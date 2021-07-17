@@ -87,6 +87,7 @@ install:
     FF_USE_FASTZIP: "true"
   stage: setup
   script:
+    - cd frontend
     - npm ci
   tags:
     - docker
@@ -104,6 +105,7 @@ test:
     - apt install -y ./google-chrome*.deb;
     - export CHROME_BIN=/usr/bin/google-chrome
   script:
+    - cd frontend
     - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
   tags:
     - docker
