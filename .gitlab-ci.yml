@@ -4,29 +4,44 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml
 
-image: golang:latest
 
-variables:
-  # Please edit to your GitLab project
-  REPO_NAME: gitlab.com/resticgui/resticgui
+cache:
+    untracked: true
+    policy: push
+    key: ${CI_COMMIT_SHORT_SHA}
+    paths:
+      - node_modules/
 
-# The problem is that to be able to use go get, one needs to put
-# the repository in the $GOPATH. So for example if your gitlab domain
-# is gitlab.com, and that your repository is namespace/project, and
-# the default GOPATH being /go, then you'd need to have your
-# repository in /go/src/gitlab.com/namespace/project
-# Thus, making a symbolic link corrects this.
-before_script:
-  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-  - cd $GOPATH/src/$REPO_NAME
+.pull_cached_node_modules:
+  cache:
+    untracked: true
+    key: ${CI_COMMIT_SHORT_SHA}
+    policy: pull
+
 
 stages:
+  - setup
   - test
   - build
   - deploy
 
 format:
+  variables:
+  # Please edit to your GitLab project
+    REPO_NAME: gitlab.com/resticgui/resticgui
+
+  # The problem is that to be able to use go get, one needs to put
+  # the repository in the $GOPATH. So for example if your gitlab domain
+  # is gitlab.com, and that your repository is namespace/project, and
+  # the default GOPATH being /go, then you'd need to have your
+  # repository in /go/src/gitlab.com/namespace/project
+  # Thus, making a symbolic link corrects this.
+  before_script:
+    - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+    - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+    - cd $GOPATH/src/$REPO_NAME
+
+  image: golang:latest
   stage: test
   script:
     - echo "format stage"
@@ -38,6 +53,21 @@ format:
     - mhx-srv
 
 compile:
+  variables:
+  # Please edit to your GitLab project
+    REPO_NAME: gitlab.com/resticgui/resticgui
+
+  # The problem is that to be able to use go get, one needs to put
+  # the repository in the $GOPATH. So for example if your gitlab domain
+  # is gitlab.com, and that your repository is namespace/project, and
+  # the default GOPATH being /go, then you'd need to have your
+  # repository in /go/src/gitlab.com/namespace/project
+  # Thus, making a symbolic link corrects this.
+  before_script:
+    - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+    - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+    - cd $GOPATH/src/$REPO_NAME
+  image: golang:latest
   stage: build
   script:
     - echo "build stage"
@@ -48,3 +78,27 @@ compile:
   tags:
     - docker
     - mhx-srv
+
+
+
+install:
+  image: node:14.15-stretch
+  variables:
+    FF_USE_FASTZIP: "true"
+  stage: setup
+  script:
+    - npm ci
+
+test:
+  image: node:14.15-stretch
+  variables:
+    FF_USE_FASTZIP: "true"
+  stage: test
+  extends: .pull_cached_node_modules
+  before_script:
+    - apt-get update
+    - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    - apt install -y ./google-chrome*.deb;
+    - export CHROME_BIN=/usr/bin/google-chrome
+  script:
+    - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
