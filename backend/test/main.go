@@ -32,12 +32,12 @@ func main() {
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusForbidden)
 	var dir string
 	// This is not working
 	flag.StringVar(&dir, "dir", "../../frontend/test", "the directory to serve files from. Defaults to the current dir")
 	flag.Parse()
 	http.FileServer(http.Dir(dir))
+	w.WriteHeader(http.StatusOK)
 }
 
 func BackupHandler(w http.ResponseWriter, r *http.Request) {
