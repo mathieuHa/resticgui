@@ -88,6 +88,9 @@ install:
   stage: setup
   script:
     - npm ci
+  tags:
+    - docker
+    - mhx-srv
 
 test:
   image: node:14.15-stretch
@@ -102,3 +105,6 @@ test:
     - export CHROME_BIN=/usr/bin/google-chrome
   script:
     - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+  tags:
+    - docker
+    - mhx-srv
