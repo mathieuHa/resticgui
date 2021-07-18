@@ -1,5 +1,5 @@
 install:
-	echo "test"
+	cd web && npm install
 
 build:
 	cd cmd/restic && go build -o ../../dist/resticgui.exe
