@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from './user';
+import { USERS } from './mock-users';
+import { faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+
 
 @Component({
   selector: 'app-users',
@@ -7,13 +10,18 @@ import { User } from './user';
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
-  user: User = {
-    id: 1,
-    name: 'admin'
-  }
+  users = USERS;
+  selectedUser?: User;
+  faEye = faEye;
+  faEdit = faEdit;
+  faTrash = faTrash;
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  onSelect(user: User): void {
+    this.selectedUser = user;
   }
 
 }
