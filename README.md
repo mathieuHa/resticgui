@@ -35,6 +35,7 @@ Install node 14 and angular CLI
 curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
 sudo apt -y install nodejs
 sudo npm install -g @angular/cli
+sudo npm install --save-dev @angular-devkit/build-angular
 ```
 
 #### Start dev web server 
