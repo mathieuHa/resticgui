@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from './user';
-import { USERS } from './mock-users';
 import { faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {UsersService} from "./users.service";
 
 
 @Component({
@@ -10,14 +10,21 @@ import { faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
-  users = USERS;
+  users: User[] = [];
   selectedUser?: User;
   faEye = faEye;
   faEdit = faEdit;
   faTrash = faTrash;
-  constructor() { }
+  constructor(private userService: UsersService) { }
 
   ngOnInit(): void {
+    this.getUsers();
+  }
+
+  getUsers(): void {
+    this.userService.getUsers().subscribe(
+      response => this.users = response
+    )
   }
 
   onSelect(user: User): void {
