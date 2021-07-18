@@ -11,11 +11,15 @@
             <fa-icon [icon]="faTrash"></fa-icon>
           </button>
 
-          <button style="float: right" class="btn btn-sm btn-warning m-1">
+          <button style="float: right" class="btn btn-sm btn-warning m-1"
+                  routerLink="/users/{{user.id}}/edit"
+          >
             <fa-icon [icon]="faEdit"></fa-icon>
           </button>
 
-          <button style="float: right" class="btn btn-sm btn-info m-1">
+          <button style="float: right" class="btn btn-sm btn-info m-1"
+                  routerLink="/users/{{user.id}}"
+            >
             <fa-icon [icon]="faEye"></fa-icon>
           </button>
 
