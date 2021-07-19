@@ -9,7 +9,15 @@ import {catchError} from "rxjs/operators";
   providedIn: 'root'
 })
 export class UsersService {
-  private userUrl = 'api/users';  // URL to web api
+  get userUrl(): string {
+    return this._userUrl;
+  }
+
+  set userUrl(value: string) {
+    this._userUrl = value;
+  }
+  private _userUrl = 'api/users';  // URL to web api
+
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
@@ -18,13 +26,13 @@ export class UsersService {
   ) { }
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.userUrl).pipe(
+    return this.http.get<User[]>(this._userUrl).pipe(
       catchError(this.handleError<User[]>('getUsers', []))
     );
   }
 
   getUser(id: number): Observable<User> {
-    const url = `${this.userUrl}/${id}`;
+    const url = `${this._userUrl}/${id}`;
 
     return this.http.get<User>(url).pipe(
       catchError(this.handleError<User>(`getUser id=${id}`))
@@ -32,13 +40,13 @@ export class UsersService {
   }
 
   updateUser(user: User): Observable<any> {
-    return this.http.put(this.userUrl, user, this.httpOptions).pipe(
+    return this.http.put(this._userUrl, user, this.httpOptions).pipe(
       catchError(this.handleError<any>('updateUser'))
     );
   }
 
   CreateUser(user: User): Observable<any> {
-    return this.http.post(this.userUrl, user, this.httpOptions).pipe(
+    return this.http.post(this._userUrl, user, this.httpOptions).pipe(
       catchError(this.handleError<any>('createUser'))
     );
   }
