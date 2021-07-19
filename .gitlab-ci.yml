@@ -1,31 +1,9 @@
-# This file is a template, and might need editing before it works on your project.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml
-
-
-cache:
-    untracked: true
-    policy: push
-    key: ${CI_COMMIT_SHORT_SHA}
-    paths:
-      - node_modules/
-
-.pull_cached_node_modules:
-  cache:
-    untracked: true
-    key: ${CI_COMMIT_SHORT_SHA}
-    policy: pull
-
-
 stages:
-  - setup
   - test
   - build
   - deploy
 
-format:
+testgo:
   variables:
   # Please edit to your GitLab project
     REPO_NAME: gitlab.com/resticgui/resticgui
@@ -41,10 +19,10 @@ format:
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME
 
-  image: golang:latest
+  image: golang:1.16.6
   stage: test
   script:
-    - echo "format stage"
+    - make testgo
     #- go fmt $(go list ./... | grep -v /vendor/)
     #- go vet $(go list ./... | grep -v /vendor/)
     #- go test -race $(go list ./... | grep -v /vendor/)
@@ -52,7 +30,7 @@ format:
     - docker
     - mhx-srv
 
-compile:
+buildgo:
   variables:
   # Please edit to your GitLab project
     REPO_NAME: gitlab.com/resticgui/resticgui
@@ -67,46 +45,41 @@ compile:
     - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME
-  image: golang:latest
+  image: golang:1.16.6
   stage: build
   script:
-    - echo "build stage"
-    # - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/resticgui
+    - make buildgo
   artifacts:
     paths:
-      - resticgui
+      - dist/
   tags:
     - docker
     - mhx-srv
 
 
 
-install:
-  image: node:14.15-stretch
+buildweb:
+  image: trion/ng-cli
   variables:
     FF_USE_FASTZIP: "true"
-  stage: setup
+  stage: build
+  before_script:
+    - make install
   script:
-    - cd frontend
-    - npm ci
+    - make buildweb
   tags:
     - docker
     - mhx-srv
 
-test:
-  image: node:14.15-stretch
+testweb:
+  image: trion/ng-cli-karma
   variables:
     FF_USE_FASTZIP: "true"
   stage: test
-  extends: .pull_cached_node_modules
   before_script:
-    - apt-get update
-    - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    - apt install -y ./google-chrome*.deb;
-    - export CHROME_BIN=/usr/bin/google-chrome
+    - make install
   script:
-    - cd frontend
-    - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+    - make testweb
   tags:
     - docker
     - mhx-srv
