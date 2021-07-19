@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 var (
 	LOG_FILE string
+	server   *http.Server
 )
 
 type spaHandler struct {
@@ -42,10 +44,15 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	resticInit()
+
 	// define router
 	router := mux.NewRouter()
 
 	// API routes
+	router.HandleFunc("/test/restic", testRestic).Methods("GET")
+	router.HandleFunc("/test/shutdown", shutdown).Methods("GET")
+
 	router.HandleFunc("/api/users", queryUsers).Methods("GET")
 	router.HandleFunc("/api/users/{id}", getUsers).Methods("GET")
 	router.HandleFunc("/api/users", createUser).Methods("POST")
@@ -63,7 +70,7 @@ func main() {
 	router.PathPrefix("/").Handler(singlePageApp)
 
 	// setting server information
-	server := &http.Server{
+	server = &http.Server{
 		Handler:      router,
 		Addr:         "127.0.0.1:8080",
 		WriteTimeout: 15 * time.Second,
@@ -111,4 +118,13 @@ func editBackup(w http.ResponseWriter, r *http.Request) {
 
 func removeBackup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+}
+
+func testRestic(w http.ResponseWriter, r *http.Request) {
+	runRestic()
+	w.WriteHeader(http.StatusOK)
+}
+
+func shutdown(w http.ResponseWriter, r *http.Request) {
+	server.Shutdown(context.Background())
 }
