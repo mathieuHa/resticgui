@@ -1,15 +1,27 @@
+dist=${CURDIR}/dist
+
+printdist:
+	 echo ${dist}
+
 install:
 	cd web && npm install
 
-build:
-	cd cmd/resticgui && go build -o ../../dist/resticgui.exe
-	cd web && ng build --output-path ../dist/front/
+build: buildgo buildweb
 
 buildgo:
-	cd cmd/resticgui && go build -o ../../dist/resticgui.exe
+	cd cmd/resticgui && go build -o ${dist}/resticgui.exe
 
-buildfront:
-	cd web && ng build --output-path ../dist/front/
+buildweb: install
+	cd web && ng build --output-path ${dist}/front/
 
 run:
-	cd dist/ && .\resticgui.exe
+	cd ${dist}/ && .\resticgui.exe
+
+testweb: install
+	cd web && ng test --progress false --watch false
+
+testgo:
+	cd cmd/resticgui && go test
+
+clean:
+	rm -rf ${dist}/*
