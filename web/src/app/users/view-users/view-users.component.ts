@@ -2,6 +2,10 @@ import {Component, Input, OnInit} from '@angular/core';
 import {User} from "../user";
 import {ActivatedRoute} from "@angular/router";
 import {UsersService} from "../users.service";
+import { Location } from '@angular/common';
+import { faUndoAlt } from '@fortawesome/free-solid-svg-icons';
+
+
 
 @Component({
   selector: 'app-view-users',
@@ -10,13 +14,15 @@ import {UsersService} from "../users.service";
 })
 export class ViewUsersComponent implements OnInit {
   @Input() user?: User;
+  faUndoAlt = faUndoAlt;
   constructor(
     private route: ActivatedRoute,
-    private location: Location,
-    private userService: UsersService
+    private userService: UsersService,
+    private location: Location
   ) { }
 
   ngOnInit(): void {
+    console.log("start view-users");
     this.getUser();
   }
 
@@ -27,4 +33,8 @@ export class ViewUsersComponent implements OnInit {
     );
   }
 
+
+  goBack() {
+    this.location.back();
+  }
 }

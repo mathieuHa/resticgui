@@ -6,6 +6,11 @@
       ID: {{user.id}}
     </p>
   </div>
+  <div class="card-footer">
+    <button style="float: right" class="btn btn-sm btn-primary" (click)="goBack()">
+      <fa-icon [icon]="faUndoAlt"></fa-icon>
+    </button>
+  </div>
 </div>
 
 <div class="alert alert-danger" *ngIf="!user">
