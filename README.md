@@ -14,12 +14,19 @@ This resticGUI version works with restic version 0.12.0 or more
 
 ```sudo apt-get install golang-go```
 
+```choco install go```
+
+
 #### Installation of go packages
 
 ```
 go get github.com/gorilla/mux
 ...
 ```
+
+#### Installation of powershell 7.1
+
+Run msi from https://github.com/PowerShell/PowerShell/releases/tag/v7.1.3
 
 #### launch server
 

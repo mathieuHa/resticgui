@@ -63,8 +63,6 @@ buildweb:
   variables:
     FF_USE_FASTZIP: "true"
   stage: build
-  before_script:
-    - make install
   script:
     - make buildweb
   tags:
@@ -76,8 +74,6 @@ testweb:
   variables:
     FF_USE_FASTZIP: "true"
   stage: test
-  before_script:
-    - make install
   script:
     - make testweb
   tags:
