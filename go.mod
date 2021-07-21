@@ -5,7 +5,8 @@ go 1.16
 require (
 	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
-	github.com/rs/zerolog v1.23.0 // indirect
-	gorm.io/driver/sqlite v1.1.4 // indirect
-	gorm.io/gorm v1.21.12 // indirect
+	github.com/rs/zerolog v1.23.0
+	github.com/spf13/viper v1.8.1
+	gorm.io/driver/sqlite v1.1.4
+	gorm.io/gorm v1.21.12
 )

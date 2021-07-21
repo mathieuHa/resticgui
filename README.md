@@ -14,13 +14,13 @@ This resticGUI version works with restic version 0.12.0 or more
 
 ```sudo apt-get install golang-go```
 
-```choco install go```
+```choco install go mingw make```
 
 
-#### Installation of go packages
+#### Compilation du projet
 
 ```
-go get github.com/gorilla/mux
+go build
 ...
 ```
 
@@ -33,13 +33,17 @@ Run msi from https://github.com/PowerShell/PowerShell/releases/tag/v7.1.3
 
 https://github.com/rs/zerolog
 
+#### Configuration documentation
+
+https://github.com/spf13/viper
+
 #### launch server
 
 ```
-go backend/test/main.go
+make run
 ```
 
-### Frontend
+### Frontend dev
 
 Install node 14 and angular CLI
 
