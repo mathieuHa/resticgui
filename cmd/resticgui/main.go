@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/API"
+	"gitlab.com/resticgui/resticgui/internal/Config"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Logs"
 	"net/http"
@@ -46,7 +47,8 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	Logs.Init_logs()
+	Config.InitConfig()
+	Logs.Initlogs()
 
 	log.Info().Msg("Start main")
 
