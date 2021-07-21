@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"gitlab.com/resticgui/resticgui/internal/API"
+	"gitlab.com/resticgui/resticgui/internal/Database"
 	"log"
 	"net/http"
 	"os"
@@ -43,6 +46,7 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println("Start main")
 
 	resticInit()
 
@@ -53,17 +57,17 @@ func main() {
 	router.HandleFunc("/test/restic", testRestic).Methods("GET")
 	router.HandleFunc("/test/shutdown", shutdown).Methods("GET")
 
-	router.HandleFunc("/api/users", queryUsers).Methods("GET")
-	router.HandleFunc("/api/users/{id}", getUsers).Methods("GET")
-	router.HandleFunc("/api/users", createUser).Methods("POST")
-	router.HandleFunc("/api/users/{id}", editUser).Methods("PATCH")
-	router.HandleFunc("/api/users/{id}", removeUser).Methods("DELETE")
+	router.HandleFunc("/api/users", API.QueryUsers).Methods("GET")
+	router.HandleFunc("/api/users/{id}", API.GetUsers).Methods("GET")
+	router.HandleFunc("/api/users", API.CreateUser).Methods("POST")
+	router.HandleFunc("/api/users/{id}", API.EditUser).Methods("PATCH")
+	router.HandleFunc("/api/users/{id}", API.RemoveUser).Methods("DELETE")
 
-	router.HandleFunc("/api/backup", queryBackups).Methods("GET")
-	router.HandleFunc("/api/backup/{id}", getBackup).Methods("GET")
-	router.HandleFunc("/api/backup", createBackup).Methods("POST")
-	router.HandleFunc("/api/backup/{id}", editBackup).Methods("PATCH")
-	router.HandleFunc("/api/backup/{id}", removeBackup).Methods("DELETE")
+	router.HandleFunc("/api/backup", API.QueryBackups).Methods("GET")
+	router.HandleFunc("/api/backup/{id}", API.GetBackup).Methods("GET")
+	router.HandleFunc("/api/backup", API.CreateBackup).Methods("POST")
+	router.HandleFunc("/api/backup/{id}", API.EditBackup).Methods("PATCH")
+	router.HandleFunc("/api/backup/{id}", API.RemoveBackup).Methods("DELETE")
 
 	// front route
 	singlePageApp := spaHandler{staticPath: "front", indexPath: "index.html"}
@@ -77,47 +81,10 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
+	Database.Migrate()
+
+	fmt.Println("Start Server listen at 127.0.0.1:8080")
 	log.Fatal(server.ListenAndServe())
-}
-
-func queryUsers(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func getUsers(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func createUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func editUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func removeUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func queryBackups(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func getBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func createBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func editBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-func removeBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 }
 
 func testRestic(w http.ResponseWriter, r *http.Request) {
