@@ -1,7 +1,7 @@
 package Models
 
 type Entity struct {
-	ID           string `gorm:"primaryKey"`
+	Base
 	Path         string
 	RepositoryId string
 	SnapshotId   string

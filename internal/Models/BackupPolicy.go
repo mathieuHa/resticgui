@@ -1,7 +1,7 @@
 package Models
 
 type BackupPolicy struct {
-	ID           string `gorm:"primaryKey"`
+	Base
 	Name         string `gorm:"unique"`
 	NBLastBackup uint
 	OneByHour    bool

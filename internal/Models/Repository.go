@@ -5,7 +5,7 @@ import (
 )
 
 type Repository struct {
-	ID           string    `gorm:"primaryKey"`
+	Base
 	Name         string    `gorm:"unique"`
 	Date         time.Time `gorm:"autoCreateTime"`
 	Snapshots    []Snapshot
