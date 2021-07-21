@@ -1,7 +1,7 @@
 package Models
 
 type Role struct {
-	ID          string
+	ID          string `gorm:"primaryKey"`
 	Name        string `gorm:"unique"`
 	Description string
 	ParentRole  string

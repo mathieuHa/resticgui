@@ -3,8 +3,8 @@ package Models
 import "time"
 
 type Snapshot struct {
-	ID           string
-	Date         time.Time
+	ID           string    `gorm:"primaryKey"`
+	Date         time.Time `gorm:"autoCreateTime"`
 	RepositoryID string
 	Entities     []Entity
 }

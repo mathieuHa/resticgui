@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	ID                 string
+	ID                 string `gorm:"primaryKey"`
 	Firstname          string
 	Lastname           string
 	Email              string `gorm:"unique"`
@@ -13,7 +13,7 @@ type User struct {
 	PasswordLastSet    *time.Time
 	PasswordFailCount  uint8
 	ResetPassword      bool
-	RegisteredDate     time.Time
+	RegisteredDate     time.Time `gorm:"autoCreateTime"`
 	LastConnectionDate time.Time
 	Mfa                bool
 	MfaToken           string

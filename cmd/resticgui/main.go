@@ -9,6 +9,7 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/Logs"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"time"
 
@@ -87,8 +88,38 @@ func main() {
 
 	Database.Migrate()
 
-	log.Info().Msg("Start Server listen at 127.0.0.1:8080")
-	log.Fatal().Err(server.ListenAndServe())
+	// Run our server in a goroutine so that it doesn't block.
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			log.Err(err).Msg("Error running server")
+		} else {
+			log.Info().Msg("Start Server listen at 127.0.0.1:8080")
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+	signal.Notify(c, os.Interrupt)
+
+	// Block until we receive our signal.
+	<-c
+
+	// Create a deadline to wait for.
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	// Doesn't block if no connections, but will otherwise wait
+	// until the timeout deadline.
+	err := server.Shutdown(ctx)
+	if err != nil {
+		log.Error().Msg("error shutting down")
+		return
+	}
+	// Optionally, you could run srv.Shutdown in a goroutine and block on
+	// <-ctx.Done() if your application should wait for other services
+	// to finalize based on context cancellation.
+	log.Info().Msg("shutting down")
+	os.Exit(0)
 }
 
 func testRestic(w http.ResponseWriter, r *http.Request) {
