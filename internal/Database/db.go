@@ -1,7 +1,7 @@
 package Database
 
 import (
-	"fmt"
+	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -12,7 +12,7 @@ func connect() (_db *gorm.DB) {
 	if err != nil {
 		panic("failed to connect database {err} ")
 	} else {
-		fmt.Println("Connected to database")
+		log.Debug().Msg("Connected to database")
 	}
 	return _db
 }
@@ -31,6 +31,6 @@ func Migrate() {
 	if err != nil {
 		panic("failed to migrate {err} ")
 	} else {
-		fmt.Println("Auto Migrate")
+		log.Debug().Msg("Auto Migrate")
 	}
 }

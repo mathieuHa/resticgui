@@ -28,6 +28,11 @@ go get github.com/gorilla/mux
 
 Run msi from https://github.com/PowerShell/PowerShell/releases/tag/v7.1.3
 
+
+#### Logging documentation
+
+https://github.com/rs/zerolog
+
 #### launch server
 
 ```
