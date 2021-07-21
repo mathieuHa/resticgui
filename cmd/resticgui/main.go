@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/API"
 	"gitlab.com/resticgui/resticgui/internal/Database"
-	"log"
+	"gitlab.com/resticgui/resticgui/internal/Logs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -46,7 +46,9 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println("Start main")
+	Logs.Init_logs()
+
+	log.Info().Msg("Start main")
 
 	resticInit()
 
@@ -83,8 +85,8 @@ func main() {
 
 	Database.Migrate()
 
-	fmt.Println("Start Server listen at 127.0.0.1:8080")
-	log.Fatal(server.ListenAndServe())
+	log.Info().Msg("Start Server listen at 127.0.0.1:8080")
+	log.Fatal().Err(server.ListenAndServe())
 }
 
 func testRestic(w http.ResponseWriter, r *http.Request) {
@@ -93,5 +95,9 @@ func testRestic(w http.ResponseWriter, r *http.Request) {
 }
 
 func shutdown(w http.ResponseWriter, r *http.Request) {
-	server.Shutdown(context.Background())
+	err := server.Shutdown(context.Background())
+	if err != nil {
+		log.Err(err)
+		return
+	}
 }
