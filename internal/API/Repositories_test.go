@@ -17,9 +17,9 @@ import (
 func TestQueryRepositoriesRoute(t *testing.T) {
 	Utils.TestConfig()
 	Database.Migrate()
-	router := SetupRouter()
 	db := Database.Connect()
-	Utils.CleanDatabaseTest(db, t)
+	router := SetupRouter()
+	Utils.CleanDatabaseTest(db, t, "repositories")
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/repositories", nil)
@@ -34,7 +34,7 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	Database.Migrate()
 	db := Database.Connect()
 	router := SetupRouter()
-	Utils.CleanDatabaseTest(db, t)
+	Utils.CleanDatabaseTest(db, t, "repositories")
 
 	// Check invalid UUID
 	id := "4ed79fc4"

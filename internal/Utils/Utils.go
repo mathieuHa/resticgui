@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -24,7 +25,8 @@ func TestConfig() {
 }
 
 // Clean database before test
-func CleanDatabaseTest(db *gorm.DB, t assert.TestingT) {
-	result := db.Exec("DELETE FROM repositories")
+func CleanDatabaseTest(db *gorm.DB, t assert.TestingT, table string) {
+	request := fmt.Sprintf("DELETE FROM %s", table)
+	result := db.Exec(request)
 	assert.Nil(t, result.Error)
 }
