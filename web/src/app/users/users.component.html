@@ -2,9 +2,9 @@
   <div class="card-header">
     Users
   </div>
-  <div *ngIf="users && users.length>0" class="card-body">
+  <div  class="card-body">
     <div class="card m-3">
-      <ul class="list-group list-group-flush">
+      <ul *ngIf="users && users.length>0" class="list-group list-group-flush">
         <li class="list-group-item" *ngFor="let user of users" (click)="onSelect(user)">
           {{user.name}}
           <button style="float: right" class="btn btn-sm btn-danger m-1">
@@ -26,12 +26,17 @@
         </li>
       </ul>
     </div>
-  </div>
-  <div *ngIf="users && users.length===0" class="card-body">
-    <div class="alert alert-info " role="alert"> No Users</div>
-  </div>
+    <div class="card-body m-3">
+        <div *ngIf="users && users.length===0"  class="alert alert-info " role="alert"> No Users</div>
+      <button  class="btn btn-primary" style="float: right">
+        <fa-icon  [icon]="faPlus" (click)="addUser=!addUser"></fa-icon>
+      </button>
 
-
+    </div>
+  </div>
 
 </div>
 
+<div *ngIf="addUser">
+  <app-create-users></app-create-users>
+</div>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from './user';
-import { faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 import {UsersService} from "./users.service";
 
 
@@ -13,8 +13,11 @@ export class UsersComponent implements OnInit {
   users: User[] = [];
   selectedUser?: User;
   faEye = faEye;
+  faPlus = faPlus;
   faEdit = faEdit;
   faTrash = faTrash;
+  addUser = false;
+  newUser = new User(1, "toto");
   constructor(private userService: UsersService) { }
 
   ngOnInit(): void {
