@@ -115,6 +115,11 @@ func RemoveUser(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
-	db.Delete(&users, "id = ?", id)
+	result = db.Delete(&users, "id = ?", id)
+	if result.Error != nil {
+		log.Error().Err(result.Error)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "user not deleted"})
+		return
+	}
 	c.Status(http.StatusNoContent)
 }
