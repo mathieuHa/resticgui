@@ -12,39 +12,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
 )
 
 var (
 	server *http.Server
 )
-
-type spaHandler struct {
-	staticPath string
-	indexPath  string
-}
-
-func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	path := filepath.Join(h.staticPath, r.URL.Path)
-
-	// check whether a file exists at the given path
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		// file does not exist, serve index.html
-		http.ServeFile(w, r, filepath.Join(h.staticPath, h.indexPath))
-		return
-	} else if err != nil {
-		// if we got an error (that wasn't that the file doesn't exist) stating the
-		// file, return a 500 internal server error and stop
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// otherwise, use http.FileServer to serve the static dir
-	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
-}
 
 func main() {
 	Config.InitConfig()
@@ -60,7 +33,7 @@ func main() {
 	//{
 	//	grp.StaticFS("", http.Dir("dist/front"))
 	//}
-	router.Use(static.Serve("/", static.LocalFile("./web/dist", true)))
+	router.Use(static.Serve("/", static.LocalFile("../../dist/front/", true)))
 
 	// API routes
 	router.GET("/test/restic", testRestic)
@@ -84,11 +57,9 @@ func main() {
 	}
 
 	// front route
-	//singlePageApp := spaHandler{staticPath: "front", indexPath: "index.html"}
-	//router.PathPrefix("/").Handler(singlePageApp)
-	//router.NoRoute(func(c *gin.Context){
-	//	c.File("./web/dist/index.html")
-	//})
+	router.NoRoute(func(c *gin.Context) {
+		c.File("../../dist/front/index.html")
+	})
 
 	// setting server information
 	server = &http.Server{
