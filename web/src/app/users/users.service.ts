@@ -16,7 +16,7 @@ export class UsersService {
   set userUrl(value: string) {
     this._userUrl = value;
   }
-  private _userUrl = 'api/users';  // URL to web api
+  private _userUrl = '/api/v1/users';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
