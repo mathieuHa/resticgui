@@ -1,20 +1,13 @@
 package API
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gorm.io/gorm"
+	"gitlab.com/resticgui/resticgui/internal/Utils"
 	"net/http"
 )
-
-func IsValidUUID(u string) bool {
-	_, err := uuid.Parse(u)
-	return err == nil
-}
 
 func QueryUsers(c *gin.Context) {
 	var users []Models.User
@@ -28,7 +21,7 @@ func QueryUsers(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	id := c.Param("id")
-	if !IsValidUUID(id) {
+	if !Utils.IsValidUUID(id) {
 		log.Info().Msgf("UUID is not valid")
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
 		return
@@ -72,7 +65,7 @@ func CreateUser(c *gin.Context) {
 
 func EditUser(c *gin.Context) {
 	id := c.Param("id")
-	if !IsValidUUID(id) {
+	if !Utils.IsValidUUID(id) {
 		log.Info().Msgf("UUID is not valid")
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
 		return
@@ -90,7 +83,8 @@ func EditUser(c *gin.Context) {
 		return
 	}
 
-	errors.Is(result.Error, gorm.ErrInvalidData)
+	// check on invalid data to do
+	// errors.Is(result.Error, gorm.ErrInvalidData)
 
 	db.Save(&users)
 	c.IndentedJSON(http.StatusOK, users)
@@ -98,7 +92,7 @@ func EditUser(c *gin.Context) {
 
 func RemoveUser(c *gin.Context) {
 	id := c.Param("id")
-	if !IsValidUUID(id) {
+	if !Utils.IsValidUUID(id) {
 		log.Info().Msgf("UUID is not valid")
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
 		return
