@@ -10,13 +10,13 @@ import (
 )
 
 func QueryRepositories(c *gin.Context) {
-	var users []Models.Repository
+	var repositories []Models.Repository
 
 	db := Database.Connect()
 
-	db.Find(&users)
+	db.Find(&repositories)
 
-	c.IndentedJSON(http.StatusFound, users)
+	c.IndentedJSON(http.StatusOK, repositories)
 }
 
 func GetRepositories(c *gin.Context) {
@@ -29,38 +29,38 @@ func GetRepositories(c *gin.Context) {
 		log.Debug().Msg("UUID is valid")
 	}
 
-	var users Models.Repository
+	var repositories Models.Repository
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", id)
+	result := db.Find(&repositories, "id = ?", id)
 	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, users)
+	c.IndentedJSON(http.StatusOK, repositories)
 }
 
 func CreateRepository(c *gin.Context) {
-	var user Models.Repository
+	var repository Models.Repository
 
-	if err := c.BindJSON(&user); err != nil {
+	if err := c.BindJSON(&repository); err != nil {
 		log.Info().Msg("Bind Error Repository")
 		return
 	}
 	db := Database.Connect()
 
-	result := db.Create(&user) // pass pointer of data to Create
+	result := db.Create(&repository) // pass pointer of data to Create
 	if result.Error != nil {
 		log.Debug().Err(result.Error).Msg("is error?")
-		err := db.Find(&user).Error
+		err := db.Find(&repository).Error
 		if err == nil {
 			log.Debug().Err(err).Msg("is error2?")
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "name already in use"})
 			return
 		}
 	}
-	c.IndentedJSON(http.StatusCreated, user)
+	c.IndentedJSON(http.StatusCreated, repository)
 }
 
 func EditRepository(c *gin.Context) {
@@ -73,20 +73,20 @@ func EditRepository(c *gin.Context) {
 		log.Debug().Msg("UUID is valid")
 	}
 
-	var users Models.Repository
+	var repository Models.Repository
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", id)
+	result := db.Find(&repository, "id = ?", id)
 	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
 	// check on invalid data to do
 	//errors.Is(result.Error, gorm.ErrInvalidData)
 
-	db.Save(&users)
-	c.IndentedJSON(http.StatusOK, users)
+	db.Save(&repository)
+	c.IndentedJSON(http.StatusOK, repository)
 }
 
 func RemoveRepository(c *gin.Context) {
@@ -99,19 +99,19 @@ func RemoveRepository(c *gin.Context) {
 		log.Debug().Msg("UUID is valid")
 	}
 
-	var users Models.Repository
+	var repository Models.Repository
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", id)
+	result := db.Find(&repository, "id = ?", id)
 	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
-	result = db.Delete(&users, "id = ?", id)
+	result = db.Delete(&repository, "id = ?", id)
 	if result.Error != nil {
 		log.Error().Err(result.Error)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "user not deleted"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "repository not deleted"})
 		return
 	}
 	c.Status(http.StatusNoContent)

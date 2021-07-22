@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/API"
@@ -26,40 +25,7 @@ func main() {
 	log.Info().Msg("Start main")
 
 	resticInit()
-
-	// define router
-	router := gin.Default()
-	//grp := router.Group("/")
-	//{
-	//	grp.StaticFS("", http.Dir("dist/front"))
-	//}
-	router.Use(static.Serve("/", static.LocalFile("../../dist/front/", true)))
-
-	// API routes
-	router.GET("/test/restic", testRestic)
-	router.GET("/test/shutdown", shutdown)
-	grpUsers := router.Group("/api/v1/users/")
-	{
-		grpUsers.GET("", API.QueryUsers)
-		grpUsers.GET(":id", API.GetUsers)
-		grpUsers.POST("", API.CreateUser)
-		grpUsers.PATCH(":id", API.EditUser)
-		grpUsers.DELETE(":id", API.RemoveUser)
-	}
-
-	grpRepositories := router.Group("/api/v1/repositories")
-	{
-		grpRepositories.GET("", API.QueryRepositories)
-		grpRepositories.GET(":id", API.GetRepositories)
-		grpRepositories.POST("", API.CreateRepository)
-		grpRepositories.PATCH(":id", API.EditRepository)
-		grpRepositories.DELETE(":id", API.RemoveRepository)
-	}
-
-	// front route
-	router.NoRoute(func(c *gin.Context) {
-		c.File("../../dist/front/index.html")
-	})
+	router := API.SetupRouter()
 
 	// setting server information
 	server = &http.Server{
