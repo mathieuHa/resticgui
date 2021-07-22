@@ -15,7 +15,7 @@ func SetupRouter() *gin.Engine {
 	router.Use(static.Serve("/", static.LocalFile("../../dist/front/", true)))
 
 	// API routes
-	grpUsers := router.Group("/api/v1/users/")
+	grpUsers := router.Group("/api/v1/users")
 	{
 		grpUsers.GET("", QueryUsers)
 		grpUsers.GET(":id", GetUsers)

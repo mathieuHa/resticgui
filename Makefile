@@ -102,7 +102,7 @@ testweb: installweb
 	cd $(BUILDDIR)/web && ng test --progress false --watch false
 
 testgo:
-	cd cmd/resticgui && go test
+	cd cmd/resticgui && go test ./...
 
 clean:
 	$(RM) ${DISTDIR}
