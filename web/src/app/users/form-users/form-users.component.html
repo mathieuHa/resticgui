@@ -1,14 +1,20 @@
 
-<form #userForm="ngForm">
+<form formGroupName="userForm" (ngSubmit)="onSubmit()">
   <div class="form-group">
-    <label for="name">User name</label>
-    <input type="text" class="form-control" id="name"
+    <label for="firstname">Firstname</label>
+    <input type="text" class="form-control" id="firstname"
            required
-           [(ngModel)]="model.name" name="name"
-           #name="ngModel">
-  </div>
-  <div [hidden]="name.valid || name.pristine"
-       class="alert alert-danger m-1">
-       Name is required
+           name="firstname"
+           formControlName="firstname">
+    <label for="lastname">Lastname</label>
+    <input type="text" class="form-control" id="lastname"
+           required
+           name="lastname"
+           formControlName="lastname">
+    <label for="email">Email</label>
+    <input type="text" class="form-control" id="email"
+           required
+           name="email"
+           formControlName="email">
   </div>
 </form>

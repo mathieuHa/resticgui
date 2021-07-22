@@ -17,7 +17,7 @@ export class UsersComponent implements OnInit {
   faEdit = faEdit;
   faTrash = faTrash;
   addUser = false;
-  newUser = new User(1, "toto");
+  newUser = new User(1, "firstname", "lastname", "email@exemple.com");
   constructor(private userService: UsersService) { }
 
   ngOnInit(): void {

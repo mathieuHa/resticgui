@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MenuComponent } from './menu/menu.component';
 import { UsersComponent } from './users/users.component';
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { EditUsersComponent } from './users/edit-users/edit-users.component';
 import { CreateUsersComponent } from './users/create-users/create-users.component';
 import { DeleteUsersComponent } from './users/delete-users/delete-users.component';
@@ -29,6 +29,7 @@ import { FormUsersComponent } from './users/form-users/form-users.component';
         BrowserModule,
         AppRoutingModule,
         FormsModule,
+        ReactiveFormsModule,
         FontAwesomeModule,
         HttpClientModule,
     ],

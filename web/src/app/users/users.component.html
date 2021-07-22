@@ -3,10 +3,10 @@
     Users
   </div>
   <div  class="card-body">
-    <div class="card m-3">
+    <div class="card-body m-3">
       <ul *ngIf="users && users.length>0" class="list-group list-group-flush">
         <li class="list-group-item" *ngFor="let user of users" (click)="onSelect(user)">
-          {{user.name}}
+          {{user.firstname}}
           <button style="float: right" class="btn btn-sm btn-danger m-1">
             <fa-icon [icon]="faTrash"></fa-icon>
           </button>
@@ -37,6 +37,9 @@
 
 </div>
 
+<br>
+<br>
+
 <div *ngIf="addUser">
-  <app-create-users></app-create-users>
+  <app-create-users [user]="newUser"></app-create-users>
 </div>

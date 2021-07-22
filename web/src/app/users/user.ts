@@ -1,13 +1,17 @@
 export interface User {
     id: number;
-    name: string;
+    firstname: string;
+    lastname: string;
+    email: string;
 }
 
 export class User implements User{
 
   constructor(
     public id: number,
-    public name: string
+    firstname: string,
+    lastname: string,
+    email: string,
   ) {  }
 
 }
