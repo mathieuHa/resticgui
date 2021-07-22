@@ -16,7 +16,7 @@ func QueryUsers(c *gin.Context) {
 
 	db.Find(&users)
 
-	c.IndentedJSON(http.StatusFound, users)
+	c.IndentedJSON(http.StatusOK, users)
 }
 
 func GetUsers(c *gin.Context) {

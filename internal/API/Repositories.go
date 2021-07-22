@@ -16,7 +16,7 @@ func QueryRepositories(c *gin.Context) {
 
 	db.Find(&users)
 
-	c.IndentedJSON(http.StatusFound, users)
+	c.IndentedJSON(http.StatusOK, users)
 }
 
 func GetRepositories(c *gin.Context) {
