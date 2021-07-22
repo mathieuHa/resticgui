@@ -47,13 +47,13 @@ func main() {
 		grpUsers.DELETE(":id", API.RemoveUser)
 	}
 
-	grpBackups := router.Group("/api/v1/backups")
+	grpRepositories := router.Group("/api/v1/repositories")
 	{
-		grpBackups.GET("", API.QueryBackups)
-		grpBackups.GET("{id}", API.GetBackup)
-		grpBackups.POST("", API.CreateBackup)
-		grpBackups.PATCH("{id}", API.EditBackup)
-		grpBackups.DELETE("{id}", API.RemoveBackup)
+		grpRepositories.GET("", API.QueryRepositories)
+		grpRepositories.GET(":id", API.GetRepositories)
+		grpRepositories.POST("", API.CreateRepository)
+		grpRepositories.PATCH(":id", API.EditRepository)
+		grpRepositories.DELETE(":id", API.RemoveRepository)
 	}
 
 	// front route
