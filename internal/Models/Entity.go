@@ -1,8 +1,8 @@
 package Models
 
 type Entity struct {
-	ID           string
-	Path         string
-	RepositoryId string
-	SnapshotId   string
+	Base
+	Path         string `json:"path"`
+	RepositoryId string `json:"repository_id"`
+	SnapshotId   string `json:"snapshot_id"`
 }

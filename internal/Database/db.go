@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func connect() (_db *gorm.DB) {
+func Connect() (_db *gorm.DB) {
 	dbname := viper.GetString("db.name")
 	_db, err := gorm.Open(sqlite.Open(dbname), &gorm.Config{})
 	if err != nil {
@@ -20,7 +20,7 @@ func connect() (_db *gorm.DB) {
 }
 
 func Migrate() {
-	db := connect()
+	db := Connect()
 	err := db.AutoMigrate(
 		&Models.User{},
 		&Models.Entity{},

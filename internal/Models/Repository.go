@@ -5,9 +5,9 @@ import (
 )
 
 type Repository struct {
-	ID           string
-	Name         string `gorm:"unique"`
-	Date         time.Time
+	Base
+	Name         string    `json:"name" gorm:"unique"`
+	Date         time.Time `json:"date" gorm:"autoCreateTime"`
 	Snapshots    []Snapshot
 	Entities     []Entity
 	BackupPolicy BackupPolicy

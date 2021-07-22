@@ -1,9 +1,9 @@
 package Models
 
 type Role struct {
-	ID          string
-	Name        string `gorm:"unique"`
-	Description string
-	ParentRole  string
-	UserId      string
+	Base
+	Name        string `json:"name" gorm:"unique"`
+	Description string `json:"description"`
+	ParentRole  string `json:"parent_role"`
+	UserId      string `json:"user_id"`
 }
