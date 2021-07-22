@@ -1,23 +1,26 @@
 package API
 
-import "net/http"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
-func QueryBackups(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func QueryBackups(c *gin.Context) {
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "backups"})
 }
 
-func GetBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func GetBackup(c *gin.Context) {
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "backups"})
 }
 
-func CreateBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func CreateBackup(c *gin.Context) {
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "backups"})
 }
 
-func EditBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func EditBackup(c *gin.Context) {
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "backups"})
 }
 
-func RemoveBackup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func RemoveBackup(c *gin.Context) {
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "backups"})
 }

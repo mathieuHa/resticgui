@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/API"
 	"gitlab.com/resticgui/resticgui/internal/Config"
@@ -12,13 +14,10 @@ import (
 	"os/signal"
 	"path/filepath"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 var (
-	LOG_FILE string
-	server   *http.Server
+	server *http.Server
 )
 
 type spaHandler struct {
@@ -56,27 +55,40 @@ func main() {
 	resticInit()
 
 	// define router
-	router := mux.NewRouter()
+	router := gin.Default()
+	//grp := router.Group("/")
+	//{
+	//	grp.StaticFS("", http.Dir("dist/front"))
+	//}
+	router.Use(static.Serve("/", static.LocalFile("./web/dist", true)))
 
 	// API routes
-	router.HandleFunc("/test/restic", testRestic).Methods("GET")
-	router.HandleFunc("/test/shutdown", shutdown).Methods("GET")
+	router.GET("/test/restic", testRestic)
+	router.GET("/test/shutdown", shutdown)
+	grpUsers := router.Group("/api/v1/users/")
+	{
+		grpUsers.GET("", API.QueryUsers)
+		grpUsers.GET(":id", API.GetUsers)
+		grpUsers.POST("", API.CreateUser)
+		grpUsers.PATCH(":id", API.EditUser)
+		grpUsers.DELETE(":id", API.RemoveUser)
+	}
 
-	router.HandleFunc("/api/users", API.QueryUsers).Methods("GET")
-	router.HandleFunc("/api/users/{id}", API.GetUsers).Methods("GET")
-	router.HandleFunc("/api/users", API.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users/{id}", API.EditUser).Methods("PATCH")
-	router.HandleFunc("/api/users/{id}", API.RemoveUser).Methods("DELETE")
-
-	router.HandleFunc("/api/backup", API.QueryBackups).Methods("GET")
-	router.HandleFunc("/api/backup/{id}", API.GetBackup).Methods("GET")
-	router.HandleFunc("/api/backup", API.CreateBackup).Methods("POST")
-	router.HandleFunc("/api/backup/{id}", API.EditBackup).Methods("PATCH")
-	router.HandleFunc("/api/backup/{id}", API.RemoveBackup).Methods("DELETE")
+	grpBackups := router.Group("/api/v1/backups")
+	{
+		grpBackups.GET("", API.QueryBackups)
+		grpBackups.GET("{id}", API.GetBackup)
+		grpBackups.POST("", API.CreateBackup)
+		grpBackups.PATCH("{id}", API.EditBackup)
+		grpBackups.DELETE("{id}", API.RemoveBackup)
+	}
 
 	// front route
-	singlePageApp := spaHandler{staticPath: "front", indexPath: "index.html"}
-	router.PathPrefix("/").Handler(singlePageApp)
+	//singlePageApp := spaHandler{staticPath: "front", indexPath: "index.html"}
+	//router.PathPrefix("/").Handler(singlePageApp)
+	//router.NoRoute(func(c *gin.Context){
+	//	c.File("./web/dist/index.html")
+	//})
 
 	// setting server information
 	server = &http.Server{
@@ -122,12 +134,11 @@ func main() {
 	os.Exit(0)
 }
 
-func testRestic(w http.ResponseWriter, r *http.Request) {
+func testRestic(c *gin.Context) {
 	runRestic()
-	w.WriteHeader(http.StatusOK)
 }
 
-func shutdown(w http.ResponseWriter, r *http.Request) {
+func shutdown(c *gin.Context) {
 	err := server.Shutdown(context.Background())
 	if err != nil {
 		log.Err(err)

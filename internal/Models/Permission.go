@@ -2,5 +2,5 @@ package Models
 
 type Permission struct {
 	Base
-	Name string `gorm:"unique"`
+	Name string `json:"name" gorm:"unique"`
 }

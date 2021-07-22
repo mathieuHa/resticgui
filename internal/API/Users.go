@@ -1,17 +1,14 @@
 package API
 
 import (
-	"encoding/json"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gorm.io/gorm"
-	"io/ioutil"
 	"net/http"
-	"strconv"
 )
 
 func IsValidUUID(u string) bool {
@@ -19,25 +16,22 @@ func IsValidUUID(u string) bool {
 	return err == nil
 }
 
-func QueryUsers(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func QueryUsers(c *gin.Context) {
+	var users []Models.User
+
+	db := Database.Connect()
+
+	db.Find(&users)
+
+	c.IndentedJSON(http.StatusFound, users)
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userId := vars["id"]
-	log.Debug().Msgf("ID = %v", userId)
-
-	if !IsValidUUID(userId) {
+func GetUsers(c *gin.Context) {
+	id := c.Param("id")
+	if !IsValidUUID(id) {
 		log.Info().Msgf("UUID is not valid")
-		w.WriteHeader(http.StatusBadRequest)
-		err := json.NewEncoder(w).Encode("UUID is not valid")
-		if err != nil {
-			log.Err(err)
-			return
-		} else {
-			return
-		}
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
 	} else {
 		log.Debug().Msg("UUID is valid")
 	}
@@ -46,71 +40,81 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", userId)
-	log.Debug().Err(result.Error).Msg("Error")
-	log.Debug().Msg(strconv.FormatInt(result.RowsAffected, 10))
-	log.Debug().Msgf("%t", errors.Is(result.Error, gorm.ErrRecordNotFound))
-
-	err := json.NewEncoder(w).Encode(users)
-	if err != nil {
-		log.Err(err)
+	result := db.Find(&users, "id = ?", id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
-	//w.WriteHeader(http.StatusOK)
+	c.IndentedJSON(http.StatusOK, users)
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
+func CreateUser(c *gin.Context) {
 	var user Models.User
 
-	for key, value := range vars {
-		log.Debug().Msgf("%v : %v", key, value)
+	if err := c.BindJSON(&user); err != nil {
+		log.Info().Msg("Bind Error User")
+		return
 	}
 	db := Database.Connect()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Info().Msgf("Error reading body: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		err := json.NewEncoder(w).Encode("Error reading body")
-		if err != nil {
-			log.Err(err)
-			return
-		} else {
-			return
-		}
-	}
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		log.Info().Msgf("Can't match body to user: %v", err)
-		err := json.NewEncoder(w).Encode("Can't match body to user")
-		w.WriteHeader(http.StatusBadRequest)
-		if err != nil {
-			log.Err(err)
-			return
-		} else {
-			return
-		}
-	}
 
 	result := db.Create(&user) // pass pointer of data to Create
-	log.Debug().Err(result.Error).Msg("Error")
-	log.Debug().Msg(strconv.FormatInt(result.RowsAffected, 10))
-	err = json.NewEncoder(w).Encode(user)
-	w.WriteHeader(http.StatusCreated)
-	if err != nil {
-		log.Err(err)
+	if result.Error != nil {
+		log.Debug().Err(result.Error).Msg("is error?")
+		err := db.Find(&user).Error
+		if err == nil {
+			log.Debug().Err(err).Msg("is error2?")
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+			return
+		}
+	}
+	c.IndentedJSON(http.StatusCreated, user)
+}
+
+func EditUser(c *gin.Context) {
+	id := c.Param("id")
+	if !IsValidUUID(id) {
+		log.Info().Msgf("UUID is not valid")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
 		return
 	} else {
-		return
-
+		log.Debug().Msg("UUID is valid")
 	}
+
+	var users Models.User
+
+	db := Database.Connect()
+
+	result := db.Find(&users, "id = ?", id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	errors.Is(result.Error, gorm.ErrInvalidData)
+
+	db.Save(&users)
+	c.IndentedJSON(http.StatusOK, users)
 }
 
-func EditUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
+func RemoveUser(c *gin.Context) {
+	id := c.Param("id")
+	if !IsValidUUID(id) {
+		log.Info().Msgf("UUID is not valid")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
+	} else {
+		log.Debug().Msg("UUID is valid")
+	}
 
-func RemoveUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	var users Models.User
+
+	db := Database.Connect()
+
+	result := db.Find(&users, "id = ?", id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	db.Delete(&users, "id = ?", id)
+	c.Status(http.StatusNoContent)
 }
