@@ -4,6 +4,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func IsValidUUID(u string) bool {
@@ -19,4 +21,10 @@ func TestConfig() {
 	if err != nil {                       // Handle errors reading the config file
 		panic(log.Panic().Err(err))
 	}
+}
+
+// Clean database before test
+func CleanDatabaseTest(db *gorm.DB, t assert.TestingT) {
+	result := db.Exec("DELETE FROM repositories")
+	assert.Nil(t, result.Error)
 }
