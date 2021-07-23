@@ -4,6 +4,7 @@ import {ActivatedRoute} from "@angular/router";
 import {UsersService} from "../users.service";
 import {Location} from "@angular/common";
 import {faSave, faUndoAlt} from '@fortawesome/free-solid-svg-icons';
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-edit-users',
@@ -14,12 +15,15 @@ export class EditUsersComponent implements OnInit {
   @Input() user?: User;
   faUndoAlt = faUndoAlt;
   faSave = faSave;
+  id = "";
 
   constructor(
     private route: ActivatedRoute,
     private userService: UsersService,
-    private location: Location
-  ) { }
+    private location: Location,
+    private _snackBar: MatSnackBar
+  ) {
+  }
 
   ngOnInit(): void {
     console.log("start edit-users");
@@ -27,20 +31,51 @@ export class EditUsersComponent implements OnInit {
   }
 
   getUser(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.userService.getUser(id).subscribe(
-      response => this.user = response
-    );
+    const _id = this.route.snapshot.paramMap.get('id');
+    if (_id !== null){
+      this.id = _id;
+      this.userService.getUser(this.id).subscribe(
+        response => this.user = response
+      );
+    }
+
   }
-  save(): void {
-    if (this.user) {
-      this.userService.updateUser(this.user)
-        .subscribe(() => this.goBack());
+  openSnackBar(message: string, action: string) {
+    this._snackBar.open(message, action);
+  }
+  save(user: User): void {
+    if (this.id && user) {
+      console.log(user);
+      this.userService.updateUser(this.id,user)
+        .subscribe (
+          result => {
+            console.log("res");
+            console.log(result);
+            if (!result.error){
+              this.openSnackBar("User Updated","close")
+            } else {
+              this.openSnackBar(result.error,"close")
+            }
+
+          },
+          error => {
+            console.log("err")
+            console.log(error);
+            if (error.error && error.error.error){
+              this.openSnackBar(error.error.error,"close")
+            }
+          });
     }
   }
+  UpdateUser($event: User) {
+    this.user = $event;
+    console.log($event);
+    this.save(this.user);
+  }
 
 
-  goBack() {
+
+    goBack() {
     this.location.back();
   }
 

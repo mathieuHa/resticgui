@@ -32,7 +32,7 @@ describe('UsersService', () => {
         {name: 'Test Data 2', id: 2}
       ];
       // Make an HTTP GET request
-      httpClient.get<Data>("/api/users")
+      httpClient.get<Data>("/api/v1/users")
         .subscribe(data =>
           // When observable resolves, result should match test data
           expect(data).toEqual(testData)
@@ -40,7 +40,7 @@ describe('UsersService', () => {
       // The following `expectOne()` will match the request's URL.
       // If no requests or multiple requests matched that URL
       // `expectOne()` would throw.
-      const req = httpTestingController.expectOne('/api/users');
+      const req = httpTestingController.expectOne('/api/v1/users');
       // Assert that the request is a GET.
       expect(req.request.method).toEqual('GET');
       // Respond with mock data, causing Observable to resolve.
@@ -51,7 +51,7 @@ describe('UsersService', () => {
     it('can test HttpClient.getUsers One', () => {
       const testData: Data = {name: 'Test Data', id: 1};
       // Make an HTTP GET request
-      httpClient.get<Data>("/api/users/1")
+      httpClient.get<Data>("/api/v1/users")
         .subscribe(data =>
           // When observable resolves, result should match test data
           expect(data).toEqual(testData)
@@ -59,7 +59,7 @@ describe('UsersService', () => {
       // The following `expectOne()` will match the request's URL.
       // If no requests or multiple requests matched that URL
       // `expectOne()` would throw.
-      const req = httpTestingController.expectOne('/api/users/1');
+      const req = httpTestingController.expectOne('/api/v1/users');
       // Assert that the request is a GET.
       expect(req.request.method).toEqual('GET');
       // Respond with mock data, causing Observable to resolve.
@@ -76,12 +76,12 @@ describe('UsersService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should use api/users', () => {
+  it('should use api/v1/users', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientModule]
     });
     service = TestBed.inject(UsersService);
-    expect(service.userUrl).toBe('api/users');
+    expect(service.userUrl).toBe('api/v1/users');
   });
 
 

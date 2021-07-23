@@ -6,7 +6,6 @@ import { Location } from '@angular/common';
 import { faUndoAlt } from '@fortawesome/free-solid-svg-icons';
 
 
-
 @Component({
   selector: 'app-view-users',
   templateUrl: './view-users.component.html',
@@ -15,6 +14,7 @@ import { faUndoAlt } from '@fortawesome/free-solid-svg-icons';
 export class ViewUsersComponent implements OnInit {
   @Input() user?: User;
   faUndoAlt = faUndoAlt;
+  private id: string|undefined  ;
   constructor(
     private route: ActivatedRoute,
     private userService: UsersService,
@@ -27,10 +27,13 @@ export class ViewUsersComponent implements OnInit {
   }
 
   getUser(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.userService.getUser(id).subscribe(
+    const _id = this.route.snapshot.paramMap.get('id');
+    if (_id !== null){
+      this.id = _id;
+      this.userService.getUser(this.id).subscribe(
         response => this.user = response
-    );
+      );
+    }
   }
 
 

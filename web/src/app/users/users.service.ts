@@ -16,7 +16,7 @@ export class UsersService {
   set userUrl(value: string) {
     this._userUrl = value;
   }
-  private _userUrl = 'api/users';  // URL to web api
+  private _userUrl = 'api/v1/users';  // URL to web api
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -31,7 +31,7 @@ export class UsersService {
     );
   }
 
-  getUser(id: number): Observable<User> {
+  getUser(id: string): Observable<User> {
     const url = `${this._userUrl}/${id}`;
 
     return this.http.get<User>(url).pipe(
@@ -39,16 +39,18 @@ export class UsersService {
     );
   }
 
-  updateUser(user: User): Observable<any> {
-    return this.http.put(this._userUrl, user, this.httpOptions).pipe(
-      catchError(this.handleError<any>('updateUser'))
-    );
+  updateUser(id: string, user: User): Observable<any> {
+    const url = `${this._userUrl}/${id}`;
+    return this.http.patch<User>(url, user, this.httpOptions);
+  }
+
+  deleteUser(id: string): Observable<any> {
+    const url = `${this._userUrl}/${id}`;
+    return this.http.delete<User>(url);
   }
 
   CreateUser(user: User): Observable<any> {
-    return this.http.post(this._userUrl, user, this.httpOptions).pipe(
-      catchError(this.handleError<any>('createUser'))
-    );
+    return this.http.post(this._userUrl, user, this.httpOptions);
   }
 
   private handleError<T>(operation = 'operation', result?: T) {
