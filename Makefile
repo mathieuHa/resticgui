@@ -90,7 +90,7 @@ buildrestic: createdir
 
 build: buildgo buildweb buildrestic
 
-buildgo:
+buildgo: createdir
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
 	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
 
