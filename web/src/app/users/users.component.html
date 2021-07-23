@@ -6,7 +6,10 @@
     <div class="card-body m-3">
       <ul *ngIf="users && users.length>0" class="list-group list-group-flush">
         <li class="list-group-item" *ngFor="let user of users" (click)="onSelect(user)">
-          {{user.firstname}}
+          ID: {{user.id}}<br>
+          Firstname: {{user.firstname}}<br>
+          Lastname: {{user.lastname}}<br>
+          Email: {{user.email}}<br>
           <button style="float: right" class="btn btn-sm btn-danger m-1">
             <fa-icon [icon]="faTrash"></fa-icon>
           </button>

@@ -14,12 +14,14 @@ export class EditUsersComponent implements OnInit {
   @Input() user?: User;
   faUndoAlt = faUndoAlt;
   faSave = faSave;
+  id = "";
 
   constructor(
     private route: ActivatedRoute,
     private userService: UsersService,
     private location: Location
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
     console.log("start edit-users");
@@ -27,14 +29,18 @@ export class EditUsersComponent implements OnInit {
   }
 
   getUser(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.userService.getUser(id).subscribe(
-      response => this.user = response
-    );
+    const _id = this.route.snapshot.paramMap.get('id');
+    if (_id !== null){
+      this.id = _id;
+      this.userService.getUser(this.id).subscribe(
+        response => this.user = response
+      );
+    }
+
   }
   save(): void {
-    if (this.user) {
-      this.userService.updateUser(this.user)
+    if (this.id && this.user) {
+      this.userService.updateUser(this.id,this.user)
         .subscribe(() => this.goBack());
     }
   }

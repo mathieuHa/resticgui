@@ -31,7 +31,7 @@ export class UsersService {
     );
   }
 
-  getUser(id: number): Observable<User> {
+  getUser(id: string): Observable<User> {
     const url = `${this._userUrl}/${id}`;
 
     return this.http.get<User>(url).pipe(
@@ -39,7 +39,8 @@ export class UsersService {
     );
   }
 
-  updateUser(user: User): Observable<any> {
+  updateUser(id: string, user: User): Observable<any> {
+    const url = `${this._userUrl}/${id}`;
     return this.http.put(this._userUrl, user, this.httpOptions).pipe(
       catchError(this.handleError<any>('updateUser'))
     );
