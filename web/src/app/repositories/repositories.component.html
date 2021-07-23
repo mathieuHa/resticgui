@@ -1,0 +1,47 @@
+<br>
+<div *ngIf="addRepository">
+  <app-create-repositories></app-create-repositories>
+</div>
+<br>
+<br>
+<div class="card">
+  <div class="card-header">
+    Repositories
+  </div>
+  <div class="card-body m-3">
+    <div *ngIf="repositories && repositories.length===0"  class="alert alert-info " role="alert"> No Repositories</div>
+    <button  class="btn btn-primary" style="float: right">
+      <fa-icon  [icon]="faPlus" (click)="addRepository=!addRepository"></fa-icon>
+    </button>
+  </div>
+  <div  class="card-body">
+    <div class="card-body m-3">
+      <ul *ngIf="repositories && repositories.length>0" class="list-group list-group-flush">
+        <li class="list-group-item" *ngFor="let repository of repositories" (click)="onSelect(repository)">
+          ID: {{repository.id}}<br>
+          Name: {{repository.name}}<br>
+          <button (click)="deleteRepositories(repository.id)" style="float: right" class="btn btn-sm btn-danger m-1">
+            <fa-icon [icon]="faTrash"></fa-icon>
+          </button>
+
+          <button style="float: right" class="btn btn-sm btn-warning m-1"
+                  routerLink="/repositories/{{repository.id}}/edit"
+          >
+            <fa-icon [icon]="faEdit"></fa-icon>
+          </button>
+
+          <button style="float: right" class="btn btn-sm btn-info m-1"
+                  routerLink="/repositories/{{repository.id}}"
+          >
+            <fa-icon [icon]="faEye"></fa-icon>
+          </button>
+
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+
+

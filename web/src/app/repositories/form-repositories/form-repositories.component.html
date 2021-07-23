@@ -1,0 +1,16 @@
+
+<form *ngIf="repositoryForm" [formGroup]="repositoryForm" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" id="name"
+           required
+           name="name"
+           formControlName="name">
+  </div>
+  <button type="submit"
+          [disabled]="!repositoryForm.valid"
+          style="float: right" class="btn btn-sm btn-success m-1">
+    <fa-icon [icon]="faSave"></fa-icon>
+
+  </button>
+</form>
