@@ -1,19 +1,22 @@
 package API
 
 import (
-	"github.com/gin-contrib/static"
+	"fmt"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 func SetupRouter() *gin.Engine {
+
+	// Activate when going to production
+	//gin.SetMode(gin.ReleaseMode)
+
 	// define router
 	router := gin.Default()
-	//grp := router.Group("/")
-	//{
-	//	grp.StaticFS("", http.Dir("dist/front"))
-	//}
-	router.Use(static.Serve("/", static.LocalFile("../../dist/front/", true)))
 
+	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 	// API routes
 	grpUsers := router.Group("/api/v1/users")
 	{
@@ -33,9 +36,11 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id", RemoveRepository)
 	}
 
-	// front route
 	router.NoRoute(func(c *gin.Context) {
-		c.File("../../dist/front/index.html")
+		index := fmt.Sprintf("%s/index.html", viper.GetString("front.path"))
+		log.Debug().Msgf("Index= %v", index)
+		c.File(index)
 	})
+
 	return router
 }

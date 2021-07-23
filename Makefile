@@ -67,7 +67,8 @@ installwebdev:
 	cd web && npm install
 
 installweb: createdir
-	cp -r web $(BUILDDIR)/web
+	$(RM) web/node_modules
+	cp -r web $(BUILDDIR)/
 	npm ci --prefix $(BUILDDIR)/web
 
 installgo:
@@ -90,6 +91,7 @@ buildrestic: createdir
 build: buildgo buildweb buildrestic
 
 buildgo:
+	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
 	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
 
 buildweb: installweb

@@ -4,3 +4,6 @@ logs:
 
 db:
   name: resticgui.db
+
+front:
+  path: ./front
