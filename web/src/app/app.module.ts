@@ -13,6 +13,8 @@ import { ViewUsersComponent } from './users/view-users/view-users.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {HttpClientModule} from "@angular/common/http";
 import { FormUsersComponent } from './users/form-users/form-users.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatSnackBarModule} from "@angular/material/snack-bar";
 
 @NgModule({
   declarations: [
@@ -32,6 +34,8 @@ import { FormUsersComponent } from './users/form-users/form-users.component';
         ReactiveFormsModule,
         FontAwesomeModule,
         HttpClientModule,
+        BrowserAnimationsModule,
+        MatSnackBarModule
     ],
   providers: [],
   bootstrap: [AppComponent]

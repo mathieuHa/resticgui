@@ -1,6 +1,18 @@
+<br>
+<div *ngIf="addUser">
+  <app-create-users></app-create-users>
+</div>
+<br>
+<br>
 <div class="card">
   <div class="card-header">
     Users
+  </div>
+  <div class="card-body m-3">
+    <div *ngIf="users && users.length===0"  class="alert alert-info " role="alert"> No Users</div>
+    <button  class="btn btn-primary" style="float: right">
+      <fa-icon  [icon]="faPlus" (click)="addUser=!addUser"></fa-icon>
+    </button>
   </div>
   <div  class="card-body">
     <div class="card-body m-3">
@@ -10,7 +22,7 @@
           Firstname: {{user.firstname}}<br>
           Lastname: {{user.lastname}}<br>
           Email: {{user.email}}<br>
-          <button style="float: right" class="btn btn-sm btn-danger m-1">
+          <button (click)="deleteUsers(user.id)" style="float: right" class="btn btn-sm btn-danger m-1">
             <fa-icon [icon]="faTrash"></fa-icon>
           </button>
 
@@ -29,19 +41,9 @@
         </li>
       </ul>
     </div>
-    <div class="card-body m-3">
-        <div *ngIf="users && users.length===0"  class="alert alert-info " role="alert"> No Users</div>
-      <button  class="btn btn-primary" style="float: right">
-        <fa-icon  [icon]="faPlus" (click)="addUser=!addUser"></fa-icon>
-      </button>
 
-    </div>
   </div>
 
 </div>
 
-<br>
-<br>
-<div *ngIf="addUser">
-  <app-create-users></app-create-users>
-</div>
+

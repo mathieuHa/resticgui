@@ -41,15 +41,16 @@ export class UsersService {
 
   updateUser(id: string, user: User): Observable<any> {
     const url = `${this._userUrl}/${id}`;
-    return this.http.put(this._userUrl, user, this.httpOptions).pipe(
-      catchError(this.handleError<any>('updateUser'))
-    );
+    return this.http.patch<User>(url, user, this.httpOptions);
+  }
+
+  deleteUser(id: string): Observable<any> {
+    const url = `${this._userUrl}/${id}`;
+    return this.http.delete<User>(url);
   }
 
   CreateUser(user: User): Observable<any> {
-    return this.http.post(this._userUrl, user, this.httpOptions).pipe(
-      catchError(this.handleError<any>('createUser'))
-    );
+    return this.http.post(this._userUrl, user, this.httpOptions);
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

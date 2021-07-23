@@ -4,6 +4,7 @@ import {ActivatedRoute} from "@angular/router";
 import {UsersService} from "../users.service";
 import {Location} from "@angular/common";
 import {faSave, faUndoAlt} from '@fortawesome/free-solid-svg-icons';
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-edit-users',
@@ -19,7 +20,8 @@ export class EditUsersComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private userService: UsersService,
-    private location: Location
+    private location: Location,
+    private _snackBar: MatSnackBar
   ) {
   }
 
@@ -38,15 +40,41 @@ export class EditUsersComponent implements OnInit {
     }
 
   }
-  save(): void {
-    if (this.id && this.user) {
-      this.userService.updateUser(this.id,this.user)
-        .subscribe(() => this.goBack());
+  openSnackBar(message: string, action: string) {
+    this._snackBar.open(message, action);
+  }
+  save(user: User): void {
+    if (this.id && user) {
+      this.userService.updateUser(this.id,user)
+        .subscribe (
+          result => {
+            console.log("res");
+            console.log(result);
+            if (!result.error){
+              this.openSnackBar("User Updated","close")
+            } else {
+              this.openSnackBar(result.error,"close")
+            }
+
+          },
+          error => {
+            console.log("err")
+            console.log(error);
+            if (error.error && error.error.error){
+              this.openSnackBar(error.error.error,"close")
+            }
+          });
     }
+  }
+  UpdateUser($event: User) {
+    this.user = $event;
+    console.log($event);
+    this.save(this.user);
   }
 
 
-  goBack() {
+
+    goBack() {
     this.location.back();
   }
 
