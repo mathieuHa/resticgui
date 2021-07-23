@@ -14,6 +14,11 @@ import {HttpClientModule} from "@angular/common/http";
 import { FormUsersComponent } from './users/form-users/form-users.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatSnackBarModule} from "@angular/material/snack-bar";
+import { RepositoriesComponent } from './repositories/repositories.component';
+import { CreateRepositoriesComponent } from './repositories/create-repositories/create-repositories.component';
+import { EditRepositoriesComponent } from './repositories/edit-repositories/edit-repositories.component';
+import { FormRepositoriesComponent } from './repositories/form-repositories/form-repositories.component';
+import { ViewRepositoriesComponent } from './repositories/view-repositories/view-repositories.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +28,12 @@ import {MatSnackBarModule} from "@angular/material/snack-bar";
     EditUsersComponent,
     CreateUsersComponent,
     ViewUsersComponent,
-    FormUsersComponent
+    FormUsersComponent,
+    RepositoriesComponent,
+    CreateRepositoriesComponent,
+    EditRepositoriesComponent,
+    FormRepositoriesComponent,
+    ViewRepositoriesComponent
   ],
     imports: [
         BrowserModule,
