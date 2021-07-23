@@ -8,7 +8,6 @@ import { UsersComponent } from './users/users.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { EditUsersComponent } from './users/edit-users/edit-users.component';
 import { CreateUsersComponent } from './users/create-users/create-users.component';
-import { DeleteUsersComponent } from './users/delete-users/delete-users.component';
 import { ViewUsersComponent } from './users/view-users/view-users.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {HttpClientModule} from "@angular/common/http";
@@ -23,7 +22,6 @@ import {MatSnackBarModule} from "@angular/material/snack-bar";
     UsersComponent,
     EditUsersComponent,
     CreateUsersComponent,
-    DeleteUsersComponent,
     ViewUsersComponent,
     FormUsersComponent
   ],

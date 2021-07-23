@@ -45,6 +45,7 @@ export class EditUsersComponent implements OnInit {
   }
   save(user: User): void {
     if (this.id && user) {
+      console.log(user);
       this.userService.updateUser(this.id,user)
         .subscribe (
           result => {

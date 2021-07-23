@@ -6,7 +6,6 @@ import { Location } from '@angular/common';
 import { faUndoAlt } from '@fortawesome/free-solid-svg-icons';
 
 
-
 @Component({
   selector: 'app-view-users',
   templateUrl: './view-users.component.html',

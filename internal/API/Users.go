@@ -73,6 +73,13 @@ func EditUser(c *gin.Context) {
 		log.Debug().Msg("UUID is valid")
 	}
 
+	var editedUser Models.User
+
+    if err := c.BindJSON(&editedUser); err != nil {
+        log.Info().Msg("Bind Error User")
+        return
+    }
+
 	var users Models.User
 
 	db := Database.Connect()
@@ -86,8 +93,8 @@ func EditUser(c *gin.Context) {
 	// check on invalid data to do
 	// errors.Is(result.Error, gorm.ErrInvalidData)
 
-	db.Save(&users)
-	c.IndentedJSON(http.StatusOK, users)
+	db.Save(&editedUser)
+	c.IndentedJSON(http.StatusOK, editedUser)
 }
 
 func RemoveUser(c *gin.Context) {
