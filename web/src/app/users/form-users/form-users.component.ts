@@ -1,6 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, Output, EventEmitter} from '@angular/core';
 import { User } from "../user";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {faSave, faUndoAlt} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-form-users',
@@ -8,36 +9,42 @@ import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
   styleUrls: ['./form-users.component.css']
 })
 export class FormUsersComponent implements OnInit{
-
+  faUndoAlt = faUndoAlt;
+  faSave = faSave;
   constructor() { }
-
   @Input() user?: User;
-  userForm= new FormGroup({});
-  model = new User(1, "", "", "");
+  userForm= new FormGroup({
+    firstname: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3)
+    ]),
+    lastname: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3)
+    ]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6)
+    ]),
+  });
+  @Output() updateUserForm = new EventEmitter<User>();
 
   submitted = false;
 
-  onSubmit() { this.submitted = true; }
-  get firstname() { return this.userForm.get('firstname'); }
-  get lastname() { return this.userForm.get('lastname'); }
-  get email() { return this.userForm.get('email'); }
+  onSubmit() {
+    this.submitted = true;
+    this.updateUserForm.emit(new User().deserialize(this.userForm.value));
+  }
 
   ngOnInit(): void {
-    this.userForm = new FormGroup({
-      firstname: new FormControl(this.model.firstname, [
-        Validators.required,
-        Validators.minLength(3)
-      ]),
-      lastname: new FormControl('', [
-        Validators.required,
-        Validators.minLength(3)
-      ]),
-      email: new FormControl('', [
-        Validators.required,
-        Validators.minLength(6)
-      ]),
-    });
-
+    // This is for edit
+    this.userForm.patchValue(
+      {
+          'firstname': this.user?.firstname,
+          'lastname': this.user?.lastname,
+          'email': this.user?.email
+      }
+    )
   }
 
 

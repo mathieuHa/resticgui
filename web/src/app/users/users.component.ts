@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { User } from './user';
 import { faEye, faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 import {UsersService} from "./users.service";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 
 
 @Component({
@@ -17,11 +18,13 @@ export class UsersComponent implements OnInit {
   faEdit = faEdit;
   faTrash = faTrash;
   addUser = false;
-  newUser = new User(1, "firstname", "lastname", "email@exemple.com");
   constructor(private userService: UsersService) { }
+
+
 
   ngOnInit(): void {
     this.getUsers();
+
   }
 
   getUsers(): void {

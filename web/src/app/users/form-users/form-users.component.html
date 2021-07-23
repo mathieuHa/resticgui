@@ -1,5 +1,5 @@
 
-<form formGroupName="userForm" (ngSubmit)="onSubmit()">
+<form *ngIf="userForm" [formGroup]="userForm" (ngSubmit)="onSubmit()">
   <div class="form-group">
     <label for="firstname">Firstname</label>
     <input type="text" class="form-control" id="firstname"
@@ -17,4 +17,11 @@
            name="email"
            formControlName="email">
   </div>
+
+  <button type="submit"
+          [disabled]="!userForm.valid"
+          style="float: right" class="btn btn-sm btn-success m-1">
+    <fa-icon [icon]="faSave"></fa-icon>
+
+  </button>
 </form>

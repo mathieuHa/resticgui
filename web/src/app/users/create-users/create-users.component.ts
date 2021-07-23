@@ -6,16 +6,15 @@ import {UsersService} from "../users.service";
 import {Location} from "@angular/common";
 
 
-
 @Component({
   selector: 'app-create-users',
   templateUrl: './create-users.component.html',
   styleUrls: ['./create-users.component.css']
 })
 export class CreateUsersComponent implements OnInit {
-  @Input() user?: User;
   faUndoAlt = faUndoAlt;
   faSave = faSave;
+  user = new User();
   constructor(
     private route: ActivatedRoute,
     private userService: UsersService,
@@ -25,14 +24,21 @@ export class CreateUsersComponent implements OnInit {
   ngOnInit(): void {
 
   }
-  save(): void {
-    if (this.user) {
-      this.userService.CreateUser(this.user)
-        .subscribe(() => this.goBack());
+  save(user: User): void {
+    if (user) {
+      this.userService.CreateUser(user)
+        .subscribe(
+          result => console.log(result),
+          error => console.log(error));
     }
   }
   goBack() {
     this.location.back();
   }
 
+  updateUser($event: User) {
+    this.user = $event;
+    console.log($event);
+    this.save(this.user);
+  }
 }

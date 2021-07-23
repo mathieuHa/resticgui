@@ -5,13 +5,20 @@ export interface User {
     email: string;
 }
 
-export class User implements User{
+interface Serializable<T> {
+  deserialize(input: Object): T;
+}
+export class User implements User, Serializable<User>{
 
   constructor(
-    public id: number,
-    firstname: string,
-    lastname: string,
-    email: string,
   ) {  }
+
+  deserialize(input: any) {
+    this.id = input.id;
+    this.firstname = input.firstname;
+    this.lastname = input.lastname;
+    this.email = input.email;
+    return this;
+  }
 
 }
