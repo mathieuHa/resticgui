@@ -15,7 +15,9 @@ type BackupSchedule struct {
 	EveryFriday         bool   `json:"every_friday"`
 	EverySaturday       bool   `json:"every_saturday"`
 	EverySunday         bool   `json:"every_sunday"`
-	DailyHour           string   `json:"daily_hour"`
+	Hour           		string   `json:"hour"`
+	Day           		string   `json:"day"`
+	Period        		string   `json:"period"`
 	CronSyntax          string   `json:"cron_syntax"`
 	RepositoryId        uuid.UUID `json:"repository_id"`
 }

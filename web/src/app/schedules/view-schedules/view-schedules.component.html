@@ -1,0 +1,76 @@
+<div *ngIf="repository && repository.Schedule">
+  Custom settings<br>
+  <div class="row g-3 align-items-center">
+    <div class="col-auto">
+      <label for="cron" class="col-form-label">Cron</label>
+    </div>
+    <div class="col-auto">
+      <input placeholder="*/30 * * * *" type="text" id="cron" class="form-control" aria-describedby="cronHelp" [readOnly]="true">
+    </div>
+
+
+  </div>  <br>
+  <mat-divider></mat-divider>
+  <br>
+  <div class="row g-3 align-items-center">
+    <div class="col-auto">
+      <label for="period" class="col-form-label">Period</label>
+    </div>
+
+    <div class="col-auto">
+      <input placeholder="1h30" type="text" id="period" class="form-control" aria-describedby="periodWeekDayHelp" [readOnly]="true">
+    </div>
+
+  </div>
+  <br>
+  <mat-divider></mat-divider>
+  <br>
+
+  Regular Settings<br>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryDay" type="checkbox" id="EveryDay">
+    <label class="form-check-label" for="EveryDay">Every Day</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryWeek" type="checkbox" id="EveryWeek">
+    <label class="form-check-label" for="EveryWeek">Every Week</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryMonth" type="checkbox" id="EveryMonth">
+    <label class="form-check-label" for="EveryMonth">Every Month</label>
+  </div>
+
+  <br>
+  <mat-divider></mat-divider>
+  <br>
+  Weekly Settings<br>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryMonday" type="checkbox" id="EveryMonday">
+    <label class="form-check-label" for="EveryMonday">Every Monday</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryTuesday" type="checkbox" id="EveryTuesday">
+    <label class="form-check-label" for="EveryTuesday">Every Tuesday</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryWednesday" type="checkbox" id="EveryWednesday">
+    <label class="form-check-label" for="EveryWednesday">Every Wednesday</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryThursday" type="checkbox" id="EveryThursday">
+    <label class="form-check-label" for="EveryThursday">Every Month</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EveryFriday" type="checkbox" id="EveryFriday">
+    <label class="form-check-label" for="EveryFriday">Every Friday</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EverySaturday" type="checkbox" id="EverySaturday">
+    <label class="form-check-label" for="EverySaturday">Every Saturday</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" [disabled]="true" [(ngModel)]="repository.Schedule.EverySunday" type="checkbox" id="EverySunday">
+    <label class="form-check-label" for="EverySunday">Every Sunday</label>
+  </div>
+
+</div>

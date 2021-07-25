@@ -7,7 +7,9 @@
   <div class="card-body">
     <h5 class="card-title">Repository {{repository.name}}</h5>
     <p class="card-text">
-      <app-form-repositories (updateRepositoryForm)="UpdateRepository($event)" [repository]="repository"></app-form-repositories>    </p>
+      <app-form-repositories (updateRepositoryForm)="UpdateRepository($event)" [repository]="repository"></app-form-repositories>
+    </p>
+    <app-edit-schedules [repository]="repository"></app-edit-schedules>
   </div>
 </div>
 
