@@ -33,7 +33,7 @@ func GetRepositories(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Find(&repositories, "id = ?", id)
+	result := db.Preload("Entities").Find(&repositories, "id = ?", id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return

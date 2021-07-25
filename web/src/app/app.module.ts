@@ -19,6 +19,8 @@ import { CreateRepositoriesComponent } from './repositories/create-repositories/
 import { EditRepositoriesComponent } from './repositories/edit-repositories/edit-repositories.component';
 import { FormRepositoriesComponent } from './repositories/form-repositories/form-repositories.component';
 import { ViewRepositoriesComponent } from './repositories/view-repositories/view-repositories.component';
+import { EntitiesComponent } from './entities/entities.component';
+import { EditEntitiesComponent } from './entities/edit-entities/edit-entities.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +35,9 @@ import { ViewRepositoriesComponent } from './repositories/view-repositories/view
     CreateRepositoriesComponent,
     EditRepositoriesComponent,
     FormRepositoriesComponent,
-    ViewRepositoriesComponent
+    ViewRepositoriesComponent,
+    EntitiesComponent,
+    EditEntitiesComponent
   ],
     imports: [
         BrowserModule,
