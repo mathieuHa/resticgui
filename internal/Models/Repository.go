@@ -11,4 +11,5 @@ type Repository struct {
 	Snapshots    []Snapshot     `gorm: "constraint:OnDelete:CASCADE;"`
 	Entities     []Entity       `gorm: "constraint:OnDelete:CASCADE;"`
 	BackupPolicy BackupPolicy
+	BackupSchedule BackupSchedule
 }

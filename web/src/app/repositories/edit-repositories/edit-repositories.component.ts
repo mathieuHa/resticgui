@@ -36,7 +36,7 @@ export class EditRepositoriesComponent implements OnInit {
     if (_id !== null){
       this.id = _id;
       this.repositoriesService.getRepository(this.id).subscribe(
-        response => this.repository = response
+        response => this.repository = new Repository().deserialize(response)
       );
     }
 

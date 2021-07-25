@@ -1,10 +1,13 @@
 package Models
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Snapshot struct {
 	Base
 	Date         time.Time `json:"date" gorm:"autoCreateTime"`
-	RepositoryID string    `json:"repository_id"`
+	RepositoryID uuid.UUID    `json:"repository_id"`
 	Entities     []Entity
 }

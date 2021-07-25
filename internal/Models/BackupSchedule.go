@@ -1,5 +1,7 @@
 package Models
 
+import "github.com/google/uuid"
+
 type BackupSchedule struct {
 	Base
 	Name                string `json:"name" gorm:"unique"`

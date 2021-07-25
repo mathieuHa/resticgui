@@ -1,5 +1,7 @@
 package Models
 
+import "github.com/google/uuid"
+
 type BackupPolicy struct {
 	Base
 	Name         string `json:"name" gorm:"unique"`
@@ -8,5 +10,5 @@ type BackupPolicy struct {
 	OneByDay     bool   `json:"one_by_day"`
 	OneByMonth   bool   `json:"one_by_month"`
 	KeepAll      bool   `json:"keep_all"`
-	RepositoryId string `json:"repository_id"`
+	RepositoryId uuid.UUID `json:"repository_id"`
 }

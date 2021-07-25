@@ -34,7 +34,13 @@ export class RepositoriesComponent implements OnInit {
 
   getRepositories(): void {
     this.repositoryService.getRepositories().subscribe(
-      response => this.repositories = response
+      response => {
+        this.repositories= []
+        for (let repo of response){
+          this.repositories.push(new Repository().deserialize(response));
+        }
+        this.repositories = response
+      }
     )
   }
 
