@@ -23,10 +23,10 @@ export class ViewRepositoriesComponent implements OnInit {
 
   ngOnInit(): void {
     console.log("start view-repositories");
-    this.getUser();
+    this.getRepository();
   }
 
-  getUser(): void {
+  getRepository(): void {
     const _id = this.route.snapshot.paramMap.get('id');
     if (_id !== null){
       this.id = _id;

@@ -36,6 +36,12 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id", RemoveRepository)
 	}
 
+	grpEntities := router.Group("/api/v1/repositories/:id/entities")
+	{
+		grpEntities.PUT("", AddEntities)
+		grpEntities.GET("", GetEntities)
+	}
+
 	router.NoRoute(func(c *gin.Context) {
 		index := fmt.Sprintf("%s/index.html", viper.GetString("front.path"))
 		log.Debug().Msgf("Index= %v", index)

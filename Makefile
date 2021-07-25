@@ -10,7 +10,7 @@ ifeq ($(OS),Windows_NT)
 	SHELL := pwsh.exe
 	EXT=.exe
     .SHELLFLAGS := -NoProfile -Command
-	RM=rm -Force -Recurse
+	RM=rm -Force -Recurse -ErrorAction Ignore
 	MKDIR= mkdir -Force
 	DLRESTIC=Invoke-RestMethod \
 		 -Method 'GET' \
@@ -67,7 +67,7 @@ installwebdev:
 	cd web && npm install
 
 installweb: createdir
-	$(RM) web/node_modules
+	#$(RM) web/node_modules
 	cp -r web $(BUILDDIR)/
 	npm ci --prefix $(BUILDDIR)/web
 
