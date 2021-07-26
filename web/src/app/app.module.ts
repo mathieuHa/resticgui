@@ -25,6 +25,7 @@ import { EditSchedulesComponent } from './schedules/edit-schedules/edit-schedule
 import { ViewSchedulesComponent } from './schedules/view-schedules/view-schedules.component';
 import {MatDividerModule} from "@angular/material/divider";
 import {MatTabsModule} from "@angular/material/tabs";
+import {MatGridListModule} from "@angular/material/grid-list";
 
 @NgModule({
   declarations: [
@@ -55,7 +56,8 @@ import {MatTabsModule} from "@angular/material/tabs";
         BrowserAnimationsModule,
         MatSnackBarModule,
         MatDividerModule,
-        MatTabsModule
+        MatTabsModule,
+        MatGridListModule
     ],
   providers: [],
   bootstrap: [AppComponent]

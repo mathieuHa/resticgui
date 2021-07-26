@@ -51,4 +51,16 @@ export class EditSchedulesComponent implements OnInit {
     }
   }
 
+  updateRegularSetting(choice: string) {
+    if (choice === "day" && this.repository && this.repository.Schedule.every_day) {
+      this.repository.Schedule.every_week = false;
+      this.repository.Schedule.every_month = false;
+    } else if (choice === "week" && this.repository && this.repository.Schedule.every_week) {
+      this.repository.Schedule.every_day = false;
+      this.repository.Schedule.every_month = false;
+    } else if (choice === "month" && this.repository && this.repository.Schedule.every_month) {
+      this.repository.Schedule.every_week = false;
+      this.repository.Schedule.every_day = false;
+    }
+  }
 }
