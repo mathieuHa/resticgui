@@ -33,7 +33,7 @@ func GetRepositories(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Preload("Entities").Find(&repositories, "id = ?", id)
+	result := db.Preload("Entities").Preload("BackupSchedule").Find(&repositories, "id = ?", id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
@@ -51,6 +51,9 @@ func CreateRepository(c *gin.Context) {
 	db := Database.Connect()
 
 	result := db.Create(&repository) // pass pointer of data to Create
+
+	//result := db.Session(&gorm.Session{FullSaveAssociations: true}).Create(&repository)
+
 	if result.Error != nil {
 		log.Debug().Err(result.Error).Msg("is error?")
 		err := db.Find(&repository).Error
@@ -60,6 +63,9 @@ func CreateRepository(c *gin.Context) {
 			return
 		}
 	}
+	repository.BackupSchedule = Models.BackupSchedule{}
+	result = db.Save(&repository)
+
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 

@@ -42,6 +42,13 @@ func SetupRouter() *gin.Engine {
 		grpEntities.GET("", GetEntities)
 	}
 
+	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")
+	{
+		grpBackupSchedules.PUT("", UpdateBackupSchedule)
+		grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
+		grpBackupSchedules.GET("", QueryBackupSchedule)
+	}
+
 	router.NoRoute(func(c *gin.Context) {
 		index := fmt.Sprintf("%s/index.html", viper.GetString("front.path"))
 		log.Debug().Msgf("Index= %v", index)

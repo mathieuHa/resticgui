@@ -21,6 +21,11 @@ import { FormRepositoriesComponent } from './repositories/form-repositories/form
 import { ViewRepositoriesComponent } from './repositories/view-repositories/view-repositories.component';
 import { EntitiesComponent } from './entities/entities.component';
 import { EditEntitiesComponent } from './entities/edit-entities/edit-entities.component';
+import { EditSchedulesComponent } from './schedules/edit-schedules/edit-schedules.component';
+import { ViewSchedulesComponent } from './schedules/view-schedules/view-schedules.component';
+import {MatDividerModule} from "@angular/material/divider";
+import {MatTabsModule} from "@angular/material/tabs";
+import {MatGridListModule} from "@angular/material/grid-list";
 
 @NgModule({
   declarations: [
@@ -37,7 +42,9 @@ import { EditEntitiesComponent } from './entities/edit-entities/edit-entities.co
     FormRepositoriesComponent,
     ViewRepositoriesComponent,
     EntitiesComponent,
-    EditEntitiesComponent
+    EditEntitiesComponent,
+    EditSchedulesComponent,
+    ViewSchedulesComponent
   ],
     imports: [
         BrowserModule,
@@ -47,7 +54,10 @@ import { EditEntitiesComponent } from './entities/edit-entities/edit-entities.co
         FontAwesomeModule,
         HttpClientModule,
         BrowserAnimationsModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatDividerModule,
+        MatTabsModule,
+        MatGridListModule
     ],
   providers: [],
   bootstrap: [AppComponent]

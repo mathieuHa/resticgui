@@ -17,4 +17,5 @@ type User struct {
 	Mfa                bool       `json:"mfa"`
 	MfaToken           string     `json:"mfa_token"`
 	Role               Role
+	Active			   bool		  `json:"active"`
 }

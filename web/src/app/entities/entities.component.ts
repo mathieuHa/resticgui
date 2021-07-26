@@ -32,9 +32,4 @@ export class EntitiesComponent implements OnInit {
   ngOnInit(): void {
 
   }
-
-
-  addNewEntity() {
-
-  }
 }
