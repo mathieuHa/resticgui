@@ -19,7 +19,4 @@ describe('ViewSchedulesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
 });
