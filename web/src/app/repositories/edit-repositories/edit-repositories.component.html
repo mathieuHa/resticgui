@@ -9,7 +9,7 @@
     <p class="card-text">
       <app-form-repositories (updateRepositoryForm)="UpdateRepository($event)" [repository]="repository"></app-form-repositories>
     </p>
-    <app-edit-schedules [repository]="repository"></app-edit-schedules>
+    <app-edit-schedules [disabled]="false" [repository]="repository"></app-edit-schedules>
   </div>
 </div>
 

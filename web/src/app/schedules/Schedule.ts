@@ -1,20 +1,19 @@
 export interface Schedule {
   id: string;
-  Name: string;
-  EveryDay: boolean;
-  EveryWeek: boolean;
-  EveryMonth: boolean;
-  EveryMonday: boolean;
-  EveryTuesday: boolean;
-  EveryWednesday: boolean;
-  EveryThursday: boolean;
-  EveryFriday: boolean;
-  EverySaturday: boolean;
-  EverySunday: boolean;
-  Hour: string;
-  Day: string;
-  CronSyntax: string;
-  Period: string;
+  every_day: boolean;
+  every_week: boolean;
+  every_month: boolean;
+  every_monday: boolean;
+  every_tuesday: boolean;
+  every_wednesday: boolean;
+  every_thursday: boolean;
+  every_friday: boolean;
+  every_saturday: boolean;
+  every_sunday: boolean;
+  hour: string;
+  day: string;
+  cron_syntax: string;
+  interval: string;
 }
 
 interface Serializable<T> {
@@ -27,20 +26,19 @@ export class Schedule implements Schedule, Serializable<Schedule>{
 
   deserialize(input: any) {
     this.id = input.id;
-    this.Name = input.Name;
-    this.Day = input.Day;
-    this.EveryMonday = input.EveryMonday;
-    this.EveryTuesday = input.EveryTuesday;
-    this.EveryWednesday = input.EveryWednesday;
-    this.EveryThursday = input.EveryThursday;
-    this.EveryFriday = input.EveryFriday;
-    this.EverySaturday = input.EverySaturday;
-    this.EverySunday = input.EverySunday;
-    this.EveryWeek = input.EveryWeek;
-    this.EveryDay = input.EveryDay;
-    this.EveryMonth = input.EveryMonth;
-    this.Period = input.Period;
-    this.CronSyntax = input.CronSyntax;
+    this.day = input.day;
+    this.every_monday = input.every_monday;
+    this.every_tuesday = input.every_tuesday;
+    this.every_wednesday = input.every_wednesday;
+    this.every_thursday = input.every_thursday;
+    this.every_friday = input.every_friday;
+    this.every_saturday = input.every_saturday;
+    this.every_sunday = input.every_sunday;
+    this.every_week = input.every_week;
+    this.every_day = input.every_day;
+    this.every_month = input.every_month;
+    this.interval = input.interval;
+    this.cron_syntax = input.cron_syntax;
     return this;
   }
 

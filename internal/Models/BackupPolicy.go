@@ -10,5 +10,5 @@ type BackupPolicy struct {
 	OneByDay     bool   `json:"one_by_day"`
 	OneByMonth   bool   `json:"one_by_month"`
 	KeepAll      bool   `json:"keep_all"`
-	RepositoryId uuid.UUID `json:"repository_id"`
+	RepositoryID uuid.UUID `json:"repository_id"`
 }

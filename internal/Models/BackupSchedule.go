@@ -4,8 +4,7 @@ import "github.com/google/uuid"
 
 type BackupSchedule struct {
 	Base
-	Name                string `json:"name" gorm:"unique"`
-	EveryDay            uint   `json:"every_day"`
+	EveryDay            bool   `json:"every_day"`
 	EveryWeek           bool   `json:"every_week"`
 	EveryMonth          bool   `json:"every_month"`
 	EveryMonday         bool   `json:"every_monday"`
@@ -15,9 +14,9 @@ type BackupSchedule struct {
 	EveryFriday         bool   `json:"every_friday"`
 	EverySaturday       bool   `json:"every_saturday"`
 	EverySunday         bool   `json:"every_sunday"`
-	Hour           		string   `json:"hour"`
-	Day           		string   `json:"day"`
-	Period        		string   `json:"period"`
-	CronSyntax          string   `json:"cron_syntax"`
-	RepositoryId        uuid.UUID `json:"repository_id"`
+	Hour           		string   	`json:"hour"`
+	Day           		string   	`json:"day"`
+	Interval        	string 		`json:"interval"`
+	CronSyntax          string   	`json:"cron_syntax"`
+	RepositoryID        uuid.UUID	`json:"repository_id"`
 }

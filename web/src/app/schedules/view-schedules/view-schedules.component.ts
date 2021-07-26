@@ -9,7 +9,7 @@ import {Schedule} from "../Schedule";
 })
 export class ViewSchedulesComponent implements OnInit {
   @Input() repository: Repository | undefined;
-
+  disabled = true;
   constructor() { }
 
   ngOnInit(): void {

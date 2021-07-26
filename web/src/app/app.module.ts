@@ -24,6 +24,7 @@ import { EditEntitiesComponent } from './entities/edit-entities/edit-entities.co
 import { EditSchedulesComponent } from './schedules/edit-schedules/edit-schedules.component';
 import { ViewSchedulesComponent } from './schedules/view-schedules/view-schedules.component';
 import {MatDividerModule} from "@angular/material/divider";
+import {MatTabsModule} from "@angular/material/tabs";
 
 @NgModule({
   declarations: [
@@ -44,17 +45,18 @@ import {MatDividerModule} from "@angular/material/divider";
     EditSchedulesComponent,
     ViewSchedulesComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    ReactiveFormsModule,
-    FontAwesomeModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatSnackBarModule,
-    MatDividerModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        FontAwesomeModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        MatSnackBarModule,
+        MatDividerModule,
+        MatTabsModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

@@ -42,10 +42,10 @@ func SetupRouter() *gin.Engine {
 		grpEntities.GET("", GetEntities)
 	}
 
-	grpBackupSchedules := router.Group("/api/v1/schedules")
+	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")
 	{
-		grpBackupSchedules.PUT(":id", UpdateBackupSchedule)
-		grpBackupSchedules.GET(":id", GetBackupSchedule)
+		grpBackupSchedules.PUT("", UpdateBackupSchedule)
+		grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
 		grpBackupSchedules.GET("", QueryBackupSchedule)
 	}
 

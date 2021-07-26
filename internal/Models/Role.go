@@ -7,5 +7,5 @@ type Role struct {
 	Name        string `json:"name" gorm:"unique"`
 	Description string `json:"description"`
 	ParentRole  uuid.UUID `json:"parent_role"`
-	UserId      uuid.UUID `json:"user_id"`
+	UserID      uuid.UUID `json:"user_id"`
 }
