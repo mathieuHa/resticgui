@@ -31,6 +31,7 @@ func SetupRouter() *gin.Engine {
 		for _, value := range cr.Entries() {
 			log.Info().Msgf("%v", value.ID)
 		}
+		CreateAllScheduledBackup()
 	}()
 
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))

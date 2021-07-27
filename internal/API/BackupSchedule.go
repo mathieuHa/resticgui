@@ -182,6 +182,18 @@ func addScheduledBackup(repository *Models.Repository) bool {
 
 }
 
+func CreateAllScheduledBackup() {
+	var repositories []Models.Repository
+
+	db := Database.Connect()
+
+	db.Where("active = ?", true).Preload("BackupSchedule").Find(&repositories)
+
+	for _, repo := range repositories {
+		log.Debug().Msgf("start repos %v", repo.ID)
+		addScheduledBackup(&repo)
+	}
+}
 func removeScheduledBackup(repository Models.Repository) {
 	// Here we need to
 }
