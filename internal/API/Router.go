@@ -4,11 +4,18 @@ import (
 	"fmt"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"github.com/robfig/cron/v3"
 )
 
+var cr *cron.Cron
+
+// todo for each repository if is active start the cron
+
+func startAllJobs() {
+
+}
 
 func SetupRouter() *gin.Engine {
 
@@ -17,11 +24,14 @@ func SetupRouter() *gin.Engine {
 
 	// define router
 	router := gin.Default()
-	go func() {
-        cr := cron.New()
-        cr.Start()
-    }()
 
+	go func() {
+		cr = cron.New()
+		cr.Start()
+		for _, value := range cr.Entries() {
+			log.Info().Msgf("%v", value.ID)
+		}
+	}()
 
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 	// API routes
