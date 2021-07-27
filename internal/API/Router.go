@@ -6,7 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	"github.com/robfig/cron/v3"
 )
+
 
 func SetupRouter() *gin.Engine {
 
@@ -15,6 +17,11 @@ func SetupRouter() *gin.Engine {
 
 	// define router
 	router := gin.Default()
+	go func() {
+        cr := cron.New()
+        cr.Start()
+    }()
+
 
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 	// API routes

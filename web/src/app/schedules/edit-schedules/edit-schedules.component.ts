@@ -1,8 +1,9 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {Repository} from "../../repositories/repository";
 import {Schedule} from "../Schedule";
 import {SchedulesService} from "../schedules.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {MatTabGroup} from "@angular/material/tabs";
 
 @Component({
   selector: 'app-edit-schedules',
@@ -12,6 +13,8 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 export class EditSchedulesComponent implements OnInit {
   @Input() repository: Repository | undefined;
   @Input() disabled!: boolean;
+  @ViewChild("selectedTab", { static: false }) selectedTab: MatTabGroup | undefined;
+
 
   constructor(
     private scheduleService: SchedulesService,
@@ -28,7 +31,18 @@ export class EditSchedulesComponent implements OnInit {
     this._snackBar.open(message, action);
   }
   save(): void {
-    if (this.repository) {
+
+    if (this.repository && this.selectedTab) {
+      // @ts-ignore
+      if (this.selectedTab.selectedIndex == 0) {
+        this.repository.Schedule.choice = "cron"
+      } else if (this.selectedTab.selectedIndex == 1) {
+        this.repository.Schedule.choice = "interval"
+      } else if (this.selectedTab.selectedIndex == 2) {
+        this.repository.Schedule.choice = "regular"
+      } else if (this.selectedTab.selectedIndex == 3) {
+        this.repository.Schedule.choice = "weekly"
+      }
       this.scheduleService.updateSchedule(this.repository.id,this.repository.Schedule)
         .subscribe (
           result => {

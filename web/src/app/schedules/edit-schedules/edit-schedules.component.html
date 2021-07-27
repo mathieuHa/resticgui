@@ -1,15 +1,15 @@
 <div *ngIf="repository && repository.Schedule">
-  <mat-tab-group mat-align-tabs="center">
-    <mat-tab label="Cron Syntax">
+  <mat-tab-group backgroundColor="primary" mat-align-tabs="center" #selectedTab>
+    <mat-tab  label="Cron Syntax">
       <ng-container [ngTemplateOutlet]='Cron'></ng-container>
     </mat-tab>
     <mat-tab label="Interval">
       <ng-container [ngTemplateOutlet]='Interval'></ng-container>
     </mat-tab>
-    <mat-tab label="Regular">
+    <mat-tab  label="Regular">
       <ng-container [ngTemplateOutlet]='Regular'></ng-container>
     </mat-tab>
-    <mat-tab label="Weekly">
+    <mat-tab  label="Weekly">
       <ng-container [ngTemplateOutlet]='Weekly'></ng-container>
     </mat-tab>
   </mat-tab-group>
@@ -69,7 +69,7 @@
         </div>
       </mat-grid-tile>
       <mat-grid-tile>
-        <div *ngIf="repository.Schedule.every_week || repository.Schedule.every_month">
+        <div>
           <div class="col-auto">
             <label for="regular_hour" class="col-form-label">Hour</label>
           </div>

@@ -22,9 +22,13 @@ func main() {
 	Config.InitConfig()
 	Logs.Initlogs()
 
+
+
 	log.Info().Msg("Start main")
 
 	resticInit()
+	//Run the cron scheduler
+
 	router := API.SetupRouter()
 
 	// setting server information
@@ -45,6 +49,8 @@ func main() {
 			log.Info().Msg("Start Server listen at 127.0.0.1:8080")
 		}
 	}()
+
+
 
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)

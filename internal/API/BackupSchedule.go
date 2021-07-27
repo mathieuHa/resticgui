@@ -38,6 +38,7 @@ func GetBackupSchedule(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "schedule not found"})
 		return
 	}
+
 	c.IndentedJSON(http.StatusOK, schedule)
 }
 
@@ -69,6 +70,8 @@ func UpdateBackupSchedule(c *gin.Context) {
 		return
 	}
 
+	validSchedule(repository.BackupSchedule)
+
 	//err := db.Model(&repository).Association("Entities").Replace(entities)
 	//if err != nil {
 	//	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error adding entities"})
@@ -85,4 +88,17 @@ func UpdateBackupSchedule(c *gin.Context) {
 	// Check if the file exist ?
 
 	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
+}
+
+func validSchedule(schedule Models.BackupSchedule) {
+    if (schedule.Choice == "cron") {
+        // check cron
+    } else if (schedule.Choice == "interval") {
+        // check interval
+    } else if (schedule.Choice == "regular") {
+        // check regular
+    } else if (schedule.Choice == "weekly") {
+        // check weekly
+    }
+
 }

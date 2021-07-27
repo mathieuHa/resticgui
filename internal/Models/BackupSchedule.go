@@ -18,5 +18,6 @@ type BackupSchedule struct {
 	Day           		string   	`json:"day"`
 	Interval        	string 		`json:"interval"`
 	CronSyntax          string   	`json:"cron_syntax"`
+	Choice              string   	`json:"choice"`
 	RepositoryID        uuid.UUID	`json:"repository_id"`
 }
