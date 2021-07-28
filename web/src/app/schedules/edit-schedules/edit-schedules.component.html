@@ -76,7 +76,7 @@
           <div class="col-auto">
             <input [disabled]="disabled"
                    [(ngModel)]="repository.Schedule.hour"
-                   placeholder="1h30" type="text" id="regular_hour" class="form-control">
+                   placeholder="01:03" type="text" id="regular_hour" class="form-control">
           </div>
         </div>
         <div *ngIf="repository.Schedule.every_week || repository.Schedule.every_month">
@@ -86,7 +86,7 @@
           <div class="col-auto">
             <input [disabled]="disabled"
                    [(ngModel)]="repository.Schedule.day"
-                   placeholder="2" type="text" id="regular_day" class="form-control">
+                   placeholder="02" type="text" id="regular_day" class="form-control">
           </div>
         </div>
       </mat-grid-tile>
@@ -148,7 +148,7 @@
             <label for="week_hour" class="col-form-label m-1">Hour</label>
             <input [disabled]="disabled"
                    [(ngModel)]="repository.Schedule.hour"
-                   placeholder="1h30" type="text" id="week_hour" class="form-control">
+                   placeholder="01:03" type="text" id="week_hour" class="form-control">
       </mat-grid-tile>
     </mat-grid-list>
   </ng-template>

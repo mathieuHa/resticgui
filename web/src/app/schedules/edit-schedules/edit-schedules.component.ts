@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
 import {Repository} from "../../repositories/repository";
 import {Schedule} from "../Schedule";
 import {SchedulesService} from "../schedules.service";
@@ -10,7 +10,7 @@ import {MatTabGroup} from "@angular/material/tabs";
   templateUrl: './edit-schedules.component.html',
   styleUrls: ['./edit-schedules.component.css']
 })
-export class EditSchedulesComponent implements OnInit {
+export class EditSchedulesComponent implements OnInit, AfterViewInit {
   @Input() repository: Repository | undefined;
   @Input() disabled!: boolean;
   @ViewChild("selectedTab", { static: false }) selectedTab: MatTabGroup | undefined;
@@ -23,8 +23,26 @@ export class EditSchedulesComponent implements OnInit {
 
   ngOnInit(): void {
     console.log(this.repository);
+
     if (this.repository?.Schedule === null) {
       this.repository.Schedule = new Schedule();
+    }
+  }
+
+  ngAfterViewInit(){
+    console.log(this.selectedTab)
+    if (this.repository && this.selectedTab){
+      if (this.repository.Schedule.choice === "cron") {
+        console.log("go to cron");
+        this.selectedTab.selectedIndex = 0
+      } else if (this.repository.Schedule.choice === "interval") {
+        console.log("go to interval ");
+        this.selectedTab.selectedIndex = 1
+      } else if (this.repository.Schedule.choice === "regular") {
+        this.selectedTab.selectedIndex = 2
+      } else if (this.repository.Schedule.choice === "weekly") {
+        this.selectedTab.selectedIndex = 3
+      }
     }
   }
   openSnackBar(message: string, action: string) {
@@ -34,13 +52,13 @@ export class EditSchedulesComponent implements OnInit {
 
     if (this.repository && this.selectedTab) {
       // @ts-ignore
-      if (this.selectedTab.selectedIndex == 0) {
+      if (this.selectedTab.selectedIndex === 0) {
         this.repository.Schedule.choice = "cron"
-      } else if (this.selectedTab.selectedIndex == 1) {
+      } else if (this.selectedTab.selectedIndex === 1) {
         this.repository.Schedule.choice = "interval"
-      } else if (this.selectedTab.selectedIndex == 2) {
+      } else if (this.selectedTab.selectedIndex === 2) {
         this.repository.Schedule.choice = "regular"
-      } else if (this.selectedTab.selectedIndex == 3) {
+      } else if (this.selectedTab.selectedIndex === 3) {
         this.repository.Schedule.choice = "weekly"
       }
       this.scheduleService.updateSchedule(this.repository.id,this.repository.Schedule)

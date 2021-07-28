@@ -114,21 +114,21 @@ func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
 	if schedule.Choice == "cron" {
 		return schedule.CronSyntax
 	} else if schedule.Choice == "interval" {
-		return schedule.Interval
+		return fmt.Sprintf("@every %v", schedule.Interval)
 	} else if schedule.Choice == "regular" {
-		hour, _ := time.Parse("06h15m04s", schedule.Hour)
-		day, _ := time.Parse("01", schedule.Day)
-		log.Debug().Msgf("%v", hour)
+		hour, _ := time.Parse("15:04", schedule.Hour)
+		log.Debug().Msgf("hour = %v", hour)
 		if schedule.EveryDay {
 			return fmt.Sprintf("%d %d * * *", hour.Minute(), hour.Hour())
 		} else if schedule.EveryWeek {
-			return fmt.Sprintf("%d %d * * %d", hour.Minute(), hour.Hour(), day.Weekday())
+			return fmt.Sprintf("%d %d * * %v", hour.Minute(), hour.Hour(), schedule.Day)
 		} else if schedule.EveryMonth {
-			return fmt.Sprintf("%d %d %d * *", hour.Minute(), hour.Hour(), day.Day())
+			return fmt.Sprintf("%d %d %v * *", hour.Minute(), hour.Hour(), schedule.Day)
 		}
 	} else if schedule.Choice == "weekly" {
 		// check weekly
-		hour, _ := time.Parse("06h15m04s", schedule.Hour)
+		hour, err := time.Parse("15:04", schedule.Hour)
+		log.Debug().Err(err).Msgf("hour = %v", hour)
 		day := ""
 		if schedule.EveryMonday {
 			day = fmt.Sprintf("%v1,", day)
@@ -152,7 +152,10 @@ func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
 			day = fmt.Sprintf("%v0,", day)
 		}
 		if len(day) > 0 {
-			day = day[:1]
+			log.Debug().Msgf("DAY = %v", day)
+			day = day[:len(day)-1]
+			log.Debug().Msgf("DAY = %v", day)
+
 		}
 		return fmt.Sprintf("%d %d * * %v", hour.Minute(), hour.Hour(), day)
 	}
@@ -160,7 +163,6 @@ func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
 }
 
 func addScheduledBackup(repository *Models.Repository) bool {
-	id := repository.ID
 	// we check if the cron has been initialized
 	if cr != nil {
 
@@ -170,7 +172,9 @@ func addScheduledBackup(repository *Models.Repository) bool {
 		}
 		// Then we had the new job to be run and register it
 		var err error
-		repository.BackupSchedule.CronID, err = cr.AddFunc("@every 5s", func() { log.Debug().Msgf("Every hour thirty %v", id) })
+		timing := getScheduleStringSyntax(repository.BackupSchedule)
+		log.Debug().Msgf("timing = %v", timing)
+		repository.BackupSchedule.CronID, err = cr.AddFunc(timing, func() { log.Debug().Msgf("JOB HAS RUN") })
 		if err != nil {
 			log.Error().Err(err)
 			return false
