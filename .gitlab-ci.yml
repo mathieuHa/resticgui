@@ -3,6 +3,9 @@ stages:
   - build
   - deploy
 
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 testgo:
   variables:
   # Please edit to your GitLab project
