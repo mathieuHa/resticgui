@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Repository} from "../repositories/repository";
 import {RepositoriesService} from "../repositories/repositories.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import { faEye, faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPlus, faEdit, faTrash, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import {EntitiesService} from "./entities.service";
 import {Entity} from "./entity";
 
@@ -19,6 +19,8 @@ export class EntitiesComponent implements OnInit {
   faPlus = faPlus;
   faEdit = faEdit;
   faTrash = faTrash;
+  faTimes = faTimes;
+  faCheck    = faCheck;
   addEntity = false;
   constructor(
     private entitiesService: EntitiesService,

@@ -1,6 +1,7 @@
 export interface Entity {
   id: string;
   path: string;
+  exists: boolean
 }
 
 interface Serializable<T> {
@@ -14,6 +15,7 @@ export class Entity implements Entity, Serializable<Entity>{
   deserialize(input: any) {
     this.id = input.id;
     this.path = input.path;
+    this.exists = input.exists;
     return this;
   }
 

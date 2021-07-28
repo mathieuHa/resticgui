@@ -6,7 +6,8 @@ import (
 
 type Entity struct {
 	Base
-	Path         string `json:"path"`
+	Path         string    `json:"path"`
 	RepositoryID uuid.UUID `gorm:"repository_id constraint:OnDelete:CASCADE;"`
-	SnapshotID   string `json:"snapshot_id"`
+	SnapshotID   string    `json:"snapshot_id"`
+	Exists       bool		`json:"exists"`
 }
