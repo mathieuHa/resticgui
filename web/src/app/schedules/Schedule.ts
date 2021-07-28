@@ -14,6 +14,7 @@ export interface Schedule {
   day: string;
   cron_syntax: string;
   interval: string;
+  choice: string;
 }
 
 interface Serializable<T> {
@@ -39,6 +40,7 @@ export class Schedule implements Schedule, Serializable<Schedule>{
     this.every_month = input.every_month;
     this.interval = input.interval;
     this.cron_syntax = input.cron_syntax;
+    this.choice = input.choice;
     return this;
   }
 
