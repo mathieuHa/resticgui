@@ -21,6 +21,9 @@
       <div class="col-auto">
         <input [disabled]="disabled"
                [(ngModel)]="repository.Schedule.cron_syntax"
+               #cron="ngModel"
+               required
+               pattern="[\s\/\*:0-9]{9,30}"
                placeholder="*/30 * * * *" type="text" id="cron" class="form-control" aria-describedby="cronHelp">
       </div>
 
@@ -33,6 +36,9 @@
       <div class="col-9">
         <input [disabled]="disabled"
                [(ngModel)]="repository.Schedule.interval"
+               #interval="ngModel"
+               required
+               pattern="[:0-9]{4,5}"
                placeholder="1h30" type="text" id="interval" class="form-control" aria-describedby="intervalHelp">
       </div>
   </ng-template>
@@ -75,22 +81,36 @@
           </div>
           <div class="col-auto">
             <input [disabled]="disabled"
+                   #regular_hour="ngModel"
+                   required
+                   pattern="[:0-9]{4,5}"
                    [(ngModel)]="repository.Schedule.hour"
                    placeholder="01:03" type="text" id="regular_hour" class="form-control">
           </div>
         </div>
-        <div *ngIf="repository.Schedule.every_week || repository.Schedule.every_month">
-          <div class="col-auto">
-            <label for="regular_day" class="col-form-label">Day</label>
-          </div>
-          <div class="col-auto">
-            <input [disabled]="disabled"
-                   [(ngModel)]="repository.Schedule.day"
-                   placeholder="02" type="text" id="regular_day" class="form-control">
-          </div>
+        <div *ngIf="repository.Schedule.every_week">
+          <mat-form-field appearance="fill">
+            <mat-label>Day of Week</mat-label>
+            <mat-select [(value)]="repository.Schedule.day">
+              <mat-option *ngFor="let day of weekDays" [value]="day.value">
+                {{day.viewValue}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
-      </mat-grid-tile>
+    <div *ngIf="repository.Schedule.every_month">
+      <mat-form-field appearance="fill">
+        <mat-label>Day of Month</mat-label>
+        <mat-select [(value)]="repository.Schedule.day">
+          <mat-option *ngFor="let day of monthDays" [value]="day">
+            {{day}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    </mat-grid-tile>
     </mat-grid-list>
+
 
   </ng-template>
 
@@ -147,7 +167,10 @@
       <mat-grid-tile>
             <label for="week_hour" class="col-form-label m-1">Hour</label>
             <input [disabled]="disabled"
+                   pattern="[:0-9]{4,5}"
+                   #week_hour="ngModel"
                    [(ngModel)]="repository.Schedule.hour"
+                   required
                    placeholder="01:03" type="text" id="week_hour" class="form-control">
       </mat-grid-tile>
     </mat-grid-list>
@@ -155,8 +178,8 @@
   <br>
   <div class="d-grid gap-2">
 
-    <div class="btn btn-sm btn-success" (click)="save()">
+    <button class="btn btn-sm btn-success" (click)="save()">
       save
-    </div>
+    </button>
   </div>
 </div>
