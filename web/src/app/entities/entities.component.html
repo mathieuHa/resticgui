@@ -1,6 +1,9 @@
 <div *ngIf="repository && repository.Entities && repository.Entities.length > 0">
   <span *ngFor="let entity of repository.Entities">
-    Path {{entity.path}}<br>
+    Path {{entity.path}}
+    <fa-icon *ngIf="entity.exists" [icon]="faCheck" ></fa-icon>
+    <fa-icon *ngIf="!entity.exists" [icon]="faTimes" ></fa-icon>
+    <br>
   </span>
 </div>
 

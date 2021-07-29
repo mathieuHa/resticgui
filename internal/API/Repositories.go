@@ -88,6 +88,15 @@ func EditRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
+
+	Models.Repository.ToString(repository)
+
+	if err := c.BindJSON(&repository); err != nil {
+        log.Info().Msg("Bind Error Repository")
+        c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not binded"})
+        return
+    }
+    Models.Repository.ToString(repository)
 	// check on invalid data to do
 	//errors.Is(result.Error, gorm.ErrInvalidData)
 

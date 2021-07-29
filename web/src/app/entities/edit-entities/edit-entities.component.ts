@@ -4,7 +4,7 @@ import {RepositoriesService} from "../../repositories/repositories.service";
 import {Location} from "@angular/common";
 import {Repository} from "../../repositories/repository";
 import {Entity} from "../entity";
-import { faSave, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faTrash, faPlus, faTimes, faCheck } from '@fortawesome/free-solid-svg-icons';
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {EntitiesService} from "../entities.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
@@ -20,7 +20,8 @@ export class EditEntitiesComponent implements OnInit {
   faTrash = faTrash;
   faPlus = faPlus;
   faSave = faSave;
-
+  faTimes = faTimes;
+  faCheck    = faCheck;
   private id: string|undefined  ;
   constructor(
     private route: ActivatedRoute,
