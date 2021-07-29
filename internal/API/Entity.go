@@ -34,23 +34,44 @@ func AddEntities(c *gin.Context) {
 
 	// Here we add repository entities
 	var entities []Models.Entity
+	err := db.Model(&repository).Association("Entities").Clear()
+	if err != nil {
+		log.Info().Err(err).Msg("Clear Error entities")
+		return
+	}
+	err = db.Model(&repository).Association("Entities").Delete(&entities)
+
+
+	if err != nil {
+		log.Info().Err(err).Msg("Delete Error entities")
+		return
+	}
+
 	if err := c.BindJSON(&entities); err != nil {
 		log.Info().Err(err).Msg("Bind Error entities")
 		return
 	}
 
+	for _, entity:= range entities {
+		Models.Entity.ToString(entity)
+		//log.Debug().Msgf("entity")
+	}
+
+
+	checkEntitiesPath(entities)
+	repository.Entities = entities
 
 	//err := db.Model(&repository).Association("Entities").Replace(entities)
 	//if err != nil {
 	//	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error adding entities"})
 	//	return
 	//}
-	checkEntitiesPath(entities)
-	repository.Entities = entities
+	//repository.Entities = entities
 	if repository.Entities == nil {
 	    log.Debug().Msg("Reset Entities to []")
         repository.Entities = []Models.Entity{}
-    }
+		db.Save(&repository)
+	}
 	db.Save(&repository)
 
 	// Check if the file exist ?

@@ -44,10 +44,10 @@ export class EditRepositoriesComponent implements OnInit {
   openSnackBar(message: string, action: string) {
     this._snackBar.open(message, action);
   }
-  save(repositorie: Repository): void {
-    if (this.id && repositorie) {
-      console.log(repositorie);
-      this.repositoriesService.updateRepository(this.id,repositorie)
+  save(repository: Repository): void {
+    if (this.id && repository) {
+      console.log(repository);
+      this.repositoriesService.updateRepository(this.id,repository)
         .subscribe (
           result => {
             console.log("res");
