@@ -20,7 +20,7 @@
         <li class="list-group-item" *ngFor="let repository of repositories" (click)="onSelect(repository)">
           ID: {{repository.id}}<br>
           Name: {{repository.name}}<br>
-          <button (click)="deleteRepositories(repository.id)" style="float: right" class="btn btn-sm btn-danger m-1">
+          <button (click)="deleteRepositories(repository.id!)" style="float: right" class="btn btn-sm btn-danger m-1">
             <fa-icon [icon]="faTrash"></fa-icon>
           </button>
 

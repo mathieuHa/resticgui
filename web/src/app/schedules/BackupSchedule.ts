@@ -1,4 +1,4 @@
-export interface Schedule {
+export interface BackupSchedule {
   id: string;
   every_day: boolean;
   every_week: boolean;
@@ -20,7 +20,7 @@ export interface Schedule {
 interface Serializable<T> {
   deserialize(input: Object): T;
 }
-export class Schedule implements Schedule, Serializable<Schedule>{
+export class BackupSchedule implements BackupSchedule, Serializable<BackupSchedule>{
 
   constructor(
   ) {  }

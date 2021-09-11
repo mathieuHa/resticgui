@@ -1,4 +1,4 @@
-<div *ngIf="repository" class="card">
+<!-- <div *ngIf="repository" class="card">
   <h5 class="card-header">Edit Repository
     <button style="float: right" class="btn btn-sm btn-primary" (click)="goBack()">
       <fa-icon [icon]="faUndoAlt"></fa-icon>
@@ -17,3 +17,6 @@
 <div class="alert alert-danger" *ngIf="!repository">
   No repository found with id
 </div>
+ -->
+
+<app-stepper [repository]="repository"></app-stepper>

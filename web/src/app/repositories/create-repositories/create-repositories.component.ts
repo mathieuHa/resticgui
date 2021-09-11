@@ -31,7 +31,7 @@ export class CreateRepositoriesComponent implements OnInit {
   }
   save(repository: Repository): void {
     if (repository) {
-      this.repositoryService.CreateRepository(repository)
+      this.repositoryService.createRepository(repository)
         .subscribe(
           result => {
             console.log("res");

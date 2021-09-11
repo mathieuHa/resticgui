@@ -7,6 +7,7 @@ import {RepositoriesComponent} from "./repositories/repositories.component";
 import {ViewRepositoriesComponent} from "./repositories/view-repositories/view-repositories.component";
 import {EditRepositoriesComponent} from "./repositories/edit-repositories/edit-repositories.component";
 import {EditEntitiesComponent} from "./entities/edit-entities/edit-entities.component";
+import {StepperComponent} from "./stepper/stepper.component";
 
 const routes: Routes = [
   { path: 'users', component: UsersComponent },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'repositories/:id', component: ViewRepositoriesComponent },
   { path: 'repositories/:id/edit', component: EditRepositoriesComponent },
   { path: 'repositories/:id/entities/edit', component: EditEntitiesComponent },
+  { path: 'stepper', component: StepperComponent },
 
   { path: '', redirectTo: '/users', pathMatch: 'full' },
 

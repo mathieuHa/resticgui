@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
 import {Repository} from "../../repositories/repository";
-import {Schedule} from "../Schedule";
+import {BackupSchedule} from "../BackupSchedule";
 import {SchedulesService} from "../schedules.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatTabGroup} from "@angular/material/tabs";
@@ -41,8 +41,8 @@ export class EditSchedulesComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     console.log(this.repository);
 
-    if (this.repository?.Schedule === null) {
-      this.repository.Schedule = new Schedule();
+    if (this.repository?.BackupSchedule === null) {
+      this.repository.BackupSchedule = new BackupSchedule();
     }
   }
 
@@ -77,7 +77,7 @@ export class EditSchedulesComponent implements OnInit, AfterViewInit {
       } else if (this.selectedTab.selectedIndex === 3) {
         this.repository.Schedule.choice = "weekly"
       }
-      this.scheduleService.updateSchedule(this.repository.id,this.repository.Schedule)
+      this.scheduleService.updateSchedule(this.repository.id!,this.repository.Schedule)
         .subscribe (
           result => {
             console.log("res");
