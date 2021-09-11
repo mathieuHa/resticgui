@@ -1,0 +1,63 @@
+{{ repository|json}}
+<mat-stepper [linear]="true" #stepper>
+    <form [formGroup]="repositoryForm">
+
+        <mat-step label="Name your repository" [stepControl]="repositoryForm.controls.name" >
+            <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" placeholder="Repository Name" required>
+            </mat-form-field>
+            <div>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+            
+        </mat-step>
+        <mat-step label="Fill the folder list to back up" [stepControl]="repositoryForm.controls.Entities" >
+            <ng-container formArrayName="Entities">
+                <ng-container *ngFor="let entityF of Entities.controls; let i = index">
+                    <div [formGroupName]="i">
+                        <mat-form-field appearance="fill">
+                            <input matInput
+                                formControlName="path"
+                                placeholder="path">
+                        </mat-form-field>
+                        <mat-icon *ngIf="entityF.value.exists" aria-hidden="false" class="text-success" aria-label="Example check icon">check</mat-icon>
+                        <!-- <mat-icon *ngIf="!entityF.value.exists" aria-hidden="false" class="text-danger" aria-label="Example error icon">error</mat-icon> -->
+                        <mat-icon *ngIf="!entityF.value.exists" aria-hidden="false" class="text-warning" aria-label="Example sync_problem icon">sync_problem</mat-icon>
+                        
+                        <button mat-raised-button (click)="removeEntity(i)" class="m-1" color="warn">Delete</button>
+
+                    <br>
+                  </div>
+                </ng-container>
+            </ng-container>
+                
+            <button type="button"  (click)="addEntity()" mat-raised-button color="primary">Add</button>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+        </mat-step>
+        <mat-step label="Choose the frequency" [stepControl]="repositoryForm.controls.BackupSchedule">
+            <ng-container formGroupName="BackupSchedule">
+                <mat-form-field appearance="fill">
+                    <mat-label>Interval</mat-label>
+                    <input matInput formControlName="interval" placeholder="10 2 * * *" required>
+                </mat-form-field>
+            </ng-container>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+        </mat-step>
+
+        <mat-step label="Save" [stepControl]="repositoryForm.controls.Active">
+            <mat-slide-toggle formControlName="Active" >Enable the backup</mat-slide-toggle>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-raised-button color="primary" (click)="submit()">Submit</button>
+            </div>
+        </mat-step>
+    </form>
+</mat-stepper>
+

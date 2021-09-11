@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Repository} from "../../repositories/repository";
-import {Schedule} from "../Schedule";
+import {BackupSchedule} from "../BackupSchedule";
 
 @Component({
   selector: 'app-view-schedules',
@@ -14,8 +14,8 @@ export class ViewSchedulesComponent implements OnInit {
 
   ngOnInit(): void {
     console.log(this.repository);
-    if (this.repository?.Schedule === null) {
-      this.repository.Schedule = new Schedule();
+    if (this.repository?.BackupSchedule === null) {
+      this.repository.BackupSchedule = new BackupSchedule();
     }
   }
 

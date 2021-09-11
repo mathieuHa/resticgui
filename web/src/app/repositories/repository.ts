@@ -1,11 +1,12 @@
 import {Entity} from "../entities/entity";
-import {Schedule} from "../schedules/Schedule";
+import {BackupSchedule} from "../schedules/BackupSchedule";
 
 export interface Repository {
   Entities: Entity[];
-  Schedule: Schedule;
+  Schedule: BackupSchedule;
+  BackupSchedule: BackupSchedule;
   BackupPolicy: string;
-  id: string;
+  id?: string;
   name: string;
 }
 
@@ -22,6 +23,7 @@ export class Repository implements Repository, Serializable<Repository>{
     this.name = input.name;
     this.Entities = input.Entities;
     this.Schedule = input.BackupSchedule;
+    this.BackupSchedule = input.BackupSchedule;
     this.BackupPolicy = input.BackupPolicy;
     return this;
   }

@@ -1,4 +1,4 @@
-<div *ngIf="repository" class="card">
+<!-- <div *ngIf="repository" class="card">
   <h5 class="card-header">Create Repository</h5>
   <div class="card-body">
     <h5 class="card-title">Repository {{repository.name}}</h5>
@@ -6,4 +6,5 @@
       <app-form-repositories (updateRepositoryForm)="CreateRepository($event)" [repository]="repository"></app-form-repositories>
     </p>
   </div>
-</div>
+</div> -->
+<app-stepper [repository]="repository"></app-stepper>

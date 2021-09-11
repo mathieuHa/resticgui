@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {Repository} from "../repositories/repository";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {Schedule} from "./Schedule";
+import {BackupSchedule} from "./BackupSchedule";
 
 @Injectable({
   providedIn: 'root'
@@ -20,9 +20,9 @@ export class SchedulesService {
 
 
 
-  updateSchedule(id: string, repository: Schedule): Observable<any> {
+  updateSchedule(id: string, repository: BackupSchedule): Observable<any> {
     const url = `${this._repositoryUrl}/${id}/schedules`;
-    return this.http.put<Schedule>(url, repository, this.httpOptions);
+    return this.http.put<BackupSchedule>(url, repository, this.httpOptions);
   }
 
 

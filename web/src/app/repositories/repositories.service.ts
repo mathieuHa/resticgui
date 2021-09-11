@@ -23,7 +23,6 @@ export class RepositoriesService {
 
   getRepository(id: string): Observable<Repository> {
     const url = `${this._repositoryUrl}/${id}`;
-
     return this.http.get<Repository>(url);
   }
 
@@ -37,7 +36,7 @@ export class RepositoriesService {
     return this.http.delete<Repository>(url);
   }
 
-  CreateRepository(repository: Repository): Observable<any> {
+  createRepository(repository: Repository): Observable<any> {
     return this.http.post(this._repositoryUrl, repository, this.httpOptions);
   }
 

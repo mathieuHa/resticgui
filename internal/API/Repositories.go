@@ -43,7 +43,7 @@ func GetRepositories(c *gin.Context) {
 
 func CreateRepository(c *gin.Context) {
 	var repository Models.Repository
-
+	
 	if err := c.BindJSON(&repository); err != nil {
 		log.Info().Msg("Bind Error Repository")
 		return

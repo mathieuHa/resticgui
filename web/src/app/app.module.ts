@@ -28,6 +28,13 @@ import {MatTabsModule} from "@angular/material/tabs";
 import {MatGridListModule} from "@angular/material/grid-list";
 import {MatSelectModule} from "@angular/material/select";
 import {MatOptionModule} from "@angular/material/core";
+import {MatStepperModule} from '@angular/material/stepper';
+import { StepperComponent } from './stepper/stepper.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule  } from '@angular/material/input';
+import { MatButtonModule  } from '@angular/material/button';
+import { MatSlideToggleModule  } from '@angular/material/slide-toggle';
+import { MatIconModule  } from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -46,7 +53,8 @@ import {MatOptionModule} from "@angular/material/core";
     EntitiesComponent,
     EditEntitiesComponent,
     EditSchedulesComponent,
-    ViewSchedulesComponent
+    ViewSchedulesComponent,
+    StepperComponent
   ],
   imports: [
     BrowserModule,
@@ -61,7 +69,13 @@ import {MatOptionModule} from "@angular/material/core";
     MatTabsModule,
     MatGridListModule,
     MatSelectModule,
-    MatOptionModule
+    MatOptionModule,
+    MatStepperModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatSlideToggleModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
