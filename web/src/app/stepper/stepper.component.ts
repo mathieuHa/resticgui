@@ -6,6 +6,7 @@ import {RepositoriesService} from "../repositories/repositories.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {faSave, faUndoAlt} from '@fortawesome/free-solid-svg-icons';
 import {Location} from "@angular/common";
+import { Entity } from '../entities/entity';
 @Component({
   selector: 'app-stepper',
   templateUrl: './stepper.component.html',
@@ -48,10 +49,35 @@ export class StepperComponent implements OnInit {
       ]),
       BackupSchedule: this._formBuilder.group({
         interval: ['', 
-          [
-            Validators.required,
-            Validators.minLength(4)
-          ]
+          []
+        ],
+        every_day: [false, []], 
+        every_week: [false, []],
+        every_month: [false, []],
+        every_monday: [false, []],
+        every_tuesday: [false, []],
+        every_wednesday: [false, []],
+        every_thursday: [false, []],
+        every_friday: [false, []],
+        every_saturday: [false, []],
+        every_sunday: [false, []],
+        hour: ['', 
+          []
+        ],
+        regular_hour: ['', 
+          []
+        ],
+        week_hour: ['', 
+          []
+        ],
+        day: ['', 
+          []
+        ],
+        cron_syntax: ['', 
+          []
+        ],
+        choice: ['', 
+          []
         ],
       }),
       Active: [false,[]],
@@ -71,6 +97,10 @@ export class StepperComponent implements OnInit {
           this.repository = new Repository().deserialize(response)
           console.log(this.repository)
           this.repositoryForm.patchValue(this.repository!)
+          for (let ent of this.repository.Entities) {
+            this.addEntity(ent)
+          }
+          console.log(this.repositoryForm)
         }
       );
     } else {
@@ -78,18 +108,14 @@ export class StepperComponent implements OnInit {
     }
   }
   
-  addEntity() {
-      const entity = this._formBuilder.group({
-        path: ['',
-            [
-              Validators.required,
-              Validators.minLength(4)
-            ]
+  addEntity(entity?: Entity) {
+      const newEntity = this._formBuilder.group({
+        path: [entity?.path,
+            []
           ],
-          exists: [false],
+          exists: [entity?.exists],
       })
-    this.Entities.push(entity);
-    console.log(this.repositoryForm)
+    this.Entities.push(newEntity);
   }
   get Entities() {
     return this.repositoryForm.controls["Entities"] as FormArray;
@@ -114,6 +140,7 @@ export class StepperComponent implements OnInit {
   openSnackBar(message: string, action: string) {
     this._snackBar.open(message, action);
   }
+
   update(repository: Repository): void {
     if (repository) {
       console.log(repository);
@@ -122,12 +149,13 @@ export class StepperComponent implements OnInit {
           result => {
             console.log("res");
             console.log(result);
-            if (!result.error){
+            if (!result.error) {
               this.openSnackBar("Repository Updated","close")
+              this.repository = new Repository().deserialize(result)
+              this.repositoryForm.patchValue(this.repository)
             } else {
               this.openSnackBar(result.error,"close")
             }
-
           },
           error => {
             console.log("err")
@@ -148,17 +176,18 @@ export class StepperComponent implements OnInit {
           result => {
             console.log("res");
             console.log(result);
-            if (!result.error){
+            if (!result.error) {
               this.openSnackBar("Repository Created","close")
+              this.repository = new Repository().deserialize(result)
+              this.repositoryForm.patchValue(this.repository)
             } else {
               this.openSnackBar(result.error,"close")
             }
-
           },
           error => {
             console.log("err")
             console.log(error);
-            if (error.error && error.error.error){
+            if (error.error && error.error.error) {
               this.openSnackBar(error.error.error,"close")
             }
           });
