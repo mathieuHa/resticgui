@@ -1,5 +1,5 @@
 export interface User {
-    id: number;
+    ID: number;
     firstname: string;
     lastname: string;
     email: string;
@@ -14,7 +14,7 @@ export class User implements User, Serializable<User>{
   ) {  }
 
   deserialize(input: any) {
-    this.id = input.id;
+    this.ID = input.ID;
     this.firstname = input.firstname;
     this.lastname = input.lastname;
     this.email = input.email;

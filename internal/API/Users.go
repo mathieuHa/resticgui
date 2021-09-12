@@ -33,7 +33,7 @@ func GetUsers(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", id)
+	result := db.Find(&users, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
@@ -65,13 +65,6 @@ func CreateUser(c *gin.Context) {
 
 func EditUser(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var editedUser Models.User
 
@@ -84,14 +77,11 @@ func EditUser(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", id)
+	result := db.Find(&users, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
-
-	// check on invalid data to do
-	// errors.Is(result.Error, gorm.ErrInvalidData)
 
 	db.Save(&editedUser)
 	c.IndentedJSON(http.StatusOK, editedUser)
@@ -99,24 +89,17 @@ func EditUser(c *gin.Context) {
 
 func RemoveUser(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var users Models.User
 
 	db := Database.Connect()
 
-	result := db.Find(&users, "id = ?", id)
+	result := db.Find(&users, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
-	result = db.Delete(&users, "id = ?", id)
+	result = db.Delete(&users, id)
 	if result.Error != nil {
 		log.Error().Err(result.Error)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "user not deleted"})
