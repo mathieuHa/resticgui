@@ -40,7 +40,7 @@
         </mat-step>
         <mat-step label="Choose the frequency of the backup" [stepControl]="repositoryForm.controls.BackupSchedule">
             <ng-container formGroupName="BackupSchedule">
-                <div *ngIf="repository && repository.Schedule">
+                <div *ngIf="repository && repository.BackupSchedule">
                     <mat-tab-group backgroundColor="primary" mat-align-tabs="center" #selectedTab>
                       <mat-tab  label="Cron Syntax">
                         <ng-container [ngTemplateOutlet]='Cron'></ng-container>
