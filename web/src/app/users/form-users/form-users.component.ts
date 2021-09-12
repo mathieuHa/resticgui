@@ -26,6 +26,7 @@ export class FormUsersComponent implements OnInit{
       Validators.required,
       Validators.minLength(6)
     ]),
+    ID: new FormControl('',[]),
   });
   @Output() updateUserForm = new EventEmitter<User>();
 
@@ -42,7 +43,8 @@ export class FormUsersComponent implements OnInit{
       {
           'firstname': this.user?.firstname,
           'lastname': this.user?.lastname,
-          'email': this.user?.email
+          'email': this.user?.email,
+          'ID': this.user?.ID
       }
     )
   }
