@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import {FormControl, FormGroup, Validators, FormBuilder, FormArray} from "@angular/forms";
 import {Repository} from "../repositories/repository";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {RepositoriesService} from "../repositories/repositories.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {faSave, faUndoAlt} from '@fortawesome/free-solid-svg-icons';
@@ -19,15 +19,18 @@ export class StepperComponent implements OnInit {
     private route: ActivatedRoute,
     private repositoriesService: RepositoriesService,
     private location: Location,
+    private router: Router,
     private _snackBar: MatSnackBar
-    ) { }
+    ) {
+      this.readonly = false;
+     }
   repositoryForm!: FormGroup;
-  @Input() repository?: Repository;
+  repository!: Repository;
+  @Input() readonly: boolean;
   id = 0;
 
   createFormModel() {
     this.repositoryForm = this._formBuilder.group({
-      // id: [undefined, []],
       // BackupPolicy: this._formBuilder.group({}),
       // Snapshots: [],
       name: ['', 
@@ -36,19 +39,7 @@ export class StepperComponent implements OnInit {
           Validators.minLength(4)
         ]
       ],
-      Entities: this._formBuilder.array([
-        // this._formBuilder.group({
-        //   path: ['',
-        //     [
-        //       Validators.required,
-        //       Validators.minLength(4)
-        //     ]
-        //   ],
-        //   id: ['',[]],
-        //   RepositoryID: ['',[]],
-        //   exists: [false],
-        // })
-      ]),
+      Entities: this._formBuilder.array([]),
       BackupSchedule: this._formBuilder.group({
         interval: ['', 
           []
@@ -84,6 +75,7 @@ export class StepperComponent implements OnInit {
       }),
       Active: [false,[]],
     });
+    
   }
   ngOnInit(): void {
     this.createFormModel()
@@ -97,16 +89,20 @@ export class StepperComponent implements OnInit {
       this.repositoriesService.getRepository(this.id).subscribe(
         response => {
           this.repository = new Repository().deserialize(response)
-          console.log(this.repository)
           this.repositoryForm.patchValue(this.repository!)
           for (let ent of this.repository.Entities) {
             this.addEntity(ent)
           }
-          console.log(this.repositoryForm)
+          if (this.readonly){
+            this.repositoryForm.disable()
+          }
         }
       );
     } else {
       this.repository = new Repository()
+      this.repository.Entities=[]
+      this.repository.Entities.push(new Entity())
+      this.addEntity()
     }
   }
   
@@ -164,7 +160,7 @@ export class StepperComponent implements OnInit {
           error => {
             console.log("err")
             console.log(error);
-            if (error.error && error.error.error){
+            if (error.error && error.error.error) {
               this.openSnackBar(error.error.error,"close")
             }
           });
@@ -183,7 +179,11 @@ export class StepperComponent implements OnInit {
             if (!result.error) {
               this.openSnackBar("Repository Created","close")
               this.repository = new Repository().deserialize(result)
+
+              this.router.navigate(['repositories', this.repository.ID]);
+
               this.repositoryForm.patchValue(this.repository)
+              
             } else {
               this.openSnackBar(result.error,"close")
             }
