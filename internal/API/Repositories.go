@@ -52,8 +52,6 @@ func CreateRepository(c *gin.Context) {
 
 	result := db.Create(&repository) // pass pointer of data to Create
 
-	//result := db.Session(&gorm.Session{FullSaveAssociations: true}).Create(&repository)
-
 	if result.Error != nil {
 		log.Debug().Err(result.Error).Msg("is error?")
 		err := db.Find(&repository).Error
@@ -63,7 +61,7 @@ func CreateRepository(c *gin.Context) {
 			return
 		}
 	}
-	//repository.BackupSchedule = Models.BackupSchedule{}
+	// repository.BackupSchedule = Models.BackupSchedule{}
 	result = db.Save(&repository)
 
 	c.IndentedJSON(http.StatusCreated, repository)
@@ -71,13 +69,6 @@ func CreateRepository(c *gin.Context) {
 
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msg("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var repository Models.Repository
 
@@ -99,15 +90,6 @@ func EditRepository(c *gin.Context) {
 
 	log.Error().Msgf("DEBUG AFTER Error Repository %s", repository.Entities)
 
-	// Models.Repository.ToString(repository)
-	// check on invalid data to do
-	//errors.Is(result.Error, gorm.ErrInvalidData)
-
-	// db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&repository)
-	// Terrible Workaround to elimiated duplicated linked
-	// now they are orphaned
-	// db.Model(&repository).Association("Entities").Replace(repository.Entities)
-	// db.Omit(clause.Associations).Save(repository)
 	db.Save(repository)
 
 	var NewRepository Models.Repository
@@ -122,13 +104,6 @@ func EditRepository(c *gin.Context) {
 
 func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var repository Models.Repository
 

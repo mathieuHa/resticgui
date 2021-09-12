@@ -16,7 +16,10 @@ interface Serializable<T> {
 export class Repository implements Repository, Serializable<Repository>{
 
   constructor(
-  ) {  }
+  ) { 
+    this.Entities=[]
+    this.BackupSchedule= new BackupSchedule()
+   }
 
   deserialize(input: any) {
     this.ID = input.ID;

@@ -7,6 +7,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {faSave, faUndoAlt} from '@fortawesome/free-solid-svg-icons';
 import {Location} from "@angular/common";
 import { Entity } from '../entities/entity';
+import { BackupSchedule } from '../schedules/BackupSchedule';
 @Component({
   selector: 'app-stepper',
   templateUrl: './stepper.component.html',
@@ -100,9 +101,9 @@ export class StepperComponent implements OnInit {
       );
     } else {
       this.repository = new Repository()
-      this.repository.Entities=[]
       this.repository.Entities.push(new Entity())
       this.addEntity()
+      console.log(this.repositoryForm)
     }
   }
   
