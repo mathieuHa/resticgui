@@ -19,7 +19,6 @@ const routes: Routes = [
   { path: 'repositories/:id', component: ViewRepositoriesComponent },
   { path: 'repositories/:id/edit', component: EditRepositoriesComponent },
   { path: 'repositories/:id/entities/edit', component: EditEntitiesComponent },
-  { path: 'stepper', component: StepperComponent },
 
   { path: '', redirectTo: '/users', pathMatch: 'full' },
 
