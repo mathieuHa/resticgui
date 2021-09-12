@@ -1,13 +1,16 @@
 package Models
 
 import (
-	"github.com/google/uuid"
+	//"github.com/google/uuid"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Snapshot struct {
-	Base
+	gorm.Model
+
 	Date         time.Time `json:"date" gorm:"autoCreateTime"`
-	RepositoryID uuid.UUID    `json:"repository_id"`
+	RepositoryID uint      //uuid.UUID    `json:"repository_id"`
 	Entities     []Entity
 }

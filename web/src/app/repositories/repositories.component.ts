@@ -44,7 +44,7 @@ export class RepositoriesComponent implements OnInit {
     )
   }
 
-  deleteRepositories(id: string): void {
+  deleteRepositories(id: number): void {
     this.repositoryService.deleteRepository(id).subscribe(
       response => {
         console.log(response);

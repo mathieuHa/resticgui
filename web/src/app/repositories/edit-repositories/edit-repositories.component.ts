@@ -16,7 +16,7 @@ export class EditRepositoriesComponent implements OnInit {
   @Input() repository?: Repository;
   faUndoAlt = faUndoAlt;
   faSave = faSave;
-  id = "";
+  id = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -34,7 +34,7 @@ export class EditRepositoriesComponent implements OnInit {
   getRepository(): void {
     const _id = this.route.snapshot.paramMap.get('id');
     if (_id !== null){
-      this.id = _id;
+      this.id = Number(_id);
       this.repositoriesService.getRepository(this.id).subscribe(
         response => this.repository = new Repository().deserialize(response)
       );

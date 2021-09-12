@@ -1,3 +1,4 @@
+{{repositories|json}}
 <br>
 <div *ngIf="addRepository">
   <app-create-repositories></app-create-repositories>
@@ -18,20 +19,20 @@
     <div class="card-body m-3">
       <ul *ngIf="repositories && repositories.length>0" class="list-group list-group-flush">
         <li class="list-group-item" *ngFor="let repository of repositories" (click)="onSelect(repository)">
-          ID: {{repository.id}}<br>
+          ID: {{repository.ID}}<br>
           Name: {{repository.name}}<br>
-          <button (click)="deleteRepositories(repository.id!)" style="float: right" class="btn btn-sm btn-danger m-1">
+          <button (click)="deleteRepositories(repository.ID!)" style="float: right" class="btn btn-sm btn-danger m-1">
             <fa-icon [icon]="faTrash"></fa-icon>
           </button>
 
           <button style="float: right" class="btn btn-sm btn-warning m-1"
-                  routerLink="/repositories/{{repository.id}}/edit"
+                  routerLink="/repositories/{{repository.ID}}/edit"
           >
             <fa-icon [icon]="faEdit"></fa-icon>
           </button>
 
           <button style="float: right" class="btn btn-sm btn-info m-1"
-                  routerLink="/repositories/{{repository.id}}"
+                  routerLink="/repositories/{{repository.ID}}"
           >
             <fa-icon [icon]="faEye"></fa-icon>
           </button>

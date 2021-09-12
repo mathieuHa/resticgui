@@ -65,7 +65,7 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	id2 := repository.ID
 	log.Debug().Msgf("%v", id2)
 
-	url = fmt.Sprintf("/api/v1/repositories/%s", id2)
+	url = fmt.Sprintf("/api/v1/repositories/%v", id2)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", url, nil)
 	router.ServeHTTP(w, req)

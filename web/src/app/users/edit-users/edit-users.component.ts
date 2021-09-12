@@ -15,7 +15,7 @@ export class EditUsersComponent implements OnInit {
   @Input() user?: User;
   faUndoAlt = faUndoAlt;
   faSave = faSave;
-  id = "";
+  id = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,7 +33,7 @@ export class EditUsersComponent implements OnInit {
   getUser(): void {
     const _id = this.route.snapshot.paramMap.get('id');
     if (_id !== null){
-      this.id = _id;
+      this.id = Number(_id);
       this.userService.getUser(this.id).subscribe(
         response => this.user = response
       );

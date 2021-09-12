@@ -66,7 +66,7 @@ func TestGetUsersRoute(t *testing.T) {
 	id2 := user.ID
 	log.Debug().Msgf("%v", id2)
 
-	url = fmt.Sprintf("/api/v1/users/%s", id2)
+	url = fmt.Sprintf("/api/v1/users/%v", id2)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", url, nil)
 	router.ServeHTTP(w, req)

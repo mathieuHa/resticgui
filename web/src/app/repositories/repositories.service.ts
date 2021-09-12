@@ -21,17 +21,17 @@ export class RepositoriesService {
     return this.http.get<Repository[]>(this._repositoryUrl);
   }
 
-  getRepository(id: string): Observable<Repository> {
+  getRepository(id: number): Observable<Repository> {
     const url = `${this._repositoryUrl}/${id}`;
     return this.http.get<Repository>(url);
   }
 
-  updateRepository(id: string, repository: Repository): Observable<any> {
+  updateRepository(id: number, repository: Repository): Observable<any> {
     const url = `${this._repositoryUrl}/${id}`;
     return this.http.patch<Repository>(url, repository, this.httpOptions);
   }
 
-  deleteRepository(id: string): Observable<any> {
+  deleteRepository(id: number): Observable<any> {
     const url = `${this._repositoryUrl}/${id}`;
     return this.http.delete<Repository>(url);
   }
