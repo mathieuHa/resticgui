@@ -25,14 +25,14 @@
                         <!-- <mat-icon *ngIf="!entityF.value.exists" aria-hidden="false" class="text-danger" aria-label="Example error icon">error</mat-icon> -->
                         <mat-icon *ngIf="!entityF.value.exists" aria-hidden="false" class="text-warning" aria-label="Example sync_problem icon">sync_problem</mat-icon>
                         
-                        <button mat-raised-button (click)="removeEntity(i)" class="m-1" color="warn">Delete</button>
+                        <button [disabled]="readonly" mat-raised-button (click)="removeEntity(i)" class="m-1" color="warn">Delete</button>
 
                     <br>
                   </div>
                 </ng-container>
             </ng-container>
                 
-            <button type="button"  (click)="addEntity()" mat-raised-button color="primary">Add</button>
+            <button type="button" [disabled]="readonly"  (click)="addEntity()" mat-raised-button color="primary">Add</button>
             <div>
                 <button mat-button matStepperPrevious>Back</button>
                 <button mat-button matStepperNext>Next</button>
@@ -262,9 +262,9 @@
 
         <mat-step label="Save" [stepControl]="repositoryForm.controls.Active">
             <mat-slide-toggle formControlName="Active" >Enable the backup</mat-slide-toggle>
-            <div>
+            <div style="float: right">
                 <button mat-button matStepperPrevious>Back</button>
-                <button mat-raised-button color="primary" (click)="submit()">Submit</button>
+                <button [disabled]="readonly" mat-raised-button color="primary" (click)="submit()">Submit</button>
             </div>
         </mat-step>
     </form>

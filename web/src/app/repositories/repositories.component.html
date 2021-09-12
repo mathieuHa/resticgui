@@ -1,9 +1,5 @@
 {{repositories|json}}
-<br>
-<div *ngIf="addRepository">
-  <app-create-repositories></app-create-repositories>
-</div>
-<br>
+
 <br>
 <div class="card">
   <div class="card-header">
@@ -11,8 +7,8 @@
   </div>
   <div class="card-body m-3">
     <div *ngIf="repositories && repositories.length===0"  class="alert alert-info " role="alert"> No Repositories</div>
-    <button  class="btn btn-primary" style="float: right">
-      <fa-icon  [icon]="faPlus" (click)="addRepository=!addRepository"></fa-icon>
+    <button  class="btn btn-primary" routerLink="/repositories/create" style="float: right">
+      <fa-icon  [icon]="faPlus"  ></fa-icon>
     </button>
   </div>
   <div  class="card-body">
