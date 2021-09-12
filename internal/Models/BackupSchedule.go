@@ -1,12 +1,13 @@
 package Models
 
 import (
-	"github.com/google/uuid"
 	"github.com/robfig/cron/v3"
+	"gorm.io/gorm"
 )
 
 type BackupSchedule struct {
-	Base
+	gorm.Model
+
 	EveryDay       bool         `json:"every_day"`
 	EveryWeek      bool         `json:"every_week"`
 	EveryMonth     bool         `json:"every_month"`
@@ -22,6 +23,6 @@ type BackupSchedule struct {
 	Interval       string       `json:"interval"`
 	CronSyntax     string       `json:"cron_syntax"`
 	Choice         string       `json:"choice"`
-	RepositoryID   uuid.UUID    `json:"repository_id"`
+	RepositoryID   uint         `json:"repository_id"`
 	CronID         cron.EntryID `json:"cron_id"`
 }

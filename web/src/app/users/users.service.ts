@@ -27,18 +27,18 @@ export class UsersService {
     return this.http.get<User[]>(this._userUrl);
   }
 
-  getUser(id: string): Observable<User> {
+  getUser(id: number): Observable<User> {
     const url = `${this._userUrl}/${id}`;
 
     return this.http.get<User>(url);
   }
 
-  updateUser(id: string, user: User): Observable<any> {
+  updateUser(id: number, user: User): Observable<any> {
     const url = `${this._userUrl}/${id}`;
     return this.http.patch<User>(url, user, this.httpOptions);
   }
 
-  deleteUser(id: string): Observable<any> {
+  deleteUser(id: number): Observable<any> {
     const url = `${this._userUrl}/${id}`;
     return this.http.delete<User>(url);
   }

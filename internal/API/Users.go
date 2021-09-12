@@ -1,12 +1,12 @@
 package API
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"net/http"
 )
 
 func QueryUsers(c *gin.Context) {
@@ -21,13 +21,13 @@ func QueryUsers(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var users Models.User
 
@@ -65,20 +65,20 @@ func CreateUser(c *gin.Context) {
 
 func EditUser(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var editedUser Models.User
 
-    if err := c.BindJSON(&editedUser); err != nil {
-        log.Info().Msg("Bind Error User")
-        return
-    }
+	if err := c.BindJSON(&editedUser); err != nil {
+		log.Info().Msg("Bind Error User")
+		return
+	}
 
 	var users Models.User
 
@@ -99,13 +99,13 @@ func EditUser(c *gin.Context) {
 
 func RemoveUser(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var users Models.User
 

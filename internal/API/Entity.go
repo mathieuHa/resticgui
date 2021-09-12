@@ -2,25 +2,25 @@ package API
 
 import (
 	"errors"
+	"net/http"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"net/http"
-	"os"
 )
 
 // AddEntities This could be redundant with the update repository ?
 func AddEntities(c *gin.Context) {
 	id := c.Param("id") // id of the repository
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var repository Models.Repository
 
@@ -41,7 +41,6 @@ func AddEntities(c *gin.Context) {
 	}
 	err = db.Model(&repository).Association("Entities").Delete(&entities)
 
-
 	if err != nil {
 		log.Info().Err(err).Msg("Delete Error entities")
 		return
@@ -52,11 +51,10 @@ func AddEntities(c *gin.Context) {
 		return
 	}
 
-	for _, entity:= range entities {
+	for _, entity := range entities {
 		Models.Entity.ToString(entity)
 		//log.Debug().Msgf("entity")
 	}
-
 
 	checkEntitiesPath(entities)
 	repository.Entities = entities
@@ -68,8 +66,8 @@ func AddEntities(c *gin.Context) {
 	//}
 	//repository.Entities = entities
 	if repository.Entities == nil {
-	    log.Debug().Msg("Reset Entities to []")
-        repository.Entities = []Models.Entity{}
+		log.Debug().Msg("Reset Entities to []")
+		repository.Entities = []Models.Entity{}
 		db.Save(&repository)
 	}
 	db.Save(&repository)
@@ -80,7 +78,7 @@ func AddEntities(c *gin.Context) {
 }
 
 func checkFileExist(path string) bool {
-	log.Debug().Msgf("path = %v",path)
+	log.Debug().Msgf("path = %v", path)
 	if _, err := os.Stat(path); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			// file does not exist
@@ -103,13 +101,13 @@ func checkEntitiesPath(entities []Models.Entity) {
 
 func GetEntities(c *gin.Context) {
 	id := c.Param("id") // id of the repository
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var repository Models.Repository
 

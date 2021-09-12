@@ -2,13 +2,13 @@ package API
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"net/http"
-	"time"
 )
 
 func QueryBackupSchedule(c *gin.Context) {
@@ -23,13 +23,13 @@ func QueryBackupSchedule(c *gin.Context) {
 
 func GetBackupSchedule(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var schedule Models.BackupSchedule
 
@@ -47,13 +47,13 @@ func GetBackupSchedule(c *gin.Context) {
 func UpdateBackupSchedule(c *gin.Context) {
 	log.Debug().Msg("UpdateBackup")
 	id := c.Param("id") // id of the repository
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var repository Models.Repository
 

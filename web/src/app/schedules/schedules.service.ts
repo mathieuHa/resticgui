@@ -20,7 +20,7 @@ export class SchedulesService {
 
 
 
-  updateSchedule(id: string, repository: BackupSchedule): Observable<any> {
+  updateSchedule(id: number, repository: BackupSchedule): Observable<any> {
     const url = `${this._repositoryUrl}/${id}/schedules`;
     return this.http.put<BackupSchedule>(url, repository, this.httpOptions);
   }

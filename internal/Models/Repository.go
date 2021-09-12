@@ -1,12 +1,15 @@
 package Models
 
 import (
-	"github.com/rs/zerolog/log"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type Repository struct {
-	Base
+	gorm.Model
+
 	Name           string         `json:"name" gorm:"unique"`
 	Date           time.Time      `json:"date" gorm:"autoCreateTime"`
 	Snapshots      []Snapshot     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

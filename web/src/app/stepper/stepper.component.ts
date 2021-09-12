@@ -23,7 +23,7 @@ export class StepperComponent implements OnInit {
     ) { }
   repositoryForm!: FormGroup;
   @Input() repository?: Repository;
-  id = "";
+  id = 0;
 
   createFormModel() {
     this.repositoryForm = this._formBuilder.group({
@@ -37,15 +37,17 @@ export class StepperComponent implements OnInit {
         ]
       ],
       Entities: this._formBuilder.array([
-        this._formBuilder.group({
-          path: ['',
-            [
-              Validators.required,
-              Validators.minLength(4)
-            ]
-          ],
-          exists: [false],
-        })
+        // this._formBuilder.group({
+        //   path: ['',
+        //     [
+        //       Validators.required,
+        //       Validators.minLength(4)
+        //     ]
+        //   ],
+        //   id: ['',[]],
+        //   RepositoryID: ['',[]],
+        //   exists: [false],
+        // })
       ]),
       BackupSchedule: this._formBuilder.group({
         interval: ['', 
@@ -91,7 +93,7 @@ export class StepperComponent implements OnInit {
   getRepository(): void {
     const _id = this.route.snapshot.paramMap.get('id');
     if (_id !== null){
-      this.id = _id;
+      this.id = Number(_id);
       this.repositoriesService.getRepository(this.id).subscribe(
         response => {
           this.repository = new Repository().deserialize(response)
@@ -114,6 +116,8 @@ export class StepperComponent implements OnInit {
             []
           ],
           exists: [entity?.exists],
+          ID: [entity?.ID],
+          RepositoryID: [entity?.RepositoryID],
       })
     this.Entities.push(newEntity);
   }
@@ -169,7 +173,7 @@ export class StepperComponent implements OnInit {
 
   create(repository: Repository): void {
     if (repository) {
-      delete repository["id"]
+      delete repository["ID"]
       console.log(repository);
       this.repositoriesService.createRepository(repository)
         .subscribe (

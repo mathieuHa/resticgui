@@ -6,7 +6,7 @@ export interface Repository {
   Schedule: BackupSchedule;
   BackupSchedule: BackupSchedule;
   BackupPolicy: string;
-  id?: string;
+  ID?: number;
   name: string;
 }
 
@@ -19,7 +19,7 @@ export class Repository implements Repository, Serializable<Repository>{
   ) {  }
 
   deserialize(input: any) {
-    this.id = input.id;
+    this.ID = input.ID;
     this.name = input.name;
     this.Entities = input.Entities;
     this.Schedule = input.BackupSchedule;

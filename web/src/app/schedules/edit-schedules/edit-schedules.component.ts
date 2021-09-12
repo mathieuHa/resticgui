@@ -77,7 +77,7 @@ export class EditSchedulesComponent implements OnInit, AfterViewInit {
       } else if (this.selectedTab.selectedIndex === 3) {
         this.repository.Schedule.choice = "weekly"
       }
-      this.scheduleService.updateSchedule(this.repository.id!,this.repository.Schedule)
+      this.scheduleService.updateSchedule(this.repository.ID!,this.repository.Schedule)
         .subscribe (
           result => {
             console.log("res");

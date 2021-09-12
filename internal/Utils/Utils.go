@@ -2,17 +2,18 @@ package Utils
 
 import (
 	"fmt"
-	"github.com/google/uuid"
+	//"github.com/google/uuid"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
-func IsValidUUID(u string) bool {
-	_, err := uuid.Parse(u)
-	return err == nil
-}
+// func IsValidUUID(u string) bool {
+// 	_, err := uuid.Parse(u)
+// 	return err == nil
+// }
 
 func TestConfig() {
 	viper.SetConfigName("config")         // name of config file (without extension)

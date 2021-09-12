@@ -1,5 +1,5 @@
 export interface BackupSchedule {
-  id: string;
+  ID: number;
   every_day: boolean;
   every_week: boolean;
   every_month: boolean;
@@ -26,7 +26,7 @@ export class BackupSchedule implements BackupSchedule, Serializable<BackupSchedu
   ) {  }
 
   deserialize(input: any) {
-    this.id = input.id;
+    this.ID = input.ID;
     this.day = input.day;
     this.every_monday = input.every_monday;
     this.every_tuesday = input.every_tuesday;

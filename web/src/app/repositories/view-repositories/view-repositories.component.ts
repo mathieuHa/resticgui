@@ -14,7 +14,7 @@ export class ViewRepositoriesComponent implements OnInit {
 
   @Input() repository?: Repository;
   faUndoAlt = faUndoAlt;
-  private id: string|undefined  ;
+  private id: number|undefined  ;
   constructor(
     private route: ActivatedRoute,
     private repositoriesService: RepositoriesService,
@@ -29,7 +29,7 @@ export class ViewRepositoriesComponent implements OnInit {
   getRepository(): void {
     const _id = this.route.snapshot.paramMap.get('id');
     if (_id !== null){
-      this.id = _id;
+      this.id = Number(_id);
       this.repositoriesService.getRepository(this.id).subscribe(
         response => this.repository = new Repository().deserialize(response)
       );

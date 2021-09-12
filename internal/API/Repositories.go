@@ -1,12 +1,12 @@
 package API
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"net/http"
 )
 
 func QueryRepositories(c *gin.Context) {
@@ -21,19 +21,19 @@ func QueryRepositories(c *gin.Context) {
 
 func GetRepositories(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var repositories Models.Repository
 
 	db := Database.Connect()
 
-	result := db.Preload("Entities").Preload("BackupSchedule").Find(&repositories, "id = ?", id)
+	result := db.Preload("Entities").Find(&repositories, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
@@ -43,7 +43,7 @@ func GetRepositories(c *gin.Context) {
 
 func CreateRepository(c *gin.Context) {
 	var repository Models.Repository
-	
+
 	if err := c.BindJSON(&repository); err != nil {
 		log.Info().Msg("Bind Error Repository")
 		return
@@ -63,7 +63,7 @@ func CreateRepository(c *gin.Context) {
 			return
 		}
 	}
-	repository.BackupSchedule = Models.BackupSchedule{}
+	//repository.BackupSchedule = Models.BackupSchedule{}
 	result = db.Save(&repository)
 
 	c.IndentedJSON(http.StatusCreated, repository)
@@ -71,48 +71,64 @@ func CreateRepository(c *gin.Context) {
 
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msg("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var repository Models.Repository
 
 	db := Database.Connect()
 
-	result := db.Find(&repository, "id = ?", id)
+	// result := db.Preload("Entities").Find(&repository, id)
+	result := db.Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
-
-	Models.Repository.ToString(repository)
+	log.Error().Msgf("DEBUG BEFORE Error Repository %s", repository.Entities)
 
 	if err := c.BindJSON(&repository); err != nil {
-        log.Info().Msg("Bind Error Repository")
-        c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not binded"})
-        return
-    }
-    Models.Repository.ToString(repository)
+		log.Info().Msg("Bind Error Repository")
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not binded"})
+		return
+	}
+
+	log.Error().Msgf("DEBUG AFTER Error Repository %s", repository.Entities)
+
+	// Models.Repository.ToString(repository)
 	// check on invalid data to do
 	//errors.Is(result.Error, gorm.ErrInvalidData)
 
-	db.Save(&repository)
-	c.IndentedJSON(http.StatusOK, repository)
+	// db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&repository)
+	// Terrible Workaround to elimiated duplicated linked
+	// now they are orphaned
+	// db.Model(&repository).Association("Entities").Replace(repository.Entities)
+	// db.Omit(clause.Associations).Save(repository)
+	db.Save(repository)
+
+	var NewRepository Models.Repository
+
+	result2 := db.Preload("Entities").Find(&NewRepository, id)
+	if result2.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, NewRepository)
 }
 
 func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
-	if !Utils.IsValidUUID(id) {
-		log.Info().Msgf("UUID is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	} else {
-		log.Debug().Msg("UUID is valid")
-	}
+	// if !Utils.IsValidUUID(id) {
+	// 	log.Info().Msgf("UUID is not valid")
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+	// 	return
+	// } else {
+	// 	log.Debug().Msg("UUID is valid")
+	// }
 
 	var repository Models.Repository
 

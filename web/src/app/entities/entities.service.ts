@@ -19,7 +19,7 @@ export class EntitiesService {
   ) { }
 
 
-  updateEntities(id: string, entities: Entity[]): Observable<any> {
+  updateEntities(id: number, entities: Entity[]): Observable<any> {
     const url = `${this._repositoryUrl}/${id}/entities`;
     return this.http.put<Repository>(url, entities, this.httpOptions);
   }
