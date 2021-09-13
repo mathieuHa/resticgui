@@ -1,0 +1,19 @@
+version: "3"
+services:
+  resticgui:
+    build:
+      context: .
+      cache_from: 
+        - ${CI_REGISTRY_IMAGE}:${TAG}
+    image: ${CI_REGISTRY_IMAGE}:${TAG}
+    hostname: backup_${TAG}
+    networks:
+      - innet
+    ports:
+      - 8000:8080
+    volumes:
+      - /var/log/backup:/var/log/backup
+    restart: unless-stopped
+
+networks:
+  innet:
