@@ -1,6 +1,6 @@
 .rule_build_deploy:
   rules:  
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "production" || $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "41-cicd-docker-to-vm"
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "production" || $CI_COMMIT_BRANCH == "dev"
 
 stages:
   - test
