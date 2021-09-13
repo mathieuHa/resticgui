@@ -104,7 +104,7 @@ buildweb: installweb
 
 builddocker:
 ifeq ($(CI), true)
-	docker pull ${CI_REGISTRY_IMAGE}:${TAG}
+	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
 	docker build -t $(CI_REGISTRY_IMAGE):$(TAG) .
 

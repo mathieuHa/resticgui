@@ -105,8 +105,8 @@ builddocker:
   before_script:
     - apk add make
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - export CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
-    - export TAG=latest
+    - export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE}
+    - export TAG=${TAG}
     - export CI=true
 
   script:
