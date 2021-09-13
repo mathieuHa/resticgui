@@ -148,7 +148,7 @@ deploy:docker:
     - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH}/${TAG} && export TAG=${tag} && git fetch https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@gitlab.com/${CI_PROJECT_PATH} && git pull -4 https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@gitlab.com/${CI_PROJECT_PATH} ${TAG}"
 
     # Copy env files, login to gitlab registry and deploy
-    - scp -o StrictHostKeyChecking=no ${ENV} ${CI_USER}@${CI_DEPLOY_IP}:${CI_PROJECT_PATH}/${TAG}/.env
+    # - scp -o StrictHostKeyChecking=no ${ENV} ${CI_USER}@${CI_DEPLOY_IP}:${CI_PROJECT_PATH}/${TAG}/.env
     - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY"
     - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH}/${TAG} && export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE} && export TAG=${tag} && docker-compose config && docker-compose pull && docker-compose up -d"
 
