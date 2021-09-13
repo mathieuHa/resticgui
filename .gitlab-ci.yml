@@ -10,7 +10,7 @@ stages:
 include:
   - template: Security/SAST.gitlab-ci.yml
 
-testgo:
+test:go:
   variables:
   # Please edit to your GitLab project
     REPO_NAME: gitlab.com/resticgui/resticgui
@@ -34,7 +34,16 @@ testgo:
     #- go vet $(go list ./... | grep -v /vendor/)
     #- go test -race $(go list ./... | grep -v /vendor/)
 
-buildgo:
+
+testweb:
+  image: trion/ng-cli-karma
+  variables:
+    FF_USE_FASTZIP: "true"
+  stage: test
+  script:
+    - make testweb
+
+build:go:
   variables:
   # Please edit to your GitLab project
     REPO_NAME: gitlab.com/resticgui/resticgui
@@ -60,7 +69,7 @@ buildgo:
     - .rule_build_deploy
 
 
-buildweb:
+build:web:
   image: trion/ng-cli
   variables:
     FF_USE_FASTZIP: "true"
@@ -73,15 +82,8 @@ buildweb:
   extends:
     - .rule_build_deploy
 
-testweb:
-  image: trion/ng-cli-karma
-  variables:
-    FF_USE_FASTZIP: "true"
-  stage: test
-  script:
-    - make testweb
 
-builddocker:
+build:docker:
   variables:
     # using "docker" as the host is only possible if you alias the service below
     DOCKER_HOST: tcp://docker:2375 
@@ -115,11 +117,11 @@ builddocker:
   extends:
     - .rule_build_deploy
 
-deploydocker:
+deploy:docker:
   stage: deploy
   image: ubuntu:20.04
   environment: $CI_COMMIT_BRANCH
-  needs: ["builddocker"]
+  needs: ["build:docker"]
   before_script:
     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
