@@ -42,10 +42,16 @@ LABEL "hanotaux.mathieu.vendor"="MHX"
 LABEL version="1.0"
 LABEL description="This image contain restic and resticgui webserver"
 
+EXPOSE 8080
+
 WORKDIR /opt
 
-#RUN apt-get update && apt-get install -y \ 
-#    && rm -rf /var/lib/apt/lists/*
+ENV GIN_MODE=release
+
+RUN apt-get update && apt-get install -y \ 
+    net-tools \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY cmd/resticgui .
 
@@ -53,5 +59,4 @@ COPY --from=BuilderRestic /restic /usr/bin/restic
 COPY --from=BuilderWeb /front front
 COPY --from=BuilderResticGui /resticgui resticgui
 
-CMD ["sleep", "infinity"]
-# CMD ["/opt/resticgui"]
+CMD ["/opt/resticgui"]

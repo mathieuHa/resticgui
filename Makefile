@@ -3,6 +3,7 @@ DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
 RESTICVERSION=0.12.0
 RESTICSRCURL=https://github.com/restic/restic/archive/refs/tags/v${RESTICVERSION}.tar.gz
+TAG=dev
 
 # OS Detection
 ifeq ($(OS),Windows_NT)
@@ -94,11 +95,16 @@ buildgo: createdir
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
 	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
 
+
+
 buildweb: installweb
 	cd $(BUILDDIR)/web && ng build --output-path ${DISTDIR}/front/
 
 builddocker:
-	docker build -t resticgui .
+	docker build -t resticgui:${TAG} .
+
+rundocker: builddocker
+	docker run --rm -d --name resticgui -p "8000:8080" resticgui:${TAG}
 
 run:
 	cd ${DISTDIR}/ && ./resticgui${EXT}
