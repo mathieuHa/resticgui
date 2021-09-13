@@ -59,3 +59,11 @@ sudo npm install --save-dev @angular-devkit/build-angular
 ```
 ng serve --open
 ```
+
+#### Start container
+
+```
+make rundocker
+```
+
+> Open browser on http://localhost:8000 to see it in action

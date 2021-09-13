@@ -2,16 +2,19 @@ package main
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/API"
-	"gitlab.com/resticgui/resticgui/internal/Config"
-	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Logs"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
+	"gitlab.com/resticgui/resticgui/internal/API"
+	"gitlab.com/resticgui/resticgui/internal/Config"
+	"gitlab.com/resticgui/resticgui/internal/Database"
+	"gitlab.com/resticgui/resticgui/internal/Logs"
 )
 
 var (
@@ -22,8 +25,6 @@ func main() {
 	Config.InitConfig()
 	Logs.Initlogs()
 
-
-
 	log.Info().Msg("Start main")
 
 	resticInit()
@@ -32,9 +33,13 @@ func main() {
 	router := API.SetupRouter()
 
 	// setting server information
+	server_ip := viper.GetString("server.ip")
+	server_port := viper.GetInt("server.port")
+	server_addr := fmt.Sprintf("%s:%d", server_ip, server_port)
+
 	server = &http.Server{
 		Handler:      router,
-		Addr:         "127.0.0.1:8080",
+		Addr:         server_addr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -46,11 +51,9 @@ func main() {
 		if err := server.ListenAndServe(); err != nil {
 			log.Err(err).Msg("Error running server")
 		} else {
-			log.Info().Msg("Start Server listen at 127.0.0.1:8080")
+			log.Info().Msgf("Start Server listen at %v", server_addr)
 		}
 	}()
-
-
 
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
