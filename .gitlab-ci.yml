@@ -1,3 +1,7 @@
+.rule_build_deploy:
+  rules:  
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "production" || $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "41-cicd-docker-to-vm"
+
 stages:
   - test
   - build
@@ -29,9 +33,6 @@ testgo:
     #- go fmt $(go list ./... | grep -v /vendor/)
     #- go vet $(go list ./... | grep -v /vendor/)
     #- go test -race $(go list ./... | grep -v /vendor/)
-  tags:
-    - docker
-    - mhx-srv
 
 buildgo:
   variables:
@@ -55,10 +56,8 @@ buildgo:
   artifacts:
     paths:
       - dist/
-  tags:
-    - docker
-    - mhx-srv
-
+  extends:
+    - .rule_build_deploy
 
 
 buildweb:
@@ -71,6 +70,8 @@ buildweb:
   tags:
     - docker
     - mhx-srv
+  extends:
+    - .rule_build_deploy
 
 testweb:
   image: trion/ng-cli-karma
@@ -79,9 +80,6 @@ testweb:
   stage: test
   script:
     - make testweb
-  tags:
-    - docker
-    - mhx-srv
 
 builddocker:
   variables:
@@ -114,6 +112,8 @@ builddocker:
   
   after_script:
     - docker logout
+  extends:
+    - .rule_build_deploy
 
 deploy:
   stage: deploy
@@ -146,6 +146,6 @@ deploy:
     - scp -o StrictHostKeyChecking=no ${ENV} ${CI_USER}@${CI_DEPLOY_IP}:${CI_PROJECT_PATH}/${TAG}/.env
     - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY"
     - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH}/${TAG} && export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE} && export TAG=${tag} && docker-compose config && docker-compose pull && docker-compose up -d"
-  rules:  
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "production" || $CI_COMMIT_BRANCH == "dev"
 
+  extends:
+    - .rule_build_deploy
