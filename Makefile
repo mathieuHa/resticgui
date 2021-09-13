@@ -4,6 +4,7 @@ BUILDDIR=${CURDIR}/build
 RESTICVERSION=0.12.0
 RESTICSRCURL=https://github.com/restic/restic/archive/refs/tags/v${RESTICVERSION}.tar.gz
 TAG=dev
+CI_REGISTRY_IMAGE=restigui
 
 # OS Detection
 ifeq ($(OS),Windows_NT)
@@ -101,10 +102,10 @@ buildweb: installweb
 	cd $(BUILDDIR)/web && ng build --output-path ${DISTDIR}/front/
 
 builddocker:
-	docker build -t resticgui:${TAG} .
+	docker build -t ${CI_REGISTRY_IMAGE}:${TAG} .
 
 rundocker: builddocker
-	docker run --rm -d --name resticgui -p "8000:8080" resticgui:${TAG}
+	docker run --rm -d --name resticgui -p "8000:8080" ${CI_REGISTRY_IMAGE}:${TAG}
 
 run:
 	cd ${DISTDIR}/ && ./resticgui${EXT}
