@@ -115,10 +115,11 @@ builddocker:
   extends:
     - .rule_build_deploy
 
-deploy:
+deploydocker:
   stage: deploy
   image: ubuntu:20.04
   environment: $CI_COMMIT_BRANCH
+  needs: ["builddocker"]
   before_script:
     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
