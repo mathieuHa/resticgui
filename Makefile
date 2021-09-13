@@ -97,6 +97,9 @@ buildgo: createdir
 buildweb: installweb
 	cd $(BUILDDIR)/web && ng build --output-path ${DISTDIR}/front/
 
+builddocker:
+	docker build -t resticgui .
+
 run:
 	cd ${DISTDIR}/ && ./resticgui${EXT}
 
