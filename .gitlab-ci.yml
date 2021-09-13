@@ -35,7 +35,7 @@ test:go:
     #- go test -race $(go list ./... | grep -v /vendor/)
 
 
-testweb:
+test:web:
   image: trion/ng-cli-karma
   variables:
     FF_USE_FASTZIP: "true"
