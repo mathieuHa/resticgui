@@ -111,7 +111,7 @@ builddocker:
 
   script:
     - make builddocker
-    - docker push
+    - make pushdocker
   
   after_script:
     - docker logout

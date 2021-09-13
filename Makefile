@@ -108,6 +108,11 @@ ifeq ($(CI), true)
 endif
 	docker build -t $(CI_REGISTRY_IMAGE):$(TAG) .
 
+pushdocker: builddocker
+ifeq ($(CI), true)
+	docker push $(CI_REGISTRY_IMAGE):$(TAG)
+endif
+
 rundocker: builddocker
 	docker run --rm -d --name resticgui -p "8000:8080" $(CI_REGISTRY_IMAGE):$(TAG)
 
