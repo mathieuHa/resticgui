@@ -79,7 +79,6 @@ testweb:
   stage: test
   script:
     - make testweb
-    - docker push
   tags:
     - docker
     - mhx-srv
@@ -112,6 +111,7 @@ builddocker:
 
   script:
     - make builddocker
+    - docker push
   
   after_script:
     - docker logout
