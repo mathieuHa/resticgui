@@ -60,6 +60,7 @@ build:go:
     - cd $GOPATH/src/$REPO_NAME
   image: golang:1.16.6
   stage: build
+  needs: ["test:go"]
   script:
     - make buildgo
   artifacts:
@@ -74,6 +75,7 @@ build:web:
   variables:
     FF_USE_FASTZIP: "true"
   stage: build
+  needs: ["test:web"]
   script:
     - make buildweb
   tags:
