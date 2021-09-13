@@ -79,6 +79,7 @@ testweb:
   stage: test
   script:
     - make testweb
+    - docker push
   tags:
     - docker
     - mhx-srv
