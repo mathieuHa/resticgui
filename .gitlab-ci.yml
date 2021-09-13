@@ -93,7 +93,6 @@ builddocker:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
     TAG: ${CI_COMMIT_BRANCH}
-    CI_REGISTRY_IMAGE: ${CI_REGISTRY_IMAGE}
 
   # Use the official docker image.
   image: docker:19.03.12
