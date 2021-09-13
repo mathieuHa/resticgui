@@ -9,8 +9,6 @@ stages:
 
 include:
   - template: Security/SAST.gitlab-ci.yml
-  extends:
-    - .rule_build_deploy
 
 test:go:
   variables:
