@@ -9,21 +9,14 @@ stages:
 
 test:go:
   variables:
-  # Please edit to your GitLab project
     REPO_NAME: gitlab.com/resticgui/resticgui
 
-  # The problem is that to be able to use go get, one needs to put
-  # the repository in the $GOPATH. So for example if your gitlab domain
-  # is gitlab.com, and that your repository is namespace/project, and
-  # the default GOPATH being /go, then you'd need to have your
-  # repository in /go/src/gitlab.com/namespace/project
-  # Thus, making a symbolic link corrects this.
   before_script:
     - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME
 
-  image: golang:1.16.6
+  image: golang:1.17.6
   stage: test
   script:
     - make testgo
@@ -42,20 +35,13 @@ test:web:
 
 build:go:
   variables:
-  # Please edit to your GitLab project
     REPO_NAME: gitlab.com/resticgui/resticgui
-
-  # The problem is that to be able to use go get, one needs to put
-  # the repository in the $GOPATH. So for example if your gitlab domain
-  # is gitlab.com, and that your repository is namespace/project, and
-  # the default GOPATH being /go, then you'd need to have your
-  # repository in /go/src/gitlab.com/namespace/project
-  # Thus, making a symbolic link corrects this.
+  
   before_script:
     - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME
-  image: golang:1.16.6
+  image: golang:1.17.6
   stage: build
   needs: ["test:go"]
   script:
@@ -83,14 +69,13 @@ build:web:
 
 
 build:docker:
-  # Use the official docker image.
   image: docker:20.10.12
   stage: build
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
     DOCKER_DRIVER: overlay2
     DOCKER_BUILDKIT: 1
-
+    TAG: ${CI_COMMIT_SHORT_SHA}
   services:
     - docker:20.10.12-dind
 
@@ -110,38 +95,14 @@ build:docker:
   extends:
     - .rule_build_deploy
 
-deploy:docker:
+deploy:nomad:
   stage: deploy
-  image: ubuntu:20.04
-  environment: $CI_COMMIT_BRANCH
-  needs: ["build:docker"]
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "$CI_SSH_PRIVATE_KEY" | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan ${CI_DEPLOY_IP} >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - tag="$CI_COMMIT_BRANCH"
-    - export TAG=${tag}
-    - export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE}
-    - export CI_PROJECT_PATH=${CI_PROJECT_PATH}
-
+  image: hendrikmaus/nomad-cli:1.2.3
+  variables:
+    TAG: ${CI_COMMIT_SHORT_SHA}
   script:
-    # create the directory based on the project path
-    - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "mkdir -p ${CI_PROJECT_PATH}"
-    
-    # clone and/or pull the project in the branch directory
-    - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH} && git clone -4 https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@gitlab.com/${CI_PROJECT_PATH} ${TAG} || true"
-    - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH}/${TAG} && git checkout ${TAG} -f"
-    - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH}/${TAG} && export TAG=${tag} && git fetch https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@gitlab.com/${CI_PROJECT_PATH} && git pull -4 https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@gitlab.com/${CI_PROJECT_PATH} ${TAG}"
-
-    # Copy env files, login to gitlab registry and deploy
-    # - scp -o StrictHostKeyChecking=no ${ENV} ${CI_USER}@${CI_DEPLOY_IP}:${CI_PROJECT_PATH}/${TAG}/.env
-    - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY"
-    - ssh -o StrictHostKeyChecking=no ${CI_USER}@${CI_DEPLOY_IP} "cd ${CI_PROJECT_PATH}/${TAG} && export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE} && export TAG=${tag} && docker-compose config && docker-compose pull && docker-compose up -d"
-
+    - nomad validate -var ci_registry_image=${CI_REGISTRY_IMAGE}:{TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} -var ci_commit_sha=${CI_COMMIT_SHORT_SHA} job.nomad
+    - nomad plan -var ci_registry_image=${CI_REGISTRY_IMAGE}:{TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} -var ci_commit_sha=${CI_COMMIT_SHORT_SHA} job.nomad || if [ $? -eq 255 ]; then exit 255; else echo "success"; fi
+    - nomad run -var ci_registry_image=${CI_REGISTRY_IMAGE}:{TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} -var ci_commit_sha=${CI_COMMIT_SHORT_SHA} job.nomad
   extends:
     - .rule_build_deploy
