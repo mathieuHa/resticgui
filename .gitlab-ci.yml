@@ -101,8 +101,8 @@ deploy:nomad:
   variables:
     TAG: ${CI_COMMIT_SHORT_SHA}
   script:
-    - nomad validate -var ci_registry_image=${CI_REGISTRY_IMAGE}:{TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} job.nomad
-    - nomad plan -var ci_registry_image=${CI_REGISTRY_IMAGE}:{TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} job.nomad || if [ $? -eq 255 ]; then exit 255; else echo "success"; fi
-    - nomad run -var ci_registry_image=${CI_REGISTRY_IMAGE}:{TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} job.nomad
+    - nomad validate -var ci_registry_image=${CI_REGISTRY_IMAGE}:${TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} job.nomad
+    - nomad plan -var ci_registry_image=${CI_REGISTRY_IMAGE}:${TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} job.nomad || if [ $? -eq 255 ]; then exit 255; else echo "success"; fi
+    - nomad run -var ci_registry_image=${CI_REGISTRY_IMAGE}:${TAG} -var ci_deploy_token=${CI_DEPLOY_TOKEN} job.nomad
   extends:
     - .rule_build_deploy
