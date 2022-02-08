@@ -1,8 +1,8 @@
 # Variables
 DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
-RESTICVERSION=0.12.0
-RESTICSRCURL=https://github.com/restic/restic/archive/refs/tags/v${RESTICVERSION}.tar.gz
+RESTICVERSION=0.12.1
+RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
 TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
 CI?=false
@@ -32,7 +32,7 @@ else
 	DLRESTIC=curl \
 			--request GET -sL \
 			--url ${RESTICSRCURL} \
-			--output ${BUILDDIR}/restic.tar.gz
+			--output ${BUILDDIR}/restic.bz2
 	MKDIR= mkdir -p
 	ifeq ($(UNAME_S),Linux)
 		os="linux"
@@ -87,16 +87,15 @@ endif
 
 buildrestic: createdir
 	$(DLRESTIC)
-	tar -C ${BUILDDIR} -xzvf ${BUILDDIR}/restic.tar.gz
-	cd ${BUILDDIR}/restic-${RESTICVERSION} && go run build.go --goos ${os} --goarch ${arch}
-	cp "${BUILDDIR}/restic-${RESTICVERSION}/restic${EXT}" ${DISTDIR}
+	bzip2 -d ${BUILDDIR}/restic.bz2
+	chmod "${BUILDDIR}/restic" 
+	cp "${BUILDDIR}/restic" ${DISTDIR}
 
 build: buildgo buildweb buildrestic
 
 buildgo: createdir
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
 	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
-
 
 
 buildweb: installweb

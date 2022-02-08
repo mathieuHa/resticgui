@@ -8,23 +8,27 @@ RUN npm ci && npm install -g @angular/cli
 
 RUN ng build --output-path /front
 
-FROM golang:1.17.1 as BuilderRestic
+FROM ubuntu:focal-20220105 as BuilderRestic
 
 ARG RESTICVERSION=0.12.1
-ARG RESTICSRCURL=https://github.com/restic/restic/archive/refs/tags/v${RESTICVERSION}.tar.gz
+ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
 ARG BUILDDIR=./build
+
+RUN apt-get update && apt-get install -y \ 
+    curl \
+    openssl
 
 RUN mkdir -p ${BUILDDIR}
 RUN curl \
     --request GET -sL \
-    --url ${RESTICSRCURL} \
-    --output ${BUILDDIR}/restic.tar.gz
+    --url ${RESTICURL} \
+    --output ${BUILDDIR}/restic.bz2
 
-RUN tar -C ${BUILDDIR} -xzvf ${BUILDDIR}/restic.tar.gz
-RUN	cd ${BUILDDIR}/restic-${RESTICVERSION} && go run build.go --goos linux --goarch amd64
-RUN	cp "${BUILDDIR}/restic-${RESTICVERSION}/restic" /restic
+RUN bzip2 -d ${BUILDDIR}/restic.bz2
 
-FROM golang:1.17.1 as BuilderResticGui
+RUN	cp "${BUILDDIR}/restic" /restic
+
+FROM golang:1.17.6 as BuilderResticGui
 
 ARG BUILDDIR=./build
 
@@ -36,7 +40,7 @@ WORKDIR ${BUILDDIR}
 
 RUN cd cmd/resticgui && go build -o /resticgui 
 
-FROM ubuntu:20.04
+FROM ubuntu:focal-20220105
 
 LABEL "hanotaux.mathieu.vendor"="MHX"
 LABEL version="1.0"
