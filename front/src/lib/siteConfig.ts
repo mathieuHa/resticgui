@@ -4,4 +4,4 @@ export const REPO_URL = 'https://gitlab.com/' + GH_USER_REPO;
 export const SITE_TITLE = 'ResticGui';
 export const SITE_DESCRIPTION = "swyx's default SvelteKit + Tailwind starter";
 export const DEFAULT_OG_IMAGE = '/resticLogo.png';
-export const BACKEND_URL = 'https://resticgui.hanotaux.local/api/v1';
+export const BACKEND_URL = 'http://localhost:8080/api/v1';

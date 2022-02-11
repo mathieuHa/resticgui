@@ -1,6 +1,7 @@
 # Variables
 DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
+WEBDIR=front
 RESTICVERSION=0.12.1
 RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
 TAG?=dev
@@ -54,8 +55,7 @@ endif
 
 # Recipes
 
-test: testgo testweb
-
+test: testgo
 
 printvars:
 	 echo DISTDIR = ${DISTDIR}
@@ -67,12 +67,11 @@ all: build test
 install: installweb buildrestic
 
 installwebdev:
-	cd web && npm install
+	cd $(WEBDIR) && npm install
 
 installweb: createdir
-	#$(RM) web/node_modules
-	cp -r web $(BUILDDIR)/
-	npm ci --prefix $(BUILDDIR)/web
+	cp -r $(WEBDIR) $(BUILDDIR)/
+	npm ci --prefix $(BUILDDIR)/$(WEBDIR)
 
 installgo:
 	choco install go
@@ -99,7 +98,8 @@ buildgo: createdir
 
 
 buildweb: installweb
-	cd $(BUILDDIR)/web && ng build --output-path ${DISTDIR}/front/
+	npm run build --prefix $(BUILDDIR)/$(WEBDIR) && \
+    cp -r $(BUILDDIR)/$(WEBDIR)/build $(DISTDIR)/
 
 builddocker:
 ifeq ($(CI), true)
@@ -118,8 +118,12 @@ rundocker: builddocker
 run:
 	cd ${DISTDIR}/ && ./resticgui${EXT}
 
-testweb: installweb
-	cd $(BUILDDIR)/web && ng test --progress false --watch false
+rundevweb: installwebdev
+	cd $(WEBDIR) && npm run dev
+    
+
+# testweb: installweb
+# 	cd $(BUILDDIR)/web && ng test --progress false --watch false
 
 testgo:
 	cd cmd/resticgui && go test ./...
@@ -127,3 +131,6 @@ testgo:
 clean:
 	$(RM) ${DISTDIR}
 	$(RM) $(BUILDDIR)
+	$(RM) $(WEBDIR)/node_modules
+	$(RM) $(WEBDIR)/build
+	$(RM) $(WEBDIR)/.svelte-kit
