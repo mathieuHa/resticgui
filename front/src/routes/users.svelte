@@ -5,46 +5,11 @@
   export async function load({ url, params, fetch }) {
     let res = null;
     try {
-      return { props: {
-        users: [
-          {
-            "ID": 1,
-            "CreatedAt": "2022-02-11T07:51:57.261657548Z",
-            "firstname": "caca",
-            "lastname": "caca",
-            "email": "caca@caca.fr",
-          },{
-            "ID": 1,
-            "CreatedAt": "2022-02-11T07:51:57.261657548Z",
-            "firstname": "caca2",
-            "lastname": "caca",
-            "email": "caca@caca.fr",
-          },{
-            "ID": 1,
-            "CreatedAt": "2022-02-11T07:51:57.261657548Z",
-            "firstname": "caca3",
-            "lastname": "caca",
-            "email": "caca@caca.fr",
-          },{
-            "ID": 1,
-            "CreatedAt": "2022-02-11T07:51:57.261657548Z",
-            "firstname": "caca4",
-            "lastname": "caca",
-            "email": "caca@caca.fr",
-          },{
-            "ID": 1,
-            "CreatedAt": "2022-02-11T07:51:57.261657548Z",
-            "firstname": "caca5",
-            "lastname": "caca",
-            "email": "caca@caca.fr",
-          }
-        ],
-      } };
-      // res = await fetch(`${BACKEND_URL}/users`);
-      // if (res.status > 400) {
-      //   return { status: res.status, error: await res.text() };
-      // }
-      // return { props: { users: await res.json() } };
+      res = await fetch(`${BACKEND_URL}/users`);
+      if (res.status > 400) {
+        return { status: res.status, error: await res.text() };
+      }
+      return { props: { users: await res.json() } };
     } catch (err) {
       console.log(err);
       return { status: 500, error: new Error(`error fetching user: ${res}`) };
@@ -89,7 +54,7 @@
     console.log(values);
     try {
       await fetch(`${BACKEND_URL}/users/${userSelected.ID}`, {
-        method: 'POST',
+        method: 'PATCH',
         data: JSON.stringify(values),
       });
       await onRefresh()
