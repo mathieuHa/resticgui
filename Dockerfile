@@ -1,12 +1,12 @@
 FROM node:14.17.6 as BuilderWeb
 
-COPY web/ /web
+COPY front/ /front
 
-WORKDIR /web
+WORKDIR /front
 
-RUN npm ci && npm install -g @angular/cli
+RUN npm ci
 
-RUN ng build --output-path /front
+RUN npm run build
 
 FROM ubuntu:focal-20220105 as BuilderRestic
 
@@ -14,7 +14,7 @@ ARG RESTICVERSION=0.12.1
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
 ARG BUILDDIR=./build
 
-RUN apt-get update && apt-get install -y \ 
+RUN apt-get update && apt-get install -y \
     curl \
     openssl
 
@@ -38,7 +38,7 @@ COPY . ${BUILDDIR}
 
 WORKDIR ${BUILDDIR}
 
-RUN cd cmd/resticgui && go build -o /resticgui 
+RUN cd cmd/resticgui && go build -o /resticgui
 
 FROM ubuntu:focal-20220105
 
@@ -52,7 +52,7 @@ WORKDIR /opt
 
 ENV GIN_MODE=release
 
-RUN apt-get update && apt-get install -y \ 
+RUN apt-get update && apt-get install -y \
     net-tools \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
 COPY cmd/resticgui .
 
 COPY --from=BuilderRestic /restic /usr/bin/restic
-COPY --from=BuilderWeb /front front
+COPY --from=BuilderWeb /build front
 COPY --from=BuilderResticGui /resticgui resticgui
 
 CMD ["/opt/resticgui"]

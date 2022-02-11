@@ -1,0 +1,47 @@
+<script context="module">
+	import { REPO_URL, SITE_TITLE } from '$lib/siteConfig';
+</script>
+
+<script>
+	import '../tailwind.css';
+	import Nav from '../components/Nav.svelte';
+</script>
+
+<svelte:head>
+	<meta name="theme-color" content="#facc15" media="(prefers-color-scheme: light)" />
+	<meta name="theme-color" content="#3730a3" media="(prefers-color-scheme: dark)" />
+</svelte:head>
+
+<div class="flex flex-col justify-center bg-gray-50 px-4 dark:bg-gray-900 sm:px-8">
+	<Nav />
+</div>
+<main class="px-8 mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 dark:border-gray-700 text-black dark:text-white">
+	<slot />
+	<div id="modals"></div>
+</main>
+
+
+<footer class="mx-auto mb-8 flex w-full max-w-2xl flex-col items-start justify-center">
+	<hr class="border-1 mb-8 w-full border-gray-200 dark:border-gray-800" />
+	<div class="grid w-full max-w-2xl grid-cols-1 gap-4 px-4 pb-16 sm:grid-cols-2 sm:px-8">
+		<div class="flex flex-col space-y-4">
+			<a class="text-gray-500 transition hover:text-gray-300" href="/">Home</a>
+			<a class="text-gray-500 transition hover:text-gray-300" href="/about">About</a>
+		</div>
+		<div class="flex flex-col space-y-4">
+			<a
+				class="text-gray-500 transition hover:text-gray-300"
+				target="_blank"
+				rel="noopener noreferrer"
+				href={REPO_URL}
+			>
+				GitLab
+			</a>
+		</div>
+	</div>
+	<p class="prose px-4 dark:prose-invert sm:px-8">
+		This blog is based on the
+		<a href="https://swyxkit.netlify.app/">swyxkit</a>
+		template.
+	</p>
+</footer>
