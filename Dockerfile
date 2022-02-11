@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
 COPY cmd/resticgui .
 
 COPY --from=BuilderRestic /restic /usr/bin/restic
-COPY --from=BuilderWeb /build front
+COPY --from=BuilderWeb /front/build front
 COPY --from=BuilderResticGui /resticgui resticgui
 
 CMD ["/opt/resticgui"]
