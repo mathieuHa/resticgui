@@ -6,64 +6,85 @@ This resticGUI version works with restic version 0.12.0 or more
 
 # Documentation
 
-## dev environment
+### Dev tools
 
-### Backend
-
-#### Install go
-
-```sudo apt-get install golang-go```
-
-```choco install go mingw make```
-
-
-#### Compilation du projet
-
-```
-go build
-...
-```
-
-#### Installation of powershell 7.1
-
-Run msi from https://github.com/PowerShell/PowerShell/releases/tag/v7.1.3
-
-
-#### Logging documentation
-
-https://github.com/rs/zerolog
-
-#### Configuration documentation
-
-https://github.com/spf13/viper
-
-#### launch server
+#### Launch Backend server
 
 ```
 make run
 ```
-
-### Frontend dev
-
-Install node 14 and angular CLI
-
-```
-curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
-sudo apt -y install nodejs
-sudo npm install -g @angular/cli
-sudo npm install --save-dev @angular-devkit/build-angular
-```
+> Listen on http://localhost:8080
 
 #### Start dev web server 
 
 ```
-ng serve --open
+make rundevweb
 ```
+> Listen on http://localhost:3000
 
 #### Start container
 
 ```
 make rundocker
 ```
+> Listen on http://localhost:8000
 
-> Open browser on http://localhost:8000 to see it in action
+## Dependancies
+
+### Frontend
+
+#### Install node 14
+
+```
+curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+sudo apt -y install nodejs
+```
+
+### Backend
+
+#### Install go
+
+__Linux__
+```bash
+sudo apt-get install golang-go
+```
+
+__Windows__
+```bash
+choco install go mingw make
+```
+
+
+### Makefile help
+
+```
+all                            Run Build and launch Tests
+build                          Build go backend, Web and restic binary
+builddocker                    Build the docker image (needs auth for gitlab registry)
+buildgo                        Build the go backend in dist dir
+buildrestic                    Download restic binary in build dir
+buildweb                       Build the frontend in dist dir
+clean                          Clean build and temporary directory
+createdir                      Create the build and package dist dir if not present
+install                        Install the web dependancies and download restic binary
+installgo                      Install go on Windows using choco
+installweb                     Install the web dependancies in the build dir
+installwebdev                  Install the web dependancies for Development
+printvars                      Print vars for debug
+pushdocker                     Push the built docker image to gitlab registry
+run                            Run resticgui binary listening on localhost:8080
+rundevweb                      Run dev web listening on localhost:3000
+rundocker                      Run the docker container locally
+test                           Launch Tests for the go backend
+testgo                         Run the go Tests
+```
+
+### Library Doc
+
+#### GO Logging documentation
+
+https://github.com/rs/zerolog
+
+#### Configuration documentation
+
+https://github.com/spf13/viper

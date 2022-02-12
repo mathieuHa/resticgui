@@ -1,6 +1,7 @@
 # Variables
 DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
+WEBDIR=front
 RESTICVERSION=0.12.1
 RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
 TAG?=dev
@@ -54,30 +55,28 @@ endif
 
 # Recipes
 
-test: testgo testweb
+test: testgo ## Launch Tests for the go backend
 
-
-printvars:
+printvars: ## Print vars for debug
 	 echo DISTDIR = ${DISTDIR}
 	 echo os = ${os}
 	 echo arch = ${arch}
 
-all: build test
+all: build test  ## Run Build and launch Tests
 
-install: installweb buildrestic
+install: installweb buildrestic ## Install the web dependancies and download restic binary
 
-installwebdev:
-	cd web && npm install
+installwebdev: ## Install the web dependancies for Development
+	cd $(WEBDIR) && npm install
 
-installweb: createdir
-	#$(RM) web/node_modules
-	cp -r web $(BUILDDIR)/
-	npm ci --prefix $(BUILDDIR)/web
+installweb: createdir ## Install the web dependancies in the build dir
+	cp -r $(WEBDIR) $(BUILDDIR)/
+	npm ci --prefix $(BUILDDIR)/$(WEBDIR)
 
-installgo:
+installgo: ## Install go on Windows using choco
 	choco install go
 
-createdir:
+createdir: ## Create the build and package dist dir if not present
 ifeq ("$(wildcard $(DISTDIR))","")
 	$(MKDIR) "$(DISTDIR)"
 endif
@@ -85,45 +84,58 @@ ifeq ("$(wildcard $(BUILDDIR))","")
 	$(MKDIR) "$(BUILDDIR)"
 endif
 
-buildrestic: createdir
+buildrestic: createdir ## Download restic binary in build dir
 	$(DLRESTIC)
 	bzip2 -d ${BUILDDIR}/restic.bz2
 	chmod "${BUILDDIR}/restic" 
 	cp "${BUILDDIR}/restic" ${DISTDIR}
 
-build: buildgo buildweb buildrestic
+build: buildgo buildweb buildrestic ## Build go backend, Web and restic binary
 
-buildgo: createdir
+buildgo: createdir ## Build the go backend in dist dir
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
 	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
 
 
-buildweb: installweb
-	cd $(BUILDDIR)/web && ng build --output-path ${DISTDIR}/front/
+buildweb: installweb ## Build the frontend in dist dir
+	npm run build --prefix $(BUILDDIR)/$(WEBDIR) && \
+    cp -r $(BUILDDIR)/$(WEBDIR)/build $(DISTDIR)/
 
-builddocker:
+builddocker: ## Build the docker image (needs auth for gitlab registry)
 ifeq ($(CI), true)
 	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
 	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) .
 
-pushdocker: builddocker
+pushdocker: builddocker ## Push the built docker image to gitlab registry
 ifeq ($(CI), true)
 	docker push $(CI_REGISTRY_IMAGE):$(TAG)
 endif
 
-rundocker: builddocker
+rundocker: builddocker ## Run the docker container locally
 	docker run --rm -d --name resticgui -p "8000:8080" $(CI_REGISTRY_IMAGE):$(TAG)
 
-run:
+run: ## Run resticgui binary listening on localhost:8080
 	cd ${DISTDIR}/ && ./resticgui${EXT}
 
-testweb: installweb
-	cd $(BUILDDIR)/web && ng test --progress false --watch false
+rundevweb: installwebdev ## Run dev web listening on localhost:3000
+	cd $(WEBDIR) && npm run dev
+    
 
-testgo:
+# testweb: installweb
+# 	cd $(BUILDDIR)/web && ng test --progress false --watch false
+
+testgo: ## Run the go Tests
 	cd cmd/resticgui && go test ./...
 
-clean:
+clean: ## Clean build and temporary directory
 	$(RM) ${DISTDIR}
 	$(RM) $(BUILDDIR)
+	$(RM) $(WEBDIR)/node_modules
+	$(RM) $(WEBDIR)/build
+	$(RM) $(WEBDIR)/.svelte-kit
+
+.PHONY: help
+.DEFAULT_GOAL := help
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

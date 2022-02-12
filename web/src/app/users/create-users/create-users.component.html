@@ -1,9 +1,0 @@
-<div *ngIf="user" class="card">
-  <h5 class="card-header">Create User</h5>
-  <div class="card-body">
-    <h5 class="card-title">User {{user.firstname}}</h5>
-    <p class="card-text">
-      <app-form-users (updateUserForm)="CreateUser($event)" [user]="user"></app-form-users>
-    </p>
-  </div>
-</div>

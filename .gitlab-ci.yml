@@ -25,47 +25,47 @@ test:go:
     #- go test -race $(go list ./... | grep -v /vendor/)
 
 
-test:web:
-  image: trion/ng-cli-karma
-  variables:
-    FF_USE_FASTZIP: "true"
-  stage: test
-  script:
-    - make testweb
+# test:web:
+#   image: trion/ng-cli-karma
+#   variables:
+#     FF_USE_FASTZIP: "true"
+#   stage: test
+#   script:
+#     - make testweb
 
-build:go:
-  variables:
-    REPO_NAME: gitlab.com/resticgui/resticgui
+# build:go:
+#   variables:
+#     REPO_NAME: gitlab.com/resticgui/resticgui
   
-  before_script:
-    - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-    - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-    - cd $GOPATH/src/$REPO_NAME
-  image: golang:1.17.6
-  stage: build
-  needs: ["test:go"]
-  script:
-    - make buildgo
-  artifacts:
-    paths:
-      - dist/
-  extends:
-    - .rule_build_deploy
+#   before_script:
+#     - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+#     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+#     - cd $GOPATH/src/$REPO_NAME
+#   image: golang:1.17.6
+#   stage: build
+#   needs: ["test:go"]
+#   script:
+#     - make buildgo
+#   artifacts:
+#     paths:
+#       - dist/
+#   extends:
+#     - .rule_build_deploy
 
 
-build:web:
-  image: trion/ng-cli
-  variables:
-    FF_USE_FASTZIP: "true"
-  stage: build
-  needs: ["test:web"]
-  script:
-    - make buildweb
-  tags:
-    - docker
-    - mhx-srv
-  extends:
-    - .rule_build_deploy
+# build:web:
+#   image: trion/ng-cli
+#   variables:
+#     FF_USE_FASTZIP: "true"
+#   stage: build
+#   needs: ["test:web"]
+#   script:
+#     - make buildweb
+#   tags:
+#     - docker
+#     - mhx-srv
+#   extends:
+#     - .rule_build_deploy
 
 
 build:docker:
