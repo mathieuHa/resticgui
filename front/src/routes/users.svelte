@@ -1,33 +1,15 @@
-<script context="module">
-  // export const prerender = true; // you can uncomment to prerender as an optimization
-  export const hydrate = true;
-  import { BACKEND_URL } from '$lib/siteConfig';
-  export async function load({ url, params, fetch }) {
-    let res = null;
-    try {
-      res = await fetch(`${BACKEND_URL}/users`);
-      if (res.status > 400) {
-        return { status: res.status, error: await res.text() };
-      }
-      return { props: { users: await res.json() } };
-    } catch (err) {
-      console.log(err);
-      return { status: 500, error: new Error(`error fetching user: ${res}`) };
-    }
-  }
-</script>
-
 <script>
   import dayjs from 'dayjs';
+  import { onMount } from 'svelte';
   import * as yup from 'yup';
 
   import extractErrors from '$lib/extractErrors';
+  import { BACKEND_URL } from '$lib/siteConfig';
   import Pen from '../components/icon/Pen.svelte';
   import Trash from '../components/icon/Trash.svelte';
   import Modal from '../components/Modal.svelte';
 
-  export let users;
-
+  let users = [];
   let userSelected = false;
   let values = {};
   let errors = {};
@@ -73,6 +55,21 @@
       // Pass
     }
   }
+
+  onMount(async () => {
+    let res = null;
+    try {
+      res = await fetch(`${BACKEND_URL}/users`);
+      if (res.status > 400) {
+        return { status: res.status, error: await res.text() };
+      }
+      return { props: { users: await res.json() } };
+    } catch (err) {
+      console.log(err);
+      return { status: 500, error: new Error(`error fetching user: ${res}`) };
+    }
+  })
+
   $:console.log(userSelected);
   $:values = userSelected || {};
   $:errors = userSelected && {};
