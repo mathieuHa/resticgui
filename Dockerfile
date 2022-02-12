@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY cmd/resticgui .
+COPY cmd/resticgui/config-docker.yaml .
 
 COPY --from=BuilderRestic /restic /usr/bin/restic
 COPY --from=BuilderWeb /front/build front
