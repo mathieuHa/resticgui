@@ -8,6 +8,9 @@ This resticGUI version works with restic version 0.12.0 or more
 
 ### Dev tools
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/resticgui/resticgui)
+
+
 #### Launch Backend server
 
 ```
