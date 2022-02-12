@@ -21,13 +21,6 @@ func QueryUsers(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var users Models.User
 
@@ -52,13 +45,16 @@ func CreateUser(c *gin.Context) {
 
 	result := db.Create(&user) // pass pointer of data to Create
 	if result.Error != nil {
-		log.Debug().Err(result.Error).Msg("is error?")
-		err := db.Find(&user).Error
-		if err == nil {
-			log.Debug().Err(err).Msg("is error2?")
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
-			return
-		}
+		log.Debug().Err(result.Error)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": result.Error})
+		return
+		// err := db.Find(&user).Error
+
+		// if err == nil {
+		// 	log.Debug().Err(err).Msg("is error2?")
+		// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+		// 	return
+		// }
 	}
 	c.IndentedJSON(http.StatusCreated, user)
 }
