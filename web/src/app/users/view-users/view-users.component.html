@@ -1,0 +1,22 @@
+<div *ngIf="user" class="card">
+  <h5 class="card-header">
+    View User
+    <button style="float: right" class="btn btn-sm btn-primary" (click)="goBack()">
+      <fa-icon [icon]="faUndoAlt"></fa-icon>
+    </button>
+  </h5>
+  <div class="card-body">
+    <h5 class="card-title">User {{user.firstname}}</h5>
+    <p class="card-text">
+      ID: {{user.ID}} <br>
+      Firstname: {{user.firstname}} <br>
+      Lastname: {{user.lastname}} <br>
+      Email: {{user.email}} <br>
+    </p>
+  </div>
+
+</div>
+
+<div class="alert alert-danger" *ngIf="!user">
+  No user found with id
+</div>

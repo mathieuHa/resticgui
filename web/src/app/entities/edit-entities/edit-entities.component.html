@@ -1,0 +1,39 @@
+<div *ngIf="repository && repository.Entities && repository.Entities.length > 0">
+    <div *ngFor="let entity of repository.Entities; let ind = index">
+      <div class="row mb-3">
+        <label class="col-sm-2 col-form-label" [for]="'path_'+ind">Path</label>
+        <div class="col-6">
+            <input type="text" class="form-control" [id]="'path_'+ind"
+                   required
+                   [name]="'path_'+ind"
+                   [(ngModel)]="entity.path">
+            <fa-icon *ngIf="entity.exists" [icon]="faCheck" ></fa-icon>
+            <fa-icon *ngIf="entity.exists!==undefined && entity.exists===false" [icon]="faTimes" ></fa-icon>
+          </div>
+
+          <div class="col-3">
+            <button (click)="deleteEntity(entity)" style="float: right" class="btn btn-sm btn-danger m-1">
+              <fa-icon [icon]="faTrash"></fa-icon>
+            </button>
+          </div>
+      </div>
+
+    </div>
+
+</div>
+
+
+<button style="float: right" (click)="addEntity()" class="btn btn-sm btn-primary m-1">
+  <fa-icon [icon]="faPlus"></fa-icon>
+</button>
+<button style="float: right" class="btn btn-sm btn-success m-1"
+  (click)="saveEntities()">
+  <fa-icon [icon]="faSave"></fa-icon>
+</button>
+
+
+<div *ngIf="repository && repository.Entities && repository.Entities.length === 0">
+  <span class="alert-info alert m-1" role="alert">
+    No Entities
+  </span>
+</div>

@@ -1,0 +1,18 @@
+<div *ngIf="repository && repository.Entities && repository.Entities.length > 0">
+  <span *ngFor="let entity of repository.Entities">
+    Path {{entity.path}}
+    <fa-icon *ngIf="entity.exists" [icon]="faCheck" ></fa-icon>
+    <fa-icon *ngIf="!entity.exists" [icon]="faTimes" ></fa-icon>
+    <br>
+  </span>
+</div>
+
+<button *ngIf="repository" [routerLink]="['/repositories/',repository.ID,'entities','edit']" class="btn btn-warning" style="float: right">
+  <fa-icon  [icon]="faEdit" ></fa-icon>
+</button>
+
+<div *ngIf="repository && repository.Entities && repository.Entities.length === 0">
+  <span class="alert-info alert m-1" role="alert">
+    No Entities
+  </span>
+</div>
