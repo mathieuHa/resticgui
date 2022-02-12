@@ -1,4 +1,4 @@
-FROM node:14.17.6 as BuilderWeb
+FROM node:16.14.0-alpine as BuilderWeb
 
 COPY front/ /front
 

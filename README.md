@@ -36,7 +36,7 @@ make rundocker
 #### Install node 14
 
 ```
-curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
 sudo apt -y install nodejs
 ```
 
@@ -47,6 +47,9 @@ sudo apt -y install nodejs
 __Linux__
 ```bash
 sudo apt-get install golang-go
+# Ou 
+wget https://go.dev/dl/go1.17.7.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.17.7.linux-amd64.tar.gz
 ```
 
 __Windows__
