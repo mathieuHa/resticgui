@@ -16,7 +16,7 @@ test:go:
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME
 
-  image: golang:1.17.6
+  image: golang:1.17.7
   stage: test
   script:
     - make testgo

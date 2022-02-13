@@ -3,14 +3,15 @@ package Models
 import (
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/rs/zerolog/log"
 )
 
 type User struct {
-	gorm.Model
-	Firstname          string     `json:"firstname"`
-	Lastname           string     `json:"lastname"`
-	Email              string     `json:"email" gorm:"unique"`
+	Base
+
+	Firstname          string     `json:"firstname" binding:"required,min=3"`
+	Lastname           string     `json:"lastname" binding:"required,min=3"`
+	Email              string     `json:"email" gorm:"unique" binding:"required,email"`
 	Password           string     `json:"password"`
 	PasswordLastSet    *time.Time `json:"password_last_set"`
 	PasswordFailCount  uint8      `json:"password_fail_count"`
@@ -20,4 +21,9 @@ type User struct {
 	MfaToken           string     `json:"mfa_token"`
 	Role               Role
 	Active             bool `json:"active"`
+}
+
+func (e User) ToString() {
+	log.Debug().Msgf("ID = %v", e.ID)
+	log.Debug().Msgf("Path = %v", e.Firstname)
 }

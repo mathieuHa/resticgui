@@ -21,13 +21,6 @@ func QueryUsers(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var users Models.User
 
@@ -45,21 +38,26 @@ func CreateUser(c *gin.Context) {
 	var user Models.User
 
 	if err := c.BindJSON(&user); err != nil {
-		log.Info().Msg("Bind Error User")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg("Bind Error User")
 		return
 	}
 	db := Database.Connect()
 
-	result := db.Create(&user) // pass pointer of data to Create
+	result := db.Create(&user)
 	if result.Error != nil {
-		log.Debug().Err(result.Error).Msg("is error?")
+		log.Debug().Err(result.Error)
 		err := db.Find(&user).Error
+
 		if err == nil {
-			log.Debug().Err(err).Msg("is error2?")
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
 			return
 		}
 	}
+
 	c.IndentedJSON(http.StatusCreated, user)
 }
 
@@ -69,7 +67,8 @@ func EditUser(c *gin.Context) {
 	var editedUser Models.User
 
 	if err := c.BindJSON(&editedUser); err != nil {
-		log.Info().Msg("Bind Error User")
+		log.Info().Err(err).Msg("Bind Error User")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -83,8 +82,21 @@ func EditUser(c *gin.Context) {
 		return
 	}
 
-	db.Save(&editedUser)
-	c.IndentedJSON(http.StatusOK, editedUser)
+	result = db.Model(&users).Updates(&editedUser)
+	if result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
+		log.Info().Err(result.Error).Msg("Error updating")
+		return
+	}
+
+	var updatedUser Models.User
+
+	result = db.Find(&updatedUser, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, updatedUser)
 }
 
 func RemoveUser(c *gin.Context) {

@@ -1,6 +1,6 @@
 module gitlab.com/resticgui/resticgui
 
-go 1.17
+go 1.17	
 
 require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
