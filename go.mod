@@ -1,6 +1,6 @@
 module gitlab.com/resticgui/resticgui
 
-go 1.17	
+go 1.17
 
 require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
@@ -41,9 +41,14 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
+	github.com/yuin/goldmark v1.4.1 // indirect
 	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2 // indirect
+	golang.org/x/mod v0.5.1 // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/tools v0.1.9 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
