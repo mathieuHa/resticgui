@@ -8,8 +8,6 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var cr *cron.Cron
@@ -77,12 +75,6 @@ func SetupRouter() *gin.Engine {
 		grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
 		grpBackupSchedules.GET("", QueryBackupSchedule)
 	}
-
-	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	// router.GET("/swagger/*any", func(c *gin.Context) {
-	// 	httpSwagger.WrapHandler(c.Writer, c.Request)
-	// })
 
 	router.NoRoute(func(c *gin.Context) {
 		index := fmt.Sprintf("%s/index.html", viper.GetString("front.path"))
