@@ -132,6 +132,9 @@ func RemoveRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
+
+	removeScheduledBackup(repository)
+
 	result = db.Select(clause.Associations).Delete(&repository, id)
 	if result.Error != nil {
 		log.Error().Err(result.Error)

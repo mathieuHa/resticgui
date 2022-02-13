@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"gitlab.com/resticgui/resticgui/internal/API"
@@ -78,8 +77,4 @@ func main() {
 	// to finalize based on context cancellation.
 	log.Info().Msg("shutting down")
 	os.Exit(0)
-}
-
-func testRestic(c *gin.Context) {
-	runRestic()
 }

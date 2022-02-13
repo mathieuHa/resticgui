@@ -159,7 +159,9 @@ func addScheduledBackup(repository *Models.Repository) bool {
 		var err error
 		timing := getScheduleStringSyntax(repository.BackupSchedule)
 		log.Debug().Msgf("timing = %v", timing)
-		repository.BackupSchedule.CronID, err = cr.AddFunc(timing, func() { log.Debug().Msgf("JOB HAS RUN") })
+		repository.BackupSchedule.CronID, err = cr.AddFunc(timing, func() {
+			log.Debug().Msgf("JOB HAS RUN")
+		})
 		if err != nil {
 			log.Error().Err(err)
 			return false
@@ -186,4 +188,10 @@ func CreateAllScheduledBackup() {
 
 func removeScheduledBackup(repository Models.Repository) {
 	// Here we need to
+	if cr != nil {
+		// First we remove the previous job launched for this repository
+		if repository.BackupSchedule.CronID >= 0 {
+			cr.Remove(repository.BackupSchedule.CronID)
+		}
+	}
 }
