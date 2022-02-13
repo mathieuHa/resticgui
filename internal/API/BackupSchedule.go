@@ -38,14 +38,13 @@ func GetBackupSchedule(c *gin.Context) {
 }
 
 func UpdateBackupSchedule(c *gin.Context) {
-	log.Debug().Msg("UpdateBackup")
 	id := c.Param("id") // id of the repository
 
 	var repository Models.Repository
 
 	db := Database.Connect()
 
-	result := db.Preload("BackupSchedule").Find(&repository, "id = ?", id)
+	result := db.Preload("BackupSchedule").Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
