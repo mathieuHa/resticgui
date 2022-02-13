@@ -64,7 +64,8 @@ func EditUser(c *gin.Context) {
 	var editedUser Models.User
 
 	if err := c.BindJSON(&editedUser); err != nil {
-		log.Info().Msg("Bind Error User")
+		log.Info().Err(err).Msg("Bind Error User")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -78,7 +79,12 @@ func EditUser(c *gin.Context) {
 		return
 	}
 
-	db.Save(&editedUser)
+	result = db.Model(&users).Updates(&editedUser)
+	if result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
+		log.Info().Err(result.Error).Msg("Error updating")
+		return
+	}
 	c.IndentedJSON(http.StatusOK, editedUser)
 }
 
