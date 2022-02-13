@@ -183,6 +183,7 @@ func CreateAllScheduledBackup() {
 		addScheduledBackup(&repo)
 	}
 }
+
 func removeScheduledBackup(repository Models.Repository) {
 	// Here we need to
 }

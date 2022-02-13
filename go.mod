@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.7
-	github.com/google/uuid v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/viper v1.10.1
