@@ -33,13 +33,13 @@ func main() {
 	router := API.SetupRouter()
 
 	// setting server information
-	server_ip := viper.GetString("server.ip")
-	server_port := viper.GetInt("server.port")
-	server_addr := fmt.Sprintf("%s:%d", server_ip, server_port)
+	serverIP := viper.GetString("server.ip")
+	serverPort := viper.GetInt("server.port")
+	serverAddr := fmt.Sprintf("%s:%d", serverIP, serverPort)
 
 	server = &http.Server{
 		Handler:      router,
-		Addr:         server_addr,
+		Addr:         serverAddr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -51,7 +51,7 @@ func main() {
 		if err := server.ListenAndServe(); err != nil {
 			log.Err(err).Msg("Error running server")
 		} else {
-			log.Info().Msgf("Start Server listen at %v", server_addr)
+			log.Info().Msgf("Start Server listen at %v", serverAddr)
 		}
 	}()
 
@@ -82,12 +82,4 @@ func main() {
 
 func testRestic(c *gin.Context) {
 	runRestic()
-}
-
-func shutdown(c *gin.Context) {
-	err := server.Shutdown(context.Background())
-	if err != nil {
-		log.Err(err)
-		return
-	}
 }

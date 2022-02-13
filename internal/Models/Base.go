@@ -14,14 +14,6 @@ type Base struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// func (b *Base) BeforeCreate(*gorm.DB) (err error) {
-// 	b.ID = uuid.New()
-// 	if !b.IsValid() {
-// 		err = errors.New("can't save invalid data")
-// 	}
-// 	return
-// }
-
 func (b *Base) IsValid() bool {
 	return true
 }
