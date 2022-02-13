@@ -74,7 +74,7 @@ func UpdateBackupSchedule(c *gin.Context) {
 		}
 	}
 
-	db.Save(&repository)
+	db.Model(&repository).Association("BackupScheduled").Replace(&repository.BackupSchedule)
 
 	// Check if the file exist ?
 

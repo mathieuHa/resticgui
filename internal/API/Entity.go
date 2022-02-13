@@ -18,7 +18,7 @@ func AddEntities(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Preload("Entities").Find(&repository, "id = ?", id)
+	result := db.Preload("Entities").Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return

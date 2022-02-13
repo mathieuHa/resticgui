@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -15,7 +16,7 @@ func QueryRepositories(c *gin.Context) {
 
 	db := Database.Connect()
 
-	db.Preload("Entities").Find(&repositories)
+	db.Preload(clause.Associations).Find(&repositories)
 
 	c.IndentedJSON(http.StatusOK, repositories)
 }
@@ -27,7 +28,7 @@ func GetRepository(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Preload("Entities").Find(&repositories, id)
+	result := db.Preload(clause.Associations).Find(&repositories, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
@@ -78,13 +79,14 @@ func EditRepository(c *gin.Context) {
 	var repository Models.Repository
 
 	db := Database.Connect()
-	result := db.Preload("Entities").Find(&repository, id)
+	result := db.Preload(clause.Associations).Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
 
-	db.Model(&repository).Association("Entities").Replace(&editedRepository.Entities)
+	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Entities").Replace(&editedRepository.Entities)
+	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
 	result = db.Model(&repository).Updates(&editedRepository)
 	if result.Error != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating 1"})
@@ -94,7 +96,7 @@ func EditRepository(c *gin.Context) {
 
 	var updatedRepository Models.Repository
 
-	result = db.Preload("Entities").Find(&updatedRepository, id)
+	result = db.Preload(clause.Associations).Find(&updatedRepository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
