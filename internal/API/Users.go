@@ -84,7 +84,15 @@ func EditUser(c *gin.Context) {
 		log.Info().Err(result.Error).Msg("Error updating")
 		return
 	}
-	c.IndentedJSON(http.StatusOK, editedUser)
+
+	var updatedUser Models.User
+
+	result = db.Find(&updatedUser, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, updatedUser)
 }
 
 func RemoveUser(c *gin.Context) {
