@@ -9,18 +9,11 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gorm.io/gorm/clause"
 )
 
-// AddEntities This could be redundant with the update repository ?
 func AddEntities(c *gin.Context) {
 	id := c.Param("id") // id of the repository
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var repository Models.Repository
 
@@ -59,12 +52,6 @@ func AddEntities(c *gin.Context) {
 	checkEntitiesPath(entities)
 	repository.Entities = entities
 
-	//err := db.Model(&repository).Association("Entities").Replace(entities)
-	//if err != nil {
-	//	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error adding entities"})
-	//	return
-	//}
-	//repository.Entities = entities
 	if repository.Entities == nil {
 		log.Debug().Msg("Reset Entities to []")
 		repository.Entities = []Models.Entity{}
@@ -142,6 +129,68 @@ func GetEntities(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, entities)
+}
+
+func CreateEntity(c *gin.Context) {
+	var entity Models.Entity
+
+	if err := c.BindJSON(&entity); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg("Bind Error Entity")
+		return
+	}
+	db := Database.Connect()
+
+	result := db.Clauses(clause.Returning{}).Create(&entity) // pass pointer of data to Create
+	if result.Error != nil {
+		log.Debug().Err(result.Error)
+		err := db.Find(&entity).Error
+
+		if err == nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+			return
+		}
+	}
+
+	c.IndentedJSON(http.StatusCreated, result)
+}
+
+func EditEntity(c *gin.Context) {
+	id := c.Param("id")
+
+	var editedEntity Models.Entity
+
+	if err := c.BindJSON(&editedEntity); err != nil {
+		log.Info().Err(err).Msg("Bind Error Entity")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var entitys Models.Entity
+
+	db := Database.Connect()
+
+	result := db.Find(&entitys, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "entity not found"})
+		return
+	}
+
+	result = db.Model(&entitys).Updates(&editedEntity)
+	if result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
+		log.Info().Err(result.Error).Msg("Error updating")
+		return
+	}
+
+	var updatedEntity Models.Entity
+
+	result = db.Find(&updatedEntity, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "entity not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, updatedEntity)
 }
 
 func RemoveEntity(c *gin.Context) {
