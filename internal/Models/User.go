@@ -7,9 +7,9 @@ import (
 type User struct {
 	Base
 
-	Firstname          string     `json:"firstname"`
-	Lastname           string     `json:"lastname"`
-	Email              string     `json:"email" gorm:"unique"`
+	Firstname          string     `json:"firstname" binding:"required,min=3"`
+	Lastname           string     `json:"lastname" binding:"required,min=3"`
+	Email              string     `json:"email" gorm:"unique" binding:"required,email"`
 	Password           string     `json:"password"`
 	PasswordLastSet    *time.Time `json:"password_last_set"`
 	PasswordFailCount  uint8      `json:"password_fail_count"`

@@ -38,7 +38,8 @@ func CreateUser(c *gin.Context) {
 	var user Models.User
 
 	if err := c.BindJSON(&user); err != nil {
-		log.Info().Msg("Bind Error User")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg("Bind Error User")
 		return
 	}
 	db := Database.Connect()
@@ -46,15 +47,13 @@ func CreateUser(c *gin.Context) {
 	result := db.Create(&user) // pass pointer of data to Create
 	if result.Error != nil {
 		log.Debug().Err(result.Error)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": result.Error})
-		return
-		// err := db.Find(&user).Error
+		err := db.Find(&user).Error
 
-		// if err == nil {
-		// 	log.Debug().Err(err).Msg("is error2?")
-		// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
-		// 	return
-		// }
+		if err == nil {
+			log.Debug().Err(err)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+			return
+		}
 	}
 	c.IndentedJSON(http.StatusCreated, user)
 }
