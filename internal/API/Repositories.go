@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gorm.io/gorm/clause"
 )
 
 func QueryRepositories(c *gin.Context) {
@@ -54,12 +55,12 @@ func CreateRepository(c *gin.Context) {
 			if err == nil {
 				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "name already in use"})
 				return
+			} else {
+				c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
+				return
 			}
 		}
 	}
-	// repository.BackupSchedule = Models.BackupSchedule{}
-	//result = db.Save(&repository)
-
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
@@ -109,11 +110,11 @@ func RemoveRepository(c *gin.Context) {
 	db := Database.Connect()
 
 	result := db.Find(&repository, "id = ?", id)
-	if result.RowsAffected == 0 { // Not found entity by id
+	if result.RowsAffected == 0 {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
-	result = db.Delete(&repository, "id = ?", id)
+	result = db.Select(clause.Associations).Delete(&repository, "id = ?", id)
 	if result.Error != nil {
 		log.Error().Err(result.Error)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "repository not deleted"})

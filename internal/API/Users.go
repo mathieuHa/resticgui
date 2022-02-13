@@ -44,7 +44,7 @@ func CreateUser(c *gin.Context) {
 	}
 	db := Database.Connect()
 
-	result := db.Create(&user) // pass pointer of data to Create
+	result := db.Create(&user)
 	if result.Error != nil {
 		log.Debug().Err(result.Error)
 		err := db.Find(&user).Error
@@ -52,8 +52,12 @@ func CreateUser(c *gin.Context) {
 		if err == nil {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
 			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
+			return
 		}
 	}
+
 	c.IndentedJSON(http.StatusCreated, user)
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gorm.io/gorm/clause"
 )
 
 func AddEntities(c *gin.Context) {
@@ -141,13 +140,16 @@ func CreateEntity(c *gin.Context) {
 	}
 	db := Database.Connect()
 
-	result := db.Clauses(clause.Returning{}).Create(&entity) // pass pointer of data to Create
+	result := db.Create(&entity)
 	if result.Error != nil {
 		log.Debug().Err(result.Error)
 		err := db.Find(&entity).Error
 
 		if err == nil {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
 			return
 		}
 	}

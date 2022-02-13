@@ -8,7 +8,7 @@ type Entity struct {
 	Base
 
 	Path         string `json:"path" binding:"required"`
-	RepositoryID uint   //uuid.UUID `gorm:"repository_id constraint:OnDelete:CASCADE;"`
+	RepositoryID uint   `gorm:"repository_id constraint:OnDelete:CASCADE;"`
 	SnapshotID   uint   //uuid.UUID  `json:"snapshot_id"`
 	Exists       bool   `json:"exists"`
 }
