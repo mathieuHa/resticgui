@@ -21,13 +21,6 @@ func QueryRepositories(c *gin.Context) {
 
 func GetRepositories(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var repositories Models.Repository
 
@@ -45,7 +38,8 @@ func CreateRepository(c *gin.Context) {
 	var repository Models.Repository
 
 	if err := c.BindJSON(&repository); err != nil {
-		log.Info().Msg("Bind Error Repository")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg("Bind Error Repository")
 		return
 	}
 	db := Database.Connect()
@@ -53,16 +47,18 @@ func CreateRepository(c *gin.Context) {
 	result := db.Create(&repository) // pass pointer of data to Create
 
 	if result.Error != nil {
-		log.Debug().Err(result.Error).Msg("is error?")
-		err := db.Find(&repository).Error
-		if err == nil {
-			log.Debug().Err(err).Msg("is error2?")
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "name already in use"})
-			return
+		if result.Error != nil {
+			log.Debug().Err(result.Error)
+			err := db.Find(&repository).Error
+
+			if err == nil {
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "name already in use"})
+				return
+			}
 		}
 	}
 	// repository.BackupSchedule = Models.BackupSchedule{}
-	result = db.Save(&repository)
+	//result = db.Save(&repository)
 
 	c.IndentedJSON(http.StatusCreated, repository)
 }
@@ -70,36 +66,42 @@ func CreateRepository(c *gin.Context) {
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
 
+	var editedRepository Models.Repository
+
+	if err := c.BindJSON(&editedRepository); err != nil {
+		log.Info().Err(err).Msg("Bind Error Repository")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var repository Models.Repository
 
 	db := Database.Connect()
-
 	// result := db.Preload("Entities").Find(&repository, id)
 	result := db.Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
-	log.Error().Msgf("DEBUG BEFORE Error Repository %s", repository.Entities)
-
-	if err := c.BindJSON(&repository); err != nil {
-		log.Info().Msg("Bind Error Repository")
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not binded"})
-		return
-	}
 
 	log.Error().Msgf("DEBUG AFTER Error Repository %s", repository.Entities)
 
-	db.Save(repository)
+	result = db.Model(&repository).Updates(&editedRepository)
 
-	var NewRepository Models.Repository
-
-	result2 := db.Preload("Entities").Find(&NewRepository, id)
-	if result2.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+	if result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
+		log.Info().Err(result.Error).Msg("Error updating")
 		return
 	}
-	c.IndentedJSON(http.StatusOK, NewRepository)
+
+	// var NewRepository Models.Repository
+
+	// result2 := db.Preload("Entities").Find(&NewRepository, id)
+	// if result2.RowsAffected == 0 { // Not found entity by id
+	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+	// 	return
+	// }
+	c.IndentedJSON(http.StatusOK, editedRepository)
 }
 
 func RemoveRepository(c *gin.Context) {

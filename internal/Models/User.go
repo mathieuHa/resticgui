@@ -2,6 +2,8 @@ package Models
 
 import (
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type User struct {
@@ -19,4 +21,9 @@ type User struct {
 	MfaToken           string     `json:"mfa_token"`
 	Role               Role
 	Active             bool `json:"active"`
+}
+
+func (e User) ToString() {
+	log.Debug().Msgf("ID = %v", e.ID)
+	log.Debug().Msgf("Path = %v", e.Firstname)
 }

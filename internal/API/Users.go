@@ -50,7 +50,6 @@ func CreateUser(c *gin.Context) {
 		err := db.Find(&user).Error
 
 		if err == nil {
-			log.Debug().Err(err)
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
 			return
 		}

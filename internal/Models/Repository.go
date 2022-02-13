@@ -9,7 +9,7 @@ import (
 type Repository struct {
 	Base
 
-	Name           string         `json:"name" gorm:"unique"`
+	Name           string         `json:"name" gorm:"unique" binding:"required,min=3"`
 	Date           time.Time      `json:"date" gorm:"autoCreateTime"`
 	Snapshots      []Snapshot     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Entities       []Entity       `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
