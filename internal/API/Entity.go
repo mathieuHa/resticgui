@@ -143,3 +143,24 @@ func GetEntities(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, entities)
 }
+
+func RemoveEntity(c *gin.Context) {
+	id := c.Param("id")
+
+	var entity Models.Entity
+
+	db := Database.Connect()
+
+	result := db.Find(&entity, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "entity not found"})
+		return
+	}
+	result = db.Delete(&entity, id)
+	if result.Error != nil {
+		log.Error().Err(result.Error)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "entity not deleted"})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}

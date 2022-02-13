@@ -19,7 +19,7 @@ func QueryRepositories(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, repositories)
 }
 
-func GetRepositories(c *gin.Context) {
+func GetRepository(c *gin.Context) {
 	id := c.Param("id")
 
 	var repositories Models.Repository

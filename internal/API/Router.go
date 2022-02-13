@@ -49,7 +49,7 @@ func SetupRouter() *gin.Engine {
 	grpRepositories := router.Group("/api/v1/repositories")
 	{
 		grpRepositories.GET("", QueryRepositories)
-		grpRepositories.GET(":id", GetRepositories)
+		grpRepositories.GET(":id", GetRepository)
 		grpRepositories.POST("", CreateRepository)
 		grpRepositories.PATCH(":id", EditRepository)
 		grpRepositories.DELETE(":id", RemoveRepository)
@@ -65,6 +65,7 @@ func SetupRouter() *gin.Engine {
 	{
 		grpEntities.GET("", QueryEntities)
 		grpEntities.GET(":id", GetEntities)
+		grpRepositories.DELETE(":id", RemoveEntity)
 	}
 
 	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")
