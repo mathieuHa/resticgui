@@ -118,7 +118,7 @@ rundocker: builddocker ## Run the docker container locally
 run: ## Run resticgui binary listening on localhost:8080
 	cd ${DISTDIR}/ && ./resticgui${EXT}
 
-rundev: buildgo run## Run resticgui binary listening on localhost:8080
+rundev: buildgo run ## Build and run resticgui binary listening on localhost:8080
 
 rundevweb: installwebdev ## Run dev web listening on localhost:3000
 	cd $(WEBDIR) && npm run dev
