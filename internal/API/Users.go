@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gitlab.com/resticgui/resticgui/internal/Utils"
 )
 
 func QueryUsers(c *gin.Context) {
@@ -21,6 +22,11 @@ func QueryUsers(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
+	}
 
 	var users Models.User
 
@@ -64,6 +70,11 @@ func CreateUser(c *gin.Context) {
 func EditUser(c *gin.Context) {
 	id := c.Param("id")
 
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
+	}
+
 	var editedUser Models.User
 
 	if err := c.BindJSON(&editedUser); err != nil {
@@ -101,6 +112,11 @@ func EditUser(c *gin.Context) {
 
 func RemoveUser(c *gin.Context) {
 	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
+	}
 
 	var users Models.User
 

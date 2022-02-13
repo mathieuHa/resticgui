@@ -3,14 +3,14 @@ package API
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,7 @@ func TestGetUsersRoute(t *testing.T) {
 	router := SetupRouter()
 	Utils.CleanDatabaseTest(db, t, "users")
 
-	// Check invalid UUID
+	// Check invalid ID
 	id := "4ed79fc4"
 	url := fmt.Sprintf("/api/v1/users/%s", id)
 	w := httptest.NewRecorder()
@@ -50,7 +50,7 @@ func TestGetUsersRoute(t *testing.T) {
 	assert.Equal(t, b, w.Body.String())
 
 	// Check Unknown UUID
-	id = uuid.NewString()
+	id = "132319"
 	url = fmt.Sprintf("/api/v1/users/%s", id)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", url, nil)
@@ -58,7 +58,7 @@ func TestGetUsersRoute(t *testing.T) {
 
 	b = "{\n    \"error\": \"user not found\"\n}"
 
-	// Check Valid UUID get
+	// Check Valid ID get
 	userEmail := "myEmail"
 	user := Models.User{Email: userEmail}
 	result := db.Create(&user)
@@ -75,6 +75,7 @@ func TestGetUsersRoute(t *testing.T) {
 	var userReceived Models.User
 	err := json.Unmarshal(w.Body.Bytes(), &userReceived)
 	log.Debug().Err(err)
+
 	assert.Nil(t, err)
 	assert.Equal(t, userReceived.ID, id2)
 	assert.Equal(t, userReceived.Email, userEmail)

@@ -74,6 +74,11 @@ func CreateRepository(c *gin.Context) {
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
 
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
+	}
+
 	var editedRepository Models.Repository
 
 	if err := c.BindJSON(&editedRepository); err != nil {
@@ -112,6 +117,11 @@ func EditRepository(c *gin.Context) {
 
 func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		return
+	}
 
 	var repository Models.Repository
 
