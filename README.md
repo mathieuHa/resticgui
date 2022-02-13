@@ -78,6 +78,7 @@ installweb                     Install the web dependancies in the build dir
 installwebdev                  Install the web dependancies for Development
 printvars                      Print vars for debug
 pushdocker                     Push the built docker image to gitlab registry
+rundev                         Build and run resticgui binary listening on localhost:8080
 run                            Run resticgui binary listening on localhost:8080
 rundevweb                      Run dev web listening on localhost:3000
 rundocker                      Run the docker container locally
