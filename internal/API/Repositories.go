@@ -15,7 +15,7 @@ func QueryRepositories(c *gin.Context) {
 
 	db := Database.Connect()
 
-	db.Find(&repositories)
+	db.Preload("Entities").Find(&repositories)
 
 	c.IndentedJSON(http.StatusOK, repositories)
 }
@@ -109,12 +109,12 @@ func RemoveRepository(c *gin.Context) {
 
 	db := Database.Connect()
 
-	result := db.Find(&repository, "id = ?", id)
+	result := db.Find(&repository, id)
 	if result.RowsAffected == 0 {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
-	result = db.Select(clause.Associations).Delete(&repository, "id = ?", id)
+	result = db.Select(clause.Associations).Delete(&repository, id)
 	if result.Error != nil {
 		log.Error().Err(result.Error)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "repository not deleted"})
