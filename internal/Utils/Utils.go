@@ -3,6 +3,8 @@ package Utils
 import (
 	"fmt"
 
+	"strconv"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -24,4 +26,15 @@ func CleanDatabaseTest(db *gorm.DB, t assert.TestingT, table string) {
 	request := fmt.Sprintf("DELETE FROM %s", table)
 	result := db.Exec(request)
 	assert.Nil(t, result.Error)
+}
+
+func IsValidInt(s string) bool {
+	_, err := strconv.Atoi(s)
+	value := (err == nil)
+	if value {
+		log.Debug().Msg("ID is valid")
+	} else {
+		log.Info().Msgf("ID is not a valid int")
+	}
+	return value
 }

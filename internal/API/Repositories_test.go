@@ -3,15 +3,15 @@ package API
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestQueryRepositoriesRoute(t *testing.T) {
@@ -36,8 +36,8 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	router := SetupRouter()
 	Utils.CleanDatabaseTest(db, t, "repositories")
 
-	// Check invalid UUID
-	id := "4ed79fc4"
+	// Check invalid id
+	id := "aze"
 	url := fmt.Sprintf("/api/v1/repositories/%s", id)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", url, nil)
@@ -48,16 +48,16 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Equal(t, b, w.Body.String())
 
-	// Check Unknown UUID
-	id = uuid.NewString()
+	// Check Unknown ID
+	id = "1280898"
 	url = fmt.Sprintf("/api/v1/repositories/%s", id)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", url, nil)
 	router.ServeHTTP(w, req)
 
-	b = "{\n    \"error\": \"user not found\"\n}"
+	b = "{\n    \"error\": \"repository not found\"\n}"
 
-	// Check Valid UUID get
+	// Check Valid ID get
 	repositoryName := "myRepo"
 	repository := Models.Repository{Name: repositoryName}
 	result := db.Create(&repository)
