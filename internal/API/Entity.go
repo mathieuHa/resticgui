@@ -99,15 +99,8 @@ func checkEntitiesPath(entities []Models.Entity) {
 	}
 }
 
-func GetEntities(c *gin.Context) {
+func GetEntitiesRepository(c *gin.Context) {
 	id := c.Param("id") // id of the repository
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var repository Models.Repository
 
@@ -124,4 +117,29 @@ func GetEntities(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, repository.Entities)
+}
+
+func QueryEntities(c *gin.Context) {
+	var entities []Models.Entity
+
+	db := Database.Connect()
+
+	db.Find(&entities)
+
+	c.IndentedJSON(http.StatusOK, entities)
+}
+
+func GetEntities(c *gin.Context) {
+	id := c.Param("id")
+
+	var entities Models.Entity
+
+	db := Database.Connect()
+
+	result := db.Find(&entities, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "entities not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, entities)
 }

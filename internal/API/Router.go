@@ -2,6 +2,7 @@ package API
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
@@ -54,10 +55,16 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id", RemoveRepository)
 	}
 
-	grpEntities := router.Group("/api/v1/repositories/:id/entities")
+	grpEntitiesRepository := router.Group("/api/v1/repositories/:id/entities")
 	{
-		grpEntities.PUT("", AddEntities)
-		grpEntities.GET("", GetEntities)
+		grpEntitiesRepository.PUT("", AddEntities)
+		grpEntitiesRepository.GET("", GetEntities)
+	}
+
+	grpEntities := router.Group("/api/v1/entities")
+	{
+		grpEntities.GET("", QueryEntities)
+		grpEntities.GET(":id", GetEntities)
 	}
 
 	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")

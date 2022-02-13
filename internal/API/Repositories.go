@@ -77,31 +77,28 @@ func EditRepository(c *gin.Context) {
 	var repository Models.Repository
 
 	db := Database.Connect()
-	// result := db.Preload("Entities").Find(&repository, id)
-	result := db.Find(&repository, id)
+	result := db.Preload("Entities").Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 		return
 	}
 
-	log.Error().Msgf("DEBUG AFTER Error Repository %s", repository.Entities)
-
+	db.Model(&repository).Association("Entities").Replace(&editedRepository.Entities)
 	result = db.Model(&repository).Updates(&editedRepository)
-
 	if result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
-		log.Info().Err(result.Error).Msg("Error updating")
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating 1"})
+		log.Info().Err(result.Error).Msg("Error updating 1")
 		return
 	}
 
-	// var NewRepository Models.Repository
+	var updatedRepository Models.Repository
 
-	// result2 := db.Preload("Entities").Find(&NewRepository, id)
-	// if result2.RowsAffected == 0 { // Not found entity by id
-	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
-	// 	return
-	// }
-	c.IndentedJSON(http.StatusOK, editedRepository)
+	result = db.Preload("Entities").Find(&updatedRepository, id)
+	if result.RowsAffected == 0 { // Not found entity by id
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, updatedRepository)
 }
 
 func RemoveRepository(c *gin.Context) {
