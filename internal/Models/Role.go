@@ -1,11 +1,7 @@
 package Models
 
-import "gorm.io/gorm"
-
-//import "github.com/google/uuid"
-
 type Role struct {
-	gorm.Model
+	Base
 
 	Name        string `json:"name" gorm:"unique"`
 	Description string `json:"description"`

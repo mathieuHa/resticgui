@@ -1,11 +1,7 @@
 package Models
 
-import "gorm.io/gorm"
-
-//import "github.com/google/uuid"
-
 type BackupPolicy struct {
-	gorm.Model
+	Base
 
 	Name         string `json:"name" gorm:"unique"`
 	NBLastBackup uint   `json:"nb_last_backup"`

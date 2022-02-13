@@ -4,11 +4,10 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
 )
 
 type Repository struct {
-	gorm.Model
+	Base
 
 	Name           string         `json:"name" gorm:"unique"`
 	Date           time.Time      `json:"date" gorm:"autoCreateTime"`

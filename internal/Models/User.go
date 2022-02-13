@@ -2,12 +2,11 @@ package Models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
+	Base
+
 	Firstname          string     `json:"firstname"`
 	Lastname           string     `json:"lastname"`
 	Email              string     `json:"email" gorm:"unique"`

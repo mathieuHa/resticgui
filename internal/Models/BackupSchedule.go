@@ -2,11 +2,10 @@ package Models
 
 import (
 	"github.com/robfig/cron/v3"
-	"gorm.io/gorm"
 )
 
 type BackupSchedule struct {
-	gorm.Model
+	Base
 
 	EveryDay       bool         `json:"every_day"`
 	EveryWeek      bool         `json:"every_week"`

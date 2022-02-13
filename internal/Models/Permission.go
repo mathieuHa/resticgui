@@ -1,9 +1,7 @@
 package Models
 
-import "gorm.io/gorm"
-
 type Permission struct {
-	gorm.Model
+	Base
 
 	Name string `json:"name" gorm:"unique"`
 }
