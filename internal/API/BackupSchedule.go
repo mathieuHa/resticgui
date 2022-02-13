@@ -23,13 +23,6 @@ func QueryBackupSchedule(c *gin.Context) {
 
 func GetBackupSchedule(c *gin.Context) {
 	id := c.Param("id")
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var schedule Models.BackupSchedule
 
@@ -47,13 +40,6 @@ func GetBackupSchedule(c *gin.Context) {
 func UpdateBackupSchedule(c *gin.Context) {
 	log.Debug().Msg("UpdateBackup")
 	id := c.Param("id") // id of the repository
-	// if !Utils.IsValidUUID(id) {
-	// 	log.Info().Msgf("UUID is not valid")
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-	// 	return
-	// } else {
-	// 	log.Debug().Msg("UUID is valid")
-	// }
 
 	var repository Models.Repository
 
@@ -73,16 +59,16 @@ func UpdateBackupSchedule(c *gin.Context) {
 		return
 	}
 
-	if validSchedule(repository.BackupSchedule) == false {
+	if !validSchedule(repository.BackupSchedule) {
 		// we check the schedule can be parsed
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "schedule not valid"})
 		log.Warn().Msg("schedule not valid")
 		return
 	}
-	if repository.Active == true {
+	if repository.Active {
 		// we add the scheduled backup
 		resultAdd := addScheduledBackup(&repository)
-		if resultAdd == false {
+		if !resultAdd {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "start cron error"})
 			log.Warn().Msg("start cron error")
 			return
