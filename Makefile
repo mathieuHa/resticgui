@@ -71,7 +71,7 @@ installwebdev: ## Install the web dependancies for Development
 
 installweb: createdir ## Install the web dependancies in the build dir
 	cp -r $(WEBDIR) $(BUILDDIR)/
-	npm ci --prefix $(BUILDDIR)/$(WEBDIR)
+	npm i --prefix $(BUILDDIR)/$(WEBDIR)
 
 installgo: ## Install go on Windows using choco
 	choco install go
