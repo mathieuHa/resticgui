@@ -38,6 +38,9 @@
 			<NavLink href="/users">Users</NavLink>
 		</li>
 		<li>
+			<NavLink href="/repositories">Repositories</NavLink>
+		</li>
+		<li>
 			<NavLink href="/about">About</NavLink>
 		</li>
 	</ul>

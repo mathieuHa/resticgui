@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import * as yup from 'yup';
 
+  import agent from '../utils/api';
   import extractErrors from '../utils/extractErrors';
   import Pen from '../components/icon/Pen.svelte';
   import Trash from '../components/icon/Trash.svelte';
@@ -24,8 +25,7 @@
 
   const onRefresh = async () => {
     try {
-      console.log('wesh')
-      users = await (await fetch(`/api/v1/users`)).json();
+      users = await agent.get(`/users`);
     } catch (err) {
       // Pass
     }
@@ -38,10 +38,7 @@
     }
     console.log(values);
     try {
-      await fetch(`/api/v1/users/${newUser ? '' : userSelected.ID}`, {
-        method: newUser ? 'POST' : 'PATCH',
-        body: JSON.stringify(values),
-      });
+      await agent[newUser ? 'post' : 'patch'](`/users/${newUser ? '' : userSelected.ID}`, values);
       await onRefresh();
       userSelected = false;
       newUser = false;
@@ -52,12 +49,10 @@
   const onRemove = async (user) => {
     console.log(user);
     try {
-      await fetch(`/api/v1/users/${user.ID}`, {
-        method: 'DELETE',
-      });
+      await agent.delete(`/users/${user.ID}`);
       await onRefresh()
     } catch (err) {
-      // Pass
+      console.log(err)
     }
   }
 
@@ -119,7 +114,7 @@
     <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
       <p>{user.firstname} {user.lastname}</p>
       <p>{user.email}</p>
-      <p>added {dayjs(user.CreatedAt).format('D/MM/YY')}</p>
+      <p>added {dayjs(user.created_at).format('D/MM/YY')}</p>
 
       <div class="flex mt-auto pt-2 h-8 mb-1">
         <button
