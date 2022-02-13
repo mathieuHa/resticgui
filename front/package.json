@@ -35,7 +35,6 @@
     "remark-abbr": "^1.4.1",
     "remark-autolink-headings": "^7.0.1",
     "remark-frontmatter": "^4.0.1",
-    "remark-github": "^11.2.2",
     "remark-parse": "^10.0.1",
     "remark-rehype": "^10.1.0",
     "remark-sectionize": "^1.1.1",

@@ -1,5 +1,5 @@
 <script context="module">
-	import { REPO_URL, SITE_TITLE } from '$lib/siteConfig';
+	import { REPO_URL, SITE_TITLE } from '../utils/siteConfig';
 </script>
 
 <script>
@@ -8,6 +8,7 @@
 </script>
 
 <svelte:head>
+	<title>{SITE_TITLE}</title>
 	<meta name="theme-color" content="#facc15" media="(prefers-color-scheme: light)" />
 	<meta name="theme-color" content="#3730a3" media="(prefers-color-scheme: dark)" />
 </svelte:head>

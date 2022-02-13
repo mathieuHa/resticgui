@@ -1,7 +1,7 @@
 <script context="module">
 	import {
 		SITE_URL, SITE_TITLE, SITE_DESCRIPTION, DEFAULT_OG_IMAGE,
-	} from '$lib/siteConfig';
+	} from '../utils/siteConfig';
 	export const prerender = true; // index page is most visited, lets prerender
 </script>
 
@@ -21,8 +21,8 @@
 	<meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
 </svelte:head>
 
-<div class="flex flex-col-reverse items-start sm:flex-row">
-	<div class="flex flex-col pr-8">
+<div class="flex flex-col-reverse items-start sm:flex-row w-full">
+	<div class="flex flex-col w-full">
 		<h1 class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
 			This is
 			<span class="relative ml-2 inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-red-500">
@@ -37,5 +37,7 @@
 		<p class="mb-16 text-gray-600 dark:text-gray-400">
 			<a href="https://restic.net/" target="_blank">View Restic here!</a>
 		</p>
+		<h2 class="text-gray-700 dark:text-gray-200">How it worked ?</h2>
+		<script src="https://asciinema.org/a/23554.js" id="asciicast-23554" async data-autoplay="true" data-size="big"></script>
 	</div>
 </div>

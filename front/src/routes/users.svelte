@@ -3,24 +3,29 @@
   import { onMount } from 'svelte';
   import * as yup from 'yup';
 
-  import extractErrors from '$lib/extractErrors';
-  import { BACKEND_URL } from '$lib/siteConfig';
+  import extractErrors from '../utils/extractErrors';
   import Pen from '../components/icon/Pen.svelte';
   import Trash from '../components/icon/Trash.svelte';
   import Modal from '../components/Modal.svelte';
 
   let users = [];
   let userSelected = false;
+  let newUser = false;
   let values = {};
   let errors = {};
+  $:values = userSelected || {} || newUser;
+  $:errors = (userSelected && {}) || newUser;
+
   const schema = yup.object?.().shape({
     firstname: yup.string().required('required'),
     lastname: yup.string().required('required'),
     email: yup.string().required('required').email('not an email'),
   });
+
   const onRefresh = async () => {
     try {
-      users = await (await fetch(`${BACKEND_URL}/users`)).json();
+      console.log('wesh')
+      users = await (await fetch(`/api/v1/users`)).json();
     } catch (err) {
       // Pass
     }
@@ -29,17 +34,17 @@
     try {
       await schema.validate(values, { abortEarly: false });
     } catch (err) {
-      console.log(JSON.stringify(err));
       errors = extractErrors(err);
-      console.log(errors)
     }
     console.log(values);
     try {
-      await fetch(`${BACKEND_URL}/users/${userSelected.ID}`, {
-        method: 'PATCH',
-        data: JSON.stringify(values),
+      await fetch(`/api/v1/users/${newUser ? '' : userSelected.ID}`, {
+        method: newUser ? 'POST' : 'PATCH',
+        body: JSON.stringify(values),
       });
-      await onRefresh()
+      await onRefresh();
+      userSelected = false;
+      newUser = false;
     } catch (err) {
       // Pass
     }
@@ -47,7 +52,7 @@
   const onRemove = async (user) => {
     console.log(user);
     try {
-      await fetch(`${BACKEND_URL}/users/${user.ID}`, {
+      await fetch(`/api/v1/users/${user.ID}`, {
         method: 'DELETE',
       });
       await onRefresh()
@@ -56,27 +61,17 @@
     }
   }
 
-  onMount(async () => {
-    let res = null;
-    try {
-      res = await fetch(`${BACKEND_URL}/users`);
-      if (res.status > 400) {
-        return { status: res.status, error: await res.text() };
-      }
-      return { props: { users: await res.json() } };
-    } catch (err) {
-      console.log(err);
-      return { status: 500, error: new Error(`error fetching user: ${res}`) };
-    }
-  })
+  onMount(onRefresh);
 
-  $:console.log(userSelected);
-  $:values = userSelected || {};
-  $:errors = userSelected && {};
 </script>
 
-{#if userSelected}
-  <Modal on:close={() => userSelected = false}>
+{#if userSelected || newUser}
+  <Modal
+    on:close={() => {
+      userSelected = false;
+      newUser = false;
+    }}
+  >
     <h1 class="mb-2">Update user</h1>
     <form on:submit|preventDefault|stopPropagation={onSubmit} class="flex flex-col">
       <div class="w-full flex justify-between">
@@ -121,20 +116,20 @@
 
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each users as user, i}
-    <div class="p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center">
+    <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
       <p>{user.firstname} {user.lastname}</p>
       <p>{user.email}</p>
       <p>added {dayjs(user.CreatedAt).format('D/MM/YY')}</p>
 
-      <div class="flex mt-2 h-5">
+      <div class="flex mt-auto pt-2 h-8 mb-1">
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
+          class="rounded h-6 w-6text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
           on:click|preventDefault|stopPropagation={() => userSelected = Object.assign({}, user)}
         >
           <Pen />
         </button>
         <button
-          class=" rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 ml-2 transition bg-orange-500 hover:bg-orange-600"
+          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 ml-2 transition bg-orange-500 hover:bg-orange-600"
           on:click|preventDefault|stopPropagation={() => onRemove(user)}
         >
           <Trash />
@@ -142,4 +137,10 @@
       </div>
     </div>
   {/each}
+  <div
+    on:click={() => newUser = true}
+    class="text-3xl p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
+  >
+    +
+  </div>
 </div>

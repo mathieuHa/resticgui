@@ -1,37 +1,20 @@
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
 import { mdsvex } from 'mdsvex';
-import remarkGithub from 'remark-github';
 import remarkAbbr from 'remark-abbr';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 const mdsvexConfig = {
 	extensions: ['.svelte.md', '.md', '.svx'],
-	layout: {
-		_: './src/mdsvexlayout.svelte' // default mdsvex layout
-	},
-	smartypants: {
-		dashes: 'oldschool'
-	},
+	layout: { _: './src/mdsvexlayout.svelte' },
+	smartypants: { dashes: 'oldschool' },
 	remarkPlugins: [
-		[
-			remarkGithub,
-			{
-				// Use your own repository
-				repository: 'https://github.com/mvasigh/sveltekit-mdsvex-blog.git'
-			}
-		],
-		remarkAbbr
+		remarkAbbr,
 	],
 	rehypePlugins: [
 		rehypeSlug,
-		[
-			rehypeAutolinkHeadings,
-			{
-				behavior: 'wrap'
-			}
-		]
+		[rehypeAutolinkHeadings, { behavior: 'wrap' }]
 	]
 };
 
@@ -47,6 +30,16 @@ const config = {
 
 	kit: {
 		adapter: adapter({ out: 'build' }),
+		vite: () => ({
+			server: {
+				proxy: {
+					'/api/v1': {
+						target: 'http://localhost:8080',
+						changeOrigin: true,
+					},
+				}
+			}
+		})
 	}
 };
 
