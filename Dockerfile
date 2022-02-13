@@ -28,7 +28,7 @@ RUN bzip2 -d ${BUILDDIR}/restic.bz2
 
 RUN	cp "${BUILDDIR}/restic" /restic
 
-FROM golang:1.17.6 as BuilderResticGui
+FROM golang:1.17.7 as BuilderResticGui
 
 ARG BUILDDIR=./build
 
