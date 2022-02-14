@@ -80,3 +80,38 @@ func TestGetRepositoriesRoute(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
+
+func TestRemoveRepositoriesRoute(t *testing.T) {
+	Utils.TestConfig()
+	Database.Migrate()
+	db := Database.Connect()
+	router := SetupRouter()
+	Utils.CleanDatabaseTest(db, t, "repositories")
+
+	// Check invalid id
+	id := "aze"
+	url := fmt.Sprintf("/api/v1/repositories/%s", id)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", url, nil)
+	router.ServeHTTP(w, req)
+
+	b := "{\n    \"error\": \"id not valid\"\n}"
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, b, w.Body.String())
+
+	// Check Valid ID get
+	repositoryName := "myRepo"
+	repository := Models.Repository{Name: repositoryName}
+	result := db.Create(&repository)
+	assert.Nil(t, result.Error)
+	id2 := repository.ID
+	log.Debug().Msgf("%v", id2)
+
+	url = fmt.Sprintf("/api/v1/repositories/%v", id2)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("DELETE", url, nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+}
