@@ -128,7 +128,7 @@ rundevweb: installwebdev ## Run dev web listening on localhost:3000
 # 	cd $(BUILDDIR)/web && ng test --progress false --watch false
 
 testgo: ## Run the go Tests
-	cd cmd/resticgui && go test ./...
+	go test ./... -cover
 
 clean: ## Clean build and temporary directory
 	$(RM) ${DISTDIR}
