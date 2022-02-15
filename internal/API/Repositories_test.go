@@ -36,9 +36,11 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	router := SetupRouter()
 	Utils.CleanDatabaseTest(db, t, "repositories")
 
+	const apiURL = "/api/v1/repositories/%v"
+
 	// Check invalid id
 	id := "aze"
-	url := fmt.Sprintf("/api/v1/repositories/%s", id)
+	url := fmt.Sprintf(apiURL, id)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", url, nil)
 	router.ServeHTTP(w, req)
@@ -50,7 +52,7 @@ func TestGetRepositoriesRoute(t *testing.T) {
 
 	// Check Unknown ID
 	id = "1280898"
-	url = fmt.Sprintf("/api/v1/repositories/%s", id)
+	url = fmt.Sprintf(apiURL, id)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", url, nil)
 	router.ServeHTTP(w, req)
@@ -65,7 +67,7 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	id2 := repository.ID
 	log.Debug().Msgf("%v", id2)
 
-	url = fmt.Sprintf("/api/v1/repositories/%v", id2)
+	url = fmt.Sprintf(apiURL, id2)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", url, nil)
 	router.ServeHTTP(w, req)
