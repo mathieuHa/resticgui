@@ -4,10 +4,10 @@ type BackupPolicy struct {
 	Base
 
 	Name         string `json:"name" gorm:"unique"`
-	NBLastBackup uint   `json:"nb_last_backup"`
-	OneByHour    bool   `json:"one_by_hour"`
-	OneByDay     bool   `json:"one_by_day"`
-	OneByMonth   bool   `json:"one_by_month"`
-	KeepAll      bool   `json:"keep_all"`
-	RepositoryID uint   // `json:"repository_id"`
+	NBLastBackup uint   `json:"nbLastBackup"`
+	OneByHour    bool   `json:"oneByHour"`
+	OneByDay     bool   `json:"oneByDay"`
+	OneByMonth   bool   `json:"oneByMonth"`
+	KeepAll      bool   `json:"keepAll"`
+	RepositoryID uint   `json:"repositoryID"`
 }

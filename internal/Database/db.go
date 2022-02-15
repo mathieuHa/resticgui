@@ -16,7 +16,7 @@ func Connect() (_db *gorm.DB) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
-			LogLevel:                   logger.Info, // Log level Info will output everything
+			LogLevel: logger.Info, // Log level Info will output everything
 		},
 	)
 	_db, err := gorm.Open(sqlite.Open(dbname), &gorm.Config{
@@ -34,10 +34,9 @@ func Migrate() {
 	db := Connect()
 	err := db.AutoMigrate(
 		&Models.User{},
-		&Models.Entity{},
+		&Models.Path{},
 		&Models.BackupPolicy{},
 		&Models.BackupSchedule{},
-		&Models.Snapshot{},
 		&Models.Permission{},
 		&Models.Role{},
 		&Models.Repository{},

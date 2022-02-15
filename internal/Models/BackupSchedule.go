@@ -7,21 +7,21 @@ import (
 type BackupSchedule struct {
 	Base
 
-	EveryDay       bool         `json:"every_day"`
-	EveryWeek      bool         `json:"every_week"`
-	EveryMonth     bool         `json:"every_month"`
-	EveryMonday    bool         `json:"every_monday"`
-	EveryTuesday   bool         `json:"every_tuesday"`
-	EveryWednesday bool         `json:"every_wednesday"`
-	EveryThursday  bool         `json:"every_thursday"`
-	EveryFriday    bool         `json:"every_friday"`
-	EverySaturday  bool         `json:"every_saturday"`
-	EverySunday    bool         `json:"every_sunday"`
+	EveryDay       bool         `json:"everyDay"`
+	EveryWeek      bool         `json:"everyWeek"`
+	EveryMonth     bool         `json:"everyMonth"`
+	EveryMonday    bool         `json:"everyMonday"`
+	EveryTuesday   bool         `json:"everyTuesday"`
+	EveryWednesday bool         `json:"everyWednesday"`
+	EveryThursday  bool         `json:"everyThursday"`
+	EveryFriday    bool         `json:"everyTriday"`
+	EverySaturday  bool         `json:"everySaturday"`
+	EverySunday    bool         `json:"everySunday"`
 	Hour           string       `json:"hour"`
 	Day            string       `json:"day"`
 	Interval       string       `json:"interval"`
-	CronSyntax     string       `json:"cron_syntax"`
+	CronSyntax     string       `json:"cronSyntax"`
 	Choice         string       `json:"choice"`
-	RepositoryID   uint         `json:"repository_id"`
-	CronID         cron.EntryID `json:"cron_id"`
+	RepositoryID   uint         `json:"repositoryID"`
+	CronID         cron.EntryID `json:"cronID"`
 }

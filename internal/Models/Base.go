@@ -8,10 +8,9 @@ import (
 )
 
 type Base struct {
-	//	ID        uuid.UUID `json:"id" sql:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	ID        uint      `gorm:"primaryKey"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func (b *Base) IsValid() bool {
