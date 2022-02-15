@@ -10,12 +10,8 @@
   import Modal from '../components/Modal.svelte';
 
   let users = [];
-  let userSelected = false;
-  let newUser = false;
-  let values = {};
   let errors = {};
-  $:values = userSelected || {} || newUser;
-  $:errors = (userSelected && {}) || newUser;
+  let values = null;
 
   const schema = yup.object?.().shape({
     firstname: yup.string().required('required'),
@@ -38,10 +34,9 @@
     }
     console.log(values);
     try {
-      await agent[newUser ? 'post' : 'patch'](`/users/${newUser ? '' : userSelected.ID}`, values);
+      await agent[values.ID ? 'patch' : 'post'](`/users/${values.ID || ''}`, values);
       await onRefresh();
-      userSelected = false;
-      newUser = false;
+      values = null;
     } catch (err) {
       // Pass
     }
@@ -57,16 +52,10 @@
   }
 
   onMount(onRefresh);
-
 </script>
 
-{#if userSelected || newUser}
-  <Modal
-    on:close={() => {
-      userSelected = false;
-      newUser = false;
-    }}
-  >
+{#if values}
+  <Modal on:close={() => { values = null; }}>
     <h1 class="mb-2">Update user</h1>
     <form on:submit|preventDefault|stopPropagation={onSubmit} class="flex flex-col">
       <div class="w-full flex justify-between">
@@ -104,7 +93,10 @@
       />
       <button
         class="mt-4 py-1 rounded transition bg-blue-500 hover:bg-blue-600"
-        type="submit">Submit</button>
+        type="submit"
+      >
+        Submit
+      </button>
     </form>
   </Modal>
 {/if}
@@ -112,14 +104,14 @@
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each users as user, i}
     <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
-      <p>{user.firstname} {user.lastname}</p>
-      <p>{user.email}</p>
-      <p>added {dayjs(user.created_at).format('D/MM/YY')}</p>
+      <p class="truncate text-lg font-bold mb-2">{user.firstname} {user.lastname}</p>
+      <p class="truncate" title={user.email}>{user.email}</p>
+      <p class="truncate text-sm my-2 font-light">{dayjs(user.createdAt).format('D/MM/YY')}</p>
 
       <div class="flex mt-auto pt-2 h-8 mb-1">
         <button
           class="rounded h-6 w-6text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
-          on:click|preventDefault|stopPropagation={() => userSelected = Object.assign({}, user)}
+          on:click|preventDefault|stopPropagation={() => { values = Object.assign({}, user); }}
         >
           <Pen />
         </button>
@@ -133,7 +125,7 @@
     </div>
   {/each}
   <div
-    on:click={() => newUser = true}
+    on:click={() => { values = { firstname: '', lastname: '', email: '' }; }}
     class="text-3xl p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
     +
