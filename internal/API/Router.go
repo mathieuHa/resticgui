@@ -14,10 +14,6 @@ var cr *cron.Cron
 
 // todo for each repository if is active start the cron
 
-func startAllJobs() {
-
-}
-
 func SetupRouter() *gin.Engine {
 
 	// Activate when going to production
@@ -60,14 +56,10 @@ func SetupRouter() *gin.Engine {
 	// 	grpEntitiesRepository.GET("", GetEntities)
 	// }
 
-	// grpEntities := router.Group("/api/v1/entities")
-	// {
-	// 	grpEntities.GET("", QueryEntities)
-	// 	grpEntities.GET(":id", GetEntities)
-	// 	grpEntities.POST(":id", CreateEntity)
-	// 	grpEntities.PATCH("", EditEntity)
-	// 	grpEntities.DELETE(":id", RemoveEntity)
-	// }
+	grpPaths := router.Group("/api/v1/paths")
+	{
+		grpPaths.POST("", GetPath)
+	}
 
 	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")
 	{

@@ -1,5 +1,41 @@
 package API
 
+import (
+	"io/fs"
+	"net/http"
+	"os"
+	"path/filepath"
+
+	"github.com/gin-gonic/gin"
+	"gitlab.com/resticgui/resticgui/internal/Models"
+)
+
+func GetPath(c *gin.Context) {
+	//root := c.Param("root") // root path
+	root := c.PostForm("root")
+	_, err := os.ReadDir(root)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err, "message": "error in path"})
+		return
+	}
+	var paths []Models.Path
+	filepath.WalkDir(root, func(pathName string, file fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		var path Models.Path
+		path.Name = file.Name()
+		path.IsDir = file.IsDir()
+		path.Exists = true
+		path.AbsPath, _ = filepath.Abs(file.Name())
+		paths = append(paths, path)
+
+		return nil
+	})
+
+	c.IndentedJSON(http.StatusOK, paths)
+}
+
 // func AddEntities(c *gin.Context) {
 // 	id := c.Param("id") // id of the repository
 

@@ -10,6 +10,8 @@ type Path struct {
 	Name         string `json:"name" binding:"required,min=1"`
 	RepositoryID uint   `json:"repositoryID"`
 	Exists       bool   `json:"exists"`
+	IsDir        bool   `json:"isDir"`
+	AbsPath      string `json:"absPath"`
 }
 
 func (e Path) ToString() {
