@@ -50,12 +50,6 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id", RemoveRepository)
 	}
 
-	// grpEntitiesRepository := router.Group("/api/v1/repositories/:id/entities")
-	// {
-	// 	grpEntitiesRepository.PUT("", AddEntities)
-	// 	grpEntitiesRepository.GET("", GetEntities)
-	// }
-
 	grpPaths := router.Group("/api/v1/paths")
 	{
 		grpPaths.POST("", GetPath)
