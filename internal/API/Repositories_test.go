@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
@@ -21,8 +20,10 @@ func TestQueryRepositoriesRoute(t *testing.T) {
 	router := SetupRouter()
 	Utils.CleanDatabaseTest(db, t, "repositories")
 
+	const apiURL = "/api/v1/repositories/%v"
+
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/repositories", nil)
+	req, _ := http.NewRequest("GET", apiURL, nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -95,9 +96,11 @@ func TestRemoveRepositoriesRoute(t *testing.T) {
 	router := SetupRouter()
 	Utils.CleanDatabaseTest(db, t, "repositories")
 
+	const apiURL = "/api/v1/repositories/%v"
+
 	// Check invalid id
 	id := "aze"
-	url := fmt.Sprintf("/api/v1/repositories/%s", id)
+	url := fmt.Sprintf(apiURL, id)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("DELETE", url, nil)
 	router.ServeHTTP(w, req)
@@ -113,9 +116,8 @@ func TestRemoveRepositoriesRoute(t *testing.T) {
 	result := db.Create(&repository)
 	assert.Nil(t, result.Error)
 	id2 := repository.ID
-	log.Debug().Msgf("%v", id2)
 
-	url = fmt.Sprintf("/api/v1/repositories/%v", id2)
+	url = fmt.Sprintf(apiURL, id2)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("DELETE", url, nil)
 	router.ServeHTTP(w, req)
