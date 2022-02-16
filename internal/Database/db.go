@@ -16,7 +16,7 @@ func Connect() (_db *gorm.DB) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
-			LogLevel: logger.Info, // Log level Info will output everything
+			LogLevel: logger.Error, // Log level Info will output everything
 		},
 	)
 	_db, err := gorm.Open(sqlite.Open(dbname), &gorm.Config{

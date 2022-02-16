@@ -62,7 +62,7 @@ func TestGetRepositoriesRoute(t *testing.T) {
 
 		b := "{\n    \"error\": \"repository not found\"\n}"
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, http.StatusNotFound, w.Code)
 		assert.Equal(t, b, w.Body.String())
 	})
 
