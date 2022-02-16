@@ -13,7 +13,26 @@ import (
 )
 
 func GetPath(c *gin.Context) {
-	//root := c.Param("root") // root path
+	root := c.PostForm("root")
+	files, err := os.ReadDir(root)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err, "message": "error in path"})
+		return
+	}
+	var paths []Models.PathStruct
+
+	for _, file := range files {
+		var path Models.PathStruct
+		path.Name = file.Name()
+		path.IsDir = file.IsDir()
+		path.AbsPath, _ = filepath.Abs(file.Name())
+		paths = append(paths, path)
+	}
+
+	c.IndentedJSON(http.StatusOK, paths)
+}
+
+func GetPathAll(c *gin.Context) {
 	root := c.PostForm("root")
 	_, err := os.ReadDir(root)
 	if err != nil {

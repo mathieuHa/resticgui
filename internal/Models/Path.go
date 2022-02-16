@@ -14,6 +14,12 @@ type Path struct {
 	AbsPath      string `json:"absPath"`
 }
 
+type PathStruct struct {
+	Name    string `json:"name"`
+	IsDir   bool   `json:"isDir"`
+	AbsPath string `json:"absPath"`
+}
+
 func (e Path) ToString() {
 	log.Debug().Msgf("ID = %v", e.ID)
 	log.Debug().Msgf("Path = %v", e.Name)
