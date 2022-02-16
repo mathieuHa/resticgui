@@ -20,7 +20,7 @@ func TestQueryRepositoriesRoute(t *testing.T) {
 	router := SetupRouter()
 	Utils.CleanDatabaseTest(db, t, "repositories")
 
-	const apiURL = "/api/v1/repositories/%v"
+	const apiURL = "/api/v1/repositories"
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", apiURL, nil)
