@@ -38,49 +38,54 @@ func TestGetRepositoriesRoute(t *testing.T) {
 
 	const apiURL = "/api/v1/repositories/%v"
 
-	// Check invalid id
-	id := "aze"
-	url := fmt.Sprintf(apiURL, id)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", url, nil)
-	router.ServeHTTP(w, req)
+	t.Run("invalid id", func(t *testing.T) {
+		// Check invalid id
+		id := "aze"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		router.ServeHTTP(w, req)
 
-	b := "{\n    \"error\": \"id not valid\"\n}"
+		b := "{\n    \"error\": \"id not valid\"\n}"
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, b, w.Body.String())
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, b, w.Body.String())
+	})
 
-	// Check Unknown ID
-	id = "1280898"
-	url = fmt.Sprintf(apiURL, id)
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", url, nil)
-	router.ServeHTTP(w, req)
+	t.Run("invalid id", func(t *testing.T) {
+		// Check Unknown ID
+		id := "1280898"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		router.ServeHTTP(w, req)
 
-	b = "{\n    \"error\": \"repository not found\"\n}"
+		b := "{\n    \"error\": \"repository not found\"\n}"
 
-	// Check Valid ID get
-	repositoryName := "myRepo"
-	repository := Models.Repository{Name: repositoryName}
-	result := db.Create(&repository)
-	assert.Nil(t, result.Error)
-	id2 := repository.ID
-	log.Debug().Msgf("%v", id2)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, b, w.Body.String())
+	})
 
-	url = fmt.Sprintf(apiURL, id2)
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", url, nil)
-	router.ServeHTTP(w, req)
+	t.Run("valid ID", func(t *testing.T) {
+		// Check Valid ID get
+		repositoryName := "myRepo"
+		repository := Models.Repository{Name: repositoryName}
+		result := db.Create(&repository)
+		assert.Nil(t, result.Error)
+		id := repository.ID
 
-	log.Debug().Msg(w.Body.String())
-	var repositoryReceived Models.Repository
-	err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
-	log.Debug().Err(err)
-	assert.Nil(t, err)
-	assert.Equal(t, repositoryReceived.ID, id2)
-	assert.Equal(t, repositoryReceived.Name, repositoryName)
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+		var repositoryReceived Models.Repository
+		err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
+		assert.Nil(t, err)
+		assert.Equal(t, repositoryReceived.ID, id)
+		assert.Equal(t, repositoryReceived.Name, repositoryName)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
 }
 
 func TestRemoveRepositoriesRoute(t *testing.T) {
