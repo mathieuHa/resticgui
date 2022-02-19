@@ -16,10 +16,9 @@ job "resticgui_job" {
 
   constraint {
     attribute = "${attr.unique.hostname}"
+    value     = "^[^reverse]*"
     operator  = "regexp"
-    value     = "nomad(5|4)"
   }
-
 
   update {
     stagger      = "30s"
