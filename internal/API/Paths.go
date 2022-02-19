@@ -14,8 +14,10 @@ import (
 
 func GetPath(c *gin.Context) {
 	root := c.PostForm("root")
+	log.Info().Msgf("%v", root)
 	files, err := os.ReadDir(root)
 	if err != nil {
+		log.Error().Err(err).Msg("File error")
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err, "message": "error in path"})
 		return
 	}
