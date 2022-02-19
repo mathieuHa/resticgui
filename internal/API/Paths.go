@@ -13,12 +13,21 @@ import (
 )
 
 func GetPath(c *gin.Context) {
-	root := c.PostForm("root")
-	log.Info().Msgf("%v", root)
-	files, err := os.ReadDir(root)
+	var root Models.Path
+
+	if err := c.BindJSON(&root); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Error().Err(err).Msg("Bind Error root path")
+		return
+	}
+
+	log.Info().Msg(root.Name)
+
+
+	files, err := os.ReadDir(root.Name)
 	if err != nil {
 		log.Error().Err(err).Msg("File error")
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err, "message": "error in path"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "error in path"})
 		return
 	}
 	var paths []Models.PathStruct
@@ -35,14 +44,20 @@ func GetPath(c *gin.Context) {
 }
 
 func GetPathAll(c *gin.Context) {
-	root := c.PostForm("root")
-	_, err := os.ReadDir(root)
+	var root  Models.Path
+
+	if err := c.BindJSON(&root); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg("Bind Error root path")
+		return
+	}
+	_, err := os.ReadDir(root.Name)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err, "message": "error in path"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "error in path"})
 		return
 	}
 	var paths []Models.Path
-	filepath.WalkDir(root, func(pathName string, file fs.DirEntry, err error) error {
+	filepath.WalkDir(root.Name, func(pathName string, file fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
