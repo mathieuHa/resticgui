@@ -96,8 +96,7 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("IncludedPath").Replace(&editedRepository.IncludedPath)
-	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("ExcludedPath").Replace(&editedRepository.ExcludedPath)
+	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Paths").Replace(&editedRepository.Paths)
 	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
 	result = db.Model(&repository).Updates(&editedRepository)
 	if result.Error != nil {

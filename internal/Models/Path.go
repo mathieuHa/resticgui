@@ -11,6 +11,7 @@ type Path struct {
 	RepositoryID uint   `json:"repositoryID"`
 	Exists       bool   `json:"exists"`
 	IsDir        bool   `json:"isDir"`
+	Included     bool   `json:"included"`
 	AbsPath      string `json:"absPath"`
 }
 

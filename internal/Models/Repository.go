@@ -8,8 +8,7 @@ type Repository struct {
 	Base
 
 	Name           string         `json:"name" gorm:"unique" binding:"required,min=3"`
-	IncludedPath   []Path         `json:"includedPaths" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	ExcludedPath   []Path         `json:"excludedPaths" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Paths   []Path         `json:"paths" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BackupPolicy   BackupPolicy   `json:"backupPolicy" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BackupSchedule BackupSchedule `json:"backupSchedule" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Active         bool           `json:"active"`
