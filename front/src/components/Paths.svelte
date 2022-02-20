@@ -33,23 +33,31 @@
     tree = populateTree(tree, rootArray, leaf);
   }
 
-  const onTogglePaths = (pathArray, isDir) => {
-    for (let path of pathArray) {
-      const index = paths.findIndex((p) => p === path);
-      if (index > -1) paths = [...paths.slice(0, index), ...paths.slice(index + 1)];
-      else paths = [...paths, path];
+  const onTogglePaths = (path, include = true) => {
+    const index = paths.findIndex((p) => p === path || p === `!${path}`);
+    if (index > -1) paths = [...paths.slice(0, index), ...paths.slice(index + 1)];
+    else paths = [...paths, `${include ? '' : '!'}${path}`];
+
+    for (let i = paths.length - 1; i >= 0; i -= 1) {
+      if (paths[i] !== path && paths[i] !== `!${path}`
+        && ((paths[i][0] === '!' && `${paths[i]}/`.slice(1).startsWith(`${path}/`))
+        || (`${paths[i]}/`.startsWith(`${path}/`)))) {
+        paths = [...paths.slice(0, i), ...paths.slice(i + 1)];
+      }
     }
   };
 
   const onDirClick = (root, fetched, visible) => {
     const rootArray = root.split('/').filter((path) => !!path);
-    if (fetched) tree = populateTree(tree, [...rootArray, '__visible'], !visible)
-    else onLoad(root)
+    if (fetched) tree = populateTree(tree, [...rootArray, '__visible'], !visible);
+    else onLoad(root);
   };
 
   onMount(() => onLoad('/'));
-  $:dispatch('update', paths);
-  $:console.log(paths, tree);
+  $:dispatch('update', paths.map((path) => path[0] === '!'
+    ? { name: path.slice(1), included: false}
+    : { name: path, included: true }));
+  $:console.log(paths);
 </script>
 
 <AddPaths path="" tree={tree} {paths} {onTogglePaths} {onDirClick} />

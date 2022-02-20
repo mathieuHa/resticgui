@@ -93,13 +93,21 @@
           <label>Paths</label>
           <span class="text-red-500">{errors.path || ''}</span>
         </div>
-        <p class="my-2">{JSON.stringify(values.paths.map((path) => path.name))}</p>
-        <Paths
-          initialPaths={values.paths.map(({ name }) => name)}
-          on:update={({ detail: paths }) => {
-            values = { ...values, paths: paths.map((name) => ({ name })) };
-          }}
-        />
+        <p class="my-2">
+          [
+          {#each values.paths as path}
+            "<span class={!path.included ? 'text-orange-500' : ''}>{path.name}</span>",&nbsp;
+          {/each}
+          ]
+        </p>
+        <div class="max-w-xl">
+          <Paths
+            initialPaths={values.paths.map(({ name, included }) => included ? name : `!${name}`)}
+            on:update={({ detail: paths }) => {
+              values = { ...values, paths };
+            }}
+          />
+        </div>
       </div>
       <div class="flex flex-col {step !== 2 ? 'hidden' : ''}">
         <div class="w-full flex justify-between">
