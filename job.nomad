@@ -75,15 +75,15 @@ job "resticgui_job" {
       tags = [
         "traefik.enable=true",
         "traefik.consulcatalog.connect=true",
-        "traefik.http.routers.to-filezilla-http.entrypoints=web",
-        "traefik.http.routers.to-filezilla-http.rule=Host(`filezilla.hanotaux.local`)",
-        "traefik.http.routers.to-filezilla-http.middlewares=force-https@file",
-        "traefik.http.routers.to-filezilla-http.middlewares=privateip@file",
-        "traefik.http.routers.to-filezilla-https.entrypoints=websecure",
-        "traefik.http.routers.to-filezilla-https.middlewares=secHeader@file",
-        "traefik.http.routers.to-filezilla-https.middlewares=privateip@file",
-        "traefik.http.routers.to-filezilla-https.rule=Host(`filezilla.hanotaux.local`)",
-        "traefik.http.routers.to-filezilla-https.tls=true",
+        "traefik.http.routers.to-guacamole-http.entrypoints=web",
+        "traefik.http.routers.to-guacamole-http.rule=Host(`guacamole.hanotaux.local`)",
+        "traefik.http.routers.to-guacamole-http.middlewares=force-https@file",
+        "traefik.http.routers.to-guacamole-http.middlewares=privateip@file",
+        "traefik.http.routers.to-guacamole-https.entrypoints=websecure",
+        "traefik.http.routers.to-guacamole-https.middlewares=secHeader@file",
+        "traefik.http.routers.to-guacamole-https.middlewares=privateip@file",
+        "traefik.http.routers.to-guacamole-https.rule=Host(`guacamole.hanotaux.local`)",
+        "traefik.http.routers.to-guacamole-https.tls=true",
       ]
     }
 
