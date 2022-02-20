@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/Commands"
+	"gitlab.com/resticgui/resticgui/internal/commands"
 )
 
 func ExecuteCmd(c *gin.Context) {
@@ -17,11 +17,11 @@ func ExecuteCmd(c *gin.Context) {
 
 	switch cmd {
 	case "version":
-		output = Commands.GetResticVersion()
+		output = commands.GetResticVersion()
 	case "help":
-		output = Commands.GetResticHelp()
+		output = commands.GetResticHelp()
 	default:
-		output = Commands.GetResticVersion()
+		output = commands.GetResticVersion()
 	}
 
 	c.IndentedJSON(http.StatusOK, output)

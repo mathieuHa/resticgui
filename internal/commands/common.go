@@ -1,4 +1,4 @@
-package Commands
+package commands
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ const restoreCmd = "restore"
 const snapshotsCmd = "snaphosts"
 const forgetCmd = "forget"
 const pruneCmd = "prune"
+const statsCmd = "stats"
 
 func GetResticVersion() string {
 	return runRestic("version")
@@ -27,14 +28,12 @@ func GetLocalSnapshots(repository string) string {
 }
 
 func InitRepository(repository Models.Repository) string {
-
 	repoFormat := getProviderFormat(repository)
 	args := fmt.Sprintf("%v -r %v", initCmd, repoFormat)
 	return runRestic(args)
 }
 
 func RestoreRepository(repository Models.Repository, path string, version string) string {
-
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getRestoreCommonArgs(path, version)
 	args := fmt.Sprintf("%v %v", repoFormat, commonArgs)
@@ -43,7 +42,7 @@ func RestoreRepository(repository Models.Repository, path string, version string
 
 func getRestoreCommonArgs(path string, version string) string {
 	// todo check path exists and is writable
-	return fmt.Sprintf("%v --target %v", restoreCmd+version, path)
+	return fmt.Sprintf("%v %v --target %v", restoreCmd, version, path)
 }
 
 func ForgetSnaphots(repository Models.Repository, version string) string {
@@ -78,6 +77,12 @@ func BackupRepository(repository Models.Repository, dryRun bool) string {
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getBackupCommonArgs(repository, dryRun)
 	args := fmt.Sprintf("%v %v %v", repoFormat, commonArgs, backupCmd)
+	return runRestic(args)
+}
+
+func StatsRepository(repository Models.Repository, dryRun bool) string {
+	repoFormat := getProviderFormat(repository)
+	args := fmt.Sprintf("%v %v", repoFormat, statsCmd)
 	return runRestic(args)
 }
 

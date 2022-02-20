@@ -11,10 +11,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"gitlab.com/resticgui/resticgui/internal/API"
-	"gitlab.com/resticgui/resticgui/internal/Commands"
 	"gitlab.com/resticgui/resticgui/internal/Config"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Logs"
+	"gitlab.com/resticgui/resticgui/internal/commands"
 )
 
 var (
@@ -27,7 +27,7 @@ func main() {
 
 	log.Info().Msg("Start main")
 
-	Commands.ResticInit()
+	commands.ResticInit()
 	//Run the cron scheduler
 
 	router := API.SetupRouter()
