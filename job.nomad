@@ -31,6 +31,14 @@ job "resticgui_job" {
       mode = "bridge"
     }
 
+    volume "ceph-resticgui" {
+      type      = "csi"
+      attachment_mode = "file-system"
+      access_mode     = "single-node-writer"
+      read_only = false
+      source    = "ceph-resticgui"
+    }
+
     service {
       port = "8080"
       name = "resticgui"
@@ -69,6 +77,11 @@ job "resticgui_job" {
       resources {
         cpu    = 200 # MHz
         memory = 256 # MB
+      }
+      volume_mount {
+        volume      = "ceph-resticgui"
+        destination = "/srv"
+        read_only   = false
       }
     }
   }
