@@ -32,7 +32,7 @@ job "resticgui_job" {
     }
 
     service {
-      port = "3001"
+      port = "8080"
       name = "resticgui"
       connect {
         sidecar_service {
