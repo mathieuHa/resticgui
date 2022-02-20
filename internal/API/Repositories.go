@@ -12,6 +12,15 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+const entity = "repository "
+const errNotFound = entity + "not found"
+const errIDNotValid = "id not valid"
+const errNotDeleted = entity + "not deleted"
+const errNotBind = entity + "bind error"
+const errUpdate = entity + "update error"
+const errNameUsed = entity + "name already in use"
+const errCreate = entity + "creation failed"
+
 func QueryRepositories(c *gin.Context) {
 	var repositories []Models.Repository
 
@@ -26,7 +35,7 @@ func GetRepository(c *gin.Context) {
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
 
@@ -36,7 +45,7 @@ func GetRepository(c *gin.Context) {
 
 	result := db.Preload(clause.Associations).Find(&repositories, id)
 	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, repositories)
@@ -47,7 +56,7 @@ func CreateRepository(c *gin.Context) {
 
 	if err := c.BindJSON(&repository); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg("Bind Error Repository")
+		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
 	db := Database.Connect()
@@ -60,10 +69,10 @@ func CreateRepository(c *gin.Context) {
 			err := db.Find(&repository).Error
 
 			if err == nil {
-				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "name already in use"})
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errNameUsed})
 				return
 			} else {
-				c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
+				c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate})
 				return
 			}
 		}
@@ -75,14 +84,14 @@ func EditRepository(c *gin.Context) {
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
 
 	var editedRepository Models.Repository
 
 	if err := c.BindJSON(&editedRepository); err != nil {
-		log.Info().Err(err).Msg("Bind Error Repository")
+		log.Info().Err(err).Msg(errNotBind)
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -92,7 +101,7 @@ func EditRepository(c *gin.Context) {
 	db := Database.Connect()
 	result := db.Preload(clause.Associations).Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
 
@@ -100,8 +109,8 @@ func EditRepository(c *gin.Context) {
 	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
 	result = db.Model(&repository).Updates(&editedRepository)
 	if result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating 1"})
-		log.Info().Err(result.Error).Msg("Error updating 1")
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
+		log.Info().Err(result.Error).Msg(errUpdate)
 		return
 	}
 
@@ -109,7 +118,7 @@ func EditRepository(c *gin.Context) {
 
 	result = db.Preload(clause.Associations).Find(&updatedRepository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, updatedRepository)
@@ -119,7 +128,7 @@ func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
 
@@ -129,7 +138,7 @@ func RemoveRepository(c *gin.Context) {
 
 	result := db.Find(&repository, id)
 	if result.RowsAffected == 0 {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
 
@@ -138,7 +147,7 @@ func RemoveRepository(c *gin.Context) {
 	result = db.Select(clause.Associations).Delete(&repository, id)
 	if result.Error != nil {
 		log.Error().Err(result.Error)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "repository not deleted"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted})
 		return
 	}
 	c.Status(http.StatusNoContent)
