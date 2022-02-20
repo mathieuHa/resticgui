@@ -178,14 +178,6 @@ job "resticgui_job" {
         PASV_MIN_PORT=21100
         PASV_MAX_PORT=21110
       }
-      volume_mount {
-        volume      = "ceph-resticgui"
-        destination = "/data"
-        read_only   = false
-      }
     }
-
-    
-    
   }
 }
