@@ -6,7 +6,12 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/Models"
 )
 
-var maxSizeFile string
+const backupCmd = "backup"
+const initCmd = "init"
+const restoreCmd = "restore"
+const snapshotsCmd = "snaphosts"
+const forgetCmd = "forget"
+const pruneCmd = "prune"
 
 func GetResticVersion() string {
 	return runRestic("version")
@@ -17,22 +22,62 @@ func GetResticHelp() string {
 }
 
 func GetLocalSnapshots(repository string) string {
-	args := fmt.Sprintf("-r %v snapshots", repository)
+	args := fmt.Sprintf("-r %v %v", repository, snapshotsCmd)
 	return runRestic(args)
 }
 
-func InitLocalRepository(repository string) string {
+func InitRepository(repository Models.Repository) string {
 
-	repoFormat := getLocalRepositoryFormat(repository)
-	args := fmt.Sprintf("init -r %v", repoFormat)
+	repoFormat := getProviderFormat(repository)
+	args := fmt.Sprintf("%v -r %v", initCmd, repoFormat)
 	return runRestic(args)
 }
 
-func BackupLocalRepository(repository Models.Repository, dryRun bool) string {
+func RestoreRepository(repository Models.Repository, path string, version string) string {
 
-	repoFormat := getLocalRepositoryFormat(repository.Local)
+	repoFormat := getProviderFormat(repository)
+	commonArgs := getRestoreCommonArgs(path, version)
+	args := fmt.Sprintf("%v %v", repoFormat, commonArgs)
+	return runRestic(args)
+}
+
+func getRestoreCommonArgs(path string, version string) string {
+	// todo check path exists and is writable
+	return fmt.Sprintf("%v --target %v", restoreCmd+version, path)
+}
+
+func ForgetSnaphots(repository Models.Repository, version string) string {
+	repoFormat := getProviderFormat(repository)
+	args := fmt.Sprintf("%v %v %v", forgetCmd, repoFormat, version)
+	return runRestic(args)
+}
+
+func PruneSnaphots(repository Models.Repository, version string) string {
+	repoFormat := getProviderFormat(repository)
+	args := fmt.Sprintf("%v %v %v", pruneCmd, repoFormat, version)
+	return runRestic(args)
+}
+
+// todo check each provider
+func getProviderFormat(repository Models.Repository) string {
+	switch repository.Provider {
+	case "local":
+		return " -r " + getLocalRepositoryFormat(repository.LocalProvider)
+	case "b2":
+		return " -r " + getB2RepositoryFormat(repository.B2Provider)
+	case "aws":
+		return " -r " + getAmazonS3RepositoryFormat(repository.AWSS3Provider)
+	case "minio":
+		return " -r " + getMinioS3RepositoryFormat(repository.MinioS3Provider)
+	default:
+		return " -r " + getLocalRepositoryFormat(repository.LocalProvider)
+	}
+}
+
+func BackupRepository(repository Models.Repository, dryRun bool) string {
+	repoFormat := getProviderFormat(repository)
 	commonArgs := getBackupCommonArgs(repository, dryRun)
-	args := fmt.Sprintf("-r %v backup %v", repoFormat, commonArgs)
+	args := fmt.Sprintf("%v %v %v", repoFormat, commonArgs, backupCmd)
 	return runRestic(args)
 }
 
@@ -73,64 +118,33 @@ func getIncludedAndExludedFiles(repository Models.Repository) string {
 	}
 	files += fmt.Sprintf("%v", included)
 	if len(excluded) > 0 {
-		files += fmt.Sprintf(" -- exclude %v", excluded)
+		files += fmt.Sprintf(" -- exclude %v ", excluded)
 	}
 	return files
 }
 
-func InitAmazonS3Repository(bucketName string) string {
-	// todo Add env var AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and optional AWS_DEFAULT_REGION
-	repoFormat := getAmazonS3RepositoryFormat(bucketName)
-	args := fmt.Sprintf("init -r %v", repoFormat)
-	return runRestic(args)
-}
-
-func InitMinioS3Repository(bucketName string, minioPort int, minioIP string, minioScheme string) string {
-	// todo Add env var AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-	// add ca cert option
-	repoFormat := getMinioS3RepositoryFormat(bucketName, minioPort, minioIP, minioScheme)
-	args := fmt.Sprintf("init -r %v", repoFormat)
-	return runRestic(args)
-}
-
-func InitB2Repository(bucketName string, repository string) string {
-	// todo Add env var AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-	// add ca cert option
-	repoFormat := getB2RepositoryFormat(bucketName, repository)
-	args := fmt.Sprintf("init -r %v", repoFormat)
-	return runRestic(args)
-}
-
-func getLocalRepositoryFormat(repository string) string {
+func getLocalRepositoryFormat(local Models.LocalProvider) string {
 	// todo check path exists and is writable
 	// todo check repository string
-	return repository
+	return local.RepoName
 }
 
-func getB2RepositoryFormat(bucketName string, repository string) string {
+func getB2RepositoryFormat(b2 Models.B2Provider) string {
 	// todo check bucketName, repository
-	repoFormat := fmt.Sprintf("b2:%v:%v", bucketName, repository)
+	repoFormat := fmt.Sprintf("b2:%v:%v", b2.BucketName, b2.RepoName)
 	return repoFormat
 }
 
-func getAmazonS3RepositoryFormat(bucketName string) string {
+func getAmazonS3RepositoryFormat(aws Models.AWSS3Provider) string {
 	// todo check bucketName
-	repoFormat := fmt.Sprintf("s3:s3.amazonaws.com/%v", bucketName)
+	repoFormat := fmt.Sprintf("s3:s3.amazonaws.com/%v", aws.BucketName)
 	return repoFormat
 }
 
-func getMinioS3RepositoryFormat(bucketName string, minioPort int, minioIP string, minioScheme string) string {
+func getMinioS3RepositoryFormat(minio Models.MinioS3Provider) string {
 	// todo check bucketName, minioPort, minioIP, minioScheme
-	repoFormat := fmt.Sprintf("s3:%v://%v:%d/%v", minioScheme, minioIP, minioPort, bucketName)
+	repoFormat := fmt.Sprintf("s3:%v://%v:%v/%v", minio.Scheme, minio.IP, minio.Port, minio.BucketName)
 	return repoFormat
-}
-
-func BackupRepository(bucketName string, repository string) string {
-	// todo Add env var AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-	// todo check bucketName, repository
-	// add ca cert option
-	args := fmt.Sprintf("init -r b2:%v:%v", bucketName, repository)
-	return runRestic(args)
 }
 
 func CheckIntegrity(repository string, full bool, pourcentage float64) string {
