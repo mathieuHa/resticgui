@@ -40,6 +40,10 @@ func Migrate() {
 		&Models.Permission{},
 		&Models.Role{},
 		&Models.Repository{},
+		&Models.MinioS3Provider{},
+		&Models.AWSS3Provider{},
+		&Models.B2Provider{},
+		&Models.LocalProvider{},
 	)
 	if err != nil {
 		panic("failed to migrate {err} ")
