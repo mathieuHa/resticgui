@@ -38,7 +38,7 @@ job "resticgui_job" {
     }
 
     service {
-      port = "8080"
+      port = "3030"
       name = "resticgui"
       connect {
         sidecar_service {
@@ -63,8 +63,8 @@ job "resticgui_job" {
     }
 
     service {
-      port = "3000"
-      name = "filezilla"
+      port = "8080"
+      name = "guacamole"
       connect {
         sidecar_service {
            proxy {
@@ -108,14 +108,14 @@ job "resticgui_job" {
       }
     }
 
-    task "filezilla" {
+    task "vnc" {
       driver = "docker"
       config {
-        image = "lscr.io/linuxserver/filezilla:latest"
+        image = "yggnas/vncserver"
       }
       resources {
         cpu    = 200 # MHz
-        memory = 256 # MB
+        memory = 512 # MB
       }
       volume_mount {
         volume      = "ceph-resticgui"
@@ -125,19 +125,14 @@ job "resticgui_job" {
   
     }
 
-    task "vsftpd" {
+    task "guac" {
       driver = "docker"
       config {
-        image = "fauria/vsftpd"
+        image = "jasonbean/guacamole"
       }
       resources {
         cpu    = 200 # MHz
-        memory = 256 # MB
-      }
-      env {
-        FTP_PASS="password"
-        LOG_STDOUT="true"
-        PASV_ENABLE="true"
+        memory = 512 # MB
       }
     }
   }
