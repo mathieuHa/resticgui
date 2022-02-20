@@ -128,7 +128,7 @@ job "resticgui_job" {
     task "guac" {
       driver = "docker"
       config {
-        image = "jasonbean/guacamole"
+        image = "maxwaldorf/guacamole"
       }
       resources {
         cpu    = 200 # MHz
