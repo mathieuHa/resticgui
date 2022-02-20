@@ -46,7 +46,7 @@ LABEL "hanotaux.mathieu.vendor"="MHX"
 LABEL version="1.0"
 LABEL description="This image contain restic and resticgui webserver"
 
-EXPOSE 8080
+EXPOSE 3001
 
 WORKDIR /opt
 
