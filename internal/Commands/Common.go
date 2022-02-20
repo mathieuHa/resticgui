@@ -1,6 +1,12 @@
 package Commands
 
-import "fmt"
+import (
+	"fmt"
+
+	"gitlab.com/resticgui/resticgui/internal/Models"
+)
+
+var maxSizeFile string
 
 func GetResticVersion() string {
 	return runRestic("version")
@@ -20,6 +26,48 @@ func InitLocalRepository(repository string) string {
 	repoFormat := getLocalRepositoryFormat(repository)
 	args := fmt.Sprintf("init -r %v", repoFormat)
 	return runRestic(args)
+}
+
+func BackupLocalRepository(repository Models.Repository) string {
+
+	repoFormat := getLocalRepositoryFormat(repository.Local)
+	commonArgs := getBackupCommonArgs(repository)
+	args := fmt.Sprintf("-r %v backup %v", repoFormat, commonArgs)
+	return runRestic(args)
+}
+
+func getBackupCommonArgs(repository Models.Repository) string {
+	files := getIncludedAndExludedFiles(repository)
+	maxSize := getMaxSizeParameter(repository)
+	return files + maxSize
+
+}
+
+func getMaxSizeParameter(repository Models.Repository) string {
+	// todo check size is correct
+	if repository.MaxSize != "" {
+		return repository.MaxSize
+	} else {
+		return ""
+	}
+}
+
+func getIncludedAndExludedFiles(repository Models.Repository) string {
+	var files string
+	var included string
+	var excluded string
+	for _, path := range repository.Paths {
+		if path.Included {
+			included += path.AbsPath
+		} else {
+			excluded += path.AbsPath
+		}
+	}
+	files += fmt.Sprintf("%v", included)
+	if len(excluded) > 0 {
+		files += fmt.Sprintf(" -- exclude %v", excluded)
+	}
+	return files
 }
 
 func InitAmazonS3Repository(bucketName string) string {

@@ -8,6 +8,8 @@ type Repository struct {
 	Base
 
 	Name           string         `json:"name" gorm:"unique" binding:"required,min=3"`
+	Local          string         `json:"local"`
+	MaxSize        string         `json:"maxSize"`
 	Paths          []Path         `json:"paths" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BackupPolicy   BackupPolicy   `json:"backupPolicy" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BackupSchedule BackupSchedule `json:"backupSchedule" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
