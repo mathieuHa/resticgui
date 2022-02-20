@@ -43,7 +43,5 @@ func Migrate() {
 	)
 	if err != nil {
 		panic("failed to migrate {err} ")
-	} else {
-		//log.Debug().Msg("Auto Migrate")
 	}
 }

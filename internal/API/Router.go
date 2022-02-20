@@ -12,8 +12,6 @@ import (
 
 var cr *cron.Cron
 
-// todo for each repository if is active start the cron
-
 func SetupRouter() *gin.Engine {
 
 	// Activate when going to production

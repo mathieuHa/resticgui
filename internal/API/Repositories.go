@@ -22,10 +22,9 @@ const errNameUsed = entity + "name already in use"
 const errCreate = entity + "creation failed"
 
 func QueryRepositories(c *gin.Context) {
-	var repositories []Models.Repository
+	repositories := []Models.Repository{}
 
 	db := Database.Connect()
-
 	db.Preload(clause.Associations).Find(&repositories)
 
 	c.IndentedJSON(http.StatusOK, repositories)
@@ -42,7 +41,6 @@ func GetRepository(c *gin.Context) {
 	var repositories Models.Repository
 
 	db := Database.Connect()
-
 	result := db.Preload(clause.Associations).Find(&repositories, id)
 
 	if result.RowsAffected == 0 { // Not found entity by id
@@ -63,8 +61,8 @@ func CreateRepository(c *gin.Context) {
 		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
-	db := Database.Connect()
 
+	db := Database.Connect()
 	result := db.Create(&repository) // pass pointer of data to Create
 
 	if result.Error != nil {
@@ -139,7 +137,6 @@ func RemoveRepository(c *gin.Context) {
 	var repository Models.Repository
 
 	db := Database.Connect()
-
 	result := db.Find(&repository, id)
 	if result.RowsAffected == 0 {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})

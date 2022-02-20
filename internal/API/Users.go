@@ -11,7 +11,7 @@ import (
 )
 
 func QueryUsers(c *gin.Context) {
-	var users []Models.User
+	users := []Models.User{}
 
 	db := Database.Connect()
 
