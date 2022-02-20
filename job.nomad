@@ -105,7 +105,7 @@ job "resticgui_job" {
     }
 
     service {
-      port = "5800"
+      port = "3000"
       name = "filezilla"
       connect {
         sidecar_service {
@@ -153,7 +153,7 @@ job "resticgui_job" {
     task "filezilla" {
       driver = "docker"
       config {
-        image = "jlesage/filezilla"
+        image = "lscr.io/linuxserver/filezilla:latest"
       }
       resources {
         cpu    = 200 # MHz
