@@ -106,7 +106,7 @@ job "resticgui_job" {
       volume_mount {
         volume      = "ceph-resticgui"
         destination = "/opt"
-        read_only   = false
+        read_only   = true
       }
     }
 
