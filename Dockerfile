@@ -8,7 +8,7 @@ RUN npm ci
 
 RUN npm run build
 
-FROM ubuntu:focal-20220105 as BuilderRestic
+FROM ubuntu:focal-20220113 as BuilderRestic
 
 ARG RESTICVERSION=0.12.1
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
@@ -40,7 +40,7 @@ WORKDIR ${BUILDDIR}
 
 RUN cd cmd/resticgui && go build -o /resticgui
 
-FROM ubuntu:focal-20220105
+FROM ubuntu:focal-20220113
 
 LABEL "hanotaux.mathieu.vendor"="MHX"
 LABEL version="1.0"
