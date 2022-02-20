@@ -16,7 +16,7 @@ job "resticgui_job" {
 
   constraint {
     attribute = "${attr.unique.hostname}"
-    value     = "^[^reverse]*"
+    value     = "^[^reverse]"
     operator  = "regexp"
   }
 
@@ -29,6 +29,14 @@ job "resticgui_job" {
     count = 1
     network {
       mode = "bridge"
+    }
+
+    volume "ceph-resticgui" {
+      type      = "csi"
+      attachment_mode = "file-system"
+      access_mode     = "single-node-writer"
+      read_only = false
+      source    = "ceph-resticgui"
     }
 
     service {
@@ -56,6 +64,31 @@ job "resticgui_job" {
       ]
     }
 
+    service {
+      port = "5800"
+      name = "filezilla"
+      connect {
+        sidecar_service {
+           proxy {
+
+           }
+        }
+      }
+      tags = [
+        "traefik.enable=true",
+        "traefik.consulcatalog.connect=true",
+        "traefik.http.routers.to-filezilla-http.entrypoints=web",
+        "traefik.http.routers.to-filezilla-http.rule=Host(`filezilla.hanotaux.local`)",
+        "traefik.http.routers.to-filezilla-http.middlewares=force-https@file",
+        "traefik.http.routers.to-filezilla-http.middlewares=privateip@file",
+        "traefik.http.routers.to-filezilla-https.entrypoints=websecure",
+        "traefik.http.routers.to-filezilla-https.middlewares=secHeader@file",
+        "traefik.http.routers.to-filezilla-https.middlewares=privateip@file",
+        "traefik.http.routers.to-filezilla-https.rule=Host(`filezilla.hanotaux.local`)",
+        "traefik.http.routers.to-filezilla-https.tls=true",
+      ]
+    }
+
     task "resticgui" {
       driver = "docker"
       config {
@@ -70,6 +103,28 @@ job "resticgui_job" {
         cpu    = 200 # MHz
         memory = 256 # MB
       }
+      volume_mount {
+        volume      = "ceph-resticgui"
+        destination = "/srv"
+        read_only   = true
+      }
     }
+
+    task "filezilla" {
+      driver = "docker"
+      config {
+        image = "jlesage/filezilla"
+      }
+      resources {
+        cpu    = 200 # MHz
+        memory = 256 # MB
+      }
+      volume_mount {
+        volume      = "ceph-resticgui"
+        destination = "/storage"
+        read_only   = false
+      }
+    }
+    
   }
 }
