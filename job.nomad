@@ -20,11 +20,6 @@ job "resticgui_job" {
     operator  = "regexp"
   }
 
-  update {
-    stagger      = "30s"
-    max_parallel = 1
-  }
-
   group "resticgui" {
     count = 1
     network {
