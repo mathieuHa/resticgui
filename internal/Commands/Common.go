@@ -28,19 +28,27 @@ func InitLocalRepository(repository string) string {
 	return runRestic(args)
 }
 
-func BackupLocalRepository(repository Models.Repository) string {
+func BackupLocalRepository(repository Models.Repository, dryRun bool) string {
 
 	repoFormat := getLocalRepositoryFormat(repository.Local)
-	commonArgs := getBackupCommonArgs(repository)
+	commonArgs := getBackupCommonArgs(repository, dryRun)
 	args := fmt.Sprintf("-r %v backup %v", repoFormat, commonArgs)
 	return runRestic(args)
 }
 
-func getBackupCommonArgs(repository Models.Repository) string {
-	files := getIncludedAndExludedFiles(repository)
-	maxSize := getMaxSizeParameter(repository)
-	return files + maxSize
+func getBackupCommonArgs(repository Models.Repository, dryRun bool) string {
+	dryRunParameter := getDryRunParameter(dryRun)
+	filesParameter := getIncludedAndExludedFiles(repository)
+	maxSizeParameter := getMaxSizeParameter(repository)
+	return filesParameter + maxSizeParameter + dryRunParameter
+}
 
+func getDryRunParameter(dryRun bool) string {
+	if dryRun {
+		return " --dry-run "
+	} else {
+		return ""
+	}
 }
 
 func getMaxSizeParameter(repository Models.Repository) string {
