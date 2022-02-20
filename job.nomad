@@ -65,7 +65,7 @@ job "resticgui_job" {
     }
 
     service {
-      port = "8080"
+      port = "5800"
       name = "filezilla"
       connect {
         sidecar_service {
