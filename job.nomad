@@ -117,6 +117,11 @@ job "resticgui_job" {
         cpu    = 200 # MHz
         memory = 256 # MB
       }
+      volume_mount {
+        volume      = "ceph-resticgui"
+        destination = "/app"
+        read_only   = true
+      }
   
     }
 
