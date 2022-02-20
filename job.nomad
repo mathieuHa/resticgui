@@ -132,6 +132,7 @@ job "resticgui_job" {
       env {
         FTP_PASS="password"
         PASV_ADDRESS="${NOMAD_IP_ftpd}"
+        LOG_STDOUT="true"
       }
     }
   }
