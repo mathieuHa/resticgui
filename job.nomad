@@ -110,20 +110,6 @@ job "resticgui_job" {
       }
     }
 
-    task "filezilla" {
-      driver = "docker"
-      config {
-        image = "jlesage/filezilla"
-      }
-      resources {
-        cpu    = 200 # MHz
-        memory = 256 # MB
-      }
-      volume_mount {
-        volume      = "ceph-resticgui"
-        destination = "/storage"
-        read_only   = false
-      }
-    }
+    
   }
 }
