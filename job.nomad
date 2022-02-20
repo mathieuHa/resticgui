@@ -132,6 +132,7 @@ job "resticgui_job" {
       env {
         FTP_PASS="password"
         LOG_STDOUT="true"
+        PASV_ENABLE="true"
       }
     }
   }
