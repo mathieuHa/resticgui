@@ -16,7 +16,7 @@ job "resticgui_job" {
 
   constraint {
     attribute = "${attr.unique.hostname}"
-    value     = "^[^reverse]*"
+    value     = "^[^reverse]"
     operator  = "regexp"
   }
 
