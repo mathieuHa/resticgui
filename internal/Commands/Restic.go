@@ -22,7 +22,7 @@ func ResticInit() {
 	}
 }
 
-func runRestic(args string) {
+func runRestic(args string) string {
 	cmd := exec.Command(RESTIC_PATH, args)
 	cmdOutput := &bytes.Buffer{}
 	cmd.Stdout = cmdOutput
@@ -32,4 +32,5 @@ func runRestic(args string) {
 		log.Error().Err(err)
 	}
 	log.Info().Msgf("output %v", cmdOutput.String())
+	return cmdOutput.String()
 }

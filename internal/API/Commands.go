@@ -15,7 +15,14 @@ func ExecuteCmd(c *gin.Context) {
 
 	log.Info().Msg(cmd)
 
-	Commands.GetResticVersion()
+	switch cmd {
+	case "version":
+		output = Commands.GetResticVersion()
+	case "help":
+		output = Commands.GetResticHelp()
+	default:
+		output = Commands.GetResticVersion()
+	}
 
 	c.IndentedJSON(http.StatusOK, output)
 }
