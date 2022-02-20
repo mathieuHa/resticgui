@@ -44,10 +44,14 @@ func GetRepository(c *gin.Context) {
 	db := Database.Connect()
 
 	result := db.Preload(clause.Associations).Find(&repositories, id)
+
 	if result.RowsAffected == 0 { // Not found entity by id
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
+	// check all path and update entity in memory if path changed
+	checkAllPath(repositories.Paths)
+
 	c.IndentedJSON(http.StatusOK, repositories)
 }
 

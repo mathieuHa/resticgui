@@ -23,14 +23,13 @@ func GetPath(c *gin.Context) {
 
 	log.Info().Msg(root.Name)
 
-
 	files, err := os.ReadDir(root.Name)
 	if err != nil {
 		log.Error().Err(err).Msg("File error")
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "error in path"})
 		return
 	}
-	var paths []Models.PathStruct
+	paths := []Models.PathStruct{}
 
 	for _, file := range files {
 		var path Models.PathStruct
@@ -44,7 +43,7 @@ func GetPath(c *gin.Context) {
 }
 
 func GetPathAll(c *gin.Context) {
-	var root  Models.Path
+	var root Models.Path
 
 	if err := c.BindJSON(&root); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -56,15 +55,15 @@ func GetPathAll(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "error in path"})
 		return
 	}
-	var paths []Models.Path
+	paths := []Models.PathStruct{}
+
 	filepath.WalkDir(root.Name, func(pathName string, file fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		var path Models.Path
+		var path Models.PathStruct
 		path.Name = file.Name()
 		path.IsDir = file.IsDir()
-		path.Exists = true
 		path.AbsPath, _ = filepath.Abs(file.Name())
 		paths = append(paths, path)
 
@@ -90,8 +89,15 @@ func checkFileExist(path string) bool {
 	log.Info().Msg("File exists")
 	return true
 }
-func checkAllPath(entities []Models.Path) {
+
+func checkAllPath(entities []Models.Path) bool {
+	changed := false
 	for i, entity := range entities {
-		entities[i].Exists = checkFileExist(entity.AbsPath)
+		exists := checkFileExist(entity.AbsPath)
+		if exists != entities[i].Exists {
+			changed = true
+		}
+		entities[i].Exists = exists
 	}
+	return changed
 }
