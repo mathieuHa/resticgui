@@ -1,9 +1,5 @@
 package Commands
 
-import (
-	"bytes"
-	"fmt"
-	"os/exec"
-)
-
-
+func GetResticVersion() {
+	runRestic("version")
+}

@@ -12,7 +12,7 @@ var (
 	RESTIC_PATH string
 )
 
-func resticInit() {
+func ResticInit() {
 	if runtime.GOOS == "windows" {
 		RESTIC_PATH = "restic.exe"
 	}

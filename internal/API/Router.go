@@ -54,6 +54,11 @@ func SetupRouter() *gin.Engine {
 		grpPaths.POST("all", GetPath)
 	}
 
+	grpCmds := router.Group("/api/v1/cmd")
+	{
+		grpCmds.GET("", ExecuteCmd)
+	}
+
 	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")
 	{
 		grpBackupSchedules.PUT("", UpdateBackupSchedule)
