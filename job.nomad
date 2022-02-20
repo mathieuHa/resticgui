@@ -29,6 +29,46 @@ job "resticgui_job" {
     count = 1
     network {
       mode = "bridge"
+      port "ftpc" {
+        to = 20
+      }
+      port "ftpd" {
+        to = 21
+      }
+      port "data21100" {
+        static = 21100
+      }
+      port "data21101" {
+        static = 21101
+      }
+      port "data21102" {
+        static = 21102
+      }
+      port "data21103" {
+        static = 21103
+      }
+      port "data21104" {
+        static = 21104
+      }
+      port "data21105" {
+        static = 21105
+      }
+      port "data21106" {
+        static = 21106
+      }
+      port "data21107" {
+        static = 21107
+      }
+      port "data21108" {
+        static = 21108
+      }
+      port "data21109" {
+        static = 21109
+      }
+      port "data21110" {
+        static = 21110
+      }
+
     }
 
     volume "ceph-resticgui" {
@@ -119,12 +159,33 @@ job "resticgui_job" {
         cpu    = 200 # MHz
         memory = 256 # MB
       }
+  
+    }
+
+    task "vsftpd" {
+      driver = "docker"
+      config {
+        image = "fauria/vsftpd"
+        ports = ["ftpd","ftpc","data21100","data21101","data21102","data21103","data21104","data21105","data21106","data21107","data21108","data21109","data21110"]
+      }
+      resources {
+        cpu    = 200 # MHz
+        memory = 256 # MB
+      }
+      env {
+        FTP_PASS="password"
+        PASV_ADDRESS="${NOMAD_IP_ftpd}"
+        PASV_MIN_PORT=21100
+        PASV_MAX_PORT=21110
+      }
       volume_mount {
         volume      = "ceph-resticgui"
-        destination = "/storage"
+        destination = "/data"
         read_only   = false
       }
     }
+
+    
     
   }
 }
