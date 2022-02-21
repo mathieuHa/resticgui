@@ -8,6 +8,7 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
+	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -79,7 +80,8 @@ func CreateRepository(c *gin.Context) {
 			}
 		}
 	}
-	// commands.InitRepository(repository)
+	commands.InitRepository(repository)
+	commands.GetSnapshots(repository)
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 

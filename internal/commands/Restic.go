@@ -30,12 +30,15 @@ func runRestic(args string) string {
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "RESTIC_PASSWORD=eajoeakjfonzanzi")
 	cmdOutput := &bytes.Buffer{}
+	cmdStderr := &bytes.Buffer{}
 	cmd.Stdout = cmdOutput
+	cmd.Stderr = cmdStderr
 	err := cmd.Run()
 
 	if err != nil {
 		log.Error().Err(err)
 	}
-	log.Info().Msgf("output %v", cmdOutput.String())
+	log.Info().Msgf("output: %v", cmdOutput.String())
+	log.Info().Msgf("error: %v", cmdStderr.String())
 	return cmdOutput.String()
 }

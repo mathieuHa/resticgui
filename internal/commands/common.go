@@ -9,7 +9,7 @@ import (
 const backupCmd = "backup"
 const initCmd = "init"
 const restoreCmd = "restore"
-const snapshotsCmd = "snaphosts"
+const snapshotsCmd = "snapshots"
 const forgetCmd = "forget"
 const pruneCmd = "prune"
 const statsCmd = "stats"
@@ -62,15 +62,15 @@ func PruneSnaphots(repository Models.Repository, version string) string {
 func getProviderFormat(repository Models.Repository) string {
 	switch repository.Provider {
 	case "local":
-		return " -r " + getLocalRepositoryFormat(repository.LocalProvider)
+		return "-r " + getLocalRepositoryFormat(repository.LocalProvider)
 	case "b2":
-		return " -r " + getB2RepositoryFormat(repository.B2Provider)
+		return "-r " + getB2RepositoryFormat(repository.B2Provider)
 	case "aws":
-		return " -r " + getAmazonS3RepositoryFormat(repository.AWSS3Provider)
+		return "-r " + getAmazonS3RepositoryFormat(repository.AWSS3Provider)
 	case "minio":
-		return " -r " + getMinioS3RepositoryFormat(repository.MinioS3Provider)
+		return "-r " + getMinioS3RepositoryFormat(repository.MinioS3Provider)
 	default:
-		return " -r " + getLocalRepositoryFormat(repository.LocalProvider)
+		return "-r " + getLocalRepositoryFormat(repository.LocalProvider)
 	}
 }
 
