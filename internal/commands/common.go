@@ -22,8 +22,9 @@ func GetResticHelp() string {
 	return runRestic("--help")
 }
 
-func GetLocalSnapshots(repository string) string {
-	args := fmt.Sprintf("-r %v %v", repository, snapshotsCmd)
+func GetSnapshots(repository Models.Repository) string {
+	repoFormat := getProviderFormat(repository)
+	args := fmt.Sprintf("-r %v %v", repoFormat, snapshotsCmd)
 	return runRestic(args)
 }
 

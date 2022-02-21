@@ -49,9 +49,9 @@ func TestGetResticHelp(t *testing.T) {
 	}
 }
 
-func TestGetLocalSnapshots(t *testing.T) {
+func TestGetSnapshots(t *testing.T) {
 	type args struct {
-		repository string
+		repository Models.Repository
 	}
 	tests := []struct {
 		name string
@@ -62,7 +62,7 @@ func TestGetLocalSnapshots(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetLocalSnapshots(tt.args.repository); got != tt.want {
+			if got := GetSnapshots(tt.args.repository); got != tt.want {
 				t.Errorf("GetLocalSnapshots() = %v, want %v", got, tt.want)
 			}
 		})
