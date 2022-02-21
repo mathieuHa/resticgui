@@ -24,13 +24,13 @@ func GetResticHelp() string {
 
 func GetSnapshots(repository Models.Repository) string {
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("-r %v %v", repoFormat, snapshotsCmd)
+	args := fmt.Sprintf("%v %v", repoFormat, snapshotsCmd)
 	return runRestic(args)
 }
 
 func InitRepository(repository Models.Repository) string {
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("%v -r %v", initCmd, repoFormat)
+	args := fmt.Sprintf("%v %v", initCmd, repoFormat)
 	return runRestic(args)
 }
 

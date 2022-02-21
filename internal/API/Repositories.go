@@ -79,6 +79,7 @@ func CreateRepository(c *gin.Context) {
 			}
 		}
 	}
+	// commands.InitRepository(repository)
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
@@ -123,6 +124,7 @@ func EditRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
+	// commands.InitRepository(repository)
 	c.IndentedJSON(http.StatusOK, updatedRepository)
 }
 

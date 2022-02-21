@@ -11,6 +11,7 @@ type Repository struct {
 	Local           string          `json:"local"`
 	MaxSize         string          `json:"maxSize"`
 	Provider        string          `json:"provider"`
+	Password        string          `json:"password"`
 	Paths           []Path          `json:"paths" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	LocalProvider   LocalProvider   `json:"localProvider" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	B2Provider      B2Provider      `json:"B2Provider" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
