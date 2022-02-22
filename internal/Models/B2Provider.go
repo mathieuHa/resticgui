@@ -6,4 +6,6 @@ type B2Provider struct {
 	BucketName   string `json:"bucketName"`
 	RepoName     string `json:"repoName"`
 	RepositoryID uint   `json:"repositoryID"`
+	AccountID    string `json:"accountID"`
+	AccountKey   string `json:"accountKey"`
 }
