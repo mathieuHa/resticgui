@@ -23,10 +23,10 @@ func ResticInit() {
 	}
 }
 
-func runRestic(args string) string {
+func runRestic(args []string) string {
 	log.Debug().Msgf("args %v", args)
 
-	cmd := exec.Command(RESTIC_PATH, args)
+	cmd := exec.Command(RESTIC_PATH, args...)
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "RESTIC_PASSWORD=eajoeakjfonzanzi")
 	cmdOutput := &bytes.Buffer{}

@@ -13,31 +13,44 @@ const snapshotsCmd = "snapshots"
 const forgetCmd = "forget"
 const pruneCmd = "prune"
 const statsCmd = "stats"
+const checkCmd = "check"
 
 func GetResticVersion() string {
-	return runRestic("version")
+	var args []string
+
+	args = append(args, "version")
+	return runRestic(args)
 }
 
 func GetResticHelp() string {
-	return runRestic("--help")
+	var args []string
+
+	args = append(args, "--help")
+	return runRestic(args)
 }
 
 func GetSnapshots(repository Models.Repository) string {
+	var args []string
+
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("%v %v", repoFormat, snapshotsCmd)
+	args = append(args, repoFormat, snapshotsCmd)
 	return runRestic(args)
 }
 
 func InitRepository(repository Models.Repository) string {
+	var args []string
+
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("%v %v", initCmd, repoFormat)
+	args = append(args, initCmd, repoFormat)
 	return runRestic(args)
 }
 
 func RestoreRepository(repository Models.Repository, path string, version string) string {
+	var args []string
+
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getRestoreCommonArgs(path, version)
-	args := fmt.Sprintf("%v %v", repoFormat, commonArgs)
+	args = append(args, repoFormat, commonArgs)
 	return runRestic(args)
 }
 
@@ -47,14 +60,16 @@ func getRestoreCommonArgs(path string, version string) string {
 }
 
 func ForgetSnaphots(repository Models.Repository, version string) string {
+	var args []string
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("%v %v %v", forgetCmd, repoFormat, version)
+	args = append(args, forgetCmd, repoFormat, version)
 	return runRestic(args)
 }
 
 func PruneSnaphots(repository Models.Repository, version string) string {
+	var args []string
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("%v %v %v", pruneCmd, repoFormat, version)
+	args = append(args, pruneCmd, repoFormat, version)
 	return runRestic(args)
 }
 
@@ -75,28 +90,34 @@ func getProviderFormat(repository Models.Repository) string {
 }
 
 func BackupRepository(repository Models.Repository, dryRun bool) string {
+	var args []string
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getBackupCommonArgs(repository, dryRun)
-	args := fmt.Sprintf("%v %v %v", repoFormat, commonArgs, backupCmd)
+	args = append(args, repoFormat)
+	args = append(args, commonArgs...)
+	args = append(args, backupCmd)
 	return runRestic(args)
 }
 
 func StatsRepository(repository Models.Repository, dryRun bool) string {
+	var args []string
 	repoFormat := getProviderFormat(repository)
-	args := fmt.Sprintf("%v %v", repoFormat, statsCmd)
+	args = append(args, repoFormat, statsCmd)
 	return runRestic(args)
 }
 
-func getBackupCommonArgs(repository Models.Repository, dryRun bool) string {
+func getBackupCommonArgs(repository Models.Repository, dryRun bool) []string {
+	var args []string
 	dryRunParameter := getDryRunParameter(dryRun)
 	filesParameter := getIncludedAndExludedFiles(repository)
 	maxSizeParameter := getMaxSizeParameter(repository)
-	return filesParameter + maxSizeParameter + dryRunParameter
+	args = append(args, filesParameter, maxSizeParameter, dryRunParameter)
+	return args
 }
 
 func getDryRunParameter(dryRun bool) string {
 	if dryRun {
-		return " --dry-run "
+		return "--dry-run"
 	} else {
 		return ""
 	}
@@ -153,14 +174,17 @@ func getMinioS3RepositoryFormat(minio Models.MinioS3Provider) string {
 	return repoFormat
 }
 
-func CheckIntegrity(repository string, full bool, pourcentage float64) string {
+func CheckIntegrity(repository Models.Repository, full bool, pourcentage float64) string {
 	// todo check repository string and pourcentage
-	args := fmt.Sprintf("-r %v check", repository)
+	var args []string
+
+	repoFormat := getProviderFormat(repository)
+	args = append(args, checkCmd, repoFormat)
 	if full {
-		args += " --read-data"
+		args = append(args, "--read-data")
 	}
 	if pourcentage != 0 {
-		args += fmt.Sprintf(" --read-data-subset %f", pourcentage)
+		args = append(args, "--read-data-subset", fmt.Sprintf("%f", pourcentage))
 	}
 	return runRestic(args)
 }
