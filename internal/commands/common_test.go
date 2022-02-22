@@ -48,8 +48,7 @@ func Test_getRestoreCommonArgs(t *testing.T) {
 		args args
 		want string
 	}{
-		// TODO: Add test cases.
-
+		{"restore common args", args{"/", "latest"}, "restore latest --target /"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
