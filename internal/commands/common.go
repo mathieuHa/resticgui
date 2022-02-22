@@ -33,7 +33,8 @@ func GetSnapshots(repository Models.Repository) string {
 	var args []string
 
 	repoFormat := getProviderFormat(repository)
-	args = append(args, repoFormat, snapshotsCmd)
+	args = append(args, repoFormat...)
+	args = append(args, snapshotsCmd)
 	return runRestic(args)
 }
 
@@ -41,7 +42,8 @@ func InitRepository(repository Models.Repository) string {
 	var args []string
 
 	repoFormat := getProviderFormat(repository)
-	args = append(args, initCmd, repoFormat)
+	args = append(args, initCmd)
+	args = append(args, repoFormat...)
 	return runRestic(args)
 }
 
@@ -50,7 +52,8 @@ func RestoreRepository(repository Models.Repository, path string, version string
 
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getRestoreCommonArgs(path, version)
-	args = append(args, repoFormat, commonArgs)
+	args = append(args, repoFormat...)
+	args = append(args, commonArgs)
 	return runRestic(args)
 }
 
@@ -62,38 +65,47 @@ func getRestoreCommonArgs(path string, version string) string {
 func ForgetSnaphots(repository Models.Repository, version string) string {
 	var args []string
 	repoFormat := getProviderFormat(repository)
-	args = append(args, forgetCmd, repoFormat, version)
+	args = append(args, forgetCmd)
+	args = append(args, repoFormat...)
+	args = append(args, version)
 	return runRestic(args)
 }
 
 func PruneSnaphots(repository Models.Repository, version string) string {
 	var args []string
 	repoFormat := getProviderFormat(repository)
-	args = append(args, pruneCmd, repoFormat, version)
+	args = append(args, pruneCmd)
+	args = append(args, repoFormat...)
+	args = append(args, version)
 	return runRestic(args)
 }
 
 // todo check each provider
-func getProviderFormat(repository Models.Repository) string {
+func getProviderFormat(repository Models.Repository) []string {
+	var args []string
+
+	args = append(args, "-r")
 	switch repository.Provider {
 	case "local":
-		return "-r " + getLocalRepositoryFormat(repository.LocalProvider)
+		args = append(args, getLocalRepositoryFormat(repository.LocalProvider))
 	case "b2":
-		return "-r " + getB2RepositoryFormat(repository.B2Provider)
+		args = append(args, getB2RepositoryFormat(repository.B2Provider))
 	case "aws":
-		return "-r " + getAmazonS3RepositoryFormat(repository.AWSS3Provider)
+		args = append(args, getAmazonS3RepositoryFormat(repository.AWSS3Provider))
 	case "minio":
-		return "-r " + getMinioS3RepositoryFormat(repository.MinioS3Provider)
+		args = append(args, getMinioS3RepositoryFormat(repository.MinioS3Provider))
 	default:
-		return "-r " + getLocalRepositoryFormat(repository.LocalProvider)
+		args = append(args, getLocalRepositoryFormat(repository.LocalProvider))
 	}
+	return args
+
 }
 
 func BackupRepository(repository Models.Repository, dryRun bool) string {
 	var args []string
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getBackupCommonArgs(repository, dryRun)
-	args = append(args, repoFormat)
+	args = append(args, repoFormat...)
 	args = append(args, commonArgs...)
 	args = append(args, backupCmd)
 	return runRestic(args)
@@ -102,7 +114,8 @@ func BackupRepository(repository Models.Repository, dryRun bool) string {
 func StatsRepository(repository Models.Repository, dryRun bool) string {
 	var args []string
 	repoFormat := getProviderFormat(repository)
-	args = append(args, repoFormat, statsCmd)
+	args = append(args, repoFormat...)
+	args = append(args, statsCmd)
 	return runRestic(args)
 }
 
@@ -111,7 +124,9 @@ func getBackupCommonArgs(repository Models.Repository, dryRun bool) []string {
 	dryRunParameter := getDryRunParameter(dryRun)
 	filesParameter := getIncludedAndExludedFiles(repository)
 	maxSizeParameter := getMaxSizeParameter(repository)
-	args = append(args, filesParameter, maxSizeParameter, dryRunParameter)
+	args = append(args, filesParameter...)
+	args = append(args, maxSizeParameter...)
+	args = append(args, dryRunParameter)
 	return args
 }
 
@@ -123,29 +138,33 @@ func getDryRunParameter(dryRun bool) string {
 	}
 }
 
-func getMaxSizeParameter(repository Models.Repository) string {
+func getMaxSizeParameter(repository Models.Repository) []string {
+	var args []string
 	// todo check size is correct
 	if repository.MaxSize != "" {
-		return repository.MaxSize
+		args = append(args, "--exclude-larger-than")
+		args = append(args, repository.MaxSize)
 	} else {
-		return ""
+		args = []string{}
 	}
+	return args
 }
 
-func getIncludedAndExludedFiles(repository Models.Repository) string {
-	var files string
-	var included string
-	var excluded string
+func getIncludedAndExludedFiles(repository Models.Repository) []string {
+	var files []string
+	var included []string
+	var excluded []string
 	for _, path := range repository.Paths {
 		if path.Included {
-			included += path.AbsPath
+			included = append(included, path.AbsPath)
 		} else {
-			excluded += path.AbsPath
+			excluded = append(excluded, path.AbsPath)
 		}
 	}
-	files += fmt.Sprintf("%v", included)
+	files = append(files, included...)
 	if len(excluded) > 0 {
-		files += fmt.Sprintf(" -- exclude %v ", excluded)
+		files = append(files, "--exclude")
+		files = append(files, excluded...)
 	}
 	return files
 }
@@ -179,7 +198,8 @@ func CheckIntegrity(repository Models.Repository, full bool, pourcentage float64
 	var args []string
 
 	repoFormat := getProviderFormat(repository)
-	args = append(args, checkCmd, repoFormat)
+	args = append(args, checkCmd)
+	args = append(args, repoFormat...)
 	if full {
 		args = append(args, "--read-data")
 	}
