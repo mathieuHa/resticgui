@@ -113,6 +113,7 @@ func EditRepository(c *gin.Context) {
 	db.Model(&repository.LocalProvider).Updates(&editedRepository.LocalProvider)
 	db.Model(&repository.MinioS3Provider).Updates(&editedRepository.MinioS3Provider)
 	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
+	db.Model(&repository.BackupPolicy).Updates(&editedRepository.BackupPolicy)
 	result = db.Model(repository).Updates(&editedRepository)
 	if result.Error != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
