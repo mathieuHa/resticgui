@@ -13,7 +13,7 @@ func TestGetRestoreCommonArgs(t *testing.T) {
 		path := "/"
 		version := "latest"
 		got := getRestoreCommonArgs(path, version)
-		want := "restore latest --target /"
+		want := restoreCmd + " latest --target /"
 		assert.Equal(t, got, want)
 	})
 }
@@ -46,13 +46,13 @@ func Test_getRestoreCommonArgs(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string
+		want []string
 	}{
-		{"restore common args", args{"/", "latest"}, "restore latest --target /"},
+		{"restore common args", args{"/", "latest"}, []string{"restore", "latest", "--target", "/"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getRestoreCommonArgs(tt.args.path, tt.args.version); got != tt.want {
+			if got := getRestoreCommonArgs(tt.args.path, tt.args.version); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getRestoreCommonArgs() = %v, want %v", got, tt.want)
 			}
 		})

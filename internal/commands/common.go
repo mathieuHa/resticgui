@@ -53,13 +53,18 @@ func RestoreRepository(repository Models.Repository, path string, version string
 	repoFormat := getProviderFormat(repository)
 	commonArgs := getRestoreCommonArgs(path, version)
 	args = append(args, repoFormat...)
-	args = append(args, commonArgs)
+	args = append(args, commonArgs...)
 	return runRestic(args)
 }
 
-func getRestoreCommonArgs(path string, version string) string {
-	// todo check path exists and is writable
-	return fmt.Sprintf("%v %v --target %v", restoreCmd, version, path)
+func getRestoreCommonArgs(path string, version string) []string {
+	var args []string
+	// todo check target path exists and is writable
+	args = append(args, restoreCmd)
+	args = append(args, version)
+	args = append(args, "--target")
+	args = append(args, path)
+	return args
 }
 
 func ForgetSnaphots(repository Models.Repository, version string) string {
