@@ -8,7 +8,6 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -80,8 +79,6 @@ func CreateRepository(c *gin.Context) {
 			}
 		}
 	}
-	commands.InitRepository(repository)
-	commands.GetSnapshots(repository)
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
@@ -111,8 +108,12 @@ func EditRepository(c *gin.Context) {
 	}
 
 	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Paths").Replace(&editedRepository.Paths)
+	db.Model(&repository.B2Provider).Updates(&editedRepository.B2Provider)
+	db.Model(&repository.AWSS3Provider).Updates(&editedRepository.AWSS3Provider)
+	db.Model(&repository.LocalProvider).Updates(&editedRepository.LocalProvider)
+	db.Model(&repository.MinioS3Provider).Updates(&editedRepository.MinioS3Provider)
 	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
-	result = db.Model(&repository).Updates(&editedRepository)
+	result = db.Model(repository).Updates(&editedRepository)
 	if result.Error != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
 		log.Info().Err(result.Error).Msg(errUpdate)
@@ -126,7 +127,6 @@ func EditRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
-	// commands.InitRepository(repository)
 	c.IndentedJSON(http.StatusOK, updatedRepository)
 }
 
