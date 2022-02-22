@@ -3,19 +3,17 @@ package commands
 import (
 	"reflect"
 	"testing"
-
-	"github.com/go-playground/assert/v2"
 )
 
-func TestGetRestoreCommonArgs(t *testing.T) {
-	t.Run("test latest restore to /", func(t *testing.T) {
-		path := "/"
-		version := "latest"
-		got := getRestoreCommonArgs(path, version)
-		want := restoreCmd + " latest --target /"
-		assert.Equal(t, got, want)
-	})
-}
+// func TestGetRestoreCommonArgs(t *testing.T) {
+// 	t.Run("test latest restore to /", func(t *testing.T) {
+// 		path := "/"
+// 		version := "latest"
+// 		got := getRestoreCommonArgs(path, version)
+// 		want := restoreCmd + " latest --target /"
+// 		assert.Equal(t, got, want)
+// 	})
+// }
 
 func Test_getRestoreCommonArgs(t *testing.T) {
 	type args struct {
