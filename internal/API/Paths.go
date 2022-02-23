@@ -13,14 +13,13 @@ import (
 )
 
 // GetPath godoc
-// @Summary get path
+// @Summary get path info
 // @Schemes
-// @Description do ping
-// @Tags example
+// @Description returns files and directories for the provided path
 // @Accept json
 // @Produce json
 // @Success 200 {string} Helloworld
-// @Router /example/helloworld [get]
+// @Router /paths [post]
 func GetPath(c *gin.Context) {
 	var root Models.Path
 
@@ -51,6 +50,14 @@ func GetPath(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, paths)
 }
 
+// GetPath godoc
+// @Summary get recursive path info
+// @Schemes
+// @Description returns files and directories recursively starting from the provided path
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /paths/all [post]
 func GetPathAll(c *gin.Context) {
 	var root Models.Path
 

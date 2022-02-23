@@ -15,7 +15,7 @@ import (
 
 var cr *cron.Cron
 
-const basePath = "/api/v1"
+const basePath = "/api/v1/"
 
 func SetupRouter() *gin.Engine {
 

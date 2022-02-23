@@ -1,12 +1,11 @@
-basePath: /api/v1
 info:
   contact: {}
 paths:
-  /example/helloworld:
-    get:
+  /paths:
+    post:
       consumes:
       - application/json
-      description: do ping
+      description: returns files and directories for the provided path
       produces:
       - application/json
       responses:
@@ -14,7 +13,19 @@ paths:
           description: OK
           schema:
             type: string
-      summary: get path
-      tags:
-      - example
+      summary: get path info
+  /paths/all:
+    post:
+      consumes:
+      - application/json
+      description: returns files and directories recursively starting from the provided
+        path
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get recursive path info
 swagger: "2.0"

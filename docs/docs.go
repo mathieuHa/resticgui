@@ -16,19 +16,36 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/example/helloworld": {
-            "get": {
-                "description": "do ping",
+        "/paths": {
+            "post": {
+                "description": "returns files and directories for the provided path",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "example"
+                "summary": "get path info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/paths/all": {
+            "post": {
+                "description": "returns files and directories recursively starting from the provided path",
+                "consumes": [
+                    "application/json"
                 ],
-                "summary": "get path",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get recursive path info",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -46,7 +63,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",
-	BasePath:         "/api/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "",
 	Description:      "",
