@@ -17,6 +17,7 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/commands"
 )
 
+
 var (
 	server *http.Server
 )

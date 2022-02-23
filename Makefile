@@ -76,6 +76,12 @@ installweb: createdir ## Install the web dependancies in the build dir
 installgo: ## Install go on Windows using choco
 	choco install go
 
+installswag: ## Install swag 1.8 on linux
+	wget https://github.com/swaggo/swag/releases/download/v1.8.0/swag_1.8.0_Linux_x86_64.tar.gz
+	tar -xvzf swag_1.8.0_Linux_x86_64.tar.gz -C /tmp/
+	sudo mv /tmp/swag /usr/bin/
+	rm swag*
+
 createdir: ## Create the build and package dist dir if not present
 ifeq ("$(wildcard $(DISTDIR))","")
 	$(MKDIR) "$(DISTDIR)"
@@ -106,6 +112,9 @@ ifeq ($(CI), true)
 	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
 	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) .
+
+builddoc: ## Build the swagger openapi documenation
+	swag init --parseInternal -g Router.go --dir internal/API/
 
 pushdocker: builddocker ## Push the built docker image to gitlab registry
 ifeq ($(CI), true)

@@ -8,14 +8,20 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"gitlab.com/resticgui/resticgui/docs"
 )
 
 var cr *cron.Cron
+
+const basePath = "/api/v1"
 
 func SetupRouter() *gin.Engine {
 
 	// Activate when going to production
 	//gin.SetMode(gin.ReleaseMode)
+	docs.SwaggerInfo.BasePath = basePath
 
 	// define router
 	router := gin.Default()
@@ -30,7 +36,7 @@ func SetupRouter() *gin.Engine {
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 	// API routes
-	grpUsers := router.Group("/api/v1/users")
+	grpUsers := router.Group(basePath + "/users")
 	{
 		grpUsers.GET("", QueryUsers)
 		grpUsers.GET(":id", GetUsers)
@@ -39,7 +45,7 @@ func SetupRouter() *gin.Engine {
 		grpUsers.DELETE(":id", RemoveUser)
 	}
 
-	grpRepositories := router.Group("/api/v1/repositories")
+	grpRepositories := router.Group(basePath + "repositories")
 	{
 		grpRepositories.GET("", QueryRepositories)
 		grpRepositories.GET(":id", GetRepository)
@@ -48,23 +54,25 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id", RemoveRepository)
 	}
 
-	grpPaths := router.Group("/api/v1/paths")
+	grpPaths := router.Group(basePath + "paths")
 	{
 		grpPaths.POST("", GetPath)
 		grpPaths.POST("all", GetPath)
 	}
 
-	grpCmds := router.Group("/api/v1/cmd")
+	grpCmds := router.Group(basePath + "cmd")
 	{
 		grpCmds.GET("", ExecuteCmd)
 	}
 
-	grpBackupSchedules := router.Group("/api/v1/repositories/:id/schedules")
+	grpBackupSchedules := router.Group(basePath + "repositories/:id/schedules")
 	{
 		grpBackupSchedules.PUT("", UpdateBackupSchedule)
 		grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
 		grpBackupSchedules.GET("", QueryBackupSchedule)
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	router.NoRoute(func(c *gin.Context) {
 		index := fmt.Sprintf("%s/index.html", viper.GetString("front.path"))

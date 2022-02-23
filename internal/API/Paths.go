@@ -12,6 +12,15 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/Models"
 )
 
+// GetPath godoc
+// @Summary get path
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /example/helloworld [get]
 func GetPath(c *gin.Context) {
 	var root Models.Path
 
