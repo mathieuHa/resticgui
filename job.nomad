@@ -29,14 +29,6 @@ job "resticgui_job" {
       }
     }
 
-    volume "ceph-resticgui" {
-      type      = "csi"
-      attachment_mode = "file-system"
-      access_mode     = "single-node-writer"
-      read_only = false
-      source    = "ceph-resticgui"
-    }
-
     service {
       port = "3030"
       name = "resticgui"
@@ -61,32 +53,6 @@ job "resticgui_job" {
         "traefik.http.routers.to-resticgui-https.tls=true",
       ]
     }
-
-    service {
-      port = "8080"
-      name = "guacamole"
-      connect {
-        sidecar_service {
-           proxy {
-
-           }
-        }
-      }
-      tags = [
-        "traefik.enable=true",
-        "traefik.consulcatalog.connect=true",
-        "traefik.http.routers.to-guacamole-http.entrypoints=web",
-        "traefik.http.routers.to-guacamole-http.rule=Host(`guacamole.hanotaux.local`)",
-        "traefik.http.routers.to-guacamole-http.middlewares=force-https@file",
-        "traefik.http.routers.to-guacamole-http.middlewares=privateip@file",
-        "traefik.http.routers.to-guacamole-https.entrypoints=websecure",
-        "traefik.http.routers.to-guacamole-https.middlewares=secHeader@file",
-        "traefik.http.routers.to-guacamole-https.middlewares=privateip@file",
-        "traefik.http.routers.to-guacamole-https.rule=Host(`guacamole.hanotaux.local`)",
-        "traefik.http.routers.to-guacamole-https.tls=true",
-      ]
-    }
-
     task "resticgui" {
       driver = "docker"
       config {
@@ -101,39 +67,7 @@ job "resticgui_job" {
         cpu    = 200 # MHz
         memory = 256 # MB
       }
-      volume_mount {
-        volume      = "ceph-resticgui"
-        destination = "/srv"
-        read_only   = true
-      }
     }
 
-    task "vnc" {
-      driver = "docker"
-      config {
-        image = "yggnas/vncserver"
-      }
-      resources {
-        cpu    = 200 # MHz
-        memory = 512 # MB
-      }
-      volume_mount {
-        volume      = "ceph-resticgui"
-        destination = "/app"
-        read_only   = false
-      }
-  
-    }
-
-    task "guac" {
-      driver = "docker"
-      config {
-        image = "maxwaldorf/guacamole"
-      }
-      resources {
-        cpu    = 200 # MHz
-        memory = 512 # MB
-      }
-    }
   }
 }
