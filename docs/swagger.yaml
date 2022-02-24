@@ -244,7 +244,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            items:
+              $ref: '#/definitions/Models.Repository'
+            type: array
       summary: get all repositories
     post:
       consumes:
@@ -256,7 +258,7 @@ paths:
         "201":
           description: Created
           schema:
-            type: string
+            $ref: '#/definitions/Models.Repository'
         "400":
           description: Bad Request
           schema:
@@ -266,11 +268,17 @@ paths:
           schema:
             type: string
       summary: create repository
-  /repositories/:id:
+  /repositories/{id}:
     delete:
       consumes:
       - application/json
       description: delete a repository by ID
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -278,20 +286,41 @@ paths:
           description: No Content
           schema:
             type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: delete repository
     get:
       consumes:
       - application/json
       description: returns a respository filtered by his ID
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
+            $ref: '#/definitions/Models.Repository'
+        "404":
+          description: Not Found
+          schema:
             type: string
       summary: get repository
-  /repositories/{id}:
     patch:
       consumes:
       - application/json

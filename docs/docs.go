@@ -70,7 +70,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Models.Repository"
+                            }
                         }
                     }
                 }
@@ -88,7 +91,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Models.Repository"
                         }
                     },
                     "400": {
@@ -106,7 +109,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repositories/:id": {
+        "/repositories/{id}": {
             "get": {
                 "description": "returns a respository filtered by his ID",
                 "consumes": [
@@ -116,9 +119,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "get repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Models.Repository"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -134,17 +152,42 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "delete repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content",
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
-            }
-        },
-        "/repositories/{id}": {
+            },
             "patch": {
                 "description": "edit a repository by ID",
                 "consumes": [

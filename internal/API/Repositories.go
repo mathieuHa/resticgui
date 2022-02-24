@@ -27,7 +27,7 @@ const errCreate = entity + "creation failed"
 // @Description returns all respositories
 // @Accept json
 // @Produce json
-// @Success 200 {string} Helloworld
+// @Success 200 {array} Models.Repository
 // @Router /repositories [get]
 func QueryRepositories(c *gin.Context) {
 	repositories := []Models.Repository{}
@@ -44,8 +44,10 @@ func QueryRepositories(c *gin.Context) {
 // @Description returns a respository filtered by his ID
 // @Accept json
 // @Produce json
-// @Success 200 {string} Helloworld
-// @Router /repositories/:id [get]
+// @Param id path int true "Repository ID"
+// @Success 200 {object} Models.Repository
+// @Failure 404 {string} Not Found
+// @Router /repositories/{id} [get]
 func GetRepository(c *gin.Context) {
 	id := c.Param("id")
 
@@ -75,7 +77,7 @@ func GetRepository(c *gin.Context) {
 // @Description create a repository
 // @Accept json
 // @Produce json
-// @Success 201 {string} Helloworld
+// @Success 201 {object} Models.Repository
 // @Failure 400 {string} Helloworld
 // @Failure 500 {string} Helloworld
 // @Router /repositories [post]
@@ -168,14 +170,18 @@ func EditRepository(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, updatedRepository)
 }
 
-// GetRepository godoc
+// RemoveRepository godoc
 // @Summary delete repository
 // @Schemes
 // @Description delete a repository by ID
+// @Param id path int true "Repository ID"
 // @Accept json
 // @Produce json
 // @Success 204 {string} Helloworld
-// @Router /repositories/:id [delete]
+// @Failure 400 {string} API.errIDNotValid
+// @Failure 404 {string} API.errNotFound
+// @Failure 500 {string} API.errNotDeleted
+// @Router /repositories/{id} [delete]
 func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
 
