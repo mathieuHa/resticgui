@@ -214,11 +214,10 @@ paths:
       parameters:
       - description: cmd
         enum:
-        - A
-        - B
-        - C
+        - version
+        - help
         in: query
-        name: enumstring
+        name: cmd
         type: string
       produces:
       - application/json

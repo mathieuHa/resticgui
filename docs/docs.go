@@ -29,13 +29,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
-                            "A",
-                            "B",
-                            "C"
+                            "version",
+                            "help"
                         ],
                         "type": "string",
                         "description": "cmd",
-                        "name": "enumstring",
+                        "name": "cmd",
                         "in": "query"
                     }
                 ],

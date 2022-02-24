@@ -12,7 +12,7 @@ import (
 // @Summary execute restic cmd
 // @Schemes
 // @Description execute a restic cmd passed by queryParam
-// @Param enumstring query string false "cmd" Enums(version, help)
+// @Param cmd query string false "cmd" Enums(version, help)
 // @Accept json
 // @Produce json
 // @Success 200 {string} outputCmd
