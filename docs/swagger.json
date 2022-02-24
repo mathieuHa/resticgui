@@ -78,6 +78,18 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -118,7 +130,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/repositories/{id}": {
             "patch": {
                 "description": "edit a repository by ID",
                 "consumes": [
@@ -128,13 +142,345 @@
                     "application/json"
                 ],
                 "summary": "edit repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
+                            "$ref": "#/definitions/Models.Repository"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Models.AWSS3Provider": {
+            "type": "object",
+            "properties": {
+                "accessKeyID": {
+                    "type": "string"
+                },
+                "bucketName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "defaultRegion": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "secretAccessKey": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.B2Provider": {
+            "type": "object",
+            "properties": {
+                "accountID": {
+                    "type": "string"
+                },
+                "accountKey": {
+                    "type": "string"
+                },
+                "bucketName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "repoName": {
+                    "type": "string"
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.BackupPolicy": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "keepAll": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nbLastBackup": {
+                    "type": "integer"
+                },
+                "oneByDay": {
+                    "type": "boolean"
+                },
+                "oneByHour": {
+                    "type": "boolean"
+                },
+                "oneByMonth": {
+                    "type": "boolean"
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.BackupSchedule": {
+            "type": "object",
+            "properties": {
+                "choice": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "cronID": {
+                    "type": "integer"
+                },
+                "cronSyntax": {
+                    "type": "string"
+                },
+                "day": {
+                    "type": "string"
+                },
+                "everyDay": {
+                    "type": "boolean"
+                },
+                "everyMonday": {
+                    "type": "boolean"
+                },
+                "everyMonth": {
+                    "type": "boolean"
+                },
+                "everySaturday": {
+                    "type": "boolean"
+                },
+                "everySunday": {
+                    "type": "boolean"
+                },
+                "everyThursday": {
+                    "type": "boolean"
+                },
+                "everyTriday": {
+                    "type": "boolean"
+                },
+                "everyTuesday": {
+                    "type": "boolean"
+                },
+                "everyWednesday": {
+                    "type": "boolean"
+                },
+                "everyWeek": {
+                    "type": "boolean"
+                },
+                "hour": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "interval": {
+                    "type": "string"
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.LocalProvider": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "repoName": {
+                    "type": "string"
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.MinioS3Provider": {
+            "type": "object",
+            "properties": {
+                "IP": {
+                    "type": "string"
+                },
+                "accessKeyID": {
+                    "type": "string"
+                },
+                "bucketName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "scheme": {
+                    "type": "string"
+                },
+                "secretAccessKey": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.Path": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "absPath": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "exists": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "included": {
+                    "type": "boolean"
+                },
+                "isDir": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "repositoryID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Models.Repository": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "AWSS3Provider": {
+                    "$ref": "#/definitions/Models.AWSS3Provider"
+                },
+                "B2Provider": {
+                    "$ref": "#/definitions/Models.B2Provider"
+                },
+                "MinioS3Provider": {
+                    "$ref": "#/definitions/Models.MinioS3Provider"
+                },
+                "active": {
+                    "type": "boolean"
+                },
+                "backupPolicy": {
+                    "$ref": "#/definitions/Models.BackupPolicy"
+                },
+                "backupSchedule": {
+                    "$ref": "#/definitions/Models.BackupSchedule"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "local": {
+                    "type": "string"
+                },
+                "localProvider": {
+                    "$ref": "#/definitions/Models.LocalProvider"
+                },
+                "maxSize": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string"
+                },
+                "paths": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Models.Path"
+                    }
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         }

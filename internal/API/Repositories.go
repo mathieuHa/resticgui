@@ -76,6 +76,8 @@ func GetRepository(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 201 {string} Helloworld
+// @Failure 400 {string} Helloworld
+// @Failure 500 {string} Helloworld
 // @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
 	var repository Models.Repository
@@ -112,8 +114,11 @@ func CreateRepository(c *gin.Context) {
 // @Description edit a repository by ID
 // @Accept json
 // @Produce json
-// @Success 200 {string} Helloworld
-// @Router /repositories/:id [patch]
+// @Param id path int true "Repository ID"
+// @Success 200 {object} Models.Repository
+// @Failure 400 {string} Helloworld
+// @Failure 404 {string} Not Found
+// @Router /repositories/{id} [patch]
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
 

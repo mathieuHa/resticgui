@@ -1,3 +1,208 @@
+definitions:
+  Models.AWSS3Provider:
+    properties:
+      accessKeyID:
+        type: string
+      bucketName:
+        type: string
+      createdAt:
+        type: string
+      defaultRegion:
+        type: string
+      id:
+        type: integer
+      repositoryID:
+        type: integer
+      secretAccessKey:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  Models.B2Provider:
+    properties:
+      accountID:
+        type: string
+      accountKey:
+        type: string
+      bucketName:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      repoName:
+        type: string
+      repositoryID:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  Models.BackupPolicy:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      keepAll:
+        type: boolean
+      name:
+        type: string
+      nbLastBackup:
+        type: integer
+      oneByDay:
+        type: boolean
+      oneByHour:
+        type: boolean
+      oneByMonth:
+        type: boolean
+      repositoryID:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  Models.BackupSchedule:
+    properties:
+      choice:
+        type: string
+      createdAt:
+        type: string
+      cronID:
+        type: integer
+      cronSyntax:
+        type: string
+      day:
+        type: string
+      everyDay:
+        type: boolean
+      everyMonday:
+        type: boolean
+      everyMonth:
+        type: boolean
+      everySaturday:
+        type: boolean
+      everySunday:
+        type: boolean
+      everyThursday:
+        type: boolean
+      everyTriday:
+        type: boolean
+      everyTuesday:
+        type: boolean
+      everyWednesday:
+        type: boolean
+      everyWeek:
+        type: boolean
+      hour:
+        type: string
+      id:
+        type: integer
+      interval:
+        type: string
+      repositoryID:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  Models.LocalProvider:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      repoName:
+        type: string
+      repositoryID:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  Models.MinioS3Provider:
+    properties:
+      IP:
+        type: string
+      accessKeyID:
+        type: string
+      bucketName:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      port:
+        type: string
+      repositoryID:
+        type: integer
+      scheme:
+        type: string
+      secretAccessKey:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  Models.Path:
+    properties:
+      absPath:
+        type: string
+      createdAt:
+        type: string
+      exists:
+        type: boolean
+      id:
+        type: integer
+      included:
+        type: boolean
+      isDir:
+        type: boolean
+      name:
+        minLength: 1
+        type: string
+      repositoryID:
+        type: integer
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  Models.Repository:
+    properties:
+      AWSS3Provider:
+        $ref: '#/definitions/Models.AWSS3Provider'
+      B2Provider:
+        $ref: '#/definitions/Models.B2Provider'
+      MinioS3Provider:
+        $ref: '#/definitions/Models.MinioS3Provider'
+      active:
+        type: boolean
+      backupPolicy:
+        $ref: '#/definitions/Models.BackupPolicy'
+      backupSchedule:
+        $ref: '#/definitions/Models.BackupSchedule'
+      createdAt:
+        type: string
+      id:
+        type: integer
+      local:
+        type: string
+      localProvider:
+        $ref: '#/definitions/Models.LocalProvider'
+      maxSize:
+        type: string
+      name:
+        minLength: 3
+        type: string
+      password:
+        type: string
+      paths:
+        items:
+          $ref: '#/definitions/Models.Path'
+        type: array
+      provider:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
 info:
   contact: {}
 paths:
@@ -52,6 +257,14 @@ paths:
           description: Created
           schema:
             type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: create repository
   /repositories/:id:
     delete:
@@ -78,15 +291,30 @@ paths:
           schema:
             type: string
       summary: get repository
+  /repositories/{id}:
     patch:
       consumes:
       - application/json
       description: edit a repository by ID
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/Models.Repository'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
           schema:
             type: string
       summary: edit repository

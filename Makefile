@@ -114,7 +114,7 @@ endif
 	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) .
 
 builddoc: ## Build the swagger openapi documenation
-	swag init --parseInternal -g Router.go --dir internal/API/
+	swag init --parseInternal --parseDependency -g Router.go  --dir internal/API
 
 pushdocker: builddocker ## Push the built docker image to gitlab registry
 ifeq ($(CI), true)

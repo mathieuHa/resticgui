@@ -4,6 +4,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Repository example
 type Repository struct {
 	Base
 
