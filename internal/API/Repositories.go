@@ -21,6 +21,14 @@ const errUpdate = entity + "update error"
 const errNameUsed = entity + "name already in use"
 const errCreate = entity + "creation failed"
 
+// QueryRepositories godoc
+// @Summary get all repositories
+// @Schemes
+// @Description returns all respositories
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /repositories [get]
 func QueryRepositories(c *gin.Context) {
 	repositories := []Models.Repository{}
 
@@ -30,6 +38,14 @@ func QueryRepositories(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, repositories)
 }
 
+// GetRepository godoc
+// @Summary get repository
+// @Schemes
+// @Description returns a respository filtered by his ID
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /repositories/:id [get]
 func GetRepository(c *gin.Context) {
 	id := c.Param("id")
 
@@ -53,6 +69,14 @@ func GetRepository(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, repositories)
 }
 
+// GetRepository godoc
+// @Summary create repository
+// @Schemes
+// @Description create a repository
+// @Accept json
+// @Produce json
+// @Success 201 {string} Helloworld
+// @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
 	var repository Models.Repository
 
@@ -82,6 +106,14 @@ func CreateRepository(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
+// GetRepository godoc
+// @Summary edit repository
+// @Schemes
+// @Description edit a repository by ID
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /repositories/:id [patch]
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
 
@@ -131,6 +163,14 @@ func EditRepository(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, updatedRepository)
 }
 
+// GetRepository godoc
+// @Summary delete repository
+// @Schemes
+// @Description delete a repository by ID
+// @Accept json
+// @Produce json
+// @Success 204 {string} Helloworld
+// @Router /repositories/:id [delete]
 func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
 

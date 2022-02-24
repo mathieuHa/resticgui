@@ -50,7 +50,7 @@ func GetPath(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, paths)
 }
 
-// GetPath godoc
+// GetAllPath godoc
 // @Summary get recursive path info
 // @Schemes
 // @Description returns files and directories recursively starting from the provided path
@@ -58,7 +58,7 @@ func GetPath(c *gin.Context) {
 // @Produce json
 // @Success 200 {string} Helloworld
 // @Router /paths/all [post]
-func GetPathAll(c *gin.Context) {
+func GetAllPath(c *gin.Context) {
 	var root Models.Path
 
 	if err := c.BindJSON(&root); err != nil {

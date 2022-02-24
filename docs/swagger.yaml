@@ -28,4 +28,66 @@ paths:
           schema:
             type: string
       summary: get recursive path info
+  /repositories:
+    get:
+      consumes:
+      - application/json
+      description: returns all respositories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get all repositories
+    post:
+      consumes:
+      - application/json
+      description: create a repository
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+      summary: create repository
+  /repositories/:id:
+    delete:
+      consumes:
+      - application/json
+      description: delete a repository by ID
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: delete repository
+    get:
+      consumes:
+      - application/json
+      description: returns a respository filtered by his ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get repository
+    patch:
+      consumes:
+      - application/json
+      description: edit a repository by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: edit repository
 swagger: "2.0"

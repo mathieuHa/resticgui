@@ -15,13 +15,21 @@ import (
 
 var cr *cron.Cron
 
-const basePath = "/api/v1/"
+const APIBasePath = "/api/v1/"
+const APITitle = "ResticGUI API"
+const APIVersion = "1.0"
+const APIdescription = "ResticGUI API allows to create and manipulates repositories and backups which translate in restic commands under the hood"
+const APIHost = "localhost:3001"
 
 func SetupRouter() *gin.Engine {
 
 	// Activate when going to production
 	//gin.SetMode(gin.ReleaseMode)
-	docs.SwaggerInfo.BasePath = basePath
+	docs.SwaggerInfo.BasePath = APIBasePath
+	docs.SwaggerInfo.Title = APITitle
+	docs.SwaggerInfo.Version = APIVersion
+	docs.SwaggerInfo.Description = APIdescription
+	docs.SwaggerInfo.Host = APIHost
 
 	// define router
 	router := gin.Default()
@@ -36,7 +44,7 @@ func SetupRouter() *gin.Engine {
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 	// API routes
-	grpUsers := router.Group(basePath + "/users")
+	grpUsers := router.Group(APIBasePath + "/users")
 	{
 		grpUsers.GET("", QueryUsers)
 		grpUsers.GET(":id", GetUsers)
@@ -45,7 +53,7 @@ func SetupRouter() *gin.Engine {
 		grpUsers.DELETE(":id", RemoveUser)
 	}
 
-	grpRepositories := router.Group(basePath + "repositories")
+	grpRepositories := router.Group(APIBasePath + "repositories")
 	{
 		grpRepositories.GET("", QueryRepositories)
 		grpRepositories.GET(":id", GetRepository)
@@ -54,18 +62,18 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id", RemoveRepository)
 	}
 
-	grpPaths := router.Group(basePath + "paths")
+	grpPaths := router.Group(APIBasePath + "paths")
 	{
 		grpPaths.POST("", GetPath)
-		grpPaths.POST("all", GetPath)
+		grpPaths.POST("all", GetAllPath)
 	}
 
-	grpCmds := router.Group(basePath + "cmd")
+	grpCmds := router.Group(APIBasePath + "cmd")
 	{
 		grpCmds.GET("", ExecuteCmd)
 	}
 
-	grpBackupSchedules := router.Group(basePath + "repositories/:id/schedules")
+	grpBackupSchedules := router.Group(APIBasePath + "repositories/:id/schedules")
 	{
 		grpBackupSchedules.PUT("", UpdateBackupSchedule)
 		grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
