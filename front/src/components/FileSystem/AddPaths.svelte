@@ -1,6 +1,6 @@
 <script>
   import AddPaths from './AddPaths.svelte';
-  import Arrow from './icon/Arrow.svelte';
+  import Arrow from '../Icon/Arrow.svelte';
 
   export let tree = {};
   export let path = '';

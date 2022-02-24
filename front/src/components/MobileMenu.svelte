@@ -1,5 +1,5 @@
 <script>
-	import Cross from './icon/Cross.svelte';
+	import Cross from './Icon/Cross.svelte';
 
 	let isOpen = false;
 	let isMenuRendered;

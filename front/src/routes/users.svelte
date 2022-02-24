@@ -5,8 +5,8 @@
 
   import agent from '../utils/api';
   import extractErrors from '../utils/extractErrors';
-  import Pen from '../components/icon/Pen.svelte';
-  import Trash from '../components/icon/Trash.svelte';
+  import Pen from '../components/Icon/Pen.svelte';
+  import Trash from '../components/Icon/Trash.svelte';
   import Modal from '../components/Modal.svelte';
 
   let users = [];

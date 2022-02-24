@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher, tick } from 'svelte';
-  import Cross from './icon/Cross.svelte';
+  import Cross from './Icon/Cross.svelte';
 
   function portal(node) {
     const anchor = document.getElementById('modals');

@@ -4,7 +4,9 @@ async function call(method, url, options, data?) {
     response = await fetch(`/api/v1${url}`, {
       method,
       ...data ? { body: JSON.stringify(data) } : {},
-      ...options,
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
   } catch (err) {
     throw err;

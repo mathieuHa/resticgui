@@ -1,26 +1,29 @@
 <script>
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
-  import * as yup from 'yup';
+  import Provider from '../../components/Provider.svelte';
 
-  import agent from '../utils/api';
-  import extractErrors from '../utils/extractErrors';
-  import Pen from '../components/icon/Pen.svelte';
-  import Trash from '../components/icon/Trash.svelte';
-  import Modal from '../components/Modal.svelte';
-  import Paths from '../components/Paths.svelte';
+  import agent from '../../utils/api';
+  import Eye from '../../components/Icon/Eye.svelte';
+  import Pen from '../../components/Icon/Pen.svelte';
+  import Trash from '../../components/Icon/Trash.svelte';
+  import Modal from '../../components/Modal.svelte';
+  import Paths from '../../components/FileSystem/Paths.svelte';
 
   let repos = [];
   let errors = {};
   let values = null;
   let step = 0;
 
-  const schema = yup.object?.().shape({
-    name: yup.string().min(4, 'too short').required('required'),
-    paths: yup.array(yup.object().shape({
-      name: yup.string().min(1, 'too short').required('required'),
-    })).min(1, 'too short').required('required'),
-  });
+  // const schema = yup.object?.().shape({
+  //   name: yup.string().min(4, 'too short').required('required'),
+  //   paths: yup.array(yup.object().shape({
+  //     name: yup.string().min(1, 'too short').required('required'),
+  //   })).min(1, 'too short').required('required'),
+  //   backupSchedule: yup.object().shape({
+  //     cron_syntax: yup.string().min(1, 'too short').required('required'),
+  //   }),
+  // });
 
   const onRefresh = async () => {
     try {
@@ -30,19 +33,25 @@
     }
   }
   const onSubmit = async () => {
-    if (step !== 2) {
+    if (step < 3) {
       step += 1;
       return;
     }
-    try {
-      await schema.validate(values, { abortEarly: false });
-    } catch (err) {
-      errors = extractErrors(err);
-      console.log(errors)
-    }
+    // try {
+    //   await schema.validate(values, { abortEarly: false });
+    // } catch (err) {
+    //   errors = extractErrors(err);
+    //   console.log(errors)
+    // }
     console.log(values);
     try {
-      await agent[values.ID ? 'patch' : 'post'](`/repositories/${values.ID || ''}`, values);
+      await agent[values.ID ? 'patch' : 'post'](`/repositories/${values.ID || ''}`, {
+        ...values,
+        backupSchedule: {
+          ...values.backupSchedule,
+          choice: 'cron',
+        },
+      });
       await onRefresh();
       values = null;
     } catch (err) {
@@ -66,10 +75,10 @@
 {#if values}
   <Modal on:close={() => { values = null; }}>
     <div class="flex max-w-min m-auto justify-between">
-      {#each [0,1,2] as stepped}
+      {#each [0, 1, 2, 3] as stepped}
         <div
-          on:click={() => { step = stepped; }}
           class="w-3 h-3 mx-2 rounded-xl cursor-pointer bg-{step === stepped ? 'orange' : 'blue'}-500"
+          on:click={() => { step = stepped; }}
         ></div>
       {/each}
     </div>
@@ -103,24 +112,22 @@
         <div class="max-w-xl">
           <Paths
             initialPaths={values.paths.map(({ name, included }) => included ? name : `!${name}`)}
-            on:update={({ detail: paths }) => {
-              values = { ...values, paths };
-            }}
+            on:update={({ detail: paths }) => { values = { ...values, paths }; }}
           />
         </div>
       </div>
       <div class="flex flex-col {step !== 2 ? 'hidden' : ''}">
         <div class="w-full flex justify-between">
-          <label for="cron">Syntax Cron</label>
-          <span class="text-red-500">{errors.cron || ''}</span>
+          <label for="cronSyntax">Syntax Cron</label>
+          <span class="text-red-500">{errors.cronSyntax || ''}</span>
         </div>
         <input
           class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-          id="cron"
-          name="cron"
+          id="cronSyntax"
+          name="cronSyntax"
           type="text"
           placeholder="*/30 * * * *"
-          bind:value={values.cron}
+          bind:value={values.backupSchedule.cronSyntax}
         />
         <div class="w-full flex justify-between">
           <label for="interval">Interval</label>
@@ -132,8 +139,16 @@
           name="interval"
           type="text"
           placeholder="1h30"
-          bind:value={values.interval}
+          bind:value={values.backupSchedule.interval}
         />
+      </div>
+      <div class="flex flex-col {step !== 3 ? 'hidden' : ''}">
+        <Provider
+          initialProvider="{values}"
+          on:update={(providers) => {
+            console.log(providers);
+            values = { ...values, ...providers };
+          }}/>
       </div>
       <button
         class="mt-4 py-1 rounded transition bg-blue-500 hover:bg-blue-600"
@@ -152,8 +167,13 @@
       <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('D/MM/YY')}</p>
 
       <div class="flex mt-auto pt-2 h-8 mb-1">
+        <button class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600">
+          <a href="/repositories/{repo.ID}">
+            <Eye />
+          </a>
+        </button>
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
+          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 ml-2 transition bg-blue-500 hover:bg-blue-600"
           on:click|preventDefault|stopPropagation={() => { values = Object.assign({}, repo); }}
         >
           <Pen />
