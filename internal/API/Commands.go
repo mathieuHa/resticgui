@@ -8,6 +8,15 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/commands"
 )
 
+// ExecuteCmd godoc
+// @Summary execute restic cmd
+// @Schemes
+// @Description execute a restic cmd passed by queryParam
+// @Param cmd query string false "cmd" Enums(version, help)
+// @Accept json
+// @Produce json
+// @Success 200 {string} outputCmd
+// @Router /cmd [get]
 func ExecuteCmd(c *gin.Context) {
 	output := ""
 

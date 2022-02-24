@@ -30,7 +30,6 @@ func SetupRouter() *gin.Engine {
 	docs.SwaggerInfo.Version = APIVersion
 	docs.SwaggerInfo.Description = APIdescription
 	docs.SwaggerInfo.Host = APIHost
-
 	// define router
 	router := gin.Default()
 

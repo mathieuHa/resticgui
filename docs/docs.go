@@ -16,6 +16,38 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/cmd": {
+            "get": {
+                "description": "execute a restic cmd passed by queryParam",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "execute restic cmd",
+                "parameters": [
+                    {
+                        "enum": [
+                            "version",
+                            "help"
+                        ],
+                        "type": "string",
+                        "description": "cmd",
+                        "name": "cmd",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/paths": {
             "post": {
                 "description": "returns files and directories for the provided path",
@@ -87,6 +119,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "create repository",
+                "parameters": [
+                    {
+                        "description": "Add account",
+                        "name": "repository",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Models.Repository"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -163,10 +206,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -204,6 +244,15 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Edit account",
+                        "name": "repository",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Models.Repository"
+                        }
                     }
                 ],
                 "responses": {
