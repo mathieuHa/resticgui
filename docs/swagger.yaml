@@ -206,6 +206,28 @@ definitions:
 info:
   contact: {}
 paths:
+  /cmd:
+    get:
+      consumes:
+      - application/json
+      description: execute a restic cmd passed by queryParam
+      parameters:
+      - description: cmd
+        enum:
+        - A
+        - B
+        - C
+        in: query
+        name: enumstring
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: execute restic cmd
   /paths:
     post:
       consumes:
@@ -252,6 +274,13 @@ paths:
       consumes:
       - application/json
       description: create a repository
+      parameters:
+      - description: Add account
+        in: body
+        name: repository
+        required: true
+        schema:
+          $ref: '#/definitions/Models.Repository'
       produces:
       - application/json
       responses:
@@ -283,9 +312,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: No Content
-          schema:
-            type: string
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -331,6 +358,12 @@ paths:
         name: id
         required: true
         type: integer
+      - description: Edit account
+        in: body
+        name: repository
+        required: true
+        schema:
+          $ref: '#/definitions/Models.Repository'
       produces:
       - application/json
       responses:

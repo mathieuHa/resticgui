@@ -46,7 +46,7 @@ func QueryRepositories(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Repository ID"
 // @Success 200 {object} Models.Repository
-// @Failure 404 {string} Not Found
+// @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [get]
 func GetRepository(c *gin.Context) {
 	id := c.Param("id")
@@ -76,10 +76,11 @@ func GetRepository(c *gin.Context) {
 // @Schemes
 // @Description create a repository
 // @Accept json
+// @Param repository body Models.Repository true "Add account"
 // @Produce json
 // @Success 201 {object} Models.Repository
-// @Failure 400 {string} Helloworld
-// @Failure 500 {string} Helloworld
+// @Failure 400 {string} errNameUsed
+// @Failure 500 {string} errCreate
 // @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
 	var repository Models.Repository
@@ -117,9 +118,10 @@ func CreateRepository(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Repository ID"
+// @Param repository body Models.Repository true "Edit account"
 // @Success 200 {object} Models.Repository
-// @Failure 400 {string} Helloworld
-// @Failure 404 {string} Not Found
+// @Failure 400 {string} errBindRepository
+// @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [patch]
 func EditRepository(c *gin.Context) {
 	id := c.Param("id")
@@ -177,10 +179,10 @@ func EditRepository(c *gin.Context) {
 // @Param id path int true "Repository ID"
 // @Accept json
 // @Produce json
-// @Success 204 {string} Helloworld
-// @Failure 400 {string} API.errIDNotValid
-// @Failure 404 {string} API.errNotFound
-// @Failure 500 {string} API.errNotDeleted
+// @Success 204
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} errNotDeleted
 // @Router /repositories/{id} [delete]
 func RemoveRepository(c *gin.Context) {
 	id := c.Param("id")
