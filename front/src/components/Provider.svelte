@@ -10,7 +10,7 @@
     AWSS3Provider: ['accessKeyID', 'secretAccessKey', 'bucketName', 'defaultRegion'],
   }
 
-  let provider = null;
+  let provider = initialProvider.provider || null;
   let values = {};
   Object.keys(providers).forEach((backupProvider) => {
     values[backupProvider] = Object.assign({}, initialProvider[backupProvider]);
@@ -19,7 +19,7 @@
   const dispatch = createEventDispatcher();
 
   $: console.log({ [provider]: values[provider] })
-  $: dispatch('update', { [provider]: values[provider] });
+  $: dispatch('update', { provider, [provider]: values[provider] });
 </script>
 
 <div class="flex">

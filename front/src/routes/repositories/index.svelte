@@ -188,7 +188,18 @@
     </div>
   {/each}
   <div
-    on:click={() => { values = { name: '', paths: [] }; }}
+    on:click={() => {
+      values = {
+        name: '',
+        paths: [],
+        backupSchedule: {
+          cronSyntax: '',
+          interval: '',
+          choice: '',
+        },
+        provider: '',
+      };
+    }}
     class="text-3xl p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
     +
