@@ -18,6 +18,36 @@ type BackupSchedule struct {
 	ID int `json:"id,omitempty"`
 	// Choice holds the value of the "choice" field.
 	Choice backupschedule.Choice `json:"choice,omitempty"`
+	// EveryDay holds the value of the "everyDay" field.
+	EveryDay bool `json:"everyDay,omitempty"`
+	// EveryWeek holds the value of the "everyWeek" field.
+	EveryWeek bool `json:"everyWeek,omitempty"`
+	// EveryMonth holds the value of the "everyMonth" field.
+	EveryMonth bool `json:"everyMonth,omitempty"`
+	// EveryMonday holds the value of the "everyMonday" field.
+	EveryMonday bool `json:"everyMonday,omitempty"`
+	// EveryTuesday holds the value of the "everyTuesday" field.
+	EveryTuesday bool `json:"everyTuesday,omitempty"`
+	// EveryWednesday holds the value of the "everyWednesday" field.
+	EveryWednesday bool `json:"everyWednesday,omitempty"`
+	// EveryThursday holds the value of the "everyThursday" field.
+	EveryThursday bool `json:"everyThursday,omitempty"`
+	// EveryTriday holds the value of the "everyTriday" field.
+	EveryTriday bool `json:"everyTriday,omitempty"`
+	// EverySaturday holds the value of the "everySaturday" field.
+	EverySaturday bool `json:"everySaturday,omitempty"`
+	// EverySunday holds the value of the "everySunday" field.
+	EverySunday bool `json:"everySunday,omitempty"`
+	// Hour holds the value of the "hour" field.
+	Hour string `json:"hour,omitempty"`
+	// Day holds the value of the "day" field.
+	Day string `json:"day,omitempty"`
+	// Interval holds the value of the "interval" field.
+	Interval string `json:"interval,omitempty"`
+	// CronSyntax holds the value of the "cronSyntax" field.
+	CronSyntax string `json:"cronSyntax,omitempty"`
+	// CronID holds the value of the "cronID" field.
+	CronID uint `json:"cronID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BackupScheduleQuery when eager-loading is set.
 	Edges                     BackupScheduleEdges `json:"edges"`
@@ -52,9 +82,11 @@ func (*BackupSchedule) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case backupschedule.FieldID:
+		case backupschedule.FieldEveryDay, backupschedule.FieldEveryWeek, backupschedule.FieldEveryMonth, backupschedule.FieldEveryMonday, backupschedule.FieldEveryTuesday, backupschedule.FieldEveryWednesday, backupschedule.FieldEveryThursday, backupschedule.FieldEveryTriday, backupschedule.FieldEverySaturday, backupschedule.FieldEverySunday:
+			values[i] = new(sql.NullBool)
+		case backupschedule.FieldID, backupschedule.FieldCronID:
 			values[i] = new(sql.NullInt64)
-		case backupschedule.FieldChoice:
+		case backupschedule.FieldChoice, backupschedule.FieldHour, backupschedule.FieldDay, backupschedule.FieldInterval, backupschedule.FieldCronSyntax:
 			values[i] = new(sql.NullString)
 		case backupschedule.ForeignKeys[0]: // repository_backupschedule
 			values[i] = new(sql.NullInt64)
@@ -84,6 +116,96 @@ func (bs *BackupSchedule) assignValues(columns []string, values []interface{}) e
 				return fmt.Errorf("unexpected type %T for field choice", values[i])
 			} else if value.Valid {
 				bs.Choice = backupschedule.Choice(value.String)
+			}
+		case backupschedule.FieldEveryDay:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyDay", values[i])
+			} else if value.Valid {
+				bs.EveryDay = value.Bool
+			}
+		case backupschedule.FieldEveryWeek:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyWeek", values[i])
+			} else if value.Valid {
+				bs.EveryWeek = value.Bool
+			}
+		case backupschedule.FieldEveryMonth:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyMonth", values[i])
+			} else if value.Valid {
+				bs.EveryMonth = value.Bool
+			}
+		case backupschedule.FieldEveryMonday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyMonday", values[i])
+			} else if value.Valid {
+				bs.EveryMonday = value.Bool
+			}
+		case backupschedule.FieldEveryTuesday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyTuesday", values[i])
+			} else if value.Valid {
+				bs.EveryTuesday = value.Bool
+			}
+		case backupschedule.FieldEveryWednesday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyWednesday", values[i])
+			} else if value.Valid {
+				bs.EveryWednesday = value.Bool
+			}
+		case backupschedule.FieldEveryThursday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyThursday", values[i])
+			} else if value.Valid {
+				bs.EveryThursday = value.Bool
+			}
+		case backupschedule.FieldEveryTriday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everyTriday", values[i])
+			} else if value.Valid {
+				bs.EveryTriday = value.Bool
+			}
+		case backupschedule.FieldEverySaturday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everySaturday", values[i])
+			} else if value.Valid {
+				bs.EverySaturday = value.Bool
+			}
+		case backupschedule.FieldEverySunday:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field everySunday", values[i])
+			} else if value.Valid {
+				bs.EverySunday = value.Bool
+			}
+		case backupschedule.FieldHour:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field hour", values[i])
+			} else if value.Valid {
+				bs.Hour = value.String
+			}
+		case backupschedule.FieldDay:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field day", values[i])
+			} else if value.Valid {
+				bs.Day = value.String
+			}
+		case backupschedule.FieldInterval:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field interval", values[i])
+			} else if value.Valid {
+				bs.Interval = value.String
+			}
+		case backupschedule.FieldCronSyntax:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cronSyntax", values[i])
+			} else if value.Valid {
+				bs.CronSyntax = value.String
+			}
+		case backupschedule.FieldCronID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field cronID", values[i])
+			} else if value.Valid {
+				bs.CronID = uint(value.Int64)
 			}
 		case backupschedule.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -127,6 +249,36 @@ func (bs *BackupSchedule) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", bs.ID))
 	builder.WriteString(", choice=")
 	builder.WriteString(fmt.Sprintf("%v", bs.Choice))
+	builder.WriteString(", everyDay=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryDay))
+	builder.WriteString(", everyWeek=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryWeek))
+	builder.WriteString(", everyMonth=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryMonth))
+	builder.WriteString(", everyMonday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryMonday))
+	builder.WriteString(", everyTuesday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryTuesday))
+	builder.WriteString(", everyWednesday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryWednesday))
+	builder.WriteString(", everyThursday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryThursday))
+	builder.WriteString(", everyTriday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryTriday))
+	builder.WriteString(", everySaturday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EverySaturday))
+	builder.WriteString(", everySunday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EverySunday))
+	builder.WriteString(", hour=")
+	builder.WriteString(bs.Hour)
+	builder.WriteString(", day=")
+	builder.WriteString(bs.Day)
+	builder.WriteString(", interval=")
+	builder.WriteString(bs.Interval)
+	builder.WriteString(", cronSyntax=")
+	builder.WriteString(bs.CronSyntax)
+	builder.WriteString(", cronID=")
+	builder.WriteString(fmt.Sprintf("%v", bs.CronID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -13,6 +13,36 @@ const (
 	FieldID = "id"
 	// FieldChoice holds the string denoting the choice field in the database.
 	FieldChoice = "choice"
+	// FieldEveryDay holds the string denoting the everyday field in the database.
+	FieldEveryDay = "every_day"
+	// FieldEveryWeek holds the string denoting the everyweek field in the database.
+	FieldEveryWeek = "every_week"
+	// FieldEveryMonth holds the string denoting the everymonth field in the database.
+	FieldEveryMonth = "every_month"
+	// FieldEveryMonday holds the string denoting the everymonday field in the database.
+	FieldEveryMonday = "every_monday"
+	// FieldEveryTuesday holds the string denoting the everytuesday field in the database.
+	FieldEveryTuesday = "every_tuesday"
+	// FieldEveryWednesday holds the string denoting the everywednesday field in the database.
+	FieldEveryWednesday = "every_wednesday"
+	// FieldEveryThursday holds the string denoting the everythursday field in the database.
+	FieldEveryThursday = "every_thursday"
+	// FieldEveryTriday holds the string denoting the everytriday field in the database.
+	FieldEveryTriday = "every_triday"
+	// FieldEverySaturday holds the string denoting the everysaturday field in the database.
+	FieldEverySaturday = "every_saturday"
+	// FieldEverySunday holds the string denoting the everysunday field in the database.
+	FieldEverySunday = "every_sunday"
+	// FieldHour holds the string denoting the hour field in the database.
+	FieldHour = "hour"
+	// FieldDay holds the string denoting the day field in the database.
+	FieldDay = "day"
+	// FieldInterval holds the string denoting the interval field in the database.
+	FieldInterval = "interval"
+	// FieldCronSyntax holds the string denoting the cronsyntax field in the database.
+	FieldCronSyntax = "cron_syntax"
+	// FieldCronID holds the string denoting the cronid field in the database.
+	FieldCronID = "cron_id"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the backupschedule in the database.
@@ -30,6 +60,21 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldChoice,
+	FieldEveryDay,
+	FieldEveryWeek,
+	FieldEveryMonth,
+	FieldEveryMonday,
+	FieldEveryTuesday,
+	FieldEveryWednesday,
+	FieldEveryThursday,
+	FieldEveryTriday,
+	FieldEverySaturday,
+	FieldEverySunday,
+	FieldHour,
+	FieldDay,
+	FieldInterval,
+	FieldCronSyntax,
+	FieldCronID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "backup_schedules"
@@ -52,6 +97,29 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultEveryDay holds the default value on creation for the "everyDay" field.
+	DefaultEveryDay bool
+	// DefaultEveryWeek holds the default value on creation for the "everyWeek" field.
+	DefaultEveryWeek bool
+	// DefaultEveryMonth holds the default value on creation for the "everyMonth" field.
+	DefaultEveryMonth bool
+	// DefaultEveryMonday holds the default value on creation for the "everyMonday" field.
+	DefaultEveryMonday bool
+	// DefaultEveryTuesday holds the default value on creation for the "everyTuesday" field.
+	DefaultEveryTuesday bool
+	// DefaultEveryWednesday holds the default value on creation for the "everyWednesday" field.
+	DefaultEveryWednesday bool
+	// DefaultEveryThursday holds the default value on creation for the "everyThursday" field.
+	DefaultEveryThursday bool
+	// DefaultEveryTriday holds the default value on creation for the "everyTriday" field.
+	DefaultEveryTriday bool
+	// DefaultEverySaturday holds the default value on creation for the "everySaturday" field.
+	DefaultEverySaturday bool
+	// DefaultEverySunday holds the default value on creation for the "everySunday" field.
+	DefaultEverySunday bool
+)
 
 // Choice defines the type for the "choice" enum field.
 type Choice string

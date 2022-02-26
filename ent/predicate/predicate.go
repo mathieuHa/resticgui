@@ -6,11 +6,35 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AWSS3Provider is the predicate function for awss3provider builders.
+type AWSS3Provider func(*sql.Selector)
+
+// B2Provider is the predicate function for b2provider builders.
+type B2Provider func(*sql.Selector)
+
+// BackupPolicy is the predicate function for backuppolicy builders.
+type BackupPolicy func(*sql.Selector)
+
 // BackupSchedule is the predicate function for backupschedule builders.
 type BackupSchedule func(*sql.Selector)
+
+// LocalProvider is the predicate function for localprovider builders.
+type LocalProvider func(*sql.Selector)
+
+// MinioS3Provider is the predicate function for minios3provider builders.
+type MinioS3Provider func(*sql.Selector)
 
 // Path is the predicate function for path builders.
 type Path func(*sql.Selector)
 
+// Permission is the predicate function for permission builders.
+type Permission func(*sql.Selector)
+
 // Repository is the predicate function for repository builders.
 type Repository func(*sql.Selector)
+
+// Role is the predicate function for role builders.
+type Role func(*sql.Selector)
+
+// User is the predicate function for user builders.
+type User func(*sql.Selector)

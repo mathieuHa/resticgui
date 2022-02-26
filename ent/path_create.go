@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"gitlab.com/resticgui/resticgui/ent/path"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 // PathCreate is the builder for creating a Path entity.
@@ -63,6 +64,25 @@ func (pc *PathCreate) SetNillableIncluded(b *bool) *PathCreate {
 		pc.SetIncluded(*b)
 	}
 	return pc
+}
+
+// SetRepositoryID sets the "repository" edge to the Repository entity by ID.
+func (pc *PathCreate) SetRepositoryID(id int) *PathCreate {
+	pc.mutation.SetRepositoryID(id)
+	return pc
+}
+
+// SetNillableRepositoryID sets the "repository" edge to the Repository entity by ID if the given value is not nil.
+func (pc *PathCreate) SetNillableRepositoryID(id *int) *PathCreate {
+	if id != nil {
+		pc = pc.SetRepositoryID(*id)
+	}
+	return pc
+}
+
+// SetRepository sets the "repository" edge to the Repository entity.
+func (pc *PathCreate) SetRepository(r *Repository) *PathCreate {
+	return pc.SetRepositoryID(r.ID)
 }
 
 // Mutation returns the PathMutation object of the builder.
@@ -239,6 +259,26 @@ func (pc *PathCreate) createSpec() (*Path, *sqlgraph.CreateSpec) {
 			Column: path.FieldIncluded,
 		})
 		_node.Included = value
+	}
+	if nodes := pc.mutation.RepositoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   path.RepositoryTable,
+			Columns: []string{path.RepositoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: repository.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.repository_path = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

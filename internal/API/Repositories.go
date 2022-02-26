@@ -19,7 +19,6 @@ const errIDNotValid = "id not valid"
 const errNotDeleted = entity + "not deleted"
 const errNotBind = entity + "bind error"
 const errUpdate = entity + "update error"
-const errNameUsed = entity + "name already in use"
 const errCreate = entity + "creation failed"
 const errQuery = entity + "query failed"
 
@@ -82,12 +81,10 @@ func GetRepository(c *gin.Context) {
 		Only(context.Background())
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
+		log.Err(err).Msgf("error: %v", errNotFound)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
-	// // check all path and update entity in memory if path changed
-	// checkAllPath(repositories.Paths)
 
 	c.IndentedJSON(http.StatusOK, repository)
 }
@@ -333,7 +330,7 @@ func RemoveRepository(c *gin.Context) {
 		Exec(ctx)
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted, "message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
 		return
 	}
 

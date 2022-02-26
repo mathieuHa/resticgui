@@ -5,17 +5,106 @@ package ent
 import (
 	"time"
 
+	"gitlab.com/resticgui/resticgui/ent/awss3provider"
+	"gitlab.com/resticgui/resticgui/ent/b2provider"
+	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/path"
+	"gitlab.com/resticgui/resticgui/ent/permission"
 	"gitlab.com/resticgui/resticgui/ent/repository"
+	"gitlab.com/resticgui/resticgui/ent/role"
 	"gitlab.com/resticgui/resticgui/ent/schema"
+	"gitlab.com/resticgui/resticgui/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	awss3providerFields := schema.AWSS3Provider{}.Fields()
+	_ = awss3providerFields
+	// awss3providerDescBucketName is the schema descriptor for bucketName field.
+	awss3providerDescBucketName := awss3providerFields[0].Descriptor()
+	// awss3provider.BucketNameValidator is a validator for the "bucketName" field. It is called by the builders before save.
+	awss3provider.BucketNameValidator = awss3providerDescBucketName.Validators[0].(func(string) error)
+	// awss3providerDescSecretAccessKey is the schema descriptor for secretAccessKey field.
+	awss3providerDescSecretAccessKey := awss3providerFields[1].Descriptor()
+	// awss3provider.SecretAccessKeyValidator is a validator for the "secretAccessKey" field. It is called by the builders before save.
+	awss3provider.SecretAccessKeyValidator = awss3providerDescSecretAccessKey.Validators[0].(func(string) error)
+	// awss3providerDescAccessKeyID is the schema descriptor for accessKeyID field.
+	awss3providerDescAccessKeyID := awss3providerFields[2].Descriptor()
+	// awss3provider.AccessKeyIDValidator is a validator for the "accessKeyID" field. It is called by the builders before save.
+	awss3provider.AccessKeyIDValidator = awss3providerDescAccessKeyID.Validators[0].(func(string) error)
+	b2providerFields := schema.B2Provider{}.Fields()
+	_ = b2providerFields
+	// b2providerDescBucketName is the schema descriptor for bucketName field.
+	b2providerDescBucketName := b2providerFields[0].Descriptor()
+	// b2provider.BucketNameValidator is a validator for the "bucketName" field. It is called by the builders before save.
+	b2provider.BucketNameValidator = b2providerDescBucketName.Validators[0].(func(string) error)
+	// b2providerDescAccountKey is the schema descriptor for accountKey field.
+	b2providerDescAccountKey := b2providerFields[1].Descriptor()
+	// b2provider.AccountKeyValidator is a validator for the "accountKey" field. It is called by the builders before save.
+	b2provider.AccountKeyValidator = b2providerDescAccountKey.Validators[0].(func(string) error)
+	// b2providerDescAccountID is the schema descriptor for accountID field.
+	b2providerDescAccountID := b2providerFields[2].Descriptor()
+	// b2provider.AccountIDValidator is a validator for the "accountID" field. It is called by the builders before save.
+	b2provider.AccountIDValidator = b2providerDescAccountID.Validators[0].(func(string) error)
+	// b2providerDescRepoName is the schema descriptor for repoName field.
+	b2providerDescRepoName := b2providerFields[3].Descriptor()
+	// b2provider.RepoNameValidator is a validator for the "repoName" field. It is called by the builders before save.
+	b2provider.RepoNameValidator = b2providerDescRepoName.Validators[0].(func(string) error)
+	backuppolicyFields := schema.BackupPolicy{}.Fields()
+	_ = backuppolicyFields
+	// backuppolicyDescNbLastBackup is the schema descriptor for nbLastBackup field.
+	backuppolicyDescNbLastBackup := backuppolicyFields[0].Descriptor()
+	// backuppolicy.DefaultNbLastBackup holds the default value on creation for the nbLastBackup field.
+	backuppolicy.DefaultNbLastBackup = backuppolicyDescNbLastBackup.Default.(uint)
+	// backuppolicyDescKeepAll is the schema descriptor for keepAll field.
+	backuppolicyDescKeepAll := backuppolicyFields[5].Descriptor()
+	// backuppolicy.DefaultKeepAll holds the default value on creation for the keepAll field.
+	backuppolicy.DefaultKeepAll = backuppolicyDescKeepAll.Default.(bool)
 	backupscheduleFields := schema.BackupSchedule{}.Fields()
 	_ = backupscheduleFields
+	// backupscheduleDescEveryDay is the schema descriptor for everyDay field.
+	backupscheduleDescEveryDay := backupscheduleFields[1].Descriptor()
+	// backupschedule.DefaultEveryDay holds the default value on creation for the everyDay field.
+	backupschedule.DefaultEveryDay = backupscheduleDescEveryDay.Default.(bool)
+	// backupscheduleDescEveryWeek is the schema descriptor for everyWeek field.
+	backupscheduleDescEveryWeek := backupscheduleFields[2].Descriptor()
+	// backupschedule.DefaultEveryWeek holds the default value on creation for the everyWeek field.
+	backupschedule.DefaultEveryWeek = backupscheduleDescEveryWeek.Default.(bool)
+	// backupscheduleDescEveryMonth is the schema descriptor for everyMonth field.
+	backupscheduleDescEveryMonth := backupscheduleFields[3].Descriptor()
+	// backupschedule.DefaultEveryMonth holds the default value on creation for the everyMonth field.
+	backupschedule.DefaultEveryMonth = backupscheduleDescEveryMonth.Default.(bool)
+	// backupscheduleDescEveryMonday is the schema descriptor for everyMonday field.
+	backupscheduleDescEveryMonday := backupscheduleFields[4].Descriptor()
+	// backupschedule.DefaultEveryMonday holds the default value on creation for the everyMonday field.
+	backupschedule.DefaultEveryMonday = backupscheduleDescEveryMonday.Default.(bool)
+	// backupscheduleDescEveryTuesday is the schema descriptor for everyTuesday field.
+	backupscheduleDescEveryTuesday := backupscheduleFields[5].Descriptor()
+	// backupschedule.DefaultEveryTuesday holds the default value on creation for the everyTuesday field.
+	backupschedule.DefaultEveryTuesday = backupscheduleDescEveryTuesday.Default.(bool)
+	// backupscheduleDescEveryWednesday is the schema descriptor for everyWednesday field.
+	backupscheduleDescEveryWednesday := backupscheduleFields[6].Descriptor()
+	// backupschedule.DefaultEveryWednesday holds the default value on creation for the everyWednesday field.
+	backupschedule.DefaultEveryWednesday = backupscheduleDescEveryWednesday.Default.(bool)
+	// backupscheduleDescEveryThursday is the schema descriptor for everyThursday field.
+	backupscheduleDescEveryThursday := backupscheduleFields[7].Descriptor()
+	// backupschedule.DefaultEveryThursday holds the default value on creation for the everyThursday field.
+	backupschedule.DefaultEveryThursday = backupscheduleDescEveryThursday.Default.(bool)
+	// backupscheduleDescEveryTriday is the schema descriptor for everyTriday field.
+	backupscheduleDescEveryTriday := backupscheduleFields[8].Descriptor()
+	// backupschedule.DefaultEveryTriday holds the default value on creation for the everyTriday field.
+	backupschedule.DefaultEveryTriday = backupscheduleDescEveryTriday.Default.(bool)
+	// backupscheduleDescEverySaturday is the schema descriptor for everySaturday field.
+	backupscheduleDescEverySaturday := backupscheduleFields[9].Descriptor()
+	// backupschedule.DefaultEverySaturday holds the default value on creation for the everySaturday field.
+	backupschedule.DefaultEverySaturday = backupscheduleDescEverySaturday.Default.(bool)
+	// backupscheduleDescEverySunday is the schema descriptor for everySunday field.
+	backupscheduleDescEverySunday := backupscheduleFields[10].Descriptor()
+	// backupschedule.DefaultEverySunday holds the default value on creation for the everySunday field.
+	backupschedule.DefaultEverySunday = backupscheduleDescEverySunday.Default.(bool)
 	pathFields := schema.Path{}.Fields()
 	_ = pathFields
 	// pathDescName is the schema descriptor for name field.
@@ -34,6 +123,12 @@ func init() {
 	pathDescIncluded := pathFields[4].Descriptor()
 	// path.DefaultIncluded holds the default value on creation for the included field.
 	path.DefaultIncluded = pathDescIncluded.Default.(bool)
+	permissionFields := schema.Permission{}.Fields()
+	_ = permissionFields
+	// permissionDescName is the schema descriptor for name field.
+	permissionDescName := permissionFields[0].Descriptor()
+	// permission.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	permission.NameValidator = permissionDescName.Validators[0].(func(string) error)
 	repositoryFields := schema.Repository{}.Fields()
 	_ = repositoryFields
 	// repositoryDescName is the schema descriptor for name field.
@@ -54,9 +149,9 @@ func init() {
 			return nil
 		}
 	}()
-	// repositoryDescCreatedAt is the schema descriptor for created_at field.
+	// repositoryDescCreatedAt is the schema descriptor for createdAt field.
 	repositoryDescCreatedAt := repositoryFields[1].Descriptor()
-	// repository.DefaultCreatedAt holds the default value on creation for the created_at field.
+	// repository.DefaultCreatedAt holds the default value on creation for the createdAt field.
 	repository.DefaultCreatedAt = repositoryDescCreatedAt.Default.(func() time.Time)
 	// repositoryDescActive is the schema descriptor for active field.
 	repositoryDescActive := repositoryFields[3].Descriptor()
@@ -66,4 +161,20 @@ func init() {
 	repositoryDescPassword := repositoryFields[4].Descriptor()
 	// repository.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	repository.PasswordValidator = repositoryDescPassword.Validators[0].(func(string) error)
+	roleFields := schema.Role{}.Fields()
+	_ = roleFields
+	// roleDescName is the schema descriptor for name field.
+	roleDescName := roleFields[0].Descriptor()
+	// role.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	role.NameValidator = roleDescName.Validators[0].(func(string) error)
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescPasswordFailCount is the schema descriptor for PasswordFailCount field.
+	userDescPasswordFailCount := userFields[5].Descriptor()
+	// user.DefaultPasswordFailCount holds the default value on creation for the PasswordFailCount field.
+	user.DefaultPasswordFailCount = userDescPasswordFailCount.Default.(int)
+	// userDescMfa is the schema descriptor for mfa field.
+	userDescMfa := userFields[6].Descriptor()
+	// user.DefaultMfa holds the default value on creation for the mfa field.
+	user.DefaultMfa = userDescMfa.Default.(bool)
 }

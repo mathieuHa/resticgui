@@ -583,13 +583,73 @@
                     "description": "Choice holds the value of the \"choice\" field.",
                     "type": "string"
                 },
+                "cronID": {
+                    "description": "CronID holds the value of the \"cronID\" field.",
+                    "type": "integer"
+                },
+                "cronSyntax": {
+                    "description": "CronSyntax holds the value of the \"cronSyntax\" field.",
+                    "type": "string"
+                },
+                "day": {
+                    "description": "Day holds the value of the \"day\" field.",
+                    "type": "string"
+                },
                 "edges": {
                     "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the BackupScheduleQuery when eager-loading is set.",
                     "$ref": "#/definitions/ent.BackupScheduleEdges"
                 },
+                "everyDay": {
+                    "description": "EveryDay holds the value of the \"everyDay\" field.",
+                    "type": "boolean"
+                },
+                "everyMonday": {
+                    "description": "EveryMonday holds the value of the \"everyMonday\" field.",
+                    "type": "boolean"
+                },
+                "everyMonth": {
+                    "description": "EveryMonth holds the value of the \"everyMonth\" field.",
+                    "type": "boolean"
+                },
+                "everySaturday": {
+                    "description": "EverySaturday holds the value of the \"everySaturday\" field.",
+                    "type": "boolean"
+                },
+                "everySunday": {
+                    "description": "EverySunday holds the value of the \"everySunday\" field.",
+                    "type": "boolean"
+                },
+                "everyThursday": {
+                    "description": "EveryThursday holds the value of the \"everyThursday\" field.",
+                    "type": "boolean"
+                },
+                "everyTriday": {
+                    "description": "EveryTriday holds the value of the \"everyTriday\" field.",
+                    "type": "boolean"
+                },
+                "everyTuesday": {
+                    "description": "EveryTuesday holds the value of the \"everyTuesday\" field.",
+                    "type": "boolean"
+                },
+                "everyWednesday": {
+                    "description": "EveryWednesday holds the value of the \"everyWednesday\" field.",
+                    "type": "boolean"
+                },
+                "everyWeek": {
+                    "description": "EveryWeek holds the value of the \"everyWeek\" field.",
+                    "type": "boolean"
+                },
+                "hour": {
+                    "description": "Hour holds the value of the \"hour\" field.",
+                    "type": "string"
+                },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "integer"
+                },
+                "interval": {
+                    "description": "Interval holds the value of the \"interval\" field.",
+                    "type": "string"
                 }
             }
         },
@@ -608,6 +668,10 @@
                 "abs_path": {
                     "description": "AbsPath holds the value of the \"abs_path\" field.",
                     "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the PathQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.PathEdges"
                 },
                 "exists": {
                     "description": "Exists holds the value of the \"exists\" field.",
@@ -628,6 +692,15 @@
                 "name": {
                     "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
+                }
+            }
+        },
+        "ent.PathEdges": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
                 }
             }
         },

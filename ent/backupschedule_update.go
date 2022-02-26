@@ -42,6 +42,183 @@ func (bsu *BackupScheduleUpdate) SetNillableChoice(b *backupschedule.Choice) *Ba
 	return bsu
 }
 
+// SetEveryDay sets the "everyDay" field.
+func (bsu *BackupScheduleUpdate) SetEveryDay(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryDay(b)
+	return bsu
+}
+
+// SetNillableEveryDay sets the "everyDay" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryDay(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryDay(*b)
+	}
+	return bsu
+}
+
+// SetEveryWeek sets the "everyWeek" field.
+func (bsu *BackupScheduleUpdate) SetEveryWeek(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryWeek(b)
+	return bsu
+}
+
+// SetNillableEveryWeek sets the "everyWeek" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryWeek(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryWeek(*b)
+	}
+	return bsu
+}
+
+// SetEveryMonth sets the "everyMonth" field.
+func (bsu *BackupScheduleUpdate) SetEveryMonth(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryMonth(b)
+	return bsu
+}
+
+// SetNillableEveryMonth sets the "everyMonth" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryMonth(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryMonth(*b)
+	}
+	return bsu
+}
+
+// SetEveryMonday sets the "everyMonday" field.
+func (bsu *BackupScheduleUpdate) SetEveryMonday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryMonday(b)
+	return bsu
+}
+
+// SetNillableEveryMonday sets the "everyMonday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryMonday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryMonday(*b)
+	}
+	return bsu
+}
+
+// SetEveryTuesday sets the "everyTuesday" field.
+func (bsu *BackupScheduleUpdate) SetEveryTuesday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryTuesday(b)
+	return bsu
+}
+
+// SetNillableEveryTuesday sets the "everyTuesday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryTuesday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryTuesday(*b)
+	}
+	return bsu
+}
+
+// SetEveryWednesday sets the "everyWednesday" field.
+func (bsu *BackupScheduleUpdate) SetEveryWednesday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryWednesday(b)
+	return bsu
+}
+
+// SetNillableEveryWednesday sets the "everyWednesday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryWednesday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryWednesday(*b)
+	}
+	return bsu
+}
+
+// SetEveryThursday sets the "everyThursday" field.
+func (bsu *BackupScheduleUpdate) SetEveryThursday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryThursday(b)
+	return bsu
+}
+
+// SetNillableEveryThursday sets the "everyThursday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryThursday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryThursday(*b)
+	}
+	return bsu
+}
+
+// SetEveryTriday sets the "everyTriday" field.
+func (bsu *BackupScheduleUpdate) SetEveryTriday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryTriday(b)
+	return bsu
+}
+
+// SetNillableEveryTriday sets the "everyTriday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryTriday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEveryTriday(*b)
+	}
+	return bsu
+}
+
+// SetEverySaturday sets the "everySaturday" field.
+func (bsu *BackupScheduleUpdate) SetEverySaturday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEverySaturday(b)
+	return bsu
+}
+
+// SetNillableEverySaturday sets the "everySaturday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEverySaturday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEverySaturday(*b)
+	}
+	return bsu
+}
+
+// SetEverySunday sets the "everySunday" field.
+func (bsu *BackupScheduleUpdate) SetEverySunday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEverySunday(b)
+	return bsu
+}
+
+// SetNillableEverySunday sets the "everySunday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEverySunday(b *bool) *BackupScheduleUpdate {
+	if b != nil {
+		bsu.SetEverySunday(*b)
+	}
+	return bsu
+}
+
+// SetHour sets the "hour" field.
+func (bsu *BackupScheduleUpdate) SetHour(s string) *BackupScheduleUpdate {
+	bsu.mutation.SetHour(s)
+	return bsu
+}
+
+// SetDay sets the "day" field.
+func (bsu *BackupScheduleUpdate) SetDay(s string) *BackupScheduleUpdate {
+	bsu.mutation.SetDay(s)
+	return bsu
+}
+
+// SetInterval sets the "interval" field.
+func (bsu *BackupScheduleUpdate) SetInterval(s string) *BackupScheduleUpdate {
+	bsu.mutation.SetInterval(s)
+	return bsu
+}
+
+// SetCronSyntax sets the "cronSyntax" field.
+func (bsu *BackupScheduleUpdate) SetCronSyntax(s string) *BackupScheduleUpdate {
+	bsu.mutation.SetCronSyntax(s)
+	return bsu
+}
+
+// SetCronID sets the "cronID" field.
+func (bsu *BackupScheduleUpdate) SetCronID(u uint) *BackupScheduleUpdate {
+	bsu.mutation.ResetCronID()
+	bsu.mutation.SetCronID(u)
+	return bsu
+}
+
+// AddCronID adds u to the "cronID" field.
+func (bsu *BackupScheduleUpdate) AddCronID(u int) *BackupScheduleUpdate {
+	bsu.mutation.AddCronID(u)
+	return bsu
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (bsu *BackupScheduleUpdate) SetRepositoryID(id int) *BackupScheduleUpdate {
 	bsu.mutation.SetRepositoryID(id)
@@ -162,6 +339,118 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Column: backupschedule.FieldChoice,
 		})
 	}
+	if value, ok := bsu.mutation.EveryDay(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryDay,
+		})
+	}
+	if value, ok := bsu.mutation.EveryWeek(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryWeek,
+		})
+	}
+	if value, ok := bsu.mutation.EveryMonth(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryMonth,
+		})
+	}
+	if value, ok := bsu.mutation.EveryMonday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryMonday,
+		})
+	}
+	if value, ok := bsu.mutation.EveryTuesday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryTuesday,
+		})
+	}
+	if value, ok := bsu.mutation.EveryWednesday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryWednesday,
+		})
+	}
+	if value, ok := bsu.mutation.EveryThursday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryThursday,
+		})
+	}
+	if value, ok := bsu.mutation.EveryTriday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryTriday,
+		})
+	}
+	if value, ok := bsu.mutation.EverySaturday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEverySaturday,
+		})
+	}
+	if value, ok := bsu.mutation.EverySunday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEverySunday,
+		})
+	}
+	if value, ok := bsu.mutation.Hour(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldHour,
+		})
+	}
+	if value, ok := bsu.mutation.Day(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldDay,
+		})
+	}
+	if value, ok := bsu.mutation.Interval(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldInterval,
+		})
+	}
+	if value, ok := bsu.mutation.CronSyntax(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldCronSyntax,
+		})
+	}
+	if value, ok := bsu.mutation.CronID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: backupschedule.FieldCronID,
+		})
+	}
+	if value, ok := bsu.mutation.AddedCronID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: backupschedule.FieldCronID,
+		})
+	}
 	if bsu.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -227,6 +516,183 @@ func (bsuo *BackupScheduleUpdateOne) SetNillableChoice(b *backupschedule.Choice)
 	if b != nil {
 		bsuo.SetChoice(*b)
 	}
+	return bsuo
+}
+
+// SetEveryDay sets the "everyDay" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryDay(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryDay(b)
+	return bsuo
+}
+
+// SetNillableEveryDay sets the "everyDay" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryDay(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryDay(*b)
+	}
+	return bsuo
+}
+
+// SetEveryWeek sets the "everyWeek" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryWeek(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryWeek(b)
+	return bsuo
+}
+
+// SetNillableEveryWeek sets the "everyWeek" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryWeek(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryWeek(*b)
+	}
+	return bsuo
+}
+
+// SetEveryMonth sets the "everyMonth" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryMonth(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryMonth(b)
+	return bsuo
+}
+
+// SetNillableEveryMonth sets the "everyMonth" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryMonth(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryMonth(*b)
+	}
+	return bsuo
+}
+
+// SetEveryMonday sets the "everyMonday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryMonday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryMonday(b)
+	return bsuo
+}
+
+// SetNillableEveryMonday sets the "everyMonday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryMonday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryMonday(*b)
+	}
+	return bsuo
+}
+
+// SetEveryTuesday sets the "everyTuesday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryTuesday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryTuesday(b)
+	return bsuo
+}
+
+// SetNillableEveryTuesday sets the "everyTuesday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryTuesday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryTuesday(*b)
+	}
+	return bsuo
+}
+
+// SetEveryWednesday sets the "everyWednesday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryWednesday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryWednesday(b)
+	return bsuo
+}
+
+// SetNillableEveryWednesday sets the "everyWednesday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryWednesday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryWednesday(*b)
+	}
+	return bsuo
+}
+
+// SetEveryThursday sets the "everyThursday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryThursday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryThursday(b)
+	return bsuo
+}
+
+// SetNillableEveryThursday sets the "everyThursday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryThursday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryThursday(*b)
+	}
+	return bsuo
+}
+
+// SetEveryTriday sets the "everyTriday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryTriday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryTriday(b)
+	return bsuo
+}
+
+// SetNillableEveryTriday sets the "everyTriday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryTriday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEveryTriday(*b)
+	}
+	return bsuo
+}
+
+// SetEverySaturday sets the "everySaturday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEverySaturday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEverySaturday(b)
+	return bsuo
+}
+
+// SetNillableEverySaturday sets the "everySaturday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEverySaturday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEverySaturday(*b)
+	}
+	return bsuo
+}
+
+// SetEverySunday sets the "everySunday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEverySunday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEverySunday(b)
+	return bsuo
+}
+
+// SetNillableEverySunday sets the "everySunday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEverySunday(b *bool) *BackupScheduleUpdateOne {
+	if b != nil {
+		bsuo.SetEverySunday(*b)
+	}
+	return bsuo
+}
+
+// SetHour sets the "hour" field.
+func (bsuo *BackupScheduleUpdateOne) SetHour(s string) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetHour(s)
+	return bsuo
+}
+
+// SetDay sets the "day" field.
+func (bsuo *BackupScheduleUpdateOne) SetDay(s string) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetDay(s)
+	return bsuo
+}
+
+// SetInterval sets the "interval" field.
+func (bsuo *BackupScheduleUpdateOne) SetInterval(s string) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetInterval(s)
+	return bsuo
+}
+
+// SetCronSyntax sets the "cronSyntax" field.
+func (bsuo *BackupScheduleUpdateOne) SetCronSyntax(s string) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetCronSyntax(s)
+	return bsuo
+}
+
+// SetCronID sets the "cronID" field.
+func (bsuo *BackupScheduleUpdateOne) SetCronID(u uint) *BackupScheduleUpdateOne {
+	bsuo.mutation.ResetCronID()
+	bsuo.mutation.SetCronID(u)
+	return bsuo
+}
+
+// AddCronID adds u to the "cronID" field.
+func (bsuo *BackupScheduleUpdateOne) AddCronID(u int) *BackupScheduleUpdateOne {
+	bsuo.mutation.AddCronID(u)
 	return bsuo
 }
 
@@ -372,6 +838,118 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: backupschedule.FieldChoice,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryDay(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryDay,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryWeek(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryWeek,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryMonth(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryMonth,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryMonday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryMonday,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryTuesday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryTuesday,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryWednesday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryWednesday,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryThursday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryThursday,
+		})
+	}
+	if value, ok := bsuo.mutation.EveryTriday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEveryTriday,
+		})
+	}
+	if value, ok := bsuo.mutation.EverySaturday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEverySaturday,
+		})
+	}
+	if value, ok := bsuo.mutation.EverySunday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: backupschedule.FieldEverySunday,
+		})
+	}
+	if value, ok := bsuo.mutation.Hour(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldHour,
+		})
+	}
+	if value, ok := bsuo.mutation.Day(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldDay,
+		})
+	}
+	if value, ok := bsuo.mutation.Interval(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldInterval,
+		})
+	}
+	if value, ok := bsuo.mutation.CronSyntax(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: backupschedule.FieldCronSyntax,
+		})
+	}
+	if value, ok := bsuo.mutation.CronID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: backupschedule.FieldCronID,
+		})
+	}
+	if value, ok := bsuo.mutation.AddedCronID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: backupschedule.FieldCronID,
 		})
 	}
 	if bsuo.mutation.RepositoryCleared() {

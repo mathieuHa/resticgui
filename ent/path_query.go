@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 // PathQuery is the builder for querying Path entities.
@@ -24,7 +25,9 @@ type PathQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Path
-	withFKs    bool
+	// eager-loading edges.
+	withRepository *RepositoryQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -59,6 +62,28 @@ func (pq *PathQuery) Unique(unique bool) *PathQuery {
 func (pq *PathQuery) Order(o ...OrderFunc) *PathQuery {
 	pq.order = append(pq.order, o...)
 	return pq
+}
+
+// QueryRepository chains the current query on the "repository" edge.
+func (pq *PathQuery) QueryRepository() *RepositoryQuery {
+	query := &RepositoryQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(path.Table, path.FieldID, selector),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, path.RepositoryTable, path.RepositoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Path entity from the query.
@@ -237,15 +262,27 @@ func (pq *PathQuery) Clone() *PathQuery {
 		return nil
 	}
 	return &PathQuery{
-		config:     pq.config,
-		limit:      pq.limit,
-		offset:     pq.offset,
-		order:      append([]OrderFunc{}, pq.order...),
-		predicates: append([]predicate.Path{}, pq.predicates...),
+		config:         pq.config,
+		limit:          pq.limit,
+		offset:         pq.offset,
+		order:          append([]OrderFunc{}, pq.order...),
+		predicates:     append([]predicate.Path{}, pq.predicates...),
+		withRepository: pq.withRepository.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
 	}
+}
+
+// WithRepository tells the query-builder to eager-load the nodes that are connected to
+// the "repository" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *PathQuery) WithRepository(opts ...func(*RepositoryQuery)) *PathQuery {
+	query := &RepositoryQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withRepository = query
+	return pq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -311,10 +348,16 @@ func (pq *PathQuery) prepareQuery(ctx context.Context) error {
 
 func (pq *PathQuery) sqlAll(ctx context.Context) ([]*Path, error) {
 	var (
-		nodes   = []*Path{}
-		withFKs = pq.withFKs
-		_spec   = pq.querySpec()
+		nodes       = []*Path{}
+		withFKs     = pq.withFKs
+		_spec       = pq.querySpec()
+		loadedTypes = [1]bool{
+			pq.withRepository != nil,
+		}
 	)
+	if pq.withRepository != nil {
+		withFKs = true
+	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, path.ForeignKeys...)
 	}
@@ -328,6 +371,7 @@ func (pq *PathQuery) sqlAll(ctx context.Context) ([]*Path, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
@@ -336,6 +380,36 @@ func (pq *PathQuery) sqlAll(ctx context.Context) ([]*Path, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := pq.withRepository; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Path)
+		for i := range nodes {
+			if nodes[i].repository_path == nil {
+				continue
+			}
+			fk := *nodes[i].repository_path
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(repository.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_path" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Repository = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

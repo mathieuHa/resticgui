@@ -4,6 +4,7 @@ package path
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
 )
 
@@ -386,6 +387,34 @@ func IncludedEQ(v bool) predicate.Path {
 func IncludedNEQ(v bool) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldIncluded), v))
+	})
+}
+
+// HasRepository applies the HasEdge predicate on the "repository" edge.
+func HasRepository() predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RepositoryTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RepositoryTable, RepositoryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRepositoryWith applies the HasEdge predicate on the "repository" edge with a given conditions (other predicates).
+func HasRepositoryWith(preds ...predicate.Repository) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RepositoryInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RepositoryTable, RepositoryColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

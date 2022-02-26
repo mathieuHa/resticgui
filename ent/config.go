@@ -24,9 +24,17 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	BackupSchedule []ent.Hook
-	Path           []ent.Hook
-	Repository     []ent.Hook
+	AWSS3Provider   []ent.Hook
+	B2Provider      []ent.Hook
+	BackupPolicy    []ent.Hook
+	BackupSchedule  []ent.Hook
+	LocalProvider   []ent.Hook
+	MinioS3Provider []ent.Hook
+	Path            []ent.Hook
+	Permission      []ent.Hook
+	Repository      []ent.Hook
+	Role            []ent.Hook
+	User            []ent.Hook
 }
 
 // Options applies the options on the config object.

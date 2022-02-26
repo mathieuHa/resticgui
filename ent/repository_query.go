@@ -12,7 +12,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.com/resticgui/resticgui/ent/awss3provider"
+	"gitlab.com/resticgui/resticgui/ent/b2provider"
+	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
 	"gitlab.com/resticgui/resticgui/ent/repository"
@@ -28,8 +33,13 @@ type RepositoryQuery struct {
 	fields     []string
 	predicates []predicate.Repository
 	// eager-loading edges.
-	withBackupschedule *BackupScheduleQuery
-	withPath           *PathQuery
+	withBackupschedule  *BackupScheduleQuery
+	withBackuppolicy    *BackupPolicyQuery
+	withLocalprovider   *LocalProviderQuery
+	withB2provider      *B2ProviderQuery
+	withAwss3provider   *AWSS3ProviderQuery
+	withMinios3provider *MinioS3ProviderQuery
+	withPath            *PathQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -81,6 +91,116 @@ func (rq *RepositoryQuery) QueryBackupschedule() *BackupScheduleQuery {
 			sqlgraph.From(repository.Table, repository.FieldID, selector),
 			sqlgraph.To(backupschedule.Table, backupschedule.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupscheduleTable, repository.BackupscheduleColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBackuppolicy chains the current query on the "backuppolicy" edge.
+func (rq *RepositoryQuery) QueryBackuppolicy() *BackupPolicyQuery {
+	query := &BackupPolicyQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(backuppolicy.Table, backuppolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackuppolicyTable, repository.BackuppolicyColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLocalprovider chains the current query on the "localprovider" edge.
+func (rq *RepositoryQuery) QueryLocalprovider() *LocalProviderQuery {
+	query := &LocalProviderQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(localprovider.Table, localprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.LocalproviderTable, repository.LocalproviderColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryB2provider chains the current query on the "b2provider" edge.
+func (rq *RepositoryQuery) QueryB2provider() *B2ProviderQuery {
+	query := &B2ProviderQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(b2provider.Table, b2provider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.B2providerTable, repository.B2providerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAwss3provider chains the current query on the "awss3provider" edge.
+func (rq *RepositoryQuery) QueryAwss3provider() *AWSS3ProviderQuery {
+	query := &AWSS3ProviderQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(awss3provider.Table, awss3provider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.Awss3providerTable, repository.Awss3providerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMinios3provider chains the current query on the "minios3provider" edge.
+func (rq *RepositoryQuery) QueryMinios3provider() *MinioS3ProviderQuery {
+	query := &MinioS3ProviderQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(minios3provider.Table, minios3provider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.Minios3providerTable, repository.Minios3providerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -286,13 +406,18 @@ func (rq *RepositoryQuery) Clone() *RepositoryQuery {
 		return nil
 	}
 	return &RepositoryQuery{
-		config:             rq.config,
-		limit:              rq.limit,
-		offset:             rq.offset,
-		order:              append([]OrderFunc{}, rq.order...),
-		predicates:         append([]predicate.Repository{}, rq.predicates...),
-		withBackupschedule: rq.withBackupschedule.Clone(),
-		withPath:           rq.withPath.Clone(),
+		config:              rq.config,
+		limit:               rq.limit,
+		offset:              rq.offset,
+		order:               append([]OrderFunc{}, rq.order...),
+		predicates:          append([]predicate.Repository{}, rq.predicates...),
+		withBackupschedule:  rq.withBackupschedule.Clone(),
+		withBackuppolicy:    rq.withBackuppolicy.Clone(),
+		withLocalprovider:   rq.withLocalprovider.Clone(),
+		withB2provider:      rq.withB2provider.Clone(),
+		withAwss3provider:   rq.withAwss3provider.Clone(),
+		withMinios3provider: rq.withMinios3provider.Clone(),
+		withPath:            rq.withPath.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -307,6 +432,61 @@ func (rq *RepositoryQuery) WithBackupschedule(opts ...func(*BackupScheduleQuery)
 		opt(query)
 	}
 	rq.withBackupschedule = query
+	return rq
+}
+
+// WithBackuppolicy tells the query-builder to eager-load the nodes that are connected to
+// the "backuppolicy" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithBackuppolicy(opts ...func(*BackupPolicyQuery)) *RepositoryQuery {
+	query := &BackupPolicyQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withBackuppolicy = query
+	return rq
+}
+
+// WithLocalprovider tells the query-builder to eager-load the nodes that are connected to
+// the "localprovider" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithLocalprovider(opts ...func(*LocalProviderQuery)) *RepositoryQuery {
+	query := &LocalProviderQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withLocalprovider = query
+	return rq
+}
+
+// WithB2provider tells the query-builder to eager-load the nodes that are connected to
+// the "b2provider" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithB2provider(opts ...func(*B2ProviderQuery)) *RepositoryQuery {
+	query := &B2ProviderQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withB2provider = query
+	return rq
+}
+
+// WithAwss3provider tells the query-builder to eager-load the nodes that are connected to
+// the "awss3provider" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithAwss3provider(opts ...func(*AWSS3ProviderQuery)) *RepositoryQuery {
+	query := &AWSS3ProviderQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withAwss3provider = query
+	return rq
+}
+
+// WithMinios3provider tells the query-builder to eager-load the nodes that are connected to
+// the "minios3provider" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithMinios3provider(opts ...func(*MinioS3ProviderQuery)) *RepositoryQuery {
+	query := &MinioS3ProviderQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withMinios3provider = query
 	return rq
 }
 
@@ -386,8 +566,13 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 	var (
 		nodes       = []*Repository{}
 		_spec       = rq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [7]bool{
 			rq.withBackupschedule != nil,
+			rq.withBackuppolicy != nil,
+			rq.withLocalprovider != nil,
+			rq.withB2provider != nil,
+			rq.withAwss3provider != nil,
+			rq.withMinios3provider != nil,
 			rq.withPath != nil,
 		}
 	)
@@ -436,6 +621,146 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "repository_backupschedule" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Backupschedule = n
+		}
+	}
+
+	if query := rq.withBackuppolicy; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Repository)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.BackupPolicy(func(s *sql.Selector) {
+			s.Where(sql.InValues(repository.BackuppolicyColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.repository_backuppolicy
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "repository_backuppolicy" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_backuppolicy" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Backuppolicy = n
+		}
+	}
+
+	if query := rq.withLocalprovider; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Repository)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.LocalProvider(func(s *sql.Selector) {
+			s.Where(sql.InValues(repository.LocalproviderColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.repository_localprovider
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "repository_localprovider" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_localprovider" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Localprovider = n
+		}
+	}
+
+	if query := rq.withB2provider; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Repository)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.B2Provider(func(s *sql.Selector) {
+			s.Where(sql.InValues(repository.B2providerColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.repository_b2provider
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "repository_b2provider" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_b2provider" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.B2provider = n
+		}
+	}
+
+	if query := rq.withAwss3provider; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Repository)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.AWSS3Provider(func(s *sql.Selector) {
+			s.Where(sql.InValues(repository.Awss3providerColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.repository_awss3provider
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "repository_awss3provider" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_awss3provider" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Awss3provider = n
+		}
+	}
+
+	if query := rq.withMinios3provider; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Repository)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.MinioS3Provider(func(s *sql.Selector) {
+			s.Where(sql.InValues(repository.Minios3providerColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.repository_minios3provider
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "repository_minios3provider" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_minios3provider" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Minios3provider = n
 		}
 	}
 

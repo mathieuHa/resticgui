@@ -17,8 +17,17 @@ const (
 	FieldIsDir = "is_dir"
 	// FieldIncluded holds the string denoting the included field in the database.
 	FieldIncluded = "included"
+	// EdgeRepository holds the string denoting the repository edge name in mutations.
+	EdgeRepository = "repository"
 	// Table holds the table name of the path in the database.
 	Table = "paths"
+	// RepositoryTable is the table that holds the repository relation/edge.
+	RepositoryTable = "paths"
+	// RepositoryInverseTable is the table name for the Repository entity.
+	// It exists in this package in order to avoid circular dependency with the "repository" package.
+	RepositoryInverseTable = "repositories"
+	// RepositoryColumn is the table column denoting the repository relation/edge.
+	RepositoryColumn = "repository_path"
 )
 
 // Columns holds all SQL columns for path fields.

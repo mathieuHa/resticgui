@@ -9,9 +9,17 @@ import (
 
 	"gitlab.com/resticgui/resticgui/ent/migrate"
 
+	"gitlab.com/resticgui/resticgui/ent/awss3provider"
+	"gitlab.com/resticgui/resticgui/ent/b2provider"
+	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
+	"gitlab.com/resticgui/resticgui/ent/permission"
 	"gitlab.com/resticgui/resticgui/ent/repository"
+	"gitlab.com/resticgui/resticgui/ent/role"
+	"gitlab.com/resticgui/resticgui/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -23,12 +31,28 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AWSS3Provider is the client for interacting with the AWSS3Provider builders.
+	AWSS3Provider *AWSS3ProviderClient
+	// B2Provider is the client for interacting with the B2Provider builders.
+	B2Provider *B2ProviderClient
+	// BackupPolicy is the client for interacting with the BackupPolicy builders.
+	BackupPolicy *BackupPolicyClient
 	// BackupSchedule is the client for interacting with the BackupSchedule builders.
 	BackupSchedule *BackupScheduleClient
+	// LocalProvider is the client for interacting with the LocalProvider builders.
+	LocalProvider *LocalProviderClient
+	// MinioS3Provider is the client for interacting with the MinioS3Provider builders.
+	MinioS3Provider *MinioS3ProviderClient
 	// Path is the client for interacting with the Path builders.
 	Path *PathClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
 	// Repository is the client for interacting with the Repository builders.
 	Repository *RepositoryClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -42,9 +66,17 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AWSS3Provider = NewAWSS3ProviderClient(c.config)
+	c.B2Provider = NewB2ProviderClient(c.config)
+	c.BackupPolicy = NewBackupPolicyClient(c.config)
 	c.BackupSchedule = NewBackupScheduleClient(c.config)
+	c.LocalProvider = NewLocalProviderClient(c.config)
+	c.MinioS3Provider = NewMinioS3ProviderClient(c.config)
 	c.Path = NewPathClient(c.config)
+	c.Permission = NewPermissionClient(c.config)
 	c.Repository = NewRepositoryClient(c.config)
+	c.Role = NewRoleClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -76,11 +108,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		BackupSchedule: NewBackupScheduleClient(cfg),
-		Path:           NewPathClient(cfg),
-		Repository:     NewRepositoryClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		AWSS3Provider:   NewAWSS3ProviderClient(cfg),
+		B2Provider:      NewB2ProviderClient(cfg),
+		BackupPolicy:    NewBackupPolicyClient(cfg),
+		BackupSchedule:  NewBackupScheduleClient(cfg),
+		LocalProvider:   NewLocalProviderClient(cfg),
+		MinioS3Provider: NewMinioS3ProviderClient(cfg),
+		Path:            NewPathClient(cfg),
+		Permission:      NewPermissionClient(cfg),
+		Repository:      NewRepositoryClient(cfg),
+		Role:            NewRoleClient(cfg),
+		User:            NewUserClient(cfg),
 	}, nil
 }
 
@@ -98,18 +138,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		BackupSchedule: NewBackupScheduleClient(cfg),
-		Path:           NewPathClient(cfg),
-		Repository:     NewRepositoryClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		AWSS3Provider:   NewAWSS3ProviderClient(cfg),
+		B2Provider:      NewB2ProviderClient(cfg),
+		BackupPolicy:    NewBackupPolicyClient(cfg),
+		BackupSchedule:  NewBackupScheduleClient(cfg),
+		LocalProvider:   NewLocalProviderClient(cfg),
+		MinioS3Provider: NewMinioS3ProviderClient(cfg),
+		Path:            NewPathClient(cfg),
+		Permission:      NewPermissionClient(cfg),
+		Repository:      NewRepositoryClient(cfg),
+		Role:            NewRoleClient(cfg),
+		User:            NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		BackupSchedule.
+//		AWSS3Provider.
 //		Query().
 //		Count(ctx)
 //
@@ -132,9 +180,335 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.AWSS3Provider.Use(hooks...)
+	c.B2Provider.Use(hooks...)
+	c.BackupPolicy.Use(hooks...)
 	c.BackupSchedule.Use(hooks...)
+	c.LocalProvider.Use(hooks...)
+	c.MinioS3Provider.Use(hooks...)
 	c.Path.Use(hooks...)
+	c.Permission.Use(hooks...)
 	c.Repository.Use(hooks...)
+	c.Role.Use(hooks...)
+	c.User.Use(hooks...)
+}
+
+// AWSS3ProviderClient is a client for the AWSS3Provider schema.
+type AWSS3ProviderClient struct {
+	config
+}
+
+// NewAWSS3ProviderClient returns a client for the AWSS3Provider from the given config.
+func NewAWSS3ProviderClient(c config) *AWSS3ProviderClient {
+	return &AWSS3ProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `awss3provider.Hooks(f(g(h())))`.
+func (c *AWSS3ProviderClient) Use(hooks ...Hook) {
+	c.hooks.AWSS3Provider = append(c.hooks.AWSS3Provider, hooks...)
+}
+
+// Create returns a create builder for AWSS3Provider.
+func (c *AWSS3ProviderClient) Create() *AWSS3ProviderCreate {
+	mutation := newAWSS3ProviderMutation(c.config, OpCreate)
+	return &AWSS3ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AWSS3Provider entities.
+func (c *AWSS3ProviderClient) CreateBulk(builders ...*AWSS3ProviderCreate) *AWSS3ProviderCreateBulk {
+	return &AWSS3ProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AWSS3Provider.
+func (c *AWSS3ProviderClient) Update() *AWSS3ProviderUpdate {
+	mutation := newAWSS3ProviderMutation(c.config, OpUpdate)
+	return &AWSS3ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AWSS3ProviderClient) UpdateOne(a *AWSS3Provider) *AWSS3ProviderUpdateOne {
+	mutation := newAWSS3ProviderMutation(c.config, OpUpdateOne, withAWSS3Provider(a))
+	return &AWSS3ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AWSS3ProviderClient) UpdateOneID(id int) *AWSS3ProviderUpdateOne {
+	mutation := newAWSS3ProviderMutation(c.config, OpUpdateOne, withAWSS3ProviderID(id))
+	return &AWSS3ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AWSS3Provider.
+func (c *AWSS3ProviderClient) Delete() *AWSS3ProviderDelete {
+	mutation := newAWSS3ProviderMutation(c.config, OpDelete)
+	return &AWSS3ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *AWSS3ProviderClient) DeleteOne(a *AWSS3Provider) *AWSS3ProviderDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *AWSS3ProviderClient) DeleteOneID(id int) *AWSS3ProviderDeleteOne {
+	builder := c.Delete().Where(awss3provider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AWSS3ProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for AWSS3Provider.
+func (c *AWSS3ProviderClient) Query() *AWSS3ProviderQuery {
+	return &AWSS3ProviderQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a AWSS3Provider entity by its id.
+func (c *AWSS3ProviderClient) Get(ctx context.Context, id int) (*AWSS3Provider, error) {
+	return c.Query().Where(awss3provider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AWSS3ProviderClient) GetX(ctx context.Context, id int) *AWSS3Provider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a AWSS3Provider.
+func (c *AWSS3ProviderClient) QueryRepository(a *AWSS3Provider) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(awss3provider.Table, awss3provider.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, awss3provider.RepositoryTable, awss3provider.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AWSS3ProviderClient) Hooks() []Hook {
+	return c.hooks.AWSS3Provider
+}
+
+// B2ProviderClient is a client for the B2Provider schema.
+type B2ProviderClient struct {
+	config
+}
+
+// NewB2ProviderClient returns a client for the B2Provider from the given config.
+func NewB2ProviderClient(c config) *B2ProviderClient {
+	return &B2ProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `b2provider.Hooks(f(g(h())))`.
+func (c *B2ProviderClient) Use(hooks ...Hook) {
+	c.hooks.B2Provider = append(c.hooks.B2Provider, hooks...)
+}
+
+// Create returns a create builder for B2Provider.
+func (c *B2ProviderClient) Create() *B2ProviderCreate {
+	mutation := newB2ProviderMutation(c.config, OpCreate)
+	return &B2ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of B2Provider entities.
+func (c *B2ProviderClient) CreateBulk(builders ...*B2ProviderCreate) *B2ProviderCreateBulk {
+	return &B2ProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for B2Provider.
+func (c *B2ProviderClient) Update() *B2ProviderUpdate {
+	mutation := newB2ProviderMutation(c.config, OpUpdate)
+	return &B2ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *B2ProviderClient) UpdateOne(b *B2Provider) *B2ProviderUpdateOne {
+	mutation := newB2ProviderMutation(c.config, OpUpdateOne, withB2Provider(b))
+	return &B2ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *B2ProviderClient) UpdateOneID(id int) *B2ProviderUpdateOne {
+	mutation := newB2ProviderMutation(c.config, OpUpdateOne, withB2ProviderID(id))
+	return &B2ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for B2Provider.
+func (c *B2ProviderClient) Delete() *B2ProviderDelete {
+	mutation := newB2ProviderMutation(c.config, OpDelete)
+	return &B2ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *B2ProviderClient) DeleteOne(b *B2Provider) *B2ProviderDeleteOne {
+	return c.DeleteOneID(b.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *B2ProviderClient) DeleteOneID(id int) *B2ProviderDeleteOne {
+	builder := c.Delete().Where(b2provider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &B2ProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for B2Provider.
+func (c *B2ProviderClient) Query() *B2ProviderQuery {
+	return &B2ProviderQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a B2Provider entity by its id.
+func (c *B2ProviderClient) Get(ctx context.Context, id int) (*B2Provider, error) {
+	return c.Query().Where(b2provider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *B2ProviderClient) GetX(ctx context.Context, id int) *B2Provider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a B2Provider.
+func (c *B2ProviderClient) QueryRepository(b *B2Provider) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(b2provider.Table, b2provider.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, b2provider.RepositoryTable, b2provider.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *B2ProviderClient) Hooks() []Hook {
+	return c.hooks.B2Provider
+}
+
+// BackupPolicyClient is a client for the BackupPolicy schema.
+type BackupPolicyClient struct {
+	config
+}
+
+// NewBackupPolicyClient returns a client for the BackupPolicy from the given config.
+func NewBackupPolicyClient(c config) *BackupPolicyClient {
+	return &BackupPolicyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `backuppolicy.Hooks(f(g(h())))`.
+func (c *BackupPolicyClient) Use(hooks ...Hook) {
+	c.hooks.BackupPolicy = append(c.hooks.BackupPolicy, hooks...)
+}
+
+// Create returns a create builder for BackupPolicy.
+func (c *BackupPolicyClient) Create() *BackupPolicyCreate {
+	mutation := newBackupPolicyMutation(c.config, OpCreate)
+	return &BackupPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BackupPolicy entities.
+func (c *BackupPolicyClient) CreateBulk(builders ...*BackupPolicyCreate) *BackupPolicyCreateBulk {
+	return &BackupPolicyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BackupPolicy.
+func (c *BackupPolicyClient) Update() *BackupPolicyUpdate {
+	mutation := newBackupPolicyMutation(c.config, OpUpdate)
+	return &BackupPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BackupPolicyClient) UpdateOne(bp *BackupPolicy) *BackupPolicyUpdateOne {
+	mutation := newBackupPolicyMutation(c.config, OpUpdateOne, withBackupPolicy(bp))
+	return &BackupPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BackupPolicyClient) UpdateOneID(id int) *BackupPolicyUpdateOne {
+	mutation := newBackupPolicyMutation(c.config, OpUpdateOne, withBackupPolicyID(id))
+	return &BackupPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BackupPolicy.
+func (c *BackupPolicyClient) Delete() *BackupPolicyDelete {
+	mutation := newBackupPolicyMutation(c.config, OpDelete)
+	return &BackupPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *BackupPolicyClient) DeleteOne(bp *BackupPolicy) *BackupPolicyDeleteOne {
+	return c.DeleteOneID(bp.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *BackupPolicyClient) DeleteOneID(id int) *BackupPolicyDeleteOne {
+	builder := c.Delete().Where(backuppolicy.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BackupPolicyDeleteOne{builder}
+}
+
+// Query returns a query builder for BackupPolicy.
+func (c *BackupPolicyClient) Query() *BackupPolicyQuery {
+	return &BackupPolicyQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a BackupPolicy entity by its id.
+func (c *BackupPolicyClient) Get(ctx context.Context, id int) (*BackupPolicy, error) {
+	return c.Query().Where(backuppolicy.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BackupPolicyClient) GetX(ctx context.Context, id int) *BackupPolicy {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a BackupPolicy.
+func (c *BackupPolicyClient) QueryRepository(bp *BackupPolicy) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := bp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(backuppolicy.Table, backuppolicy.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, backuppolicy.RepositoryTable, backuppolicy.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(bp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BackupPolicyClient) Hooks() []Hook {
+	return c.hooks.BackupPolicy
 }
 
 // BackupScheduleClient is a client for the BackupSchedule schema.
@@ -243,6 +617,218 @@ func (c *BackupScheduleClient) Hooks() []Hook {
 	return c.hooks.BackupSchedule
 }
 
+// LocalProviderClient is a client for the LocalProvider schema.
+type LocalProviderClient struct {
+	config
+}
+
+// NewLocalProviderClient returns a client for the LocalProvider from the given config.
+func NewLocalProviderClient(c config) *LocalProviderClient {
+	return &LocalProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `localprovider.Hooks(f(g(h())))`.
+func (c *LocalProviderClient) Use(hooks ...Hook) {
+	c.hooks.LocalProvider = append(c.hooks.LocalProvider, hooks...)
+}
+
+// Create returns a create builder for LocalProvider.
+func (c *LocalProviderClient) Create() *LocalProviderCreate {
+	mutation := newLocalProviderMutation(c.config, OpCreate)
+	return &LocalProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LocalProvider entities.
+func (c *LocalProviderClient) CreateBulk(builders ...*LocalProviderCreate) *LocalProviderCreateBulk {
+	return &LocalProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LocalProvider.
+func (c *LocalProviderClient) Update() *LocalProviderUpdate {
+	mutation := newLocalProviderMutation(c.config, OpUpdate)
+	return &LocalProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LocalProviderClient) UpdateOne(lp *LocalProvider) *LocalProviderUpdateOne {
+	mutation := newLocalProviderMutation(c.config, OpUpdateOne, withLocalProvider(lp))
+	return &LocalProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LocalProviderClient) UpdateOneID(id int) *LocalProviderUpdateOne {
+	mutation := newLocalProviderMutation(c.config, OpUpdateOne, withLocalProviderID(id))
+	return &LocalProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LocalProvider.
+func (c *LocalProviderClient) Delete() *LocalProviderDelete {
+	mutation := newLocalProviderMutation(c.config, OpDelete)
+	return &LocalProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *LocalProviderClient) DeleteOne(lp *LocalProvider) *LocalProviderDeleteOne {
+	return c.DeleteOneID(lp.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *LocalProviderClient) DeleteOneID(id int) *LocalProviderDeleteOne {
+	builder := c.Delete().Where(localprovider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LocalProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for LocalProvider.
+func (c *LocalProviderClient) Query() *LocalProviderQuery {
+	return &LocalProviderQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a LocalProvider entity by its id.
+func (c *LocalProviderClient) Get(ctx context.Context, id int) (*LocalProvider, error) {
+	return c.Query().Where(localprovider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LocalProviderClient) GetX(ctx context.Context, id int) *LocalProvider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a LocalProvider.
+func (c *LocalProviderClient) QueryRepository(lp *LocalProvider) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := lp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(localprovider.Table, localprovider.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, localprovider.RepositoryTable, localprovider.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(lp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LocalProviderClient) Hooks() []Hook {
+	return c.hooks.LocalProvider
+}
+
+// MinioS3ProviderClient is a client for the MinioS3Provider schema.
+type MinioS3ProviderClient struct {
+	config
+}
+
+// NewMinioS3ProviderClient returns a client for the MinioS3Provider from the given config.
+func NewMinioS3ProviderClient(c config) *MinioS3ProviderClient {
+	return &MinioS3ProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `minios3provider.Hooks(f(g(h())))`.
+func (c *MinioS3ProviderClient) Use(hooks ...Hook) {
+	c.hooks.MinioS3Provider = append(c.hooks.MinioS3Provider, hooks...)
+}
+
+// Create returns a create builder for MinioS3Provider.
+func (c *MinioS3ProviderClient) Create() *MinioS3ProviderCreate {
+	mutation := newMinioS3ProviderMutation(c.config, OpCreate)
+	return &MinioS3ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MinioS3Provider entities.
+func (c *MinioS3ProviderClient) CreateBulk(builders ...*MinioS3ProviderCreate) *MinioS3ProviderCreateBulk {
+	return &MinioS3ProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MinioS3Provider.
+func (c *MinioS3ProviderClient) Update() *MinioS3ProviderUpdate {
+	mutation := newMinioS3ProviderMutation(c.config, OpUpdate)
+	return &MinioS3ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MinioS3ProviderClient) UpdateOne(ms *MinioS3Provider) *MinioS3ProviderUpdateOne {
+	mutation := newMinioS3ProviderMutation(c.config, OpUpdateOne, withMinioS3Provider(ms))
+	return &MinioS3ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MinioS3ProviderClient) UpdateOneID(id int) *MinioS3ProviderUpdateOne {
+	mutation := newMinioS3ProviderMutation(c.config, OpUpdateOne, withMinioS3ProviderID(id))
+	return &MinioS3ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MinioS3Provider.
+func (c *MinioS3ProviderClient) Delete() *MinioS3ProviderDelete {
+	mutation := newMinioS3ProviderMutation(c.config, OpDelete)
+	return &MinioS3ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MinioS3ProviderClient) DeleteOne(ms *MinioS3Provider) *MinioS3ProviderDeleteOne {
+	return c.DeleteOneID(ms.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MinioS3ProviderClient) DeleteOneID(id int) *MinioS3ProviderDeleteOne {
+	builder := c.Delete().Where(minios3provider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MinioS3ProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for MinioS3Provider.
+func (c *MinioS3ProviderClient) Query() *MinioS3ProviderQuery {
+	return &MinioS3ProviderQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a MinioS3Provider entity by its id.
+func (c *MinioS3ProviderClient) Get(ctx context.Context, id int) (*MinioS3Provider, error) {
+	return c.Query().Where(minios3provider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MinioS3ProviderClient) GetX(ctx context.Context, id int) *MinioS3Provider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a MinioS3Provider.
+func (c *MinioS3ProviderClient) QueryRepository(ms *MinioS3Provider) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ms.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(minios3provider.Table, minios3provider.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, minios3provider.RepositoryTable, minios3provider.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(ms.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MinioS3ProviderClient) Hooks() []Hook {
+	return c.hooks.MinioS3Provider
+}
+
 // PathClient is a client for the Path schema.
 type PathClient struct {
 	config
@@ -328,9 +914,115 @@ func (c *PathClient) GetX(ctx context.Context, id int) *Path {
 	return obj
 }
 
+// QueryRepository queries the repository edge of a Path.
+func (c *PathClient) QueryRepository(pa *Path) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(path.Table, path.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, path.RepositoryTable, path.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PathClient) Hooks() []Hook {
 	return c.hooks.Path
+}
+
+// PermissionClient is a client for the Permission schema.
+type PermissionClient struct {
+	config
+}
+
+// NewPermissionClient returns a client for the Permission from the given config.
+func NewPermissionClient(c config) *PermissionClient {
+	return &PermissionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `permission.Hooks(f(g(h())))`.
+func (c *PermissionClient) Use(hooks ...Hook) {
+	c.hooks.Permission = append(c.hooks.Permission, hooks...)
+}
+
+// Create returns a create builder for Permission.
+func (c *PermissionClient) Create() *PermissionCreate {
+	mutation := newPermissionMutation(c.config, OpCreate)
+	return &PermissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Permission entities.
+func (c *PermissionClient) CreateBulk(builders ...*PermissionCreate) *PermissionCreateBulk {
+	return &PermissionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Permission.
+func (c *PermissionClient) Update() *PermissionUpdate {
+	mutation := newPermissionMutation(c.config, OpUpdate)
+	return &PermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PermissionClient) UpdateOne(pe *Permission) *PermissionUpdateOne {
+	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermission(pe))
+	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PermissionClient) UpdateOneID(id int) *PermissionUpdateOne {
+	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermissionID(id))
+	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Permission.
+func (c *PermissionClient) Delete() *PermissionDelete {
+	mutation := newPermissionMutation(c.config, OpDelete)
+	return &PermissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *PermissionClient) DeleteOne(pe *Permission) *PermissionDeleteOne {
+	return c.DeleteOneID(pe.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *PermissionClient) DeleteOneID(id int) *PermissionDeleteOne {
+	builder := c.Delete().Where(permission.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PermissionDeleteOne{builder}
+}
+
+// Query returns a query builder for Permission.
+func (c *PermissionClient) Query() *PermissionQuery {
+	return &PermissionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Permission entity by its id.
+func (c *PermissionClient) Get(ctx context.Context, id int) (*Permission, error) {
+	return c.Query().Where(permission.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PermissionClient) GetX(ctx context.Context, id int) *Permission {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PermissionClient) Hooks() []Hook {
+	return c.hooks.Permission
 }
 
 // RepositoryClient is a client for the Repository schema.
@@ -434,6 +1126,86 @@ func (c *RepositoryClient) QueryBackupschedule(r *Repository) *BackupScheduleQue
 	return query
 }
 
+// QueryBackuppolicy queries the backuppolicy edge of a Repository.
+func (c *RepositoryClient) QueryBackuppolicy(r *Repository) *BackupPolicyQuery {
+	query := &BackupPolicyQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(backuppolicy.Table, backuppolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackuppolicyTable, repository.BackuppolicyColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLocalprovider queries the localprovider edge of a Repository.
+func (c *RepositoryClient) QueryLocalprovider(r *Repository) *LocalProviderQuery {
+	query := &LocalProviderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(localprovider.Table, localprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.LocalproviderTable, repository.LocalproviderColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryB2provider queries the b2provider edge of a Repository.
+func (c *RepositoryClient) QueryB2provider(r *Repository) *B2ProviderQuery {
+	query := &B2ProviderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(b2provider.Table, b2provider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.B2providerTable, repository.B2providerColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAwss3provider queries the awss3provider edge of a Repository.
+func (c *RepositoryClient) QueryAwss3provider(r *Repository) *AWSS3ProviderQuery {
+	query := &AWSS3ProviderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(awss3provider.Table, awss3provider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.Awss3providerTable, repository.Awss3providerColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMinios3provider queries the minios3provider edge of a Repository.
+func (c *RepositoryClient) QueryMinios3provider(r *Repository) *MinioS3ProviderQuery {
+	query := &MinioS3ProviderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(minios3provider.Table, minios3provider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.Minios3providerTable, repository.Minios3providerColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPath queries the path edge of a Repository.
 func (c *RepositoryClient) QueryPath(r *Repository) *PathQuery {
 	query := &PathQuery{config: c.config}
@@ -453,4 +1225,184 @@ func (c *RepositoryClient) QueryPath(r *Repository) *PathQuery {
 // Hooks returns the client hooks.
 func (c *RepositoryClient) Hooks() []Hook {
 	return c.hooks.Repository
+}
+
+// RoleClient is a client for the Role schema.
+type RoleClient struct {
+	config
+}
+
+// NewRoleClient returns a client for the Role from the given config.
+func NewRoleClient(c config) *RoleClient {
+	return &RoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `role.Hooks(f(g(h())))`.
+func (c *RoleClient) Use(hooks ...Hook) {
+	c.hooks.Role = append(c.hooks.Role, hooks...)
+}
+
+// Create returns a create builder for Role.
+func (c *RoleClient) Create() *RoleCreate {
+	mutation := newRoleMutation(c.config, OpCreate)
+	return &RoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Role entities.
+func (c *RoleClient) CreateBulk(builders ...*RoleCreate) *RoleCreateBulk {
+	return &RoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Role.
+func (c *RoleClient) Update() *RoleUpdate {
+	mutation := newRoleMutation(c.config, OpUpdate)
+	return &RoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(r))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RoleClient) UpdateOneID(id int) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Role.
+func (c *RoleClient) Delete() *RoleDelete {
+	mutation := newRoleMutation(c.config, OpDelete)
+	return &RoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
+	builder := c.Delete().Where(role.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RoleDeleteOne{builder}
+}
+
+// Query returns a query builder for Role.
+func (c *RoleClient) Query() *RoleQuery {
+	return &RoleQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Role entity by its id.
+func (c *RoleClient) Get(ctx context.Context, id int) (*Role, error) {
+	return c.Query().Where(role.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RoleClient) Hooks() []Hook {
+	return c.hooks.Role
+}
+
+// UserClient is a client for the User schema.
+type UserClient struct {
+	config
+}
+
+// NewUserClient returns a client for the User from the given config.
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Create returns a create builder for User.
+func (c *UserClient) Create() *UserCreate {
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for User.
+func (c *UserClient) Update() *UserUpdate {
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for User.
+func (c *UserClient) Delete() *UserDelete {
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
+	return c.DeleteOneID(u.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
+}
+
+// Query returns a query builder for User.
+func (c *UserClient) Query() *UserQuery {
+	return &UserQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
 }

@@ -8,10 +8,96 @@ import (
 )
 
 var (
+	// Awss3providersColumns holds the columns for the "awss3providers" table.
+	Awss3providersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "bucket_name", Type: field.TypeString},
+		{Name: "secret_access_key", Type: field.TypeString},
+		{Name: "access_key_id", Type: field.TypeString},
+		{Name: "default_region", Type: field.TypeString, Nullable: true},
+		{Name: "repository_awss3provider", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// Awss3providersTable holds the schema information for the "awss3providers" table.
+	Awss3providersTable = &schema.Table{
+		Name:       "awss3providers",
+		Columns:    Awss3providersColumns,
+		PrimaryKey: []*schema.Column{Awss3providersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "awss3providers_repositories_awss3provider",
+				Columns:    []*schema.Column{Awss3providersColumns[5]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// B2providersColumns holds the columns for the "b2providers" table.
+	B2providersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "bucket_name", Type: field.TypeString},
+		{Name: "account_key", Type: field.TypeString},
+		{Name: "account_id", Type: field.TypeString},
+		{Name: "repo_name", Type: field.TypeString},
+		{Name: "repository_b2provider", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// B2providersTable holds the schema information for the "b2providers" table.
+	B2providersTable = &schema.Table{
+		Name:       "b2providers",
+		Columns:    B2providersColumns,
+		PrimaryKey: []*schema.Column{B2providersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "b2providers_repositories_b2provider",
+				Columns:    []*schema.Column{B2providersColumns[5]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// BackupPoliciesColumns holds the columns for the "backup_policies" table.
+	BackupPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "nb_last_backup", Type: field.TypeUint, Default: 10},
+		{Name: "name", Type: field.TypeString},
+		{Name: "one_by_hour", Type: field.TypeBool},
+		{Name: "one_by_day", Type: field.TypeBool},
+		{Name: "one_by_month", Type: field.TypeBool},
+		{Name: "keep_all", Type: field.TypeBool, Default: true},
+		{Name: "repository_backuppolicy", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// BackupPoliciesTable holds the schema information for the "backup_policies" table.
+	BackupPoliciesTable = &schema.Table{
+		Name:       "backup_policies",
+		Columns:    BackupPoliciesColumns,
+		PrimaryKey: []*schema.Column{BackupPoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "backup_policies_repositories_backuppolicy",
+				Columns:    []*schema.Column{BackupPoliciesColumns[7]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// BackupSchedulesColumns holds the columns for the "backup_schedules" table.
 	BackupSchedulesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "choice", Type: field.TypeEnum, Enums: []string{"cron", "interval", "monthly", "weekly"}, Default: "cron"},
+		{Name: "every_day", Type: field.TypeBool, Default: false},
+		{Name: "every_week", Type: field.TypeBool, Default: false},
+		{Name: "every_month", Type: field.TypeBool, Default: false},
+		{Name: "every_monday", Type: field.TypeBool, Default: false},
+		{Name: "every_tuesday", Type: field.TypeBool, Default: false},
+		{Name: "every_wednesday", Type: field.TypeBool, Default: false},
+		{Name: "every_thursday", Type: field.TypeBool, Default: false},
+		{Name: "every_triday", Type: field.TypeBool, Default: false},
+		{Name: "every_saturday", Type: field.TypeBool, Default: false},
+		{Name: "every_sunday", Type: field.TypeBool, Default: false},
+		{Name: "hour", Type: field.TypeString},
+		{Name: "day", Type: field.TypeString},
+		{Name: "interval", Type: field.TypeString},
+		{Name: "cron_syntax", Type: field.TypeString},
+		{Name: "cron_id", Type: field.TypeUint},
 		{Name: "repository_backupschedule", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// BackupSchedulesTable holds the schema information for the "backup_schedules" table.
@@ -22,7 +108,52 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "backup_schedules_repositories_backupschedule",
-				Columns:    []*schema.Column{BackupSchedulesColumns[2]},
+				Columns:    []*schema.Column{BackupSchedulesColumns[17]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// LocalProvidersColumns holds the columns for the "local_providers" table.
+	LocalProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "repo_path", Type: field.TypeString},
+		{Name: "repository_localprovider", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// LocalProvidersTable holds the schema information for the "local_providers" table.
+	LocalProvidersTable = &schema.Table{
+		Name:       "local_providers",
+		Columns:    LocalProvidersColumns,
+		PrimaryKey: []*schema.Column{LocalProvidersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "local_providers_repositories_localprovider",
+				Columns:    []*schema.Column{LocalProvidersColumns[2]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// MinioS3providersColumns holds the columns for the "minio_s3providers" table.
+	MinioS3providersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "bucket_name", Type: field.TypeString},
+		{Name: "ip", Type: field.TypeString},
+		{Name: "port", Type: field.TypeString},
+		{Name: "scheme", Type: field.TypeString},
+		{Name: "access_key_id", Type: field.TypeString},
+		{Name: "secret_access_key", Type: field.TypeString},
+		{Name: "repository_minios3provider", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// MinioS3providersTable holds the schema information for the "minio_s3providers" table.
+	MinioS3providersTable = &schema.Table{
+		Name:       "minio_s3providers",
+		Columns:    MinioS3providersColumns,
+		PrimaryKey: []*schema.Column{MinioS3providersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "minio_s3providers_repositories_minios3provider",
+				Columns:    []*schema.Column{MinioS3providersColumns[7]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -52,6 +183,17 @@ var (
 			},
 		},
 	}
+	// PermissionsColumns holds the columns for the "permissions" table.
+	PermissionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// PermissionsTable holds the schema information for the "permissions" table.
+	PermissionsTable = &schema.Table{
+		Name:       "permissions",
+		Columns:    PermissionsColumns,
+		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
+	}
 	// RepositoriesColumns holds the columns for the "repositories" table.
 	RepositoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -68,15 +210,58 @@ var (
 		Columns:    RepositoriesColumns,
 		PrimaryKey: []*schema.Column{RepositoriesColumns[0]},
 	}
+	// RolesColumns holds the columns for the "roles" table.
+	RolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "parent_role", Type: field.TypeString, Nullable: true},
+	}
+	// RolesTable holds the schema information for the "roles" table.
+	RolesTable = &schema.Table{
+		Name:       "roles",
+		Columns:    RolesColumns,
+		PrimaryKey: []*schema.Column{RolesColumns[0]},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "username", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString},
+		{Name: "password", Type: field.TypeString},
+		{Name: "last_connection_date", Type: field.TypeTime, Nullable: true},
+		{Name: "password_last_set", Type: field.TypeTime, Nullable: true},
+		{Name: "password_fail_count", Type: field.TypeInt, Default: 0},
+		{Name: "mfa", Type: field.TypeBool, Default: false},
+	}
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		Awss3providersTable,
+		B2providersTable,
+		BackupPoliciesTable,
 		BackupSchedulesTable,
+		LocalProvidersTable,
+		MinioS3providersTable,
 		PathsTable,
+		PermissionsTable,
 		RepositoriesTable,
+		RolesTable,
+		UsersTable,
 	}
 )
 
 func init() {
+	Awss3providersTable.ForeignKeys[0].RefTable = RepositoriesTable
+	B2providersTable.ForeignKeys[0].RefTable = RepositoriesTable
+	BackupPoliciesTable.ForeignKeys[0].RefTable = RepositoriesTable
 	BackupSchedulesTable.ForeignKeys[0].RefTable = RepositoriesTable
+	LocalProvidersTable.ForeignKeys[0].RefTable = RepositoriesTable
+	MinioS3providersTable.ForeignKeys[0].RefTable = RepositoriesTable
 	PathsTable.ForeignKeys[0].RefTable = RepositoriesTable
 }

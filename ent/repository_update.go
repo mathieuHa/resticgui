@@ -10,7 +10,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.com/resticgui/resticgui/ent/awss3provider"
+	"gitlab.com/resticgui/resticgui/ent/b2provider"
+	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
 	"gitlab.com/resticgui/resticgui/ent/repository"
@@ -83,13 +88,13 @@ func (ru *RepositoryUpdate) ClearPassword() *RepositoryUpdate {
 	return ru
 }
 
-// SetMaxSize sets the "max_size" field.
+// SetMaxSize sets the "maxSize" field.
 func (ru *RepositoryUpdate) SetMaxSize(s string) *RepositoryUpdate {
 	ru.mutation.SetMaxSize(s)
 	return ru
 }
 
-// SetNillableMaxSize sets the "max_size" field if the given value is not nil.
+// SetNillableMaxSize sets the "maxSize" field if the given value is not nil.
 func (ru *RepositoryUpdate) SetNillableMaxSize(s *string) *RepositoryUpdate {
 	if s != nil {
 		ru.SetMaxSize(*s)
@@ -97,7 +102,7 @@ func (ru *RepositoryUpdate) SetNillableMaxSize(s *string) *RepositoryUpdate {
 	return ru
 }
 
-// ClearMaxSize clears the value of the "max_size" field.
+// ClearMaxSize clears the value of the "maxSize" field.
 func (ru *RepositoryUpdate) ClearMaxSize() *RepositoryUpdate {
 	ru.mutation.ClearMaxSize()
 	return ru
@@ -120,6 +125,101 @@ func (ru *RepositoryUpdate) SetNillableBackupscheduleID(id *int) *RepositoryUpda
 // SetBackupschedule sets the "backupschedule" edge to the BackupSchedule entity.
 func (ru *RepositoryUpdate) SetBackupschedule(b *BackupSchedule) *RepositoryUpdate {
 	return ru.SetBackupscheduleID(b.ID)
+}
+
+// SetBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by ID.
+func (ru *RepositoryUpdate) SetBackuppolicyID(id int) *RepositoryUpdate {
+	ru.mutation.SetBackuppolicyID(id)
+	return ru
+}
+
+// SetNillableBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableBackuppolicyID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetBackuppolicyID(*id)
+	}
+	return ru
+}
+
+// SetBackuppolicy sets the "backuppolicy" edge to the BackupPolicy entity.
+func (ru *RepositoryUpdate) SetBackuppolicy(b *BackupPolicy) *RepositoryUpdate {
+	return ru.SetBackuppolicyID(b.ID)
+}
+
+// SetLocalproviderID sets the "localprovider" edge to the LocalProvider entity by ID.
+func (ru *RepositoryUpdate) SetLocalproviderID(id int) *RepositoryUpdate {
+	ru.mutation.SetLocalproviderID(id)
+	return ru
+}
+
+// SetNillableLocalproviderID sets the "localprovider" edge to the LocalProvider entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableLocalproviderID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetLocalproviderID(*id)
+	}
+	return ru
+}
+
+// SetLocalprovider sets the "localprovider" edge to the LocalProvider entity.
+func (ru *RepositoryUpdate) SetLocalprovider(l *LocalProvider) *RepositoryUpdate {
+	return ru.SetLocalproviderID(l.ID)
+}
+
+// SetB2providerID sets the "b2provider" edge to the B2Provider entity by ID.
+func (ru *RepositoryUpdate) SetB2providerID(id int) *RepositoryUpdate {
+	ru.mutation.SetB2providerID(id)
+	return ru
+}
+
+// SetNillableB2providerID sets the "b2provider" edge to the B2Provider entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableB2providerID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetB2providerID(*id)
+	}
+	return ru
+}
+
+// SetB2provider sets the "b2provider" edge to the B2Provider entity.
+func (ru *RepositoryUpdate) SetB2provider(b *B2Provider) *RepositoryUpdate {
+	return ru.SetB2providerID(b.ID)
+}
+
+// SetAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by ID.
+func (ru *RepositoryUpdate) SetAwss3providerID(id int) *RepositoryUpdate {
+	ru.mutation.SetAwss3providerID(id)
+	return ru
+}
+
+// SetNillableAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableAwss3providerID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetAwss3providerID(*id)
+	}
+	return ru
+}
+
+// SetAwss3provider sets the "awss3provider" edge to the AWSS3Provider entity.
+func (ru *RepositoryUpdate) SetAwss3provider(a *AWSS3Provider) *RepositoryUpdate {
+	return ru.SetAwss3providerID(a.ID)
+}
+
+// SetMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by ID.
+func (ru *RepositoryUpdate) SetMinios3providerID(id int) *RepositoryUpdate {
+	ru.mutation.SetMinios3providerID(id)
+	return ru
+}
+
+// SetNillableMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableMinios3providerID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetMinios3providerID(*id)
+	}
+	return ru
+}
+
+// SetMinios3provider sets the "minios3provider" edge to the MinioS3Provider entity.
+func (ru *RepositoryUpdate) SetMinios3provider(m *MinioS3Provider) *RepositoryUpdate {
+	return ru.SetMinios3providerID(m.ID)
 }
 
 // AddPathIDs adds the "path" edge to the Path entity by IDs.
@@ -145,6 +245,36 @@ func (ru *RepositoryUpdate) Mutation() *RepositoryMutation {
 // ClearBackupschedule clears the "backupschedule" edge to the BackupSchedule entity.
 func (ru *RepositoryUpdate) ClearBackupschedule() *RepositoryUpdate {
 	ru.mutation.ClearBackupschedule()
+	return ru
+}
+
+// ClearBackuppolicy clears the "backuppolicy" edge to the BackupPolicy entity.
+func (ru *RepositoryUpdate) ClearBackuppolicy() *RepositoryUpdate {
+	ru.mutation.ClearBackuppolicy()
+	return ru
+}
+
+// ClearLocalprovider clears the "localprovider" edge to the LocalProvider entity.
+func (ru *RepositoryUpdate) ClearLocalprovider() *RepositoryUpdate {
+	ru.mutation.ClearLocalprovider()
+	return ru
+}
+
+// ClearB2provider clears the "b2provider" edge to the B2Provider entity.
+func (ru *RepositoryUpdate) ClearB2provider() *RepositoryUpdate {
+	ru.mutation.ClearB2provider()
+	return ru
+}
+
+// ClearAwss3provider clears the "awss3provider" edge to the AWSS3Provider entity.
+func (ru *RepositoryUpdate) ClearAwss3provider() *RepositoryUpdate {
+	ru.mutation.ClearAwss3provider()
+	return ru
+}
+
+// ClearMinios3provider clears the "minios3provider" edge to the MinioS3Provider entity.
+func (ru *RepositoryUpdate) ClearMinios3provider() *RepositoryUpdate {
+	ru.mutation.ClearMinios3provider()
 	return ru
 }
 
@@ -349,6 +479,181 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ru.mutation.BackuppolicyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackuppolicyTable,
+			Columns: []string{repository.BackuppolicyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backuppolicy.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.BackuppolicyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackuppolicyTable,
+			Columns: []string{repository.BackuppolicyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backuppolicy.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.LocalproviderCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.LocalproviderTable,
+			Columns: []string{repository.LocalproviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: localprovider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.LocalproviderIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.LocalproviderTable,
+			Columns: []string{repository.LocalproviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: localprovider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.B2providerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.B2providerTable,
+			Columns: []string{repository.B2providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: b2provider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.B2providerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.B2providerTable,
+			Columns: []string{repository.B2providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: b2provider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.Awss3providerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Awss3providerTable,
+			Columns: []string{repository.Awss3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: awss3provider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.Awss3providerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Awss3providerTable,
+			Columns: []string{repository.Awss3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: awss3provider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.Minios3providerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Minios3providerTable,
+			Columns: []string{repository.Minios3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: minios3provider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.Minios3providerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Minios3providerTable,
+			Columns: []string{repository.Minios3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: minios3provider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if ru.mutation.PathCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -476,13 +781,13 @@ func (ruo *RepositoryUpdateOne) ClearPassword() *RepositoryUpdateOne {
 	return ruo
 }
 
-// SetMaxSize sets the "max_size" field.
+// SetMaxSize sets the "maxSize" field.
 func (ruo *RepositoryUpdateOne) SetMaxSize(s string) *RepositoryUpdateOne {
 	ruo.mutation.SetMaxSize(s)
 	return ruo
 }
 
-// SetNillableMaxSize sets the "max_size" field if the given value is not nil.
+// SetNillableMaxSize sets the "maxSize" field if the given value is not nil.
 func (ruo *RepositoryUpdateOne) SetNillableMaxSize(s *string) *RepositoryUpdateOne {
 	if s != nil {
 		ruo.SetMaxSize(*s)
@@ -490,7 +795,7 @@ func (ruo *RepositoryUpdateOne) SetNillableMaxSize(s *string) *RepositoryUpdateO
 	return ruo
 }
 
-// ClearMaxSize clears the value of the "max_size" field.
+// ClearMaxSize clears the value of the "maxSize" field.
 func (ruo *RepositoryUpdateOne) ClearMaxSize() *RepositoryUpdateOne {
 	ruo.mutation.ClearMaxSize()
 	return ruo
@@ -513,6 +818,101 @@ func (ruo *RepositoryUpdateOne) SetNillableBackupscheduleID(id *int) *Repository
 // SetBackupschedule sets the "backupschedule" edge to the BackupSchedule entity.
 func (ruo *RepositoryUpdateOne) SetBackupschedule(b *BackupSchedule) *RepositoryUpdateOne {
 	return ruo.SetBackupscheduleID(b.ID)
+}
+
+// SetBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by ID.
+func (ruo *RepositoryUpdateOne) SetBackuppolicyID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetBackuppolicyID(id)
+	return ruo
+}
+
+// SetNillableBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableBackuppolicyID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetBackuppolicyID(*id)
+	}
+	return ruo
+}
+
+// SetBackuppolicy sets the "backuppolicy" edge to the BackupPolicy entity.
+func (ruo *RepositoryUpdateOne) SetBackuppolicy(b *BackupPolicy) *RepositoryUpdateOne {
+	return ruo.SetBackuppolicyID(b.ID)
+}
+
+// SetLocalproviderID sets the "localprovider" edge to the LocalProvider entity by ID.
+func (ruo *RepositoryUpdateOne) SetLocalproviderID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetLocalproviderID(id)
+	return ruo
+}
+
+// SetNillableLocalproviderID sets the "localprovider" edge to the LocalProvider entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableLocalproviderID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetLocalproviderID(*id)
+	}
+	return ruo
+}
+
+// SetLocalprovider sets the "localprovider" edge to the LocalProvider entity.
+func (ruo *RepositoryUpdateOne) SetLocalprovider(l *LocalProvider) *RepositoryUpdateOne {
+	return ruo.SetLocalproviderID(l.ID)
+}
+
+// SetB2providerID sets the "b2provider" edge to the B2Provider entity by ID.
+func (ruo *RepositoryUpdateOne) SetB2providerID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetB2providerID(id)
+	return ruo
+}
+
+// SetNillableB2providerID sets the "b2provider" edge to the B2Provider entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableB2providerID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetB2providerID(*id)
+	}
+	return ruo
+}
+
+// SetB2provider sets the "b2provider" edge to the B2Provider entity.
+func (ruo *RepositoryUpdateOne) SetB2provider(b *B2Provider) *RepositoryUpdateOne {
+	return ruo.SetB2providerID(b.ID)
+}
+
+// SetAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by ID.
+func (ruo *RepositoryUpdateOne) SetAwss3providerID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetAwss3providerID(id)
+	return ruo
+}
+
+// SetNillableAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableAwss3providerID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetAwss3providerID(*id)
+	}
+	return ruo
+}
+
+// SetAwss3provider sets the "awss3provider" edge to the AWSS3Provider entity.
+func (ruo *RepositoryUpdateOne) SetAwss3provider(a *AWSS3Provider) *RepositoryUpdateOne {
+	return ruo.SetAwss3providerID(a.ID)
+}
+
+// SetMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by ID.
+func (ruo *RepositoryUpdateOne) SetMinios3providerID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetMinios3providerID(id)
+	return ruo
+}
+
+// SetNillableMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableMinios3providerID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetMinios3providerID(*id)
+	}
+	return ruo
+}
+
+// SetMinios3provider sets the "minios3provider" edge to the MinioS3Provider entity.
+func (ruo *RepositoryUpdateOne) SetMinios3provider(m *MinioS3Provider) *RepositoryUpdateOne {
+	return ruo.SetMinios3providerID(m.ID)
 }
 
 // AddPathIDs adds the "path" edge to the Path entity by IDs.
@@ -538,6 +938,36 @@ func (ruo *RepositoryUpdateOne) Mutation() *RepositoryMutation {
 // ClearBackupschedule clears the "backupschedule" edge to the BackupSchedule entity.
 func (ruo *RepositoryUpdateOne) ClearBackupschedule() *RepositoryUpdateOne {
 	ruo.mutation.ClearBackupschedule()
+	return ruo
+}
+
+// ClearBackuppolicy clears the "backuppolicy" edge to the BackupPolicy entity.
+func (ruo *RepositoryUpdateOne) ClearBackuppolicy() *RepositoryUpdateOne {
+	ruo.mutation.ClearBackuppolicy()
+	return ruo
+}
+
+// ClearLocalprovider clears the "localprovider" edge to the LocalProvider entity.
+func (ruo *RepositoryUpdateOne) ClearLocalprovider() *RepositoryUpdateOne {
+	ruo.mutation.ClearLocalprovider()
+	return ruo
+}
+
+// ClearB2provider clears the "b2provider" edge to the B2Provider entity.
+func (ruo *RepositoryUpdateOne) ClearB2provider() *RepositoryUpdateOne {
+	ruo.mutation.ClearB2provider()
+	return ruo
+}
+
+// ClearAwss3provider clears the "awss3provider" edge to the AWSS3Provider entity.
+func (ruo *RepositoryUpdateOne) ClearAwss3provider() *RepositoryUpdateOne {
+	ruo.mutation.ClearAwss3provider()
+	return ruo
+}
+
+// ClearMinios3provider clears the "minios3provider" edge to the MinioS3Provider entity.
+func (ruo *RepositoryUpdateOne) ClearMinios3provider() *RepositoryUpdateOne {
+	ruo.mutation.ClearMinios3provider()
 	return ruo
 }
 
@@ -758,6 +1188,181 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.BackuppolicyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackuppolicyTable,
+			Columns: []string{repository.BackuppolicyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backuppolicy.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.BackuppolicyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackuppolicyTable,
+			Columns: []string{repository.BackuppolicyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backuppolicy.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.LocalproviderCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.LocalproviderTable,
+			Columns: []string{repository.LocalproviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: localprovider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.LocalproviderIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.LocalproviderTable,
+			Columns: []string{repository.LocalproviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: localprovider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.B2providerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.B2providerTable,
+			Columns: []string{repository.B2providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: b2provider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.B2providerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.B2providerTable,
+			Columns: []string{repository.B2providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: b2provider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.Awss3providerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Awss3providerTable,
+			Columns: []string{repository.Awss3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: awss3provider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.Awss3providerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Awss3providerTable,
+			Columns: []string{repository.Awss3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: awss3provider.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.Minios3providerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Minios3providerTable,
+			Columns: []string{repository.Minios3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: minios3provider.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.Minios3providerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.Minios3providerTable,
+			Columns: []string{repository.Minios3providerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: minios3provider.FieldID,
 				},
 			},
 		}

@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"gitlab.com/resticgui/resticgui/ent/path"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 // Path is the model entity for the Path schema.
@@ -24,8 +25,34 @@ type Path struct {
 	// IsDir holds the value of the "is_dir" field.
 	IsDir bool `json:"is_dir,omitempty"`
 	// Included holds the value of the "included" field.
-	Included        bool `json:"included,omitempty"`
+	Included bool `json:"included,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the PathQuery when eager-loading is set.
+	Edges           PathEdges `json:"edges"`
 	repository_path *int
+}
+
+// PathEdges holds the relations/edges for other nodes in the graph.
+type PathEdges struct {
+	// Repository holds the value of the repository edge.
+	Repository *Repository `json:"repository,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// RepositoryOrErr returns the Repository value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PathEdges) RepositoryOrErr() (*Repository, error) {
+	if e.loadedTypes[0] {
+		if e.Repository == nil {
+			// The edge repository was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: repository.Label}
+		}
+		return e.Repository, nil
+	}
+	return nil, &NotLoadedError{edge: "repository"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -102,6 +129,11 @@ func (pa *Path) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryRepository queries the "repository" edge of the Path entity.
+func (pa *Path) QueryRepository() *RepositoryQuery {
+	return (&PathClient{config: pa.config}).QueryRepository(pa)
 }
 
 // Update returns a builder for updating this Path.

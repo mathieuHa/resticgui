@@ -8,9 +8,17 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"gitlab.com/resticgui/resticgui/ent/awss3provider"
+	"gitlab.com/resticgui/resticgui/ent/b2provider"
+	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
+	"gitlab.com/resticgui/resticgui/ent/permission"
 	"gitlab.com/resticgui/resticgui/ent/repository"
+	"gitlab.com/resticgui/resticgui/ent/role"
+	"gitlab.com/resticgui/resticgui/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -31,9 +39,17 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		backupschedule.Table: backupschedule.ValidColumn,
-		path.Table:           path.ValidColumn,
-		repository.Table:     repository.ValidColumn,
+		awss3provider.Table:   awss3provider.ValidColumn,
+		b2provider.Table:      b2provider.ValidColumn,
+		backuppolicy.Table:    backuppolicy.ValidColumn,
+		backupschedule.Table:  backupschedule.ValidColumn,
+		localprovider.Table:   localprovider.ValidColumn,
+		minios3provider.Table: minios3provider.ValidColumn,
+		path.Table:            path.ValidColumn,
+		permission.Table:      permission.ValidColumn,
+		repository.Table:      repository.ValidColumn,
+		role.Table:            role.ValidColumn,
+		user.Table:            user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

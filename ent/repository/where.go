@@ -100,7 +100,7 @@ func Name(v string) predicate.Repository {
 	})
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+// CreatedAt applies equality check predicate on the "createdAt" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
@@ -121,7 +121,7 @@ func Password(v string) predicate.Repository {
 	})
 }
 
-// MaxSize applies equality check predicate on the "max_size" field. It's identical to MaxSizeEQ.
+// MaxSize applies equality check predicate on the "maxSize" field. It's identical to MaxSizeEQ.
 func MaxSize(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldMaxSize), v))
@@ -239,21 +239,21 @@ func NameContainsFold(v string) predicate.Repository {
 	})
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+// CreatedAtEQ applies the EQ predicate on the "createdAt" field.
 func CreatedAtEQ(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
 	})
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+// CreatedAtNEQ applies the NEQ predicate on the "createdAt" field.
 func CreatedAtNEQ(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
 	})
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
+// CreatedAtIn applies the In predicate on the "createdAt" field.
 func CreatedAtIn(vs ...time.Time) predicate.Repository {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -270,7 +270,7 @@ func CreatedAtIn(vs ...time.Time) predicate.Repository {
 	})
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+// CreatedAtNotIn applies the NotIn predicate on the "createdAt" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.Repository {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -287,28 +287,28 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Repository {
 	})
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
+// CreatedAtGT applies the GT predicate on the "createdAt" field.
 func CreatedAtGT(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldCreatedAt), v))
 	})
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+// CreatedAtGTE applies the GTE predicate on the "createdAt" field.
 func CreatedAtGTE(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
 	})
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
+// CreatedAtLT applies the LT predicate on the "createdAt" field.
 func CreatedAtLT(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldCreatedAt), v))
 	})
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+// CreatedAtLTE applies the LTE predicate on the "createdAt" field.
 func CreatedAtLTE(v time.Time) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
@@ -502,21 +502,21 @@ func PasswordContainsFold(v string) predicate.Repository {
 	})
 }
 
-// MaxSizeEQ applies the EQ predicate on the "max_size" field.
+// MaxSizeEQ applies the EQ predicate on the "maxSize" field.
 func MaxSizeEQ(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeNEQ applies the NEQ predicate on the "max_size" field.
+// MaxSizeNEQ applies the NEQ predicate on the "maxSize" field.
 func MaxSizeNEQ(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeIn applies the In predicate on the "max_size" field.
+// MaxSizeIn applies the In predicate on the "maxSize" field.
 func MaxSizeIn(vs ...string) predicate.Repository {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -533,7 +533,7 @@ func MaxSizeIn(vs ...string) predicate.Repository {
 	})
 }
 
-// MaxSizeNotIn applies the NotIn predicate on the "max_size" field.
+// MaxSizeNotIn applies the NotIn predicate on the "maxSize" field.
 func MaxSizeNotIn(vs ...string) predicate.Repository {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -550,77 +550,77 @@ func MaxSizeNotIn(vs ...string) predicate.Repository {
 	})
 }
 
-// MaxSizeGT applies the GT predicate on the "max_size" field.
+// MaxSizeGT applies the GT predicate on the "maxSize" field.
 func MaxSizeGT(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeGTE applies the GTE predicate on the "max_size" field.
+// MaxSizeGTE applies the GTE predicate on the "maxSize" field.
 func MaxSizeGTE(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeLT applies the LT predicate on the "max_size" field.
+// MaxSizeLT applies the LT predicate on the "maxSize" field.
 func MaxSizeLT(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeLTE applies the LTE predicate on the "max_size" field.
+// MaxSizeLTE applies the LTE predicate on the "maxSize" field.
 func MaxSizeLTE(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeContains applies the Contains predicate on the "max_size" field.
+// MaxSizeContains applies the Contains predicate on the "maxSize" field.
 func MaxSizeContains(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.Contains(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeHasPrefix applies the HasPrefix predicate on the "max_size" field.
+// MaxSizeHasPrefix applies the HasPrefix predicate on the "maxSize" field.
 func MaxSizeHasPrefix(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.HasPrefix(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeHasSuffix applies the HasSuffix predicate on the "max_size" field.
+// MaxSizeHasSuffix applies the HasSuffix predicate on the "maxSize" field.
 func MaxSizeHasSuffix(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeIsNil applies the IsNil predicate on the "max_size" field.
+// MaxSizeIsNil applies the IsNil predicate on the "maxSize" field.
 func MaxSizeIsNil() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.IsNull(s.C(FieldMaxSize)))
 	})
 }
 
-// MaxSizeNotNil applies the NotNil predicate on the "max_size" field.
+// MaxSizeNotNil applies the NotNil predicate on the "maxSize" field.
 func MaxSizeNotNil() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldMaxSize)))
 	})
 }
 
-// MaxSizeEqualFold applies the EqualFold predicate on the "max_size" field.
+// MaxSizeEqualFold applies the EqualFold predicate on the "maxSize" field.
 func MaxSizeEqualFold(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.EqualFold(s.C(FieldMaxSize), v))
 	})
 }
 
-// MaxSizeContainsFold applies the ContainsFold predicate on the "max_size" field.
+// MaxSizeContainsFold applies the ContainsFold predicate on the "maxSize" field.
 func MaxSizeContainsFold(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldMaxSize), v))
@@ -646,6 +646,146 @@ func HasBackupscheduleWith(preds ...predicate.BackupSchedule) predicate.Reposito
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(BackupscheduleInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, BackupscheduleTable, BackupscheduleColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBackuppolicy applies the HasEdge predicate on the "backuppolicy" edge.
+func HasBackuppolicy() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BackuppolicyTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackuppolicyTable, BackuppolicyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBackuppolicyWith applies the HasEdge predicate on the "backuppolicy" edge with a given conditions (other predicates).
+func HasBackuppolicyWith(preds ...predicate.BackupPolicy) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BackuppolicyInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackuppolicyTable, BackuppolicyColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLocalprovider applies the HasEdge predicate on the "localprovider" edge.
+func HasLocalprovider() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(LocalproviderTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, LocalproviderTable, LocalproviderColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLocalproviderWith applies the HasEdge predicate on the "localprovider" edge with a given conditions (other predicates).
+func HasLocalproviderWith(preds ...predicate.LocalProvider) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(LocalproviderInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, LocalproviderTable, LocalproviderColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasB2provider applies the HasEdge predicate on the "b2provider" edge.
+func HasB2provider() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(B2providerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, B2providerTable, B2providerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasB2providerWith applies the HasEdge predicate on the "b2provider" edge with a given conditions (other predicates).
+func HasB2providerWith(preds ...predicate.B2Provider) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(B2providerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, B2providerTable, B2providerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAwss3provider applies the HasEdge predicate on the "awss3provider" edge.
+func HasAwss3provider() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Awss3providerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, Awss3providerTable, Awss3providerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAwss3providerWith applies the HasEdge predicate on the "awss3provider" edge with a given conditions (other predicates).
+func HasAwss3providerWith(preds ...predicate.AWSS3Provider) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Awss3providerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, Awss3providerTable, Awss3providerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMinios3provider applies the HasEdge predicate on the "minios3provider" edge.
+func HasMinios3provider() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Minios3providerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, Minios3providerTable, Minios3providerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMinios3providerWith applies the HasEdge predicate on the "minios3provider" edge with a given conditions (other predicates).
+func HasMinios3providerWith(preds ...predicate.MinioS3Provider) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Minios3providerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, Minios3providerTable, Minios3providerColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

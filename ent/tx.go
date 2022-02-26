@@ -12,12 +12,28 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AWSS3Provider is the client for interacting with the AWSS3Provider builders.
+	AWSS3Provider *AWSS3ProviderClient
+	// B2Provider is the client for interacting with the B2Provider builders.
+	B2Provider *B2ProviderClient
+	// BackupPolicy is the client for interacting with the BackupPolicy builders.
+	BackupPolicy *BackupPolicyClient
 	// BackupSchedule is the client for interacting with the BackupSchedule builders.
 	BackupSchedule *BackupScheduleClient
+	// LocalProvider is the client for interacting with the LocalProvider builders.
+	LocalProvider *LocalProviderClient
+	// MinioS3Provider is the client for interacting with the MinioS3Provider builders.
+	MinioS3Provider *MinioS3ProviderClient
 	// Path is the client for interacting with the Path builders.
 	Path *PathClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
 	// Repository is the client for interacting with the Repository builders.
 	Repository *RepositoryClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 
 	// lazily loaded.
 	client     *Client
@@ -153,9 +169,17 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AWSS3Provider = NewAWSS3ProviderClient(tx.config)
+	tx.B2Provider = NewB2ProviderClient(tx.config)
+	tx.BackupPolicy = NewBackupPolicyClient(tx.config)
 	tx.BackupSchedule = NewBackupScheduleClient(tx.config)
+	tx.LocalProvider = NewLocalProviderClient(tx.config)
+	tx.MinioS3Provider = NewMinioS3ProviderClient(tx.config)
 	tx.Path = NewPathClient(tx.config)
+	tx.Permission = NewPermissionClient(tx.config)
 	tx.Repository = NewRepositoryClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -165,7 +189,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: BackupSchedule.QueryXXX(), the query will be executed
+// applies a query, for example: AWSS3Provider.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

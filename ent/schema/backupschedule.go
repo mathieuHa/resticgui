@@ -15,6 +15,21 @@ type BackupSchedule struct {
 func (BackupSchedule) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("choice").Values("cron", "interval", "monthly", "weekly").Default("cron"),
+		field.Bool("everyDay").Default(false),
+		field.Bool("everyWeek").Default(false),
+		field.Bool("everyMonth").Default(false),
+		field.Bool("everyMonday").Default(false),
+		field.Bool("everyTuesday").Default(false),
+		field.Bool("everyWednesday").Default(false),
+		field.Bool("everyThursday").Default(false),
+		field.Bool("everyTriday").Default(false),
+		field.Bool("everySaturday").Default(false),
+		field.Bool("everySunday").Default(false),
+		field.String("hour"),
+		field.String("day"),
+		field.String("interval"),
+		field.String("cronSyntax"),
+		field.Uint("cronID"),
 	}
 }
 

@@ -14,7 +14,7 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	// FieldCreatedAt holds the string denoting the createdat field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldProvider holds the string denoting the provider field in the database.
 	FieldProvider = "provider"
@@ -22,10 +22,20 @@ const (
 	FieldActive = "active"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
-	// FieldMaxSize holds the string denoting the max_size field in the database.
+	// FieldMaxSize holds the string denoting the maxsize field in the database.
 	FieldMaxSize = "max_size"
 	// EdgeBackupschedule holds the string denoting the backupschedule edge name in mutations.
 	EdgeBackupschedule = "backupschedule"
+	// EdgeBackuppolicy holds the string denoting the backuppolicy edge name in mutations.
+	EdgeBackuppolicy = "backuppolicy"
+	// EdgeLocalprovider holds the string denoting the localprovider edge name in mutations.
+	EdgeLocalprovider = "localprovider"
+	// EdgeB2provider holds the string denoting the b2provider edge name in mutations.
+	EdgeB2provider = "b2provider"
+	// EdgeAwss3provider holds the string denoting the awss3provider edge name in mutations.
+	EdgeAwss3provider = "awss3provider"
+	// EdgeMinios3provider holds the string denoting the minios3provider edge name in mutations.
+	EdgeMinios3provider = "minios3provider"
 	// EdgePath holds the string denoting the path edge name in mutations.
 	EdgePath = "path"
 	// Table holds the table name of the repository in the database.
@@ -37,6 +47,41 @@ const (
 	BackupscheduleInverseTable = "backup_schedules"
 	// BackupscheduleColumn is the table column denoting the backupschedule relation/edge.
 	BackupscheduleColumn = "repository_backupschedule"
+	// BackuppolicyTable is the table that holds the backuppolicy relation/edge.
+	BackuppolicyTable = "backup_policies"
+	// BackuppolicyInverseTable is the table name for the BackupPolicy entity.
+	// It exists in this package in order to avoid circular dependency with the "backuppolicy" package.
+	BackuppolicyInverseTable = "backup_policies"
+	// BackuppolicyColumn is the table column denoting the backuppolicy relation/edge.
+	BackuppolicyColumn = "repository_backuppolicy"
+	// LocalproviderTable is the table that holds the localprovider relation/edge.
+	LocalproviderTable = "local_providers"
+	// LocalproviderInverseTable is the table name for the LocalProvider entity.
+	// It exists in this package in order to avoid circular dependency with the "localprovider" package.
+	LocalproviderInverseTable = "local_providers"
+	// LocalproviderColumn is the table column denoting the localprovider relation/edge.
+	LocalproviderColumn = "repository_localprovider"
+	// B2providerTable is the table that holds the b2provider relation/edge.
+	B2providerTable = "b2providers"
+	// B2providerInverseTable is the table name for the B2Provider entity.
+	// It exists in this package in order to avoid circular dependency with the "b2provider" package.
+	B2providerInverseTable = "b2providers"
+	// B2providerColumn is the table column denoting the b2provider relation/edge.
+	B2providerColumn = "repository_b2provider"
+	// Awss3providerTable is the table that holds the awss3provider relation/edge.
+	Awss3providerTable = "awss3providers"
+	// Awss3providerInverseTable is the table name for the AWSS3Provider entity.
+	// It exists in this package in order to avoid circular dependency with the "awss3provider" package.
+	Awss3providerInverseTable = "awss3providers"
+	// Awss3providerColumn is the table column denoting the awss3provider relation/edge.
+	Awss3providerColumn = "repository_awss3provider"
+	// Minios3providerTable is the table that holds the minios3provider relation/edge.
+	Minios3providerTable = "minio_s3providers"
+	// Minios3providerInverseTable is the table name for the MinioS3Provider entity.
+	// It exists in this package in order to avoid circular dependency with the "minios3provider" package.
+	Minios3providerInverseTable = "minio_s3providers"
+	// Minios3providerColumn is the table column denoting the minios3provider relation/edge.
+	Minios3providerColumn = "repository_minios3provider"
 	// PathTable is the table that holds the path relation/edge.
 	PathTable = "paths"
 	// PathInverseTable is the table name for the Path entity.
@@ -70,7 +115,7 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	// DefaultCreatedAt holds the default value on creation for the "createdAt" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool

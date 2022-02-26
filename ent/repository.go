@@ -8,7 +8,12 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"gitlab.com/resticgui/resticgui/ent/awss3provider"
+	"gitlab.com/resticgui/resticgui/ent/b2provider"
+	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -19,16 +24,16 @@ type Repository struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// Provider holds the value of the "provider" field.
 	Provider repository.Provider `json:"provider,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"-"`
-	// MaxSize holds the value of the "max_size" field.
-	MaxSize string `json:"max_size,omitempty"`
+	// MaxSize holds the value of the "maxSize" field.
+	MaxSize string `json:"maxSize,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RepositoryQuery when eager-loading is set.
 	Edges RepositoryEdges `json:"edges"`
@@ -38,11 +43,21 @@ type Repository struct {
 type RepositoryEdges struct {
 	// Backupschedule holds the value of the backupschedule edge.
 	Backupschedule *BackupSchedule `json:"backupschedule,omitempty"`
+	// Backuppolicy holds the value of the backuppolicy edge.
+	Backuppolicy *BackupPolicy `json:"backuppolicy,omitempty"`
+	// Localprovider holds the value of the localprovider edge.
+	Localprovider *LocalProvider `json:"localprovider,omitempty"`
+	// B2provider holds the value of the b2provider edge.
+	B2provider *B2Provider `json:"b2provider,omitempty"`
+	// Awss3provider holds the value of the awss3provider edge.
+	Awss3provider *AWSS3Provider `json:"awss3provider,omitempty"`
+	// Minios3provider holds the value of the minios3provider edge.
+	Minios3provider *MinioS3Provider `json:"minios3provider,omitempty"`
 	// Path holds the value of the path edge.
 	Path []*Path `json:"path,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [7]bool
 }
 
 // BackupscheduleOrErr returns the Backupschedule value or an error if the edge
@@ -59,10 +74,80 @@ func (e RepositoryEdges) BackupscheduleOrErr() (*BackupSchedule, error) {
 	return nil, &NotLoadedError{edge: "backupschedule"}
 }
 
+// BackuppolicyOrErr returns the Backuppolicy value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) BackuppolicyOrErr() (*BackupPolicy, error) {
+	if e.loadedTypes[1] {
+		if e.Backuppolicy == nil {
+			// The edge backuppolicy was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: backuppolicy.Label}
+		}
+		return e.Backuppolicy, nil
+	}
+	return nil, &NotLoadedError{edge: "backuppolicy"}
+}
+
+// LocalproviderOrErr returns the Localprovider value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) LocalproviderOrErr() (*LocalProvider, error) {
+	if e.loadedTypes[2] {
+		if e.Localprovider == nil {
+			// The edge localprovider was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: localprovider.Label}
+		}
+		return e.Localprovider, nil
+	}
+	return nil, &NotLoadedError{edge: "localprovider"}
+}
+
+// B2providerOrErr returns the B2provider value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) B2providerOrErr() (*B2Provider, error) {
+	if e.loadedTypes[3] {
+		if e.B2provider == nil {
+			// The edge b2provider was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: b2provider.Label}
+		}
+		return e.B2provider, nil
+	}
+	return nil, &NotLoadedError{edge: "b2provider"}
+}
+
+// Awss3providerOrErr returns the Awss3provider value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) Awss3providerOrErr() (*AWSS3Provider, error) {
+	if e.loadedTypes[4] {
+		if e.Awss3provider == nil {
+			// The edge awss3provider was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: awss3provider.Label}
+		}
+		return e.Awss3provider, nil
+	}
+	return nil, &NotLoadedError{edge: "awss3provider"}
+}
+
+// Minios3providerOrErr returns the Minios3provider value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) Minios3providerOrErr() (*MinioS3Provider, error) {
+	if e.loadedTypes[5] {
+		if e.Minios3provider == nil {
+			// The edge minios3provider was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: minios3provider.Label}
+		}
+		return e.Minios3provider, nil
+	}
+	return nil, &NotLoadedError{edge: "minios3provider"}
+}
+
 // PathOrErr returns the Path value or an error if the edge
 // was not loaded in eager-loading.
 func (e RepositoryEdges) PathOrErr() ([]*Path, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[6] {
 		return e.Path, nil
 	}
 	return nil, &NotLoadedError{edge: "path"}
@@ -110,7 +195,7 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 			}
 		case repository.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				r.CreatedAt = value.Time
 			}
@@ -134,7 +219,7 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 			}
 		case repository.FieldMaxSize:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field max_size", values[i])
+				return fmt.Errorf("unexpected type %T for field maxSize", values[i])
 			} else if value.Valid {
 				r.MaxSize = value.String
 			}
@@ -146,6 +231,31 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 // QueryBackupschedule queries the "backupschedule" edge of the Repository entity.
 func (r *Repository) QueryBackupschedule() *BackupScheduleQuery {
 	return (&RepositoryClient{config: r.config}).QueryBackupschedule(r)
+}
+
+// QueryBackuppolicy queries the "backuppolicy" edge of the Repository entity.
+func (r *Repository) QueryBackuppolicy() *BackupPolicyQuery {
+	return (&RepositoryClient{config: r.config}).QueryBackuppolicy(r)
+}
+
+// QueryLocalprovider queries the "localprovider" edge of the Repository entity.
+func (r *Repository) QueryLocalprovider() *LocalProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryLocalprovider(r)
+}
+
+// QueryB2provider queries the "b2provider" edge of the Repository entity.
+func (r *Repository) QueryB2provider() *B2ProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryB2provider(r)
+}
+
+// QueryAwss3provider queries the "awss3provider" edge of the Repository entity.
+func (r *Repository) QueryAwss3provider() *AWSS3ProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryAwss3provider(r)
+}
+
+// QueryMinios3provider queries the "minios3provider" edge of the Repository entity.
+func (r *Repository) QueryMinios3provider() *MinioS3ProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryMinios3provider(r)
 }
 
 // QueryPath queries the "path" edge of the Repository entity.
@@ -178,14 +288,14 @@ func (r *Repository) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(r.Name)
-	builder.WriteString(", created_at=")
+	builder.WriteString(", createdAt=")
 	builder.WriteString(r.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", provider=")
 	builder.WriteString(fmt.Sprintf("%v", r.Provider))
 	builder.WriteString(", active=")
 	builder.WriteString(fmt.Sprintf("%v", r.Active))
 	builder.WriteString(", password=<sensitive>")
-	builder.WriteString(", max_size=")
+	builder.WriteString(", maxSize=")
 	builder.WriteString(r.MaxSize)
 	builder.WriteByte(')')
 	return builder.String()

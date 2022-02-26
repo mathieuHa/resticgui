@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 // PathUpdate is the builder for updating Path entities.
@@ -73,9 +74,34 @@ func (pu *PathUpdate) SetNillableIncluded(b *bool) *PathUpdate {
 	return pu
 }
 
+// SetRepositoryID sets the "repository" edge to the Repository entity by ID.
+func (pu *PathUpdate) SetRepositoryID(id int) *PathUpdate {
+	pu.mutation.SetRepositoryID(id)
+	return pu
+}
+
+// SetNillableRepositoryID sets the "repository" edge to the Repository entity by ID if the given value is not nil.
+func (pu *PathUpdate) SetNillableRepositoryID(id *int) *PathUpdate {
+	if id != nil {
+		pu = pu.SetRepositoryID(*id)
+	}
+	return pu
+}
+
+// SetRepository sets the "repository" edge to the Repository entity.
+func (pu *PathUpdate) SetRepository(r *Repository) *PathUpdate {
+	return pu.SetRepositoryID(r.ID)
+}
+
 // Mutation returns the PathMutation object of the builder.
 func (pu *PathUpdate) Mutation() *PathMutation {
 	return pu.mutation
+}
+
+// ClearRepository clears the "repository" edge to the Repository entity.
+func (pu *PathUpdate) ClearRepository() *PathUpdate {
+	pu.mutation.ClearRepository()
+	return pu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -206,6 +232,41 @@ func (pu *PathUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: path.FieldIncluded,
 		})
 	}
+	if pu.mutation.RepositoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   path.RepositoryTable,
+			Columns: []string{path.RepositoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: repository.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RepositoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   path.RepositoryTable,
+			Columns: []string{path.RepositoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: repository.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{path.Label}
@@ -271,9 +332,34 @@ func (puo *PathUpdateOne) SetNillableIncluded(b *bool) *PathUpdateOne {
 	return puo
 }
 
+// SetRepositoryID sets the "repository" edge to the Repository entity by ID.
+func (puo *PathUpdateOne) SetRepositoryID(id int) *PathUpdateOne {
+	puo.mutation.SetRepositoryID(id)
+	return puo
+}
+
+// SetNillableRepositoryID sets the "repository" edge to the Repository entity by ID if the given value is not nil.
+func (puo *PathUpdateOne) SetNillableRepositoryID(id *int) *PathUpdateOne {
+	if id != nil {
+		puo = puo.SetRepositoryID(*id)
+	}
+	return puo
+}
+
+// SetRepository sets the "repository" edge to the Repository entity.
+func (puo *PathUpdateOne) SetRepository(r *Repository) *PathUpdateOne {
+	return puo.SetRepositoryID(r.ID)
+}
+
 // Mutation returns the PathMutation object of the builder.
 func (puo *PathUpdateOne) Mutation() *PathMutation {
 	return puo.mutation
+}
+
+// ClearRepository clears the "repository" edge to the Repository entity.
+func (puo *PathUpdateOne) ClearRepository() *PathUpdateOne {
+	puo.mutation.ClearRepository()
+	return puo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -427,6 +513,41 @@ func (puo *PathUpdateOne) sqlSave(ctx context.Context) (_node *Path, err error) 
 			Value:  value,
 			Column: path.FieldIncluded,
 		})
+	}
+	if puo.mutation.RepositoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   path.RepositoryTable,
+			Columns: []string{path.RepositoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: repository.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RepositoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   path.RepositoryTable,
+			Columns: []string{path.RepositoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: repository.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Path{config: puo.config}
 	_spec.Assign = _node.assignValues
