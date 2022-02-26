@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gitlab.com/resticgui/resticgui/ent"
 )
 
 // func QueryBackupSchedule(c *gin.Context) {
-// 	var schedules []Models.BackupSchedule
+// 	var schedules []ent.BackupSchedule
 
 // 	db := Database.Connect()
 
@@ -21,7 +22,7 @@ import (
 // func GetBackupSchedule(c *gin.Context) {
 // 	id := c.Param("id")
 
-// 	var schedule Models.BackupSchedule
+// 	var schedule ent.BackupSchedule
 
 // 	db := Database.Connect()
 
@@ -37,7 +38,7 @@ import (
 // func UpdateBackupSchedule(c *gin.Context) {
 // 	id := c.Param("id") // id of the repository
 
-// 	var repository Models.Repository
+// 	var repository ent.Repository
 
 // 	db := Database.Connect()
 
@@ -48,7 +49,7 @@ import (
 // 	}
 
 // 	// Here we add repository schedule
-// 	//var schedule Models.BackupSchedule
+// 	//var schedule ent.BackupSchedule
 // 	if err := c.BindJSON(&repository.BackupSchedule); err != nil {
 // 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bind error"})
 // 		log.Info().Err(err).Msg("Bind Error schedule")
@@ -78,7 +79,7 @@ import (
 // 	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
 // }
 
-func validSchedule(schedule Models.BackupSchedule) bool {
+func validSchedule(schedule ent.BackupSchedule) bool {
 	if schedule.Choice == "cron" {
 		// check cron
 	} else if schedule.Choice == "interval" {
@@ -92,7 +93,7 @@ func validSchedule(schedule Models.BackupSchedule) bool {
 }
 
 // This returns the schedule in string format that can be used by cron
-func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
+func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 	if schedule.Choice == "cron" {
 		return schedule.CronSyntax
 	} else if schedule.Choice == "interval" {
@@ -124,7 +125,7 @@ func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
 		if schedule.EveryThursday {
 			day = fmt.Sprintf("%v4,", day)
 		}
-		if schedule.EveryFriday {
+		if schedule.EveryTriday {
 			day = fmt.Sprintf("%v5,", day)
 		}
 		if schedule.EverySaturday {
@@ -144,21 +145,21 @@ func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
 	return ""
 }
 
-func addScheduledBackup(repository *Models.Repository) bool {
+func addScheduledBackup(repository *ent.Repository) bool {
 	// we check if the cron has been initialized
 	if cr != nil {
 
 		// First we remove the previous job launched for this repository
-		if repository.BackupSchedule.CronID >= 0 {
-			cr.Remove(repository.BackupSchedule.CronID)
+		if repository.Edges.Backupschedule.CronID >= 0 {
+			cr.Remove(cron.EntryID(repository.Edges.Backupschedule.CronID))
 		}
 		// Then we had the new job to be run and register it
 		var err error
-		timing := getScheduleStringSyntax(repository.BackupSchedule)
+		timing := getScheduleStringSyntax(*repository.Edges.Backupschedule)
 		log.Debug().Msgf("timing = %v", timing)
-		repository.BackupSchedule.CronID, err = cr.AddFunc(timing, func() {
-			log.Debug().Msgf("JOB HAS RUN")
-		})
+		// repository.Edges.Backupschedule.CronID, err = cr.AddFunc(timing, func() {
+		// 	log.Debug().Msgf("JOB HAS RUN")
+		// })
 		if err != nil {
 			log.Error().Err(err)
 			return false
@@ -171,7 +172,7 @@ func addScheduledBackup(repository *Models.Repository) bool {
 }
 
 func CreateAllScheduledBackup() {
-	// var repositories []Models.Repository
+	// var repositories []ent.Repository
 
 	// db := Database.Connect()
 
@@ -183,12 +184,12 @@ func CreateAllScheduledBackup() {
 	// }
 }
 
-func removeScheduledBackup(repository Models.Repository) {
+func removeScheduledBackup(repository ent.Repository) {
 	// Here we need to
 	if cr != nil {
 		// First we remove the previous job launched for this repository
-		if repository.BackupSchedule.CronID >= 0 {
-			cr.Remove(repository.BackupSchedule.CronID)
-		}
+		// if repository.BackupSchedule.CronID >= 0 {
+		// 	cr.Remove(repository.BackupSchedule.CronID)
+		// }
 	}
 }

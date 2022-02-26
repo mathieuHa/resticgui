@@ -94,7 +94,7 @@ func GetRepository(c *gin.Context) {
 // @Schemes
 // @Description create a repository
 // @Accept json
-// @Param repository body Models.Repository true "Add account"
+// @Param repository body ent.Repository true "Add account"
 // @Produce json
 // @Success 201 {object} ent.Repository
 // @Failure 400 {string} errNameUsed

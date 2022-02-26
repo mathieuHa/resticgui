@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 )
 
@@ -21,7 +22,7 @@ import (
 // @Success 200 {string} Helloworld
 // @Router /paths [post]
 func GetPath(c *gin.Context) {
-	var root Models.Path
+	var root ent.Path
 
 	if err := c.BindJSON(&root); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -59,7 +60,7 @@ func GetPath(c *gin.Context) {
 // @Success 200 {string} Helloworld
 // @Router /paths/all [post]
 func GetAllPath(c *gin.Context) {
-	var root Models.Path
+	var root ent.Path
 
 	if err := c.BindJSON(&root); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -106,7 +107,7 @@ func checkFileExist(path string) bool {
 	return true
 }
 
-func checkAllPath(entities []Models.Path) bool {
+func checkAllPath(entities []ent.Path) bool {
 	changed := false
 	for i, entity := range entities {
 		exists := checkFileExist(entity.AbsPath)
