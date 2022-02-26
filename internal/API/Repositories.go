@@ -144,6 +144,7 @@ func EditRepository(c *gin.Context) {
 	db := Database.Connect()
 	result := db.Preload(clause.Associations).Find(&repository, id)
 	if result.RowsAffected == 0 { // Not found entity by id
+		log.Info().Msg(errNotFound)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
 		return
 	}
