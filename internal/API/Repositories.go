@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
 )
 
@@ -36,7 +36,11 @@ func QueryRepositories(c *gin.Context) {
 	db := Database.Connect()
 	defer db.Close()
 
-	repositories, err := db.Repository.Query().All(context.Background())
+	repositories, err := db.Repository.
+		Query().
+		WithBackupschedule().
+		WithPath().
+		All(context.Background())
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
@@ -70,7 +74,12 @@ func GetRepository(c *gin.Context) {
 	db := Database.Connect()
 	defer db.Close()
 
-	repositories, err := db.Repository.Get(context.Background(), newId)
+	repository, err := db.Repository.
+		Query().
+		WithBackupschedule().
+		WithPath().
+		Where(repository.ID(newId)).
+		First(context.Background())
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
@@ -80,7 +89,7 @@ func GetRepository(c *gin.Context) {
 	// // check all path and update entity in memory if path changed
 	// checkAllPath(repositories.Paths)
 
-	c.IndentedJSON(http.StatusOK, repositories)
+	c.IndentedJSON(http.StatusOK, repository)
 }
 
 // GetRepository godoc
@@ -95,9 +104,10 @@ func GetRepository(c *gin.Context) {
 // @Failure 500 {string} errCreate
 // @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
-	var repository ent.Repository
+	ctx := context.Background()
+	var repo ent.Repository
 
-	if err := c.BindJSON(&repository); err != nil {
+	if err := c.BindJSON(&repo); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Info().Err(err).Msg(errNotBind)
 		return
@@ -108,9 +118,9 @@ func CreateRepository(c *gin.Context) {
 
 	newRepository, err := db.Repository.
 		Create().
-		SetName(repository.Name).
-		SetMaxSize(repository.MaxSize).
-		Save(context.Background())
+		SetName(repo.Name).
+		SetMaxSize(repo.MaxSize).
+		Save(ctx)
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
@@ -118,21 +128,31 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	// if result.Error != nil {
-	// 	if result.Error != nil {
-	// 		log.Debug().Err(result.Error)
-	// 		err := db.Find(&repository).Error
+	_, err = db.BackupSchedule.
+		Create().
+		SetRepository(newRepository).
+		Save(ctx)
 
-	// 		if err == nil {
-	// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errNameUsed})
-	// 			return
-	// 		} else {
-	// 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate})
-	// 			return
-	// 		}
-	// 	}
-	// }
-	c.IndentedJSON(http.StatusCreated, newRepository)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+		return
+	}
+
+	repository, err := db.Repository.
+		Query().
+		WithBackupschedule().
+		WithPath().
+		Where(repository.ID(newRepository.ID)).
+		First(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, repository)
 }
 
 // GetRepository godoc
@@ -148,6 +168,7 @@ func CreateRepository(c *gin.Context) {
 // @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [patch]
 func EditRepository(c *gin.Context) {
+	ctx := context.Background()
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -155,46 +176,59 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	var editedRepository Models.Repository
+	var repo ent.Repository
 
-	// if err := c.BindJSON(&editedRepository); err != nil {
-	// 	log.Info().Err(err).Msg(errNotBind)
-	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	if err := c.BindJSON(&repo); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
 
-	// var repository Models.Repository
+	db := Database.Connect()
+	defer db.Close()
 
-	// db := Database.Connect()
-	// result := db.Preload(clause.Associations).Find(&repository, id)
-	// if result.RowsAffected == 0 { // Not found entity by id
-	// 	log.Info().Msg(errNotFound)
-	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-	// 	return
-	// }
+	// Update repository
+	_, err := db.Repository.
+		UpdateOneID(repo.ID).
+		SetName(repo.Name).
+		SetMaxSize(repo.MaxSize).
+		SetActive(repo.Active).
+		SetProvider(repo.Provider).
+		Save(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		return
+	}
 
-	// db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Paths").Replace(&editedRepository.Paths)
-	// db.Model(&repository.B2Provider).Updates(&editedRepository.B2Provider)
-	// db.Model(&repository.AWSS3Provider).Updates(&editedRepository.AWSS3Provider)
-	// db.Model(&repository.LocalProvider).Updates(&editedRepository.LocalProvider)
-	// db.Model(&repository.MinioS3Provider).Updates(&editedRepository.MinioS3Provider)
-	// db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
-	// db.Model(&repository.BackupPolicy).Updates(&editedRepository.BackupPolicy)
-	// result = db.Model(repository).Updates(&editedRepository)
-	// if result.Error != nil {
-	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
-	// 	log.Info().Err(result.Error).Msg(errUpdate)
-	// 	return
-	// }
+	// Update backup schedule
+	if repo.Edges.Backupschedule != nil {
+		_, err = db.BackupSchedule.
+			UpdateOneID(repo.Edges.Backupschedule.ID).
+			SetChoice(repo.Edges.Backupschedule.Choice).
+			Save(ctx)
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+			return
+		}
+	}
 
-	// var updatedRepository Models.Repository
+	// Fetch repository after update
+	repository, err := db.Repository.
+		Query().
+		WithBackupschedule().
+		WithPath().
+		Where(repository.ID(repo.ID)).
+		First(ctx)
 
-	// result = db.Preload(clause.Associations).Find(&updatedRepository, id)
-	// if result.RowsAffected == 0 { // Not found entity by id
-	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-	// 	return
-	// }
-	c.IndentedJSON(http.StatusOK, editedRepository)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, repository)
 }
 
 // RemoveRepository godoc
@@ -210,6 +244,7 @@ func EditRepository(c *gin.Context) {
 // @Failure 500 {string} errNotDeleted
 // @Router /repositories/{id} [delete]
 func RemoveRepository(c *gin.Context) {
+	ctx := context.Background()
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -217,22 +252,27 @@ func RemoveRepository(c *gin.Context) {
 		return
 	}
 
-	// var repository Models.Repository
+	newId, _ := strconv.Atoi(id)
+	var repo ent.Repository
 
-	// db := Database.Connect()
-	// result := db.Find(&repository, id)
-	// if result.RowsAffected == 0 {
-	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-	// 	return
-	// }
+	if err := c.BindJSON(&repo); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
 
-	// removeScheduledBackup(repository)
+	db := Database.Connect()
+	defer db.Close()
 
-	// result = db.Select(clause.Associations).Delete(&repository, id)
-	// if result.Error != nil {
-	// 	log.Error().Err(result.Error)
-	// 	c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted})
-	// 	return
-	// }
+	// Delete repository
+	err := db.Repository.
+		DeleteOneID(newId).
+		Exec(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted, "message": err.Error()})
+		return
+	}
+
 	c.Status(http.StatusNoContent)
 }
