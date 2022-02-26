@@ -102,6 +102,11 @@ buildgo: createdir ## Build the go backend in dist dir
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
 	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
 
+buildschema: ## Build the go ent schema backend
+	go generate ./ent
+
+showschema: ## Show the go ent schema
+	go run entgo.io/ent/cmd/ent describe ./ent/schema
 
 buildweb: installweb ## Build the frontend in dist dir
 	npm run build --prefix $(BUILDDIR)/$(WEBDIR) && \

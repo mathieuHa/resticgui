@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 
@@ -24,25 +26,939 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeRepository = "Repository"
+	TypeBackupSchedule = "BackupSchedule"
+	TypePath           = "Path"
+	TypeRepository     = "Repository"
 )
 
-// RepositoryMutation represents an operation that mutates the Repository nodes in the graph.
-type RepositoryMutation struct {
+// BackupScheduleMutation represents an operation that mutates the BackupSchedule nodes in the graph.
+type BackupScheduleMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	choice            *backupschedule.Choice
+	clearedFields     map[string]struct{}
+	repository        *int
+	clearedrepository bool
+	done              bool
+	oldValue          func(context.Context) (*BackupSchedule, error)
+	predicates        []predicate.BackupSchedule
+}
+
+var _ ent.Mutation = (*BackupScheduleMutation)(nil)
+
+// backupscheduleOption allows management of the mutation configuration using functional options.
+type backupscheduleOption func(*BackupScheduleMutation)
+
+// newBackupScheduleMutation creates new mutation for the BackupSchedule entity.
+func newBackupScheduleMutation(c config, op Op, opts ...backupscheduleOption) *BackupScheduleMutation {
+	m := &BackupScheduleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBackupSchedule,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBackupScheduleID sets the ID field of the mutation.
+func withBackupScheduleID(id int) backupscheduleOption {
+	return func(m *BackupScheduleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BackupSchedule
+		)
+		m.oldValue = func(ctx context.Context) (*BackupSchedule, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BackupSchedule.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBackupSchedule sets the old BackupSchedule of the mutation.
+func withBackupSchedule(node *BackupSchedule) backupscheduleOption {
+	return func(m *BackupScheduleMutation) {
+		m.oldValue = func(context.Context) (*BackupSchedule, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BackupScheduleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BackupScheduleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BackupScheduleMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BackupScheduleMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BackupSchedule.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetChoice sets the "choice" field.
+func (m *BackupScheduleMutation) SetChoice(b backupschedule.Choice) {
+	m.choice = &b
+}
+
+// Choice returns the value of the "choice" field in the mutation.
+func (m *BackupScheduleMutation) Choice() (r backupschedule.Choice, exists bool) {
+	v := m.choice
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChoice returns the old "choice" field's value of the BackupSchedule entity.
+// If the BackupSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BackupScheduleMutation) OldChoice(ctx context.Context) (v backupschedule.Choice, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChoice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChoice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChoice: %w", err)
+	}
+	return oldValue.Choice, nil
+}
+
+// ResetChoice resets all changes to the "choice" field.
+func (m *BackupScheduleMutation) ResetChoice() {
+	m.choice = nil
+}
+
+// SetRepositoryID sets the "repository" edge to the Repository entity by id.
+func (m *BackupScheduleMutation) SetRepositoryID(id int) {
+	m.repository = &id
+}
+
+// ClearRepository clears the "repository" edge to the Repository entity.
+func (m *BackupScheduleMutation) ClearRepository() {
+	m.clearedrepository = true
+}
+
+// RepositoryCleared reports if the "repository" edge to the Repository entity was cleared.
+func (m *BackupScheduleMutation) RepositoryCleared() bool {
+	return m.clearedrepository
+}
+
+// RepositoryID returns the "repository" edge ID in the mutation.
+func (m *BackupScheduleMutation) RepositoryID() (id int, exists bool) {
+	if m.repository != nil {
+		return *m.repository, true
+	}
+	return
+}
+
+// RepositoryIDs returns the "repository" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RepositoryID instead. It exists only for internal usage by the builders.
+func (m *BackupScheduleMutation) RepositoryIDs() (ids []int) {
+	if id := m.repository; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRepository resets all changes to the "repository" edge.
+func (m *BackupScheduleMutation) ResetRepository() {
+	m.repository = nil
+	m.clearedrepository = false
+}
+
+// Where appends a list predicates to the BackupScheduleMutation builder.
+func (m *BackupScheduleMutation) Where(ps ...predicate.BackupSchedule) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *BackupScheduleMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (BackupSchedule).
+func (m *BackupScheduleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BackupScheduleMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.choice != nil {
+		fields = append(fields, backupschedule.FieldChoice)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BackupScheduleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case backupschedule.FieldChoice:
+		return m.Choice()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BackupScheduleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case backupschedule.FieldChoice:
+		return m.OldChoice(ctx)
+	}
+	return nil, fmt.Errorf("unknown BackupSchedule field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BackupScheduleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case backupschedule.FieldChoice:
+		v, ok := value.(backupschedule.Choice)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChoice(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BackupSchedule field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BackupScheduleMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BackupScheduleMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BackupScheduleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown BackupSchedule numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BackupScheduleMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BackupScheduleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BackupScheduleMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BackupSchedule nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BackupScheduleMutation) ResetField(name string) error {
+	switch name {
+	case backupschedule.FieldChoice:
+		m.ResetChoice()
+		return nil
+	}
+	return fmt.Errorf("unknown BackupSchedule field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BackupScheduleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.repository != nil {
+		edges = append(edges, backupschedule.EdgeRepository)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BackupScheduleMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case backupschedule.EdgeRepository:
+		if id := m.repository; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BackupScheduleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BackupScheduleMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BackupScheduleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedrepository {
+		edges = append(edges, backupschedule.EdgeRepository)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BackupScheduleMutation) EdgeCleared(name string) bool {
+	switch name {
+	case backupschedule.EdgeRepository:
+		return m.clearedrepository
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BackupScheduleMutation) ClearEdge(name string) error {
+	switch name {
+	case backupschedule.EdgeRepository:
+		m.ClearRepository()
+		return nil
+	}
+	return fmt.Errorf("unknown BackupSchedule unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BackupScheduleMutation) ResetEdge(name string) error {
+	switch name {
+	case backupschedule.EdgeRepository:
+		m.ResetRepository()
+		return nil
+	}
+	return fmt.Errorf("unknown BackupSchedule edge %s", name)
+}
+
+// PathMutation represents an operation that mutates the Path nodes in the graph.
+type PathMutation struct {
 	config
 	op            Op
 	typ           string
 	id            *int
 	name          *string
-	created_at    *time.Time
-	provider      *repository.Provider
-	active        *bool
-	password      *string
-	max_size      *string
+	abs_path      *string
+	exists        *bool
+	is_dir        *bool
+	included      *bool
 	clearedFields map[string]struct{}
 	done          bool
-	oldValue      func(context.Context) (*Repository, error)
-	predicates    []predicate.Repository
+	oldValue      func(context.Context) (*Path, error)
+	predicates    []predicate.Path
+}
+
+var _ ent.Mutation = (*PathMutation)(nil)
+
+// pathOption allows management of the mutation configuration using functional options.
+type pathOption func(*PathMutation)
+
+// newPathMutation creates new mutation for the Path entity.
+func newPathMutation(c config, op Op, opts ...pathOption) *PathMutation {
+	m := &PathMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePath,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPathID sets the ID field of the mutation.
+func withPathID(id int) pathOption {
+	return func(m *PathMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Path
+		)
+		m.oldValue = func(ctx context.Context) (*Path, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Path.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPath sets the old Path of the mutation.
+func withPath(node *Path) pathOption {
+	return func(m *PathMutation) {
+		m.oldValue = func(context.Context) (*Path, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PathMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PathMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PathMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PathMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Path.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *PathMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PathMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Path entity.
+// If the Path object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PathMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PathMutation) ResetName() {
+	m.name = nil
+}
+
+// SetAbsPath sets the "abs_path" field.
+func (m *PathMutation) SetAbsPath(s string) {
+	m.abs_path = &s
+}
+
+// AbsPath returns the value of the "abs_path" field in the mutation.
+func (m *PathMutation) AbsPath() (r string, exists bool) {
+	v := m.abs_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAbsPath returns the old "abs_path" field's value of the Path entity.
+// If the Path object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PathMutation) OldAbsPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAbsPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAbsPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAbsPath: %w", err)
+	}
+	return oldValue.AbsPath, nil
+}
+
+// ResetAbsPath resets all changes to the "abs_path" field.
+func (m *PathMutation) ResetAbsPath() {
+	m.abs_path = nil
+}
+
+// SetExists sets the "exists" field.
+func (m *PathMutation) SetExists(b bool) {
+	m.exists = &b
+}
+
+// Exists returns the value of the "exists" field in the mutation.
+func (m *PathMutation) Exists() (r bool, exists bool) {
+	v := m.exists
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExists returns the old "exists" field's value of the Path entity.
+// If the Path object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PathMutation) OldExists(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExists is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExists requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExists: %w", err)
+	}
+	return oldValue.Exists, nil
+}
+
+// ResetExists resets all changes to the "exists" field.
+func (m *PathMutation) ResetExists() {
+	m.exists = nil
+}
+
+// SetIsDir sets the "is_dir" field.
+func (m *PathMutation) SetIsDir(b bool) {
+	m.is_dir = &b
+}
+
+// IsDir returns the value of the "is_dir" field in the mutation.
+func (m *PathMutation) IsDir() (r bool, exists bool) {
+	v := m.is_dir
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsDir returns the old "is_dir" field's value of the Path entity.
+// If the Path object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PathMutation) OldIsDir(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsDir is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsDir requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsDir: %w", err)
+	}
+	return oldValue.IsDir, nil
+}
+
+// ResetIsDir resets all changes to the "is_dir" field.
+func (m *PathMutation) ResetIsDir() {
+	m.is_dir = nil
+}
+
+// SetIncluded sets the "included" field.
+func (m *PathMutation) SetIncluded(b bool) {
+	m.included = &b
+}
+
+// Included returns the value of the "included" field in the mutation.
+func (m *PathMutation) Included() (r bool, exists bool) {
+	v := m.included
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncluded returns the old "included" field's value of the Path entity.
+// If the Path object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PathMutation) OldIncluded(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncluded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncluded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncluded: %w", err)
+	}
+	return oldValue.Included, nil
+}
+
+// ResetIncluded resets all changes to the "included" field.
+func (m *PathMutation) ResetIncluded() {
+	m.included = nil
+}
+
+// Where appends a list predicates to the PathMutation builder.
+func (m *PathMutation) Where(ps ...predicate.Path) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *PathMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Path).
+func (m *PathMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PathMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.name != nil {
+		fields = append(fields, path.FieldName)
+	}
+	if m.abs_path != nil {
+		fields = append(fields, path.FieldAbsPath)
+	}
+	if m.exists != nil {
+		fields = append(fields, path.FieldExists)
+	}
+	if m.is_dir != nil {
+		fields = append(fields, path.FieldIsDir)
+	}
+	if m.included != nil {
+		fields = append(fields, path.FieldIncluded)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PathMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case path.FieldName:
+		return m.Name()
+	case path.FieldAbsPath:
+		return m.AbsPath()
+	case path.FieldExists:
+		return m.Exists()
+	case path.FieldIsDir:
+		return m.IsDir()
+	case path.FieldIncluded:
+		return m.Included()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PathMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case path.FieldName:
+		return m.OldName(ctx)
+	case path.FieldAbsPath:
+		return m.OldAbsPath(ctx)
+	case path.FieldExists:
+		return m.OldExists(ctx)
+	case path.FieldIsDir:
+		return m.OldIsDir(ctx)
+	case path.FieldIncluded:
+		return m.OldIncluded(ctx)
+	}
+	return nil, fmt.Errorf("unknown Path field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PathMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case path.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case path.FieldAbsPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAbsPath(v)
+		return nil
+	case path.FieldExists:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExists(v)
+		return nil
+	case path.FieldIsDir:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsDir(v)
+		return nil
+	case path.FieldIncluded:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncluded(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Path field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PathMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PathMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PathMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Path numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PathMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PathMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PathMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Path nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PathMutation) ResetField(name string) error {
+	switch name {
+	case path.FieldName:
+		m.ResetName()
+		return nil
+	case path.FieldAbsPath:
+		m.ResetAbsPath()
+		return nil
+	case path.FieldExists:
+		m.ResetExists()
+		return nil
+	case path.FieldIsDir:
+		m.ResetIsDir()
+		return nil
+	case path.FieldIncluded:
+		m.ResetIncluded()
+		return nil
+	}
+	return fmt.Errorf("unknown Path field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PathMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PathMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PathMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PathMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PathMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PathMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PathMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Path unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PathMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Path edge %s", name)
+}
+
+// RepositoryMutation represents an operation that mutates the Repository nodes in the graph.
+type RepositoryMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *int
+	name                  *string
+	created_at            *time.Time
+	provider              *repository.Provider
+	active                *bool
+	password              *string
+	max_size              *string
+	clearedFields         map[string]struct{}
+	backupschedule        *int
+	clearedbackupschedule bool
+	_path                 map[int]struct{}
+	removed_path          map[int]struct{}
+	cleared_path          bool
+	done                  bool
+	oldValue              func(context.Context) (*Repository, error)
+	predicates            []predicate.Repository
 }
 
 var _ ent.Mutation = (*RepositoryMutation)(nil)
@@ -385,6 +1301,99 @@ func (m *RepositoryMutation) ResetMaxSize() {
 	delete(m.clearedFields, repository.FieldMaxSize)
 }
 
+// SetBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by id.
+func (m *RepositoryMutation) SetBackupscheduleID(id int) {
+	m.backupschedule = &id
+}
+
+// ClearBackupschedule clears the "backupschedule" edge to the BackupSchedule entity.
+func (m *RepositoryMutation) ClearBackupschedule() {
+	m.clearedbackupschedule = true
+}
+
+// BackupscheduleCleared reports if the "backupschedule" edge to the BackupSchedule entity was cleared.
+func (m *RepositoryMutation) BackupscheduleCleared() bool {
+	return m.clearedbackupschedule
+}
+
+// BackupscheduleID returns the "backupschedule" edge ID in the mutation.
+func (m *RepositoryMutation) BackupscheduleID() (id int, exists bool) {
+	if m.backupschedule != nil {
+		return *m.backupschedule, true
+	}
+	return
+}
+
+// BackupscheduleIDs returns the "backupschedule" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// BackupscheduleID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) BackupscheduleIDs() (ids []int) {
+	if id := m.backupschedule; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBackupschedule resets all changes to the "backupschedule" edge.
+func (m *RepositoryMutation) ResetBackupschedule() {
+	m.backupschedule = nil
+	m.clearedbackupschedule = false
+}
+
+// AddPathIDs adds the "path" edge to the Path entity by ids.
+func (m *RepositoryMutation) AddPathIDs(ids ...int) {
+	if m._path == nil {
+		m._path = make(map[int]struct{})
+	}
+	for i := range ids {
+		m._path[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPath clears the "path" edge to the Path entity.
+func (m *RepositoryMutation) ClearPath() {
+	m.cleared_path = true
+}
+
+// PathCleared reports if the "path" edge to the Path entity was cleared.
+func (m *RepositoryMutation) PathCleared() bool {
+	return m.cleared_path
+}
+
+// RemovePathIDs removes the "path" edge to the Path entity by IDs.
+func (m *RepositoryMutation) RemovePathIDs(ids ...int) {
+	if m.removed_path == nil {
+		m.removed_path = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m._path, ids[i])
+		m.removed_path[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPath returns the removed IDs of the "path" edge to the Path entity.
+func (m *RepositoryMutation) RemovedPathIDs() (ids []int) {
+	for id := range m.removed_path {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PathIDs returns the "path" edge IDs in the mutation.
+func (m *RepositoryMutation) PathIDs() (ids []int) {
+	for id := range m._path {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPath resets all changes to the "path" edge.
+func (m *RepositoryMutation) ResetPath() {
+	m._path = nil
+	m.cleared_path = false
+	m.removed_path = nil
+}
+
 // Where appends a list predicates to the RepositoryMutation builder.
 func (m *RepositoryMutation) Where(ps ...predicate.Repository) {
 	m.predicates = append(m.predicates, ps...)
@@ -603,48 +1612,102 @@ func (m *RepositoryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RepositoryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.backupschedule != nil {
+		edges = append(edges, repository.EdgeBackupschedule)
+	}
+	if m._path != nil {
+		edges = append(edges, repository.EdgePath)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *RepositoryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case repository.EdgeBackupschedule:
+		if id := m.backupschedule; id != nil {
+			return []ent.Value{*id}
+		}
+	case repository.EdgePath:
+		ids := make([]ent.Value, 0, len(m._path))
+		for id := range m._path {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RepositoryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.removed_path != nil {
+		edges = append(edges, repository.EdgePath)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *RepositoryMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case repository.EdgePath:
+		ids := make([]ent.Value, 0, len(m.removed_path))
+		for id := range m.removed_path {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RepositoryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedbackupschedule {
+		edges = append(edges, repository.EdgeBackupschedule)
+	}
+	if m.cleared_path {
+		edges = append(edges, repository.EdgePath)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *RepositoryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case repository.EdgeBackupschedule:
+		return m.clearedbackupschedule
+	case repository.EdgePath:
+		return m.cleared_path
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *RepositoryMutation) ClearEdge(name string) error {
+	switch name {
+	case repository.EdgeBackupschedule:
+		m.ClearBackupschedule()
+		return nil
+	}
 	return fmt.Errorf("unknown Repository unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *RepositoryMutation) ResetEdge(name string) error {
+	switch name {
+	case repository.EdgeBackupschedule:
+		m.ResetBackupschedule()
+		return nil
+	case repository.EdgePath:
+		m.ResetPath()
+		return nil
+	}
 	return fmt.Errorf("unknown Repository edge %s", name)
 }

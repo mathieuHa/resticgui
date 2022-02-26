@@ -8,6 +8,50 @@ import (
 )
 
 var (
+	// BackupSchedulesColumns holds the columns for the "backup_schedules" table.
+	BackupSchedulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "choice", Type: field.TypeEnum, Enums: []string{"cron", "interval", "monthly", "weekly"}, Default: "cron"},
+		{Name: "repository_backupschedule", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// BackupSchedulesTable holds the schema information for the "backup_schedules" table.
+	BackupSchedulesTable = &schema.Table{
+		Name:       "backup_schedules",
+		Columns:    BackupSchedulesColumns,
+		PrimaryKey: []*schema.Column{BackupSchedulesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "backup_schedules_repositories_backupschedule",
+				Columns:    []*schema.Column{BackupSchedulesColumns[2]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PathsColumns holds the columns for the "paths" table.
+	PathsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "abs_path", Type: field.TypeString},
+		{Name: "exists", Type: field.TypeBool, Default: true},
+		{Name: "is_dir", Type: field.TypeBool},
+		{Name: "included", Type: field.TypeBool, Default: true},
+		{Name: "repository_path", Type: field.TypeInt, Nullable: true},
+	}
+	// PathsTable holds the schema information for the "paths" table.
+	PathsTable = &schema.Table{
+		Name:       "paths",
+		Columns:    PathsColumns,
+		PrimaryKey: []*schema.Column{PathsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "paths_repositories_path",
+				Columns:    []*schema.Column{PathsColumns[6]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// RepositoriesColumns holds the columns for the "repositories" table.
 	RepositoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -26,9 +70,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BackupSchedulesTable,
+		PathsTable,
 		RepositoriesTable,
 	}
 )
 
 func init() {
+	BackupSchedulesTable.ForeignKeys[0].RefTable = RepositoriesTable
+	PathsTable.ForeignKeys[0].RefTable = RepositoriesTable
 }

@@ -29,7 +29,8 @@ func (Repository) Fields() []ent.Field {
 // Edges of the Repository.
 func (Repository) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("repository", Repository.Type).
+		edge.To("backupschedule", BackupSchedule.Type).
 			Unique(),
+		edge.To("path", Path.Type),
 	}
 }

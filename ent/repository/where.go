@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
 )
 
@@ -623,6 +624,62 @@ func MaxSizeEqualFold(v string) predicate.Repository {
 func MaxSizeContainsFold(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldMaxSize), v))
+	})
+}
+
+// HasBackupschedule applies the HasEdge predicate on the "backupschedule" edge.
+func HasBackupschedule() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BackupscheduleTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackupscheduleTable, BackupscheduleColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBackupscheduleWith applies the HasEdge predicate on the "backupschedule" edge with a given conditions (other predicates).
+func HasBackupscheduleWith(preds ...predicate.BackupSchedule) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BackupscheduleInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackupscheduleTable, BackupscheduleColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPath applies the HasEdge predicate on the "path" edge.
+func HasPath() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PathTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PathTable, PathColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPathWith applies the HasEdge predicate on the "path" edge with a given conditions (other predicates).
+func HasPathWith(preds ...predicate.Path) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PathInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PathTable, PathColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

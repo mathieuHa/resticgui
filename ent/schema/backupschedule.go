@@ -22,7 +22,7 @@ func (BackupSchedule) Fields() []ent.Field {
 func (BackupSchedule) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("repository", Repository.Type).
-			Ref("backup_schedule").
+			Ref("backupschedule").
 			Unique().
 			// We add the "Required" method to the builder
 			// to make this edge required on entity creation.

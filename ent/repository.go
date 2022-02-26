@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -28,6 +29,43 @@ type Repository struct {
 	Password string `json:"-"`
 	// MaxSize holds the value of the "max_size" field.
 	MaxSize string `json:"max_size,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the RepositoryQuery when eager-loading is set.
+	Edges RepositoryEdges `json:"edges"`
+}
+
+// RepositoryEdges holds the relations/edges for other nodes in the graph.
+type RepositoryEdges struct {
+	// Backupschedule holds the value of the backupschedule edge.
+	Backupschedule *BackupSchedule `json:"backupschedule,omitempty"`
+	// Path holds the value of the path edge.
+	Path []*Path `json:"path,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// BackupscheduleOrErr returns the Backupschedule value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) BackupscheduleOrErr() (*BackupSchedule, error) {
+	if e.loadedTypes[0] {
+		if e.Backupschedule == nil {
+			// The edge backupschedule was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: backupschedule.Label}
+		}
+		return e.Backupschedule, nil
+	}
+	return nil, &NotLoadedError{edge: "backupschedule"}
+}
+
+// PathOrErr returns the Path value or an error if the edge
+// was not loaded in eager-loading.
+func (e RepositoryEdges) PathOrErr() ([]*Path, error) {
+	if e.loadedTypes[1] {
+		return e.Path, nil
+	}
+	return nil, &NotLoadedError{edge: "path"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -103,6 +141,16 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 		}
 	}
 	return nil
+}
+
+// QueryBackupschedule queries the "backupschedule" edge of the Repository entity.
+func (r *Repository) QueryBackupschedule() *BackupScheduleQuery {
+	return (&RepositoryClient{config: r.config}).QueryBackupschedule(r)
+}
+
+// QueryPath queries the "path" edge of the Repository entity.
+func (r *Repository) QueryPath() *PathQuery {
+	return (&RepositoryClient{config: r.config}).QueryPath(r)
 }
 
 // Update returns a builder for updating this Repository.

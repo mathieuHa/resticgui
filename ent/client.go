@@ -9,10 +9,13 @@ import (
 
 	"gitlab.com/resticgui/resticgui/ent/migrate"
 
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -20,6 +23,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// BackupSchedule is the client for interacting with the BackupSchedule builders.
+	BackupSchedule *BackupScheduleClient
+	// Path is the client for interacting with the Path builders.
+	Path *PathClient
 	// Repository is the client for interacting with the Repository builders.
 	Repository *RepositoryClient
 }
@@ -35,6 +42,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.BackupSchedule = NewBackupScheduleClient(c.config)
+	c.Path = NewPathClient(c.config)
 	c.Repository = NewRepositoryClient(c.config)
 }
 
@@ -67,9 +76,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:        ctx,
-		config:     cfg,
-		Repository: NewRepositoryClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		BackupSchedule: NewBackupScheduleClient(cfg),
+		Path:           NewPathClient(cfg),
+		Repository:     NewRepositoryClient(cfg),
 	}, nil
 }
 
@@ -87,16 +98,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:        ctx,
-		config:     cfg,
-		Repository: NewRepositoryClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		BackupSchedule: NewBackupScheduleClient(cfg),
+		Path:           NewPathClient(cfg),
+		Repository:     NewRepositoryClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Repository.
+//		BackupSchedule.
 //		Query().
 //		Count(ctx)
 //
@@ -119,7 +132,205 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.BackupSchedule.Use(hooks...)
+	c.Path.Use(hooks...)
 	c.Repository.Use(hooks...)
+}
+
+// BackupScheduleClient is a client for the BackupSchedule schema.
+type BackupScheduleClient struct {
+	config
+}
+
+// NewBackupScheduleClient returns a client for the BackupSchedule from the given config.
+func NewBackupScheduleClient(c config) *BackupScheduleClient {
+	return &BackupScheduleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `backupschedule.Hooks(f(g(h())))`.
+func (c *BackupScheduleClient) Use(hooks ...Hook) {
+	c.hooks.BackupSchedule = append(c.hooks.BackupSchedule, hooks...)
+}
+
+// Create returns a create builder for BackupSchedule.
+func (c *BackupScheduleClient) Create() *BackupScheduleCreate {
+	mutation := newBackupScheduleMutation(c.config, OpCreate)
+	return &BackupScheduleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BackupSchedule entities.
+func (c *BackupScheduleClient) CreateBulk(builders ...*BackupScheduleCreate) *BackupScheduleCreateBulk {
+	return &BackupScheduleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BackupSchedule.
+func (c *BackupScheduleClient) Update() *BackupScheduleUpdate {
+	mutation := newBackupScheduleMutation(c.config, OpUpdate)
+	return &BackupScheduleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BackupScheduleClient) UpdateOne(bs *BackupSchedule) *BackupScheduleUpdateOne {
+	mutation := newBackupScheduleMutation(c.config, OpUpdateOne, withBackupSchedule(bs))
+	return &BackupScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BackupScheduleClient) UpdateOneID(id int) *BackupScheduleUpdateOne {
+	mutation := newBackupScheduleMutation(c.config, OpUpdateOne, withBackupScheduleID(id))
+	return &BackupScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BackupSchedule.
+func (c *BackupScheduleClient) Delete() *BackupScheduleDelete {
+	mutation := newBackupScheduleMutation(c.config, OpDelete)
+	return &BackupScheduleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *BackupScheduleClient) DeleteOne(bs *BackupSchedule) *BackupScheduleDeleteOne {
+	return c.DeleteOneID(bs.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *BackupScheduleClient) DeleteOneID(id int) *BackupScheduleDeleteOne {
+	builder := c.Delete().Where(backupschedule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BackupScheduleDeleteOne{builder}
+}
+
+// Query returns a query builder for BackupSchedule.
+func (c *BackupScheduleClient) Query() *BackupScheduleQuery {
+	return &BackupScheduleQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a BackupSchedule entity by its id.
+func (c *BackupScheduleClient) Get(ctx context.Context, id int) (*BackupSchedule, error) {
+	return c.Query().Where(backupschedule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BackupScheduleClient) GetX(ctx context.Context, id int) *BackupSchedule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a BackupSchedule.
+func (c *BackupScheduleClient) QueryRepository(bs *BackupSchedule) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := bs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(backupschedule.Table, backupschedule.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, backupschedule.RepositoryTable, backupschedule.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(bs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BackupScheduleClient) Hooks() []Hook {
+	return c.hooks.BackupSchedule
+}
+
+// PathClient is a client for the Path schema.
+type PathClient struct {
+	config
+}
+
+// NewPathClient returns a client for the Path from the given config.
+func NewPathClient(c config) *PathClient {
+	return &PathClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `path.Hooks(f(g(h())))`.
+func (c *PathClient) Use(hooks ...Hook) {
+	c.hooks.Path = append(c.hooks.Path, hooks...)
+}
+
+// Create returns a create builder for Path.
+func (c *PathClient) Create() *PathCreate {
+	mutation := newPathMutation(c.config, OpCreate)
+	return &PathCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Path entities.
+func (c *PathClient) CreateBulk(builders ...*PathCreate) *PathCreateBulk {
+	return &PathCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Path.
+func (c *PathClient) Update() *PathUpdate {
+	mutation := newPathMutation(c.config, OpUpdate)
+	return &PathUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PathClient) UpdateOne(pa *Path) *PathUpdateOne {
+	mutation := newPathMutation(c.config, OpUpdateOne, withPath(pa))
+	return &PathUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PathClient) UpdateOneID(id int) *PathUpdateOne {
+	mutation := newPathMutation(c.config, OpUpdateOne, withPathID(id))
+	return &PathUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Path.
+func (c *PathClient) Delete() *PathDelete {
+	mutation := newPathMutation(c.config, OpDelete)
+	return &PathDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *PathClient) DeleteOne(pa *Path) *PathDeleteOne {
+	return c.DeleteOneID(pa.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *PathClient) DeleteOneID(id int) *PathDeleteOne {
+	builder := c.Delete().Where(path.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PathDeleteOne{builder}
+}
+
+// Query returns a query builder for Path.
+func (c *PathClient) Query() *PathQuery {
+	return &PathQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Path entity by its id.
+func (c *PathClient) Get(ctx context.Context, id int) (*Path, error) {
+	return c.Query().Where(path.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PathClient) GetX(ctx context.Context, id int) *Path {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PathClient) Hooks() []Hook {
+	return c.hooks.Path
 }
 
 // RepositoryClient is a client for the Repository schema.
@@ -205,6 +416,38 @@ func (c *RepositoryClient) GetX(ctx context.Context, id int) *Repository {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryBackupschedule queries the backupschedule edge of a Repository.
+func (c *RepositoryClient) QueryBackupschedule(r *Repository) *BackupScheduleQuery {
+	query := &BackupScheduleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(backupschedule.Table, backupschedule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupscheduleTable, repository.BackupscheduleColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPath queries the path edge of a Repository.
+func (c *RepositoryClient) QueryPath(r *Repository) *PathQuery {
+	query := &PathQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(path.Table, path.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathTable, repository.PathColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

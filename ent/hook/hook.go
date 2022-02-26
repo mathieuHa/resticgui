@@ -9,6 +9,32 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
+// The BackupScheduleFunc type is an adapter to allow the use of ordinary
+// function as BackupSchedule mutator.
+type BackupScheduleFunc func(context.Context, *ent.BackupScheduleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BackupScheduleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BackupScheduleMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BackupScheduleMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The PathFunc type is an adapter to allow the use of ordinary
+// function as Path mutator.
+type PathFunc func(context.Context, *ent.PathMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PathFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PathMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PathMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The RepositoryFunc type is an adapter to allow the use of ordinary
 // function as Repository mutator.
 type RepositoryFunc func(context.Context, *ent.RepositoryMutation) (ent.Value, error)

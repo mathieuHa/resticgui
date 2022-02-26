@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/ent/schema"
 )
@@ -13,6 +14,26 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	backupscheduleFields := schema.BackupSchedule{}.Fields()
+	_ = backupscheduleFields
+	pathFields := schema.Path{}.Fields()
+	_ = pathFields
+	// pathDescName is the schema descriptor for name field.
+	pathDescName := pathFields[0].Descriptor()
+	// path.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	path.NameValidator = pathDescName.Validators[0].(func(string) error)
+	// pathDescAbsPath is the schema descriptor for abs_path field.
+	pathDescAbsPath := pathFields[1].Descriptor()
+	// path.AbsPathValidator is a validator for the "abs_path" field. It is called by the builders before save.
+	path.AbsPathValidator = pathDescAbsPath.Validators[0].(func(string) error)
+	// pathDescExists is the schema descriptor for exists field.
+	pathDescExists := pathFields[2].Descriptor()
+	// path.DefaultExists holds the default value on creation for the exists field.
+	path.DefaultExists = pathDescExists.Default.(bool)
+	// pathDescIncluded is the schema descriptor for included field.
+	pathDescIncluded := pathFields[4].Descriptor()
+	// path.DefaultIncluded holds the default value on creation for the included field.
+	path.DefaultIncluded = pathDescIncluded.Default.(bool)
 	repositoryFields := schema.Repository{}.Fields()
 	_ = repositoryFields
 	// repositoryDescName is the schema descriptor for name field.

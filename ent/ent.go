@@ -8,6 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -29,7 +31,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		repository.Table: repository.ValidColumn,
+		backupschedule.Table: backupschedule.ValidColumn,
+		path.Table:           path.ValidColumn,
+		repository.Table:     repository.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

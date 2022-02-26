@@ -6,5 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// BackupSchedule is the predicate function for backupschedule builders.
+type BackupSchedule func(*sql.Selector)
+
+// Path is the predicate function for path builders.
+type Path func(*sql.Selector)
+
 // Repository is the predicate function for repository builders.
 type Repository func(*sql.Selector)

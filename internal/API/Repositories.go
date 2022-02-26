@@ -1,6 +1,7 @@
 package API
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,8 +9,6 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 const entity = "repository "
@@ -20,6 +19,7 @@ const errNotBind = entity + "bind error"
 const errUpdate = entity + "update error"
 const errNameUsed = entity + "name already in use"
 const errCreate = entity + "creation failed"
+const errQuery = entity + "query failed"
 
 // QueryRepositories godoc
 // @Summary get all repositories
@@ -30,10 +30,14 @@ const errCreate = entity + "creation failed"
 // @Success 200 {array} Models.Repository
 // @Router /repositories [get]
 func QueryRepositories(c *gin.Context) {
-	repositories := []Models.Repository{}
 
 	db := Database.Connect()
-	db.Preload(clause.Associations).Find(&repositories)
+	repositories, err := db.Repository.Query().All(context.Background())
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errQuery})
+	}
+	// db.Preload(clause.Associations).Find(&repositories)
 
 	c.IndentedJSON(http.StatusOK, repositories)
 }
@@ -58,15 +62,15 @@ func GetRepository(c *gin.Context) {
 
 	var repositories Models.Repository
 
-	db := Database.Connect()
-	result := db.Preload(clause.Associations).Find(&repositories, id)
+	// db := Database.Connect()
+	// result := db.Preload(clause.Associations).Find(&repositories, id)
 
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-		return
-	}
-	// check all path and update entity in memory if path changed
-	checkAllPath(repositories.Paths)
+	// if result.RowsAffected == 0 { // Not found entity by id
+	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	// 	return
+	// }
+	// // check all path and update entity in memory if path changed
+	// checkAllPath(repositories.Paths)
 
 	c.IndentedJSON(http.StatusOK, repositories)
 }
@@ -91,23 +95,23 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	db := Database.Connect()
-	result := db.Create(&repository) // pass pointer of data to Create
+	// db := Database.Connect()
+	// result := db.Create(&repository) // pass pointer of data to Create
 
-	if result.Error != nil {
-		if result.Error != nil {
-			log.Debug().Err(result.Error)
-			err := db.Find(&repository).Error
+	// if result.Error != nil {
+	// 	if result.Error != nil {
+	// 		log.Debug().Err(result.Error)
+	// 		err := db.Find(&repository).Error
 
-			if err == nil {
-				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errNameUsed})
-				return
-			} else {
-				c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate})
-				return
-			}
-		}
-	}
+	// 		if err == nil {
+	// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errNameUsed})
+	// 			return
+	// 		} else {
+	// 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate})
+	// 			return
+	// 		}
+	// 	}
+	// }
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
@@ -133,44 +137,44 @@ func EditRepository(c *gin.Context) {
 
 	var editedRepository Models.Repository
 
-	if err := c.BindJSON(&editedRepository); err != nil {
-		log.Info().Err(err).Msg(errNotBind)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	// if err := c.BindJSON(&editedRepository); err != nil {
+	// 	log.Info().Err(err).Msg(errNotBind)
+	// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
-	var repository Models.Repository
+	// var repository Models.Repository
 
-	db := Database.Connect()
-	result := db.Preload(clause.Associations).Find(&repository, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		log.Info().Msg(errNotFound)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-		return
-	}
+	// db := Database.Connect()
+	// result := db.Preload(clause.Associations).Find(&repository, id)
+	// if result.RowsAffected == 0 { // Not found entity by id
+	// 	log.Info().Msg(errNotFound)
+	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	// 	return
+	// }
 
-	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Paths").Replace(&editedRepository.Paths)
-	db.Model(&repository.B2Provider).Updates(&editedRepository.B2Provider)
-	db.Model(&repository.AWSS3Provider).Updates(&editedRepository.AWSS3Provider)
-	db.Model(&repository.LocalProvider).Updates(&editedRepository.LocalProvider)
-	db.Model(&repository.MinioS3Provider).Updates(&editedRepository.MinioS3Provider)
-	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
-	db.Model(&repository.BackupPolicy).Updates(&editedRepository.BackupPolicy)
-	result = db.Model(repository).Updates(&editedRepository)
-	if result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
-		log.Info().Err(result.Error).Msg(errUpdate)
-		return
-	}
+	// db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Paths").Replace(&editedRepository.Paths)
+	// db.Model(&repository.B2Provider).Updates(&editedRepository.B2Provider)
+	// db.Model(&repository.AWSS3Provider).Updates(&editedRepository.AWSS3Provider)
+	// db.Model(&repository.LocalProvider).Updates(&editedRepository.LocalProvider)
+	// db.Model(&repository.MinioS3Provider).Updates(&editedRepository.MinioS3Provider)
+	// db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
+	// db.Model(&repository.BackupPolicy).Updates(&editedRepository.BackupPolicy)
+	// result = db.Model(repository).Updates(&editedRepository)
+	// if result.Error != nil {
+	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
+	// 	log.Info().Err(result.Error).Msg(errUpdate)
+	// 	return
+	// }
 
-	var updatedRepository Models.Repository
+	// var updatedRepository Models.Repository
 
-	result = db.Preload(clause.Associations).Find(&updatedRepository, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-		return
-	}
-	c.IndentedJSON(http.StatusOK, updatedRepository)
+	// result = db.Preload(clause.Associations).Find(&updatedRepository, id)
+	// if result.RowsAffected == 0 { // Not found entity by id
+	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	// 	return
+	// }
+	c.IndentedJSON(http.StatusOK, editedRepository)
 }
 
 // RemoveRepository godoc
@@ -193,22 +197,22 @@ func RemoveRepository(c *gin.Context) {
 		return
 	}
 
-	var repository Models.Repository
+	// var repository Models.Repository
 
-	db := Database.Connect()
-	result := db.Find(&repository, id)
-	if result.RowsAffected == 0 {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-		return
-	}
+	// db := Database.Connect()
+	// result := db.Find(&repository, id)
+	// if result.RowsAffected == 0 {
+	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	// 	return
+	// }
 
-	removeScheduledBackup(repository)
+	// removeScheduledBackup(repository)
 
-	result = db.Select(clause.Associations).Delete(&repository, id)
-	if result.Error != nil {
-		log.Error().Err(result.Error)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted})
-		return
-	}
+	// result = db.Select(clause.Associations).Delete(&repository, id)
+	// if result.Error != nil {
+	// 	log.Error().Err(result.Error)
+	// 	c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted})
+	// 	return
+	// }
 	c.Status(http.StatusNoContent)
 }

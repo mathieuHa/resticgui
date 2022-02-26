@@ -2,84 +2,81 @@ package API
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 )
 
-func QueryBackupSchedule(c *gin.Context) {
-	var schedules []Models.BackupSchedule
+// func QueryBackupSchedule(c *gin.Context) {
+// 	var schedules []Models.BackupSchedule
 
-	db := Database.Connect()
+// 	db := Database.Connect()
 
-	db.Find(&schedules)
+// 	db.Find(&schedules)
 
-	c.IndentedJSON(http.StatusOK, schedules)
-}
+// 	c.IndentedJSON(http.StatusOK, schedules)
+// }
 
-func GetBackupSchedule(c *gin.Context) {
-	id := c.Param("id")
+// func GetBackupSchedule(c *gin.Context) {
+// 	id := c.Param("id")
 
-	var schedule Models.BackupSchedule
+// 	var schedule Models.BackupSchedule
 
-	db := Database.Connect()
+// 	db := Database.Connect()
 
-	result := db.Find(&schedule, "id = ?", id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "schedule not found"})
-		return
-	}
+// 	result := db.Find(&schedule, "id = ?", id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "schedule not found"})
+// 		return
+// 	}
 
-	c.IndentedJSON(http.StatusOK, schedule)
-}
+// 	c.IndentedJSON(http.StatusOK, schedule)
+// }
 
-func UpdateBackupSchedule(c *gin.Context) {
-	id := c.Param("id") // id of the repository
+// func UpdateBackupSchedule(c *gin.Context) {
+// 	id := c.Param("id") // id of the repository
 
-	var repository Models.Repository
+// 	var repository Models.Repository
 
-	db := Database.Connect()
+// 	db := Database.Connect()
 
-	result := db.Preload("BackupSchedule").Find(&repository, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
-		return
-	}
+// 	result := db.Preload("BackupSchedule").Find(&repository, id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+// 		return
+// 	}
 
-	// Here we add repository schedule
-	//var schedule Models.BackupSchedule
-	if err := c.BindJSON(&repository.BackupSchedule); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bind error"})
-		log.Info().Err(err).Msg("Bind Error schedule")
-		return
-	}
+// 	// Here we add repository schedule
+// 	//var schedule Models.BackupSchedule
+// 	if err := c.BindJSON(&repository.BackupSchedule); err != nil {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bind error"})
+// 		log.Info().Err(err).Msg("Bind Error schedule")
+// 		return
+// 	}
 
-	if !validSchedule(repository.BackupSchedule) {
-		// we check the schedule can be parsed
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "schedule not valid"})
-		log.Warn().Msg("schedule not valid")
-		return
-	}
-	if repository.Active {
-		// we add the scheduled backup
-		resultAdd := addScheduledBackup(&repository)
-		if !resultAdd {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "start cron error"})
-			log.Warn().Msg("start cron error")
-			return
-		}
-	}
+// 	if !validSchedule(repository.BackupSchedule) {
+// 		// we check the schedule can be parsed
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "schedule not valid"})
+// 		log.Warn().Msg("schedule not valid")
+// 		return
+// 	}
+// 	if repository.Active {
+// 		// we add the scheduled backup
+// 		resultAdd := addScheduledBackup(&repository)
+// 		if !resultAdd {
+// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "start cron error"})
+// 			log.Warn().Msg("start cron error")
+// 			return
+// 		}
+// 	}
 
-	db.Model(&repository).Association("BackupScheduled").Replace(&repository.BackupSchedule)
+// 	db.Model(&repository).Association("BackupScheduled").Replace(&repository.BackupSchedule)
 
-	// Check if the file exist ?
+// 	// Check if the file exist ?
 
-	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
-}
+// 	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
+// }
 
 func validSchedule(schedule Models.BackupSchedule) bool {
 	if schedule.Choice == "cron" {
@@ -174,16 +171,16 @@ func addScheduledBackup(repository *Models.Repository) bool {
 }
 
 func CreateAllScheduledBackup() {
-	var repositories []Models.Repository
+	// var repositories []Models.Repository
 
-	db := Database.Connect()
+	// db := Database.Connect()
 
-	db.Where("active = ?", true).Preload("BackupSchedule").Find(&repositories)
+	// db.Where("active = ?", true).Preload("BackupSchedule").Find(&repositories)
 
-	for _, repo := range repositories {
-		log.Debug().Msgf("start repos %v", repo.ID)
-		addScheduledBackup(&repo)
-	}
+	// for _, repo := range repositories {
+	// 	log.Debug().Msgf("start repos %v", repo.ID)
+	// 	addScheduledBackup(&repo)
+	// }
 }
 
 func removeScheduledBackup(repository Models.Repository) {

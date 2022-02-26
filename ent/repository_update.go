@@ -10,6 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
@@ -101,9 +103,70 @@ func (ru *RepositoryUpdate) ClearMaxSize() *RepositoryUpdate {
 	return ru
 }
 
+// SetBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID.
+func (ru *RepositoryUpdate) SetBackupscheduleID(id int) *RepositoryUpdate {
+	ru.mutation.SetBackupscheduleID(id)
+	return ru
+}
+
+// SetNillableBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableBackupscheduleID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetBackupscheduleID(*id)
+	}
+	return ru
+}
+
+// SetBackupschedule sets the "backupschedule" edge to the BackupSchedule entity.
+func (ru *RepositoryUpdate) SetBackupschedule(b *BackupSchedule) *RepositoryUpdate {
+	return ru.SetBackupscheduleID(b.ID)
+}
+
+// AddPathIDs adds the "path" edge to the Path entity by IDs.
+func (ru *RepositoryUpdate) AddPathIDs(ids ...int) *RepositoryUpdate {
+	ru.mutation.AddPathIDs(ids...)
+	return ru
+}
+
+// AddPath adds the "path" edges to the Path entity.
+func (ru *RepositoryUpdate) AddPath(p ...*Path) *RepositoryUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ru.AddPathIDs(ids...)
+}
+
 // Mutation returns the RepositoryMutation object of the builder.
 func (ru *RepositoryUpdate) Mutation() *RepositoryMutation {
 	return ru.mutation
+}
+
+// ClearBackupschedule clears the "backupschedule" edge to the BackupSchedule entity.
+func (ru *RepositoryUpdate) ClearBackupschedule() *RepositoryUpdate {
+	ru.mutation.ClearBackupschedule()
+	return ru
+}
+
+// ClearPath clears all "path" edges to the Path entity.
+func (ru *RepositoryUpdate) ClearPath() *RepositoryUpdate {
+	ru.mutation.ClearPath()
+	return ru
+}
+
+// RemovePathIDs removes the "path" edge to Path entities by IDs.
+func (ru *RepositoryUpdate) RemovePathIDs(ids ...int) *RepositoryUpdate {
+	ru.mutation.RemovePathIDs(ids...)
+	return ru
+}
+
+// RemovePath removes "path" edges to Path entities.
+func (ru *RepositoryUpdate) RemovePath(p ...*Path) *RepositoryUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ru.RemovePathIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -251,6 +314,95 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: repository.FieldMaxSize,
 		})
 	}
+	if ru.mutation.BackupscheduleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackupscheduleTable,
+			Columns: []string{repository.BackupscheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.BackupscheduleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackupscheduleTable,
+			Columns: []string{repository.BackupscheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.PathCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.RemovedPathIDs(); len(nodes) > 0 && !ru.mutation.PathCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.PathIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{repository.Label}
@@ -344,9 +496,70 @@ func (ruo *RepositoryUpdateOne) ClearMaxSize() *RepositoryUpdateOne {
 	return ruo
 }
 
+// SetBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID.
+func (ruo *RepositoryUpdateOne) SetBackupscheduleID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetBackupscheduleID(id)
+	return ruo
+}
+
+// SetNillableBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableBackupscheduleID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetBackupscheduleID(*id)
+	}
+	return ruo
+}
+
+// SetBackupschedule sets the "backupschedule" edge to the BackupSchedule entity.
+func (ruo *RepositoryUpdateOne) SetBackupschedule(b *BackupSchedule) *RepositoryUpdateOne {
+	return ruo.SetBackupscheduleID(b.ID)
+}
+
+// AddPathIDs adds the "path" edge to the Path entity by IDs.
+func (ruo *RepositoryUpdateOne) AddPathIDs(ids ...int) *RepositoryUpdateOne {
+	ruo.mutation.AddPathIDs(ids...)
+	return ruo
+}
+
+// AddPath adds the "path" edges to the Path entity.
+func (ruo *RepositoryUpdateOne) AddPath(p ...*Path) *RepositoryUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ruo.AddPathIDs(ids...)
+}
+
 // Mutation returns the RepositoryMutation object of the builder.
 func (ruo *RepositoryUpdateOne) Mutation() *RepositoryMutation {
 	return ruo.mutation
+}
+
+// ClearBackupschedule clears the "backupschedule" edge to the BackupSchedule entity.
+func (ruo *RepositoryUpdateOne) ClearBackupschedule() *RepositoryUpdateOne {
+	ruo.mutation.ClearBackupschedule()
+	return ruo
+}
+
+// ClearPath clears all "path" edges to the Path entity.
+func (ruo *RepositoryUpdateOne) ClearPath() *RepositoryUpdateOne {
+	ruo.mutation.ClearPath()
+	return ruo
+}
+
+// RemovePathIDs removes the "path" edge to Path entities by IDs.
+func (ruo *RepositoryUpdateOne) RemovePathIDs(ids ...int) *RepositoryUpdateOne {
+	ruo.mutation.RemovePathIDs(ids...)
+	return ruo
+}
+
+// RemovePath removes "path" edges to Path entities.
+func (ruo *RepositoryUpdateOne) RemovePath(p ...*Path) *RepositoryUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ruo.RemovePathIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -517,6 +730,95 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 			Type:   field.TypeString,
 			Column: repository.FieldMaxSize,
 		})
+	}
+	if ruo.mutation.BackupscheduleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackupscheduleTable,
+			Columns: []string{repository.BackupscheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.BackupscheduleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackupscheduleTable,
+			Columns: []string{repository.BackupscheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.PathCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.RemovedPathIDs(); len(nodes) > 0 && !ruo.mutation.PathCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.PathIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Repository{config: ruo.config}
 	_spec.Assign = _node.assignValues

@@ -10,6 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -94,6 +96,40 @@ func (rc *RepositoryCreate) SetNillableMaxSize(s *string) *RepositoryCreate {
 		rc.SetMaxSize(*s)
 	}
 	return rc
+}
+
+// SetBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID.
+func (rc *RepositoryCreate) SetBackupscheduleID(id int) *RepositoryCreate {
+	rc.mutation.SetBackupscheduleID(id)
+	return rc
+}
+
+// SetNillableBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableBackupscheduleID(id *int) *RepositoryCreate {
+	if id != nil {
+		rc = rc.SetBackupscheduleID(*id)
+	}
+	return rc
+}
+
+// SetBackupschedule sets the "backupschedule" edge to the BackupSchedule entity.
+func (rc *RepositoryCreate) SetBackupschedule(b *BackupSchedule) *RepositoryCreate {
+	return rc.SetBackupscheduleID(b.ID)
+}
+
+// AddPathIDs adds the "path" edge to the Path entity by IDs.
+func (rc *RepositoryCreate) AddPathIDs(ids ...int) *RepositoryCreate {
+	rc.mutation.AddPathIDs(ids...)
+	return rc
+}
+
+// AddPath adds the "path" edges to the Path entity.
+func (rc *RepositoryCreate) AddPath(p ...*Path) *RepositoryCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return rc.AddPathIDs(ids...)
 }
 
 // Mutation returns the RepositoryMutation object of the builder.
@@ -284,6 +320,44 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 			Column: repository.FieldMaxSize,
 		})
 		_node.MaxSize = value
+	}
+	if nodes := rc.mutation.BackupscheduleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.BackupscheduleTable,
+			Columns: []string{repository.BackupscheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.PathIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.PathTable,
+			Columns: []string{repository.PathColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
