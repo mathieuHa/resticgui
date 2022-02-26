@@ -203,6 +203,84 @@ definitions:
     required:
     - name
     type: object
+  ent.BackupSchedule:
+    properties:
+      choice:
+        description: Choice holds the value of the "choice" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.BackupScheduleEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the BackupScheduleQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+    type: object
+  ent.BackupScheduleEdges:
+    properties:
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.Path:
+    properties:
+      abs_path:
+        description: AbsPath holds the value of the "abs_path" field.
+        type: string
+      exists:
+        description: Exists holds the value of the "exists" field.
+        type: boolean
+      id:
+        description: ID of the ent.
+        type: integer
+      included:
+        description: Included holds the value of the "included" field.
+        type: boolean
+      is_dir:
+        description: IsDir holds the value of the "is_dir" field.
+        type: boolean
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+    type: object
+  ent.Repository:
+    properties:
+      active:
+        description: Active holds the value of the "active" field.
+        type: boolean
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.RepositoryEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the RepositoryQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+      max_size:
+        description: MaxSize holds the value of the "max_size" field.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      provider:
+        description: Provider holds the value of the "provider" field.
+        type: string
+    type: object
+  ent.RepositoryEdges:
+    properties:
+      backupschedule:
+        $ref: '#/definitions/ent.BackupSchedule'
+        description: Backupschedule holds the value of the backupschedule edge.
+      path:
+        description: Path holds the value of the path edge.
+        items:
+          $ref: '#/definitions/ent.Path'
+        type: array
+    type: object
 info:
   contact: {}
 paths:
@@ -266,7 +344,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Models.Repository'
+              $ref: '#/definitions/ent.Repository'
             type: array
       summary: get all repositories
     post:
@@ -286,7 +364,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/Models.Repository'
+            $ref: '#/definitions/ent.Repository'
         "400":
           description: Bad Request
           schema:
@@ -341,7 +419,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Models.Repository'
+            $ref: '#/definitions/ent.Repository'
         "404":
           description: Not Found
           schema:
@@ -362,14 +440,14 @@ paths:
         name: repository
         required: true
         schema:
-          $ref: '#/definitions/Models.Repository'
+          $ref: '#/definitions/ent.Repository'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Models.Repository'
+            $ref: '#/definitions/ent.Repository'
         "400":
           description: Bad Request
           schema:

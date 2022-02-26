@@ -104,7 +104,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Models.Repository"
+                                "$ref": "#/definitions/ent.Repository"
                             }
                         }
                     }
@@ -134,7 +134,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     },
                     "400": {
@@ -175,7 +175,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     },
                     "404": {
@@ -251,7 +251,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     }
                 ],
@@ -259,7 +259,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     },
                     "400": {
@@ -585,6 +585,110 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "ent.BackupSchedule": {
+            "type": "object",
+            "properties": {
+                "choice": {
+                    "description": "Choice holds the value of the \"choice\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the BackupScheduleQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.BackupScheduleEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.BackupScheduleEdges": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.Path": {
+            "type": "object",
+            "properties": {
+                "abs_path": {
+                    "description": "AbsPath holds the value of the \"abs_path\" field.",
+                    "type": "string"
+                },
+                "exists": {
+                    "description": "Exists holds the value of the \"exists\" field.",
+                    "type": "boolean"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "included": {
+                    "description": "Included holds the value of the \"included\" field.",
+                    "type": "boolean"
+                },
+                "is_dir": {
+                    "description": "IsDir holds the value of the \"is_dir\" field.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.Repository": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "description": "Active holds the value of the \"active\" field.",
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the RepositoryQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.RepositoryEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "max_size": {
+                    "description": "MaxSize holds the value of the \"max_size\" field.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                },
+                "provider": {
+                    "description": "Provider holds the value of the \"provider\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.RepositoryEdges": {
+            "type": "object",
+            "properties": {
+                "backupschedule": {
+                    "description": "Backupschedule holds the value of the backupschedule edge.",
+                    "$ref": "#/definitions/ent.BackupSchedule"
+                },
+                "path": {
+                    "description": "Path holds the value of the path edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Path"
+                    }
                 }
             }
         }

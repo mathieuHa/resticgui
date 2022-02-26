@@ -29,7 +29,7 @@ const errQuery = entity + "query failed"
 // @Description returns all respositories
 // @Accept json
 // @Produce json
-// @Success 200 {array} Models.Repository
+// @Success 200 {array} ent.Repository
 // @Router /repositories [get]
 func QueryRepositories(c *gin.Context) {
 
@@ -58,7 +58,7 @@ func QueryRepositories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Repository ID"
-// @Success 200 {object} Models.Repository
+// @Success 200 {object} ent.Repository
 // @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [get]
 func GetRepository(c *gin.Context) {
@@ -79,7 +79,7 @@ func GetRepository(c *gin.Context) {
 		WithBackupschedule().
 		WithPath().
 		Where(repository.ID(newId)).
-		First(context.Background())
+		Only(context.Background())
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
@@ -99,7 +99,7 @@ func GetRepository(c *gin.Context) {
 // @Accept json
 // @Param repository body Models.Repository true "Add account"
 // @Produce json
-// @Success 201 {object} Models.Repository
+// @Success 201 {object} ent.Repository
 // @Failure 400 {string} errNameUsed
 // @Failure 500 {string} errCreate
 // @Router /repositories [post]
@@ -157,10 +157,6 @@ func CreateRepository(c *gin.Context) {
 		}
 	}
 
-	// _, err = db.Path.
-	// 	Create().
-	// 	Save(ctx)
-
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
@@ -172,7 +168,7 @@ func CreateRepository(c *gin.Context) {
 		WithBackupschedule().
 		WithPath().
 		Where(repository.ID(newRepository.ID)).
-		First(ctx)
+		Only(ctx)
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
@@ -190,8 +186,8 @@ func CreateRepository(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Repository ID"
-// @Param repository body Models.Repository true "Edit account"
-// @Success 200 {object} Models.Repository
+// @Param repository body ent.Repository true "Edit account"
+// @Success 200 {object} ent.Repository
 // @Failure 400 {string} errBindRepository
 // @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [patch]
@@ -240,6 +236,44 @@ func EditRepository(c *gin.Context) {
 			log.Err(err).Msgf("error: backup %v", errUpdate)
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 			return
+		}
+	}
+
+	// Remove old path edges
+	_, err = db.Repository.
+		UpdateOneID(newId).RemovePath(db.Repository.Query().QueryPath().AllX(ctx)...).Save(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+		return
+	}
+
+	// Update path edges
+	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
+		for _, p := range repo.Edges.Path {
+			// ID has not been provided if p.ID == 0 -> new path
+			path, err := db.Path.
+				Create().
+				SetAbsPath(p.AbsPath).
+				SetIsDir(p.IsDir).
+				SetExists(p.Exists).
+				SetIncluded(p.Included).
+				SetName(p.Name).
+				Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
+			_, err = db.Repository.
+				UpdateOneID(newId).AddPath(path).Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
+			// }
+
 		}
 	}
 
