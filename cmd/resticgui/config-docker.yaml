@@ -3,7 +3,7 @@ logs:
   level: 1
 
 db:
-  name: resticgui.db
+  name: /opt/db/resticgui.db
 
 server:
   ip: "0.0.0.0"

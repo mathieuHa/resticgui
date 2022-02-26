@@ -63,4 +63,6 @@ COPY --from=BuilderRestic /restic /usr/bin/restic
 COPY --from=BuilderWeb /front/build front
 COPY --from=BuilderResticGui /resticgui resticgui
 
+RUN mkdir /opt/db
+
 CMD ["/opt/resticgui"]
