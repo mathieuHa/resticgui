@@ -176,6 +176,7 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
+	newId, _ := strconv.Atoi(id)
 	var repo ent.Repository
 
 	if err := c.BindJSON(&repo); err != nil {
@@ -189,14 +190,14 @@ func EditRepository(c *gin.Context) {
 
 	// Update repository
 	_, err := db.Repository.
-		UpdateOneID(repo.ID).
+		UpdateOneID(newId).
 		SetName(repo.Name).
 		SetMaxSize(repo.MaxSize).
 		SetActive(repo.Active).
 		SetProvider(repo.Provider).
 		Save(ctx)
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
+		log.Err(err).Msgf("error: repository %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
@@ -208,7 +209,7 @@ func EditRepository(c *gin.Context) {
 			SetChoice(repo.Edges.Backupschedule.Choice).
 			Save(ctx)
 		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
+			log.Err(err).Msgf("error: backup %v", errUpdate)
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 			return
 		}
@@ -219,7 +220,7 @@ func EditRepository(c *gin.Context) {
 		Query().
 		WithBackupschedule().
 		WithPath().
-		Where(repository.ID(repo.ID)).
+		Where(repository.ID(newId)).
 		First(ctx)
 
 	if err != nil {
