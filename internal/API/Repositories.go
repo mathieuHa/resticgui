@@ -132,6 +132,34 @@ func CreateRepository(c *gin.Context) {
 		Create().
 		SetRepository(newRepository).
 		Save(ctx)
+	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
+		for _, p := range repo.Edges.Path {
+			path, err := db.Path.
+				Create().
+				SetAbsPath(p.AbsPath).
+				SetIsDir(p.IsDir).
+				SetExists(p.Exists).
+				SetIncluded(p.Included).
+				SetName(p.Name).
+				Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
+			_, err = db.Repository.
+				UpdateOneID(newRepository.ID).AddPath(path).Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
+		}
+	}
+
+	// _, err = db.Path.
+	// 	Create().
+	// 	Save(ctx)
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)

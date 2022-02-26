@@ -3,12 +3,11 @@ package Database
 import (
 	"context"
 
-	"gitlab.com/resticgui/resticgui/ent"
-
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
+	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func Connect() (_db *ent.Client) {
