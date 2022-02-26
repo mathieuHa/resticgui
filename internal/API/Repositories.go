@@ -32,10 +32,13 @@ const errQuery = entity + "query failed"
 func QueryRepositories(c *gin.Context) {
 
 	db := Database.Connect()
+	defer db.Close()
 	repositories, err := db.Repository.Query().All(context.Background())
 
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errQuery})
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errQuery, "message": err.Error()})
+		return
 	}
 	// db.Preload(clause.Associations).Find(&repositories)
 

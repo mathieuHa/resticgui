@@ -17,7 +17,6 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/commands"
 )
 
-
 var (
 	server *http.Server
 )
@@ -45,7 +44,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	Database.Migrate()
+	Database.Connect()
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
