@@ -3,9 +3,11 @@ package API
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
@@ -33,6 +35,7 @@ func QueryRepositories(c *gin.Context) {
 
 	db := Database.Connect()
 	defer db.Close()
+
 	repositories, err := db.Repository.Query().All(context.Background())
 
 	if err != nil {
@@ -40,7 +43,6 @@ func QueryRepositories(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
-	// db.Preload(clause.Associations).Find(&repositories)
 
 	c.IndentedJSON(http.StatusOK, repositories)
 }
@@ -63,15 +65,18 @@ func GetRepository(c *gin.Context) {
 		return
 	}
 
-	var repositories Models.Repository
+	newId, _ := strconv.Atoi(id)
 
-	// db := Database.Connect()
-	// result := db.Preload(clause.Associations).Find(&repositories, id)
+	db := Database.Connect()
+	defer db.Close()
 
-	// if result.RowsAffected == 0 { // Not found entity by id
-	// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
-	// 	return
-	// }
+	repositories, err := db.Repository.Get(context.Background(), newId)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
 	// // check all path and update entity in memory if path changed
 	// checkAllPath(repositories.Paths)
 
@@ -90,7 +95,7 @@ func GetRepository(c *gin.Context) {
 // @Failure 500 {string} errCreate
 // @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
-	var repository Models.Repository
+	var repository ent.Repository
 
 	if err := c.BindJSON(&repository); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -98,8 +103,20 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	// db := Database.Connect()
-	// result := db.Create(&repository) // pass pointer of data to Create
+	db := Database.Connect()
+	defer db.Close()
+
+	newRepository, err := db.Repository.
+		Create().
+		SetName(repository.Name).
+		SetMaxSize(repository.MaxSize).
+		Save(context.Background())
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+		return
+	}
 
 	// if result.Error != nil {
 	// 	if result.Error != nil {
@@ -115,7 +132,7 @@ func CreateRepository(c *gin.Context) {
 	// 		}
 	// 	}
 	// }
-	c.IndentedJSON(http.StatusCreated, repository)
+	c.IndentedJSON(http.StatusCreated, newRepository)
 }
 
 // GetRepository godoc
