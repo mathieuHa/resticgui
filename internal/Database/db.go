@@ -12,7 +12,7 @@ import (
 
 func Connect() (_db *ent.Client) {
 	dbname := viper.GetString("db.name")
-	client, err := ent.Open("sqlite3", dbname+"ent?_fk=1")
+	client, err := ent.Open("sqlite3", dbname+"?_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
