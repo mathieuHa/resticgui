@@ -26,7 +26,7 @@ func (pc *PathCreate) SetName(s string) *PathCreate {
 	return pc
 }
 
-// SetAbsPath sets the "abs_path" field.
+// SetAbsPath sets the "absPath" field.
 func (pc *PathCreate) SetAbsPath(s string) *PathCreate {
 	pc.mutation.SetAbsPath(s)
 	return pc
@@ -46,7 +46,7 @@ func (pc *PathCreate) SetNillableExists(b *bool) *PathCreate {
 	return pc
 }
 
-// SetIsDir sets the "is_dir" field.
+// SetIsDir sets the "isDir" field.
 func (pc *PathCreate) SetIsDir(b bool) *PathCreate {
 	pc.mutation.SetIsDir(b)
 	return pc
@@ -177,18 +177,18 @@ func (pc *PathCreate) check() error {
 		}
 	}
 	if _, ok := pc.mutation.AbsPath(); !ok {
-		return &ValidationError{Name: "abs_path", err: errors.New(`ent: missing required field "Path.abs_path"`)}
+		return &ValidationError{Name: "absPath", err: errors.New(`ent: missing required field "Path.absPath"`)}
 	}
 	if v, ok := pc.mutation.AbsPath(); ok {
 		if err := path.AbsPathValidator(v); err != nil {
-			return &ValidationError{Name: "abs_path", err: fmt.Errorf(`ent: validator failed for field "Path.abs_path": %w`, err)}
+			return &ValidationError{Name: "absPath", err: fmt.Errorf(`ent: validator failed for field "Path.absPath": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.Exists(); !ok {
 		return &ValidationError{Name: "exists", err: errors.New(`ent: missing required field "Path.exists"`)}
 	}
 	if _, ok := pc.mutation.IsDir(); !ok {
-		return &ValidationError{Name: "is_dir", err: errors.New(`ent: missing required field "Path.is_dir"`)}
+		return &ValidationError{Name: "isDir", err: errors.New(`ent: missing required field "Path.isDir"`)}
 	}
 	if _, ok := pc.mutation.Included(); !ok {
 		return &ValidationError{Name: "included", err: errors.New(`ent: missing required field "Path.included"`)}

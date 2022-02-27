@@ -98,7 +98,7 @@ func Name(v string) predicate.Path {
 	})
 }
 
-// AbsPath applies equality check predicate on the "abs_path" field. It's identical to AbsPathEQ.
+// AbsPath applies equality check predicate on the "absPath" field. It's identical to AbsPathEQ.
 func AbsPath(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldAbsPath), v))
@@ -112,7 +112,7 @@ func Exists(v bool) predicate.Path {
 	})
 }
 
-// IsDir applies equality check predicate on the "is_dir" field. It's identical to IsDirEQ.
+// IsDir applies equality check predicate on the "isDir" field. It's identical to IsDirEQ.
 func IsDir(v bool) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldIsDir), v))
@@ -237,21 +237,21 @@ func NameContainsFold(v string) predicate.Path {
 	})
 }
 
-// AbsPathEQ applies the EQ predicate on the "abs_path" field.
+// AbsPathEQ applies the EQ predicate on the "absPath" field.
 func AbsPathEQ(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathNEQ applies the NEQ predicate on the "abs_path" field.
+// AbsPathNEQ applies the NEQ predicate on the "absPath" field.
 func AbsPathNEQ(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathIn applies the In predicate on the "abs_path" field.
+// AbsPathIn applies the In predicate on the "absPath" field.
 func AbsPathIn(vs ...string) predicate.Path {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -268,7 +268,7 @@ func AbsPathIn(vs ...string) predicate.Path {
 	})
 }
 
-// AbsPathNotIn applies the NotIn predicate on the "abs_path" field.
+// AbsPathNotIn applies the NotIn predicate on the "absPath" field.
 func AbsPathNotIn(vs ...string) predicate.Path {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -285,63 +285,63 @@ func AbsPathNotIn(vs ...string) predicate.Path {
 	})
 }
 
-// AbsPathGT applies the GT predicate on the "abs_path" field.
+// AbsPathGT applies the GT predicate on the "absPath" field.
 func AbsPathGT(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathGTE applies the GTE predicate on the "abs_path" field.
+// AbsPathGTE applies the GTE predicate on the "absPath" field.
 func AbsPathGTE(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathLT applies the LT predicate on the "abs_path" field.
+// AbsPathLT applies the LT predicate on the "absPath" field.
 func AbsPathLT(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathLTE applies the LTE predicate on the "abs_path" field.
+// AbsPathLTE applies the LTE predicate on the "absPath" field.
 func AbsPathLTE(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathContains applies the Contains predicate on the "abs_path" field.
+// AbsPathContains applies the Contains predicate on the "absPath" field.
 func AbsPathContains(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.Contains(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathHasPrefix applies the HasPrefix predicate on the "abs_path" field.
+// AbsPathHasPrefix applies the HasPrefix predicate on the "absPath" field.
 func AbsPathHasPrefix(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.HasPrefix(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathHasSuffix applies the HasSuffix predicate on the "abs_path" field.
+// AbsPathHasSuffix applies the HasSuffix predicate on the "absPath" field.
 func AbsPathHasSuffix(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathEqualFold applies the EqualFold predicate on the "abs_path" field.
+// AbsPathEqualFold applies the EqualFold predicate on the "absPath" field.
 func AbsPathEqualFold(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.EqualFold(s.C(FieldAbsPath), v))
 	})
 }
 
-// AbsPathContainsFold applies the ContainsFold predicate on the "abs_path" field.
+// AbsPathContainsFold applies the ContainsFold predicate on the "absPath" field.
 func AbsPathContainsFold(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldAbsPath), v))
@@ -362,14 +362,14 @@ func ExistsNEQ(v bool) predicate.Path {
 	})
 }
 
-// IsDirEQ applies the EQ predicate on the "is_dir" field.
+// IsDirEQ applies the EQ predicate on the "isDir" field.
 func IsDirEQ(v bool) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldIsDir), v))
 	})
 }
 
-// IsDirNEQ applies the NEQ predicate on the "is_dir" field.
+// IsDirNEQ applies the NEQ predicate on the "isDir" field.
 func IsDirNEQ(v bool) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldIsDir), v))

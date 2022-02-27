@@ -4201,9 +4201,9 @@ type PathMutation struct {
 	typ               string
 	id                *int
 	name              *string
-	abs_path          *string
+	absPath           *string
 	exists            *bool
-	is_dir            *bool
+	isDir             *bool
 	included          *bool
 	clearedFields     map[string]struct{}
 	repository        *int
@@ -4347,21 +4347,21 @@ func (m *PathMutation) ResetName() {
 	m.name = nil
 }
 
-// SetAbsPath sets the "abs_path" field.
+// SetAbsPath sets the "absPath" field.
 func (m *PathMutation) SetAbsPath(s string) {
-	m.abs_path = &s
+	m.absPath = &s
 }
 
-// AbsPath returns the value of the "abs_path" field in the mutation.
+// AbsPath returns the value of the "absPath" field in the mutation.
 func (m *PathMutation) AbsPath() (r string, exists bool) {
-	v := m.abs_path
+	v := m.absPath
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAbsPath returns the old "abs_path" field's value of the Path entity.
+// OldAbsPath returns the old "absPath" field's value of the Path entity.
 // If the Path object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *PathMutation) OldAbsPath(ctx context.Context) (v string, err error) {
@@ -4378,9 +4378,9 @@ func (m *PathMutation) OldAbsPath(ctx context.Context) (v string, err error) {
 	return oldValue.AbsPath, nil
 }
 
-// ResetAbsPath resets all changes to the "abs_path" field.
+// ResetAbsPath resets all changes to the "absPath" field.
 func (m *PathMutation) ResetAbsPath() {
-	m.abs_path = nil
+	m.absPath = nil
 }
 
 // SetExists sets the "exists" field.
@@ -4419,21 +4419,21 @@ func (m *PathMutation) ResetExists() {
 	m.exists = nil
 }
 
-// SetIsDir sets the "is_dir" field.
+// SetIsDir sets the "isDir" field.
 func (m *PathMutation) SetIsDir(b bool) {
-	m.is_dir = &b
+	m.isDir = &b
 }
 
-// IsDir returns the value of the "is_dir" field in the mutation.
+// IsDir returns the value of the "isDir" field in the mutation.
 func (m *PathMutation) IsDir() (r bool, exists bool) {
-	v := m.is_dir
+	v := m.isDir
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIsDir returns the old "is_dir" field's value of the Path entity.
+// OldIsDir returns the old "isDir" field's value of the Path entity.
 // If the Path object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *PathMutation) OldIsDir(ctx context.Context) (v bool, err error) {
@@ -4450,9 +4450,9 @@ func (m *PathMutation) OldIsDir(ctx context.Context) (v bool, err error) {
 	return oldValue.IsDir, nil
 }
 
-// ResetIsDir resets all changes to the "is_dir" field.
+// ResetIsDir resets all changes to the "isDir" field.
 func (m *PathMutation) ResetIsDir() {
-	m.is_dir = nil
+	m.isDir = nil
 }
 
 // SetIncluded sets the "included" field.
@@ -4553,13 +4553,13 @@ func (m *PathMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, path.FieldName)
 	}
-	if m.abs_path != nil {
+	if m.absPath != nil {
 		fields = append(fields, path.FieldAbsPath)
 	}
 	if m.exists != nil {
 		fields = append(fields, path.FieldExists)
 	}
-	if m.is_dir != nil {
+	if m.isDir != nil {
 		fields = append(fields, path.FieldIsDir)
 	}
 	if m.included != nil {

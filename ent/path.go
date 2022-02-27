@@ -18,12 +18,12 @@ type Path struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// AbsPath holds the value of the "abs_path" field.
-	AbsPath string `json:"abs_path,omitempty"`
+	// AbsPath holds the value of the "absPath" field.
+	AbsPath string `json:"absPath,omitempty"`
 	// Exists holds the value of the "exists" field.
 	Exists bool `json:"exists,omitempty"`
-	// IsDir holds the value of the "is_dir" field.
-	IsDir bool `json:"is_dir,omitempty"`
+	// IsDir holds the value of the "isDir" field.
+	IsDir bool `json:"isDir,omitempty"`
 	// Included holds the value of the "included" field.
 	Included bool `json:"included,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -97,7 +97,7 @@ func (pa *Path) assignValues(columns []string, values []interface{}) error {
 			}
 		case path.FieldAbsPath:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field abs_path", values[i])
+				return fmt.Errorf("unexpected type %T for field absPath", values[i])
 			} else if value.Valid {
 				pa.AbsPath = value.String
 			}
@@ -109,7 +109,7 @@ func (pa *Path) assignValues(columns []string, values []interface{}) error {
 			}
 		case path.FieldIsDir:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_dir", values[i])
+				return fmt.Errorf("unexpected type %T for field isDir", values[i])
 			} else if value.Valid {
 				pa.IsDir = value.Bool
 			}
@@ -161,11 +161,11 @@ func (pa *Path) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", pa.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(pa.Name)
-	builder.WriteString(", abs_path=")
+	builder.WriteString(", absPath=")
 	builder.WriteString(pa.AbsPath)
 	builder.WriteString(", exists=")
 	builder.WriteString(fmt.Sprintf("%v", pa.Exists))
-	builder.WriteString(", is_dir=")
+	builder.WriteString(", isDir=")
 	builder.WriteString(fmt.Sprintf("%v", pa.IsDir))
 	builder.WriteString(", included=")
 	builder.WriteString(fmt.Sprintf("%v", pa.Included))

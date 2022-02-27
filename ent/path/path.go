@@ -9,11 +9,11 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldAbsPath holds the string denoting the abs_path field in the database.
+	// FieldAbsPath holds the string denoting the abspath field in the database.
 	FieldAbsPath = "abs_path"
 	// FieldExists holds the string denoting the exists field in the database.
 	FieldExists = "exists"
-	// FieldIsDir holds the string denoting the is_dir field in the database.
+	// FieldIsDir holds the string denoting the isdir field in the database.
 	FieldIsDir = "is_dir"
 	// FieldIncluded holds the string denoting the included field in the database.
 	FieldIncluded = "included"
@@ -64,7 +64,7 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// AbsPathValidator is a validator for the "abs_path" field. It is called by the builders before save.
+	// AbsPathValidator is a validator for the "absPath" field. It is called by the builders before save.
 	AbsPathValidator func(string) error
 	// DefaultExists holds the default value on creation for the "exists" field.
 	DefaultExists bool

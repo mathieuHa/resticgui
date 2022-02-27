@@ -15,9 +15,9 @@ type Path struct {
 func (Path) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").NotEmpty(),
-		field.String("abs_path").NotEmpty(),
+		field.String("absPath").NotEmpty(),
 		field.Bool("exists").Default(true),
-		field.Bool("is_dir"),
+		field.Bool("isDir"),
 		field.Bool("included").Default(true),
 	}
 }

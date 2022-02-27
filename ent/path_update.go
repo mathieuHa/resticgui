@@ -34,7 +34,7 @@ func (pu *PathUpdate) SetName(s string) *PathUpdate {
 	return pu
 }
 
-// SetAbsPath sets the "abs_path" field.
+// SetAbsPath sets the "absPath" field.
 func (pu *PathUpdate) SetAbsPath(s string) *PathUpdate {
 	pu.mutation.SetAbsPath(s)
 	return pu
@@ -54,7 +54,7 @@ func (pu *PathUpdate) SetNillableExists(b *bool) *PathUpdate {
 	return pu
 }
 
-// SetIsDir sets the "is_dir" field.
+// SetIsDir sets the "isDir" field.
 func (pu *PathUpdate) SetIsDir(b bool) *PathUpdate {
 	pu.mutation.SetIsDir(b)
 	return pu
@@ -173,7 +173,7 @@ func (pu *PathUpdate) check() error {
 	}
 	if v, ok := pu.mutation.AbsPath(); ok {
 		if err := path.AbsPathValidator(v); err != nil {
-			return &ValidationError{Name: "abs_path", err: fmt.Errorf(`ent: validator failed for field "Path.abs_path": %w`, err)}
+			return &ValidationError{Name: "absPath", err: fmt.Errorf(`ent: validator failed for field "Path.absPath": %w`, err)}
 		}
 	}
 	return nil
@@ -292,7 +292,7 @@ func (puo *PathUpdateOne) SetName(s string) *PathUpdateOne {
 	return puo
 }
 
-// SetAbsPath sets the "abs_path" field.
+// SetAbsPath sets the "absPath" field.
 func (puo *PathUpdateOne) SetAbsPath(s string) *PathUpdateOne {
 	puo.mutation.SetAbsPath(s)
 	return puo
@@ -312,7 +312,7 @@ func (puo *PathUpdateOne) SetNillableExists(b *bool) *PathUpdateOne {
 	return puo
 }
 
-// SetIsDir sets the "is_dir" field.
+// SetIsDir sets the "isDir" field.
 func (puo *PathUpdateOne) SetIsDir(b bool) *PathUpdateOne {
 	puo.mutation.SetIsDir(b)
 	return puo
@@ -438,7 +438,7 @@ func (puo *PathUpdateOne) check() error {
 	}
 	if v, ok := puo.mutation.AbsPath(); ok {
 		if err := path.AbsPathValidator(v); err != nil {
-			return &ValidationError{Name: "abs_path", err: fmt.Errorf(`ent: validator failed for field "Path.abs_path": %w`, err)}
+			return &ValidationError{Name: "absPath", err: fmt.Errorf(`ent: validator failed for field "Path.absPath": %w`, err)}
 		}
 	}
 	return nil

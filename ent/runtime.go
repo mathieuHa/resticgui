@@ -131,9 +131,9 @@ func init() {
 	pathDescName := pathFields[0].Descriptor()
 	// path.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	path.NameValidator = pathDescName.Validators[0].(func(string) error)
-	// pathDescAbsPath is the schema descriptor for abs_path field.
+	// pathDescAbsPath is the schema descriptor for absPath field.
 	pathDescAbsPath := pathFields[1].Descriptor()
-	// path.AbsPathValidator is a validator for the "abs_path" field. It is called by the builders before save.
+	// path.AbsPathValidator is a validator for the "absPath" field. It is called by the builders before save.
 	path.AbsPathValidator = pathDescAbsPath.Validators[0].(func(string) error)
 	// pathDescExists is the schema descriptor for exists field.
 	pathDescExists := pathFields[2].Descriptor()
