@@ -385,10 +385,10 @@ func (bsq *BackupScheduleQuery) sqlAll(ctx context.Context) ([]*BackupSchedule, 
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*BackupSchedule)
 		for i := range nodes {
-			if nodes[i].repository_backupschedule == nil {
+			if nodes[i].repository_backup_schedule == nil {
 				continue
 			}
-			fk := *nodes[i].repository_backupschedule
+			fk := *nodes[i].repository_backup_schedule
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +402,7 @@ func (bsq *BackupScheduleQuery) sqlAll(ctx context.Context) ([]*BackupSchedule, 
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "repository_backupschedule" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_backup_schedule" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Repository = n

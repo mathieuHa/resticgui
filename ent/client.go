@@ -1110,15 +1110,15 @@ func (c *RepositoryClient) GetX(ctx context.Context, id int) *Repository {
 	return obj
 }
 
-// QueryBackupschedule queries the backupschedule edge of a Repository.
-func (c *RepositoryClient) QueryBackupschedule(r *Repository) *BackupScheduleQuery {
+// QueryBackupSchedule queries the backupSchedule edge of a Repository.
+func (c *RepositoryClient) QueryBackupSchedule(r *Repository) *BackupScheduleQuery {
 	query := &BackupScheduleQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(backupschedule.Table, backupschedule.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupscheduleTable, repository.BackupscheduleColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupScheduleTable, repository.BackupScheduleColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1126,15 +1126,15 @@ func (c *RepositoryClient) QueryBackupschedule(r *Repository) *BackupScheduleQue
 	return query
 }
 
-// QueryBackuppolicy queries the backuppolicy edge of a Repository.
-func (c *RepositoryClient) QueryBackuppolicy(r *Repository) *BackupPolicyQuery {
+// QueryBackupPolicy queries the backupPolicy edge of a Repository.
+func (c *RepositoryClient) QueryBackupPolicy(r *Repository) *BackupPolicyQuery {
 	query := &BackupPolicyQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(backuppolicy.Table, backuppolicy.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackuppolicyTable, repository.BackuppolicyColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupPolicyTable, repository.BackupPolicyColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1142,15 +1142,15 @@ func (c *RepositoryClient) QueryBackuppolicy(r *Repository) *BackupPolicyQuery {
 	return query
 }
 
-// QueryLocalprovider queries the localprovider edge of a Repository.
-func (c *RepositoryClient) QueryLocalprovider(r *Repository) *LocalProviderQuery {
+// QueryLocalProvider queries the localProvider edge of a Repository.
+func (c *RepositoryClient) QueryLocalProvider(r *Repository) *LocalProviderQuery {
 	query := &LocalProviderQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(localprovider.Table, localprovider.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, repository.LocalproviderTable, repository.LocalproviderColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.LocalProviderTable, repository.LocalProviderColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1158,15 +1158,15 @@ func (c *RepositoryClient) QueryLocalprovider(r *Repository) *LocalProviderQuery
 	return query
 }
 
-// QueryB2provider queries the b2provider edge of a Repository.
-func (c *RepositoryClient) QueryB2provider(r *Repository) *B2ProviderQuery {
+// QueryB2Provider queries the B2Provider edge of a Repository.
+func (c *RepositoryClient) QueryB2Provider(r *Repository) *B2ProviderQuery {
 	query := &B2ProviderQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(b2provider.Table, b2provider.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, repository.B2providerTable, repository.B2providerColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.B2ProviderTable, repository.B2ProviderColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1174,15 +1174,15 @@ func (c *RepositoryClient) QueryB2provider(r *Repository) *B2ProviderQuery {
 	return query
 }
 
-// QueryAwss3provider queries the awss3provider edge of a Repository.
-func (c *RepositoryClient) QueryAwss3provider(r *Repository) *AWSS3ProviderQuery {
+// QueryAWSS3Provider queries the AWSS3Provider edge of a Repository.
+func (c *RepositoryClient) QueryAWSS3Provider(r *Repository) *AWSS3ProviderQuery {
 	query := &AWSS3ProviderQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(awss3provider.Table, awss3provider.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, repository.Awss3providerTable, repository.Awss3providerColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.AWSS3ProviderTable, repository.AWSS3ProviderColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1190,15 +1190,15 @@ func (c *RepositoryClient) QueryAwss3provider(r *Repository) *AWSS3ProviderQuery
 	return query
 }
 
-// QueryMinios3provider queries the minios3provider edge of a Repository.
-func (c *RepositoryClient) QueryMinios3provider(r *Repository) *MinioS3ProviderQuery {
+// QueryMinioS3Provider queries the MinioS3Provider edge of a Repository.
+func (c *RepositoryClient) QueryMinioS3Provider(r *Repository) *MinioS3ProviderQuery {
 	query := &MinioS3ProviderQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(minios3provider.Table, minios3provider.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, repository.Minios3providerTable, repository.Minios3providerColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.MinioS3ProviderTable, repository.MinioS3ProviderColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil

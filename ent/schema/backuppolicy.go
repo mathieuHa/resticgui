@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -9,6 +11,13 @@ import (
 // BackupPolicy holds the schema definition for the BackupPolicy entity.
 type BackupPolicy struct {
 	ent.Schema
+}
+
+// Annotations of the BackupPolicy.
+func (BackupPolicy) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "BackupPolicy"},
+	}
 }
 
 // Fields of the BackupPolicy.
@@ -27,7 +36,7 @@ func (BackupPolicy) Fields() []ent.Field {
 func (BackupPolicy) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("repository", Repository.Type).
-			Ref("backuppolicy").
+			Ref("backupPolicy").
 			Unique().
 			// We add the "Required" method to the builder
 			// to make this edge required on entity creation.

@@ -20,8 +20,8 @@ type LocalProvider struct {
 	RepoPath string `json:"repoPath,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LocalProviderQuery when eager-loading is set.
-	Edges                    LocalProviderEdges `json:"edges"`
-	repository_localprovider *int
+	Edges                     LocalProviderEdges `json:"edges"`
+	repository_local_provider *int
 }
 
 // LocalProviderEdges holds the relations/edges for other nodes in the graph.
@@ -56,7 +56,7 @@ func (*LocalProvider) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case localprovider.FieldRepoPath:
 			values[i] = new(sql.NullString)
-		case localprovider.ForeignKeys[0]: // repository_localprovider
+		case localprovider.ForeignKeys[0]: // repository_local_provider
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type LocalProvider", columns[i])
@@ -87,10 +87,10 @@ func (lp *LocalProvider) assignValues(columns []string, values []interface{}) er
 			}
 		case localprovider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field repository_localprovider", value)
+				return fmt.Errorf("unexpected type %T for edge-field repository_local_provider", value)
 			} else if value.Valid {
-				lp.repository_localprovider = new(int)
-				*lp.repository_localprovider = int(value.Int64)
+				lp.repository_local_provider = new(int)
+				*lp.repository_local_provider = int(value.Int64)
 			}
 		}
 	}

@@ -41,18 +41,18 @@ type Repository struct {
 
 // RepositoryEdges holds the relations/edges for other nodes in the graph.
 type RepositoryEdges struct {
-	// Backupschedule holds the value of the backupschedule edge.
-	Backupschedule *BackupSchedule `json:"backupschedule,omitempty"`
-	// Backuppolicy holds the value of the backuppolicy edge.
-	Backuppolicy *BackupPolicy `json:"backuppolicy,omitempty"`
-	// Localprovider holds the value of the localprovider edge.
-	Localprovider *LocalProvider `json:"localprovider,omitempty"`
-	// B2provider holds the value of the b2provider edge.
-	B2provider *B2Provider `json:"b2provider,omitempty"`
-	// Awss3provider holds the value of the awss3provider edge.
-	Awss3provider *AWSS3Provider `json:"awss3provider,omitempty"`
-	// Minios3provider holds the value of the minios3provider edge.
-	Minios3provider *MinioS3Provider `json:"minios3provider,omitempty"`
+	// BackupSchedule holds the value of the backupSchedule edge.
+	BackupSchedule *BackupSchedule `json:"backupSchedule,omitempty"`
+	// BackupPolicy holds the value of the backupPolicy edge.
+	BackupPolicy *BackupPolicy `json:"backupPolicy,omitempty"`
+	// LocalProvider holds the value of the localProvider edge.
+	LocalProvider *LocalProvider `json:"localProvider,omitempty"`
+	// B2Provider holds the value of the B2Provider edge.
+	B2Provider *B2Provider `json:"B2Provider,omitempty"`
+	// AWSS3Provider holds the value of the AWSS3Provider edge.
+	AWSS3Provider *AWSS3Provider `json:"AWSS3Provider,omitempty"`
+	// MinioS3Provider holds the value of the MinioS3Provider edge.
+	MinioS3Provider *MinioS3Provider `json:"MinioS3Provider,omitempty"`
 	// Path holds the value of the path edge.
 	Path []*Path `json:"path,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -60,88 +60,88 @@ type RepositoryEdges struct {
 	loadedTypes [7]bool
 }
 
-// BackupscheduleOrErr returns the Backupschedule value or an error if the edge
+// BackupScheduleOrErr returns the BackupSchedule value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RepositoryEdges) BackupscheduleOrErr() (*BackupSchedule, error) {
+func (e RepositoryEdges) BackupScheduleOrErr() (*BackupSchedule, error) {
 	if e.loadedTypes[0] {
-		if e.Backupschedule == nil {
-			// The edge backupschedule was loaded in eager-loading,
+		if e.BackupSchedule == nil {
+			// The edge backupSchedule was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: backupschedule.Label}
 		}
-		return e.Backupschedule, nil
+		return e.BackupSchedule, nil
 	}
-	return nil, &NotLoadedError{edge: "backupschedule"}
+	return nil, &NotLoadedError{edge: "backupSchedule"}
 }
 
-// BackuppolicyOrErr returns the Backuppolicy value or an error if the edge
+// BackupPolicyOrErr returns the BackupPolicy value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RepositoryEdges) BackuppolicyOrErr() (*BackupPolicy, error) {
+func (e RepositoryEdges) BackupPolicyOrErr() (*BackupPolicy, error) {
 	if e.loadedTypes[1] {
-		if e.Backuppolicy == nil {
-			// The edge backuppolicy was loaded in eager-loading,
+		if e.BackupPolicy == nil {
+			// The edge backupPolicy was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: backuppolicy.Label}
 		}
-		return e.Backuppolicy, nil
+		return e.BackupPolicy, nil
 	}
-	return nil, &NotLoadedError{edge: "backuppolicy"}
+	return nil, &NotLoadedError{edge: "backupPolicy"}
 }
 
-// LocalproviderOrErr returns the Localprovider value or an error if the edge
+// LocalProviderOrErr returns the LocalProvider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RepositoryEdges) LocalproviderOrErr() (*LocalProvider, error) {
+func (e RepositoryEdges) LocalProviderOrErr() (*LocalProvider, error) {
 	if e.loadedTypes[2] {
-		if e.Localprovider == nil {
-			// The edge localprovider was loaded in eager-loading,
+		if e.LocalProvider == nil {
+			// The edge localProvider was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: localprovider.Label}
 		}
-		return e.Localprovider, nil
+		return e.LocalProvider, nil
 	}
-	return nil, &NotLoadedError{edge: "localprovider"}
+	return nil, &NotLoadedError{edge: "localProvider"}
 }
 
-// B2providerOrErr returns the B2provider value or an error if the edge
+// B2ProviderOrErr returns the B2Provider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RepositoryEdges) B2providerOrErr() (*B2Provider, error) {
+func (e RepositoryEdges) B2ProviderOrErr() (*B2Provider, error) {
 	if e.loadedTypes[3] {
-		if e.B2provider == nil {
-			// The edge b2provider was loaded in eager-loading,
+		if e.B2Provider == nil {
+			// The edge B2Provider was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: b2provider.Label}
 		}
-		return e.B2provider, nil
+		return e.B2Provider, nil
 	}
-	return nil, &NotLoadedError{edge: "b2provider"}
+	return nil, &NotLoadedError{edge: "B2Provider"}
 }
 
-// Awss3providerOrErr returns the Awss3provider value or an error if the edge
+// AWSS3ProviderOrErr returns the AWSS3Provider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RepositoryEdges) Awss3providerOrErr() (*AWSS3Provider, error) {
+func (e RepositoryEdges) AWSS3ProviderOrErr() (*AWSS3Provider, error) {
 	if e.loadedTypes[4] {
-		if e.Awss3provider == nil {
-			// The edge awss3provider was loaded in eager-loading,
+		if e.AWSS3Provider == nil {
+			// The edge AWSS3Provider was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: awss3provider.Label}
 		}
-		return e.Awss3provider, nil
+		return e.AWSS3Provider, nil
 	}
-	return nil, &NotLoadedError{edge: "awss3provider"}
+	return nil, &NotLoadedError{edge: "AWSS3Provider"}
 }
 
-// Minios3providerOrErr returns the Minios3provider value or an error if the edge
+// MinioS3ProviderOrErr returns the MinioS3Provider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RepositoryEdges) Minios3providerOrErr() (*MinioS3Provider, error) {
+func (e RepositoryEdges) MinioS3ProviderOrErr() (*MinioS3Provider, error) {
 	if e.loadedTypes[5] {
-		if e.Minios3provider == nil {
-			// The edge minios3provider was loaded in eager-loading,
+		if e.MinioS3Provider == nil {
+			// The edge MinioS3Provider was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: minios3provider.Label}
 		}
-		return e.Minios3provider, nil
+		return e.MinioS3Provider, nil
 	}
-	return nil, &NotLoadedError{edge: "minios3provider"}
+	return nil, &NotLoadedError{edge: "MinioS3Provider"}
 }
 
 // PathOrErr returns the Path value or an error if the edge
@@ -228,34 +228,34 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 	return nil
 }
 
-// QueryBackupschedule queries the "backupschedule" edge of the Repository entity.
-func (r *Repository) QueryBackupschedule() *BackupScheduleQuery {
-	return (&RepositoryClient{config: r.config}).QueryBackupschedule(r)
+// QueryBackupSchedule queries the "backupSchedule" edge of the Repository entity.
+func (r *Repository) QueryBackupSchedule() *BackupScheduleQuery {
+	return (&RepositoryClient{config: r.config}).QueryBackupSchedule(r)
 }
 
-// QueryBackuppolicy queries the "backuppolicy" edge of the Repository entity.
-func (r *Repository) QueryBackuppolicy() *BackupPolicyQuery {
-	return (&RepositoryClient{config: r.config}).QueryBackuppolicy(r)
+// QueryBackupPolicy queries the "backupPolicy" edge of the Repository entity.
+func (r *Repository) QueryBackupPolicy() *BackupPolicyQuery {
+	return (&RepositoryClient{config: r.config}).QueryBackupPolicy(r)
 }
 
-// QueryLocalprovider queries the "localprovider" edge of the Repository entity.
-func (r *Repository) QueryLocalprovider() *LocalProviderQuery {
-	return (&RepositoryClient{config: r.config}).QueryLocalprovider(r)
+// QueryLocalProvider queries the "localProvider" edge of the Repository entity.
+func (r *Repository) QueryLocalProvider() *LocalProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryLocalProvider(r)
 }
 
-// QueryB2provider queries the "b2provider" edge of the Repository entity.
-func (r *Repository) QueryB2provider() *B2ProviderQuery {
-	return (&RepositoryClient{config: r.config}).QueryB2provider(r)
+// QueryB2Provider queries the "B2Provider" edge of the Repository entity.
+func (r *Repository) QueryB2Provider() *B2ProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryB2Provider(r)
 }
 
-// QueryAwss3provider queries the "awss3provider" edge of the Repository entity.
-func (r *Repository) QueryAwss3provider() *AWSS3ProviderQuery {
-	return (&RepositoryClient{config: r.config}).QueryAwss3provider(r)
+// QueryAWSS3Provider queries the "AWSS3Provider" edge of the Repository entity.
+func (r *Repository) QueryAWSS3Provider() *AWSS3ProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryAWSS3Provider(r)
 }
 
-// QueryMinios3provider queries the "minios3provider" edge of the Repository entity.
-func (r *Repository) QueryMinios3provider() *MinioS3ProviderQuery {
-	return (&RepositoryClient{config: r.config}).QueryMinios3provider(r)
+// QueryMinioS3Provider queries the "MinioS3Provider" edge of the Repository entity.
+func (r *Repository) QueryMinioS3Provider() *MinioS3ProviderQuery {
+	return (&RepositoryClient{config: r.config}).QueryMinioS3Provider(r)
 }
 
 // QueryPath queries the "path" edge of the Repository entity.

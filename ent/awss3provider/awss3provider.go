@@ -18,9 +18,9 @@ const (
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the awss3provider in the database.
-	Table = "awss3providers"
+	Table = "AWSS3Provider"
 	// RepositoryTable is the table that holds the repository relation/edge.
-	RepositoryTable = "awss3providers"
+	RepositoryTable = "AWSS3Provider"
 	// RepositoryInverseTable is the table name for the Repository entity.
 	// It exists in this package in order to avoid circular dependency with the "repository" package.
 	RepositoryInverseTable = "repositories"
@@ -37,7 +37,7 @@ var Columns = []string{
 	FieldDefaultRegion,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "awss3providers"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "AWSS3Provider"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"repository_awss3provider",

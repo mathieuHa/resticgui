@@ -50,8 +50,8 @@ type BackupSchedule struct {
 	CronID uint `json:"cronID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BackupScheduleQuery when eager-loading is set.
-	Edges                     BackupScheduleEdges `json:"edges"`
-	repository_backupschedule *int
+	Edges                      BackupScheduleEdges `json:"edges"`
+	repository_backup_schedule *int
 }
 
 // BackupScheduleEdges holds the relations/edges for other nodes in the graph.
@@ -88,7 +88,7 @@ func (*BackupSchedule) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case backupschedule.FieldChoice, backupschedule.FieldHour, backupschedule.FieldDay, backupschedule.FieldInterval, backupschedule.FieldCronSyntax:
 			values[i] = new(sql.NullString)
-		case backupschedule.ForeignKeys[0]: // repository_backupschedule
+		case backupschedule.ForeignKeys[0]: // repository_backup_schedule
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type BackupSchedule", columns[i])
@@ -209,10 +209,10 @@ func (bs *BackupSchedule) assignValues(columns []string, values []interface{}) e
 			}
 		case backupschedule.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field repository_backupschedule", value)
+				return fmt.Errorf("unexpected type %T for edge-field repository_backup_schedule", value)
 			} else if value.Valid {
-				bs.repository_backupschedule = new(int)
-				*bs.repository_backupschedule = int(value.Int64)
+				bs.repository_backup_schedule = new(int)
+				*bs.repository_backup_schedule = int(value.Int64)
 			}
 		}
 	}

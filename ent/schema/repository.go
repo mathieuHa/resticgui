@@ -30,22 +30,22 @@ func (Repository) Fields() []ent.Field {
 // Edges of the Repository.
 func (Repository) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("backupschedule", BackupSchedule.Type).Unique().Annotations(entsql.Annotation{
+		edge.To("backupSchedule", BackupSchedule.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("backuppolicy", BackupPolicy.Type).Unique().Annotations(entsql.Annotation{
+		edge.To("backupPolicy", BackupPolicy.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("localprovider", LocalProvider.Type).Unique().Annotations(entsql.Annotation{
+		edge.To("localProvider", LocalProvider.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("b2provider", B2Provider.Type).Unique().Annotations(entsql.Annotation{
+		edge.To("B2Provider", B2Provider.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("awss3provider", AWSS3Provider.Type).Unique().Annotations(entsql.Annotation{
+		edge.To("AWSS3Provider", AWSS3Provider.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("minios3provider", MinioS3Provider.Type).Unique().Annotations(entsql.Annotation{
+		edge.To("MinioS3Provider", MinioS3Provider.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
 		edge.To("path", Path.Type).Annotations(entsql.Annotation{

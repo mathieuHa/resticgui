@@ -18,9 +18,9 @@ const (
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the b2provider in the database.
-	Table = "b2providers"
+	Table = "B2Provider"
 	// RepositoryTable is the table that holds the repository relation/edge.
-	RepositoryTable = "b2providers"
+	RepositoryTable = "B2Provider"
 	// RepositoryInverseTable is the table name for the Repository entity.
 	// It exists in this package in order to avoid circular dependency with the "repository" package.
 	RepositoryInverseTable = "repositories"
@@ -37,7 +37,7 @@ var Columns = []string{
 	FieldRepoName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "b2providers"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "B2Provider"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"repository_b2provider",

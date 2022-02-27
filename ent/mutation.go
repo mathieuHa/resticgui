@@ -5104,34 +5104,34 @@ func (m *PermissionMutation) ResetEdge(name string) error {
 // RepositoryMutation represents an operation that mutates the Repository nodes in the graph.
 type RepositoryMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *int
-	name                   *string
-	createdAt              *time.Time
-	provider               *repository.Provider
-	active                 *bool
-	password               *string
-	maxSize                *string
-	clearedFields          map[string]struct{}
-	backupschedule         *int
-	clearedbackupschedule  bool
-	backuppolicy           *int
-	clearedbackuppolicy    bool
-	localprovider          *int
-	clearedlocalprovider   bool
-	b2provider             *int
-	clearedb2provider      bool
-	awss3provider          *int
-	clearedawss3provider   bool
-	minios3provider        *int
-	clearedminios3provider bool
-	_path                  map[int]struct{}
-	removed_path           map[int]struct{}
-	cleared_path           bool
-	done                   bool
-	oldValue               func(context.Context) (*Repository, error)
-	predicates             []predicate.Repository
+	op                      Op
+	typ                     string
+	id                      *int
+	name                    *string
+	createdAt               *time.Time
+	provider                *repository.Provider
+	active                  *bool
+	password                *string
+	maxSize                 *string
+	clearedFields           map[string]struct{}
+	backupSchedule          *int
+	clearedbackupSchedule   bool
+	backupPolicy            *int
+	clearedbackupPolicy     bool
+	localProvider           *int
+	clearedlocalProvider    bool
+	_B2Provider             *int
+	cleared_B2Provider      bool
+	_AWSS3Provider          *int
+	cleared_AWSS3Provider   bool
+	_MinioS3Provider        *int
+	cleared_MinioS3Provider bool
+	_path                   map[int]struct{}
+	removed_path            map[int]struct{}
+	cleared_path            bool
+	done                    bool
+	oldValue                func(context.Context) (*Repository, error)
+	predicates              []predicate.Repository
 }
 
 var _ ent.Mutation = (*RepositoryMutation)(nil)
@@ -5474,238 +5474,238 @@ func (m *RepositoryMutation) ResetMaxSize() {
 	delete(m.clearedFields, repository.FieldMaxSize)
 }
 
-// SetBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by id.
-func (m *RepositoryMutation) SetBackupscheduleID(id int) {
-	m.backupschedule = &id
+// SetBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by id.
+func (m *RepositoryMutation) SetBackupScheduleID(id int) {
+	m.backupSchedule = &id
 }
 
-// ClearBackupschedule clears the "backupschedule" edge to the BackupSchedule entity.
-func (m *RepositoryMutation) ClearBackupschedule() {
-	m.clearedbackupschedule = true
+// ClearBackupSchedule clears the "backupSchedule" edge to the BackupSchedule entity.
+func (m *RepositoryMutation) ClearBackupSchedule() {
+	m.clearedbackupSchedule = true
 }
 
-// BackupscheduleCleared reports if the "backupschedule" edge to the BackupSchedule entity was cleared.
-func (m *RepositoryMutation) BackupscheduleCleared() bool {
-	return m.clearedbackupschedule
+// BackupScheduleCleared reports if the "backupSchedule" edge to the BackupSchedule entity was cleared.
+func (m *RepositoryMutation) BackupScheduleCleared() bool {
+	return m.clearedbackupSchedule
 }
 
-// BackupscheduleID returns the "backupschedule" edge ID in the mutation.
-func (m *RepositoryMutation) BackupscheduleID() (id int, exists bool) {
-	if m.backupschedule != nil {
-		return *m.backupschedule, true
+// BackupScheduleID returns the "backupSchedule" edge ID in the mutation.
+func (m *RepositoryMutation) BackupScheduleID() (id int, exists bool) {
+	if m.backupSchedule != nil {
+		return *m.backupSchedule, true
 	}
 	return
 }
 
-// BackupscheduleIDs returns the "backupschedule" edge IDs in the mutation.
+// BackupScheduleIDs returns the "backupSchedule" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// BackupscheduleID instead. It exists only for internal usage by the builders.
-func (m *RepositoryMutation) BackupscheduleIDs() (ids []int) {
-	if id := m.backupschedule; id != nil {
+// BackupScheduleID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) BackupScheduleIDs() (ids []int) {
+	if id := m.backupSchedule; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetBackupschedule resets all changes to the "backupschedule" edge.
-func (m *RepositoryMutation) ResetBackupschedule() {
-	m.backupschedule = nil
-	m.clearedbackupschedule = false
+// ResetBackupSchedule resets all changes to the "backupSchedule" edge.
+func (m *RepositoryMutation) ResetBackupSchedule() {
+	m.backupSchedule = nil
+	m.clearedbackupSchedule = false
 }
 
-// SetBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by id.
-func (m *RepositoryMutation) SetBackuppolicyID(id int) {
-	m.backuppolicy = &id
+// SetBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by id.
+func (m *RepositoryMutation) SetBackupPolicyID(id int) {
+	m.backupPolicy = &id
 }
 
-// ClearBackuppolicy clears the "backuppolicy" edge to the BackupPolicy entity.
-func (m *RepositoryMutation) ClearBackuppolicy() {
-	m.clearedbackuppolicy = true
+// ClearBackupPolicy clears the "backupPolicy" edge to the BackupPolicy entity.
+func (m *RepositoryMutation) ClearBackupPolicy() {
+	m.clearedbackupPolicy = true
 }
 
-// BackuppolicyCleared reports if the "backuppolicy" edge to the BackupPolicy entity was cleared.
-func (m *RepositoryMutation) BackuppolicyCleared() bool {
-	return m.clearedbackuppolicy
+// BackupPolicyCleared reports if the "backupPolicy" edge to the BackupPolicy entity was cleared.
+func (m *RepositoryMutation) BackupPolicyCleared() bool {
+	return m.clearedbackupPolicy
 }
 
-// BackuppolicyID returns the "backuppolicy" edge ID in the mutation.
-func (m *RepositoryMutation) BackuppolicyID() (id int, exists bool) {
-	if m.backuppolicy != nil {
-		return *m.backuppolicy, true
+// BackupPolicyID returns the "backupPolicy" edge ID in the mutation.
+func (m *RepositoryMutation) BackupPolicyID() (id int, exists bool) {
+	if m.backupPolicy != nil {
+		return *m.backupPolicy, true
 	}
 	return
 }
 
-// BackuppolicyIDs returns the "backuppolicy" edge IDs in the mutation.
+// BackupPolicyIDs returns the "backupPolicy" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// BackuppolicyID instead. It exists only for internal usage by the builders.
-func (m *RepositoryMutation) BackuppolicyIDs() (ids []int) {
-	if id := m.backuppolicy; id != nil {
+// BackupPolicyID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) BackupPolicyIDs() (ids []int) {
+	if id := m.backupPolicy; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetBackuppolicy resets all changes to the "backuppolicy" edge.
-func (m *RepositoryMutation) ResetBackuppolicy() {
-	m.backuppolicy = nil
-	m.clearedbackuppolicy = false
+// ResetBackupPolicy resets all changes to the "backupPolicy" edge.
+func (m *RepositoryMutation) ResetBackupPolicy() {
+	m.backupPolicy = nil
+	m.clearedbackupPolicy = false
 }
 
-// SetLocalproviderID sets the "localprovider" edge to the LocalProvider entity by id.
-func (m *RepositoryMutation) SetLocalproviderID(id int) {
-	m.localprovider = &id
+// SetLocalProviderID sets the "localProvider" edge to the LocalProvider entity by id.
+func (m *RepositoryMutation) SetLocalProviderID(id int) {
+	m.localProvider = &id
 }
 
-// ClearLocalprovider clears the "localprovider" edge to the LocalProvider entity.
-func (m *RepositoryMutation) ClearLocalprovider() {
-	m.clearedlocalprovider = true
+// ClearLocalProvider clears the "localProvider" edge to the LocalProvider entity.
+func (m *RepositoryMutation) ClearLocalProvider() {
+	m.clearedlocalProvider = true
 }
 
-// LocalproviderCleared reports if the "localprovider" edge to the LocalProvider entity was cleared.
-func (m *RepositoryMutation) LocalproviderCleared() bool {
-	return m.clearedlocalprovider
+// LocalProviderCleared reports if the "localProvider" edge to the LocalProvider entity was cleared.
+func (m *RepositoryMutation) LocalProviderCleared() bool {
+	return m.clearedlocalProvider
 }
 
-// LocalproviderID returns the "localprovider" edge ID in the mutation.
-func (m *RepositoryMutation) LocalproviderID() (id int, exists bool) {
-	if m.localprovider != nil {
-		return *m.localprovider, true
+// LocalProviderID returns the "localProvider" edge ID in the mutation.
+func (m *RepositoryMutation) LocalProviderID() (id int, exists bool) {
+	if m.localProvider != nil {
+		return *m.localProvider, true
 	}
 	return
 }
 
-// LocalproviderIDs returns the "localprovider" edge IDs in the mutation.
+// LocalProviderIDs returns the "localProvider" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LocalproviderID instead. It exists only for internal usage by the builders.
-func (m *RepositoryMutation) LocalproviderIDs() (ids []int) {
-	if id := m.localprovider; id != nil {
+// LocalProviderID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) LocalProviderIDs() (ids []int) {
+	if id := m.localProvider; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetLocalprovider resets all changes to the "localprovider" edge.
-func (m *RepositoryMutation) ResetLocalprovider() {
-	m.localprovider = nil
-	m.clearedlocalprovider = false
+// ResetLocalProvider resets all changes to the "localProvider" edge.
+func (m *RepositoryMutation) ResetLocalProvider() {
+	m.localProvider = nil
+	m.clearedlocalProvider = false
 }
 
-// SetB2providerID sets the "b2provider" edge to the B2Provider entity by id.
-func (m *RepositoryMutation) SetB2providerID(id int) {
-	m.b2provider = &id
+// SetB2ProviderID sets the "B2Provider" edge to the B2Provider entity by id.
+func (m *RepositoryMutation) SetB2ProviderID(id int) {
+	m._B2Provider = &id
 }
 
-// ClearB2provider clears the "b2provider" edge to the B2Provider entity.
-func (m *RepositoryMutation) ClearB2provider() {
-	m.clearedb2provider = true
+// ClearB2Provider clears the "B2Provider" edge to the B2Provider entity.
+func (m *RepositoryMutation) ClearB2Provider() {
+	m.cleared_B2Provider = true
 }
 
-// B2providerCleared reports if the "b2provider" edge to the B2Provider entity was cleared.
-func (m *RepositoryMutation) B2providerCleared() bool {
-	return m.clearedb2provider
+// B2ProviderCleared reports if the "B2Provider" edge to the B2Provider entity was cleared.
+func (m *RepositoryMutation) B2ProviderCleared() bool {
+	return m.cleared_B2Provider
 }
 
-// B2providerID returns the "b2provider" edge ID in the mutation.
-func (m *RepositoryMutation) B2providerID() (id int, exists bool) {
-	if m.b2provider != nil {
-		return *m.b2provider, true
+// B2ProviderID returns the "B2Provider" edge ID in the mutation.
+func (m *RepositoryMutation) B2ProviderID() (id int, exists bool) {
+	if m._B2Provider != nil {
+		return *m._B2Provider, true
 	}
 	return
 }
 
-// B2providerIDs returns the "b2provider" edge IDs in the mutation.
+// B2ProviderIDs returns the "B2Provider" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// B2providerID instead. It exists only for internal usage by the builders.
-func (m *RepositoryMutation) B2providerIDs() (ids []int) {
-	if id := m.b2provider; id != nil {
+// B2ProviderID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) B2ProviderIDs() (ids []int) {
+	if id := m._B2Provider; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetB2provider resets all changes to the "b2provider" edge.
-func (m *RepositoryMutation) ResetB2provider() {
-	m.b2provider = nil
-	m.clearedb2provider = false
+// ResetB2Provider resets all changes to the "B2Provider" edge.
+func (m *RepositoryMutation) ResetB2Provider() {
+	m._B2Provider = nil
+	m.cleared_B2Provider = false
 }
 
-// SetAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by id.
-func (m *RepositoryMutation) SetAwss3providerID(id int) {
-	m.awss3provider = &id
+// SetAWSS3ProviderID sets the "AWSS3Provider" edge to the AWSS3Provider entity by id.
+func (m *RepositoryMutation) SetAWSS3ProviderID(id int) {
+	m._AWSS3Provider = &id
 }
 
-// ClearAwss3provider clears the "awss3provider" edge to the AWSS3Provider entity.
-func (m *RepositoryMutation) ClearAwss3provider() {
-	m.clearedawss3provider = true
+// ClearAWSS3Provider clears the "AWSS3Provider" edge to the AWSS3Provider entity.
+func (m *RepositoryMutation) ClearAWSS3Provider() {
+	m.cleared_AWSS3Provider = true
 }
 
-// Awss3providerCleared reports if the "awss3provider" edge to the AWSS3Provider entity was cleared.
-func (m *RepositoryMutation) Awss3providerCleared() bool {
-	return m.clearedawss3provider
+// AWSS3ProviderCleared reports if the "AWSS3Provider" edge to the AWSS3Provider entity was cleared.
+func (m *RepositoryMutation) AWSS3ProviderCleared() bool {
+	return m.cleared_AWSS3Provider
 }
 
-// Awss3providerID returns the "awss3provider" edge ID in the mutation.
-func (m *RepositoryMutation) Awss3providerID() (id int, exists bool) {
-	if m.awss3provider != nil {
-		return *m.awss3provider, true
+// AWSS3ProviderID returns the "AWSS3Provider" edge ID in the mutation.
+func (m *RepositoryMutation) AWSS3ProviderID() (id int, exists bool) {
+	if m._AWSS3Provider != nil {
+		return *m._AWSS3Provider, true
 	}
 	return
 }
 
-// Awss3providerIDs returns the "awss3provider" edge IDs in the mutation.
+// AWSS3ProviderIDs returns the "AWSS3Provider" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// Awss3providerID instead. It exists only for internal usage by the builders.
-func (m *RepositoryMutation) Awss3providerIDs() (ids []int) {
-	if id := m.awss3provider; id != nil {
+// AWSS3ProviderID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) AWSS3ProviderIDs() (ids []int) {
+	if id := m._AWSS3Provider; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetAwss3provider resets all changes to the "awss3provider" edge.
-func (m *RepositoryMutation) ResetAwss3provider() {
-	m.awss3provider = nil
-	m.clearedawss3provider = false
+// ResetAWSS3Provider resets all changes to the "AWSS3Provider" edge.
+func (m *RepositoryMutation) ResetAWSS3Provider() {
+	m._AWSS3Provider = nil
+	m.cleared_AWSS3Provider = false
 }
 
-// SetMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by id.
-func (m *RepositoryMutation) SetMinios3providerID(id int) {
-	m.minios3provider = &id
+// SetMinioS3ProviderID sets the "MinioS3Provider" edge to the MinioS3Provider entity by id.
+func (m *RepositoryMutation) SetMinioS3ProviderID(id int) {
+	m._MinioS3Provider = &id
 }
 
-// ClearMinios3provider clears the "minios3provider" edge to the MinioS3Provider entity.
-func (m *RepositoryMutation) ClearMinios3provider() {
-	m.clearedminios3provider = true
+// ClearMinioS3Provider clears the "MinioS3Provider" edge to the MinioS3Provider entity.
+func (m *RepositoryMutation) ClearMinioS3Provider() {
+	m.cleared_MinioS3Provider = true
 }
 
-// Minios3providerCleared reports if the "minios3provider" edge to the MinioS3Provider entity was cleared.
-func (m *RepositoryMutation) Minios3providerCleared() bool {
-	return m.clearedminios3provider
+// MinioS3ProviderCleared reports if the "MinioS3Provider" edge to the MinioS3Provider entity was cleared.
+func (m *RepositoryMutation) MinioS3ProviderCleared() bool {
+	return m.cleared_MinioS3Provider
 }
 
-// Minios3providerID returns the "minios3provider" edge ID in the mutation.
-func (m *RepositoryMutation) Minios3providerID() (id int, exists bool) {
-	if m.minios3provider != nil {
-		return *m.minios3provider, true
+// MinioS3ProviderID returns the "MinioS3Provider" edge ID in the mutation.
+func (m *RepositoryMutation) MinioS3ProviderID() (id int, exists bool) {
+	if m._MinioS3Provider != nil {
+		return *m._MinioS3Provider, true
 	}
 	return
 }
 
-// Minios3providerIDs returns the "minios3provider" edge IDs in the mutation.
+// MinioS3ProviderIDs returns the "MinioS3Provider" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// Minios3providerID instead. It exists only for internal usage by the builders.
-func (m *RepositoryMutation) Minios3providerIDs() (ids []int) {
-	if id := m.minios3provider; id != nil {
+// MinioS3ProviderID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) MinioS3ProviderIDs() (ids []int) {
+	if id := m._MinioS3Provider; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetMinios3provider resets all changes to the "minios3provider" edge.
-func (m *RepositoryMutation) ResetMinios3provider() {
-	m.minios3provider = nil
-	m.clearedminios3provider = false
+// ResetMinioS3Provider resets all changes to the "MinioS3Provider" edge.
+func (m *RepositoryMutation) ResetMinioS3Provider() {
+	m._MinioS3Provider = nil
+	m.cleared_MinioS3Provider = false
 }
 
 // AddPathIDs adds the "path" edge to the Path entity by ids.
@@ -5981,23 +5981,23 @@ func (m *RepositoryMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RepositoryMutation) AddedEdges() []string {
 	edges := make([]string, 0, 7)
-	if m.backupschedule != nil {
-		edges = append(edges, repository.EdgeBackupschedule)
+	if m.backupSchedule != nil {
+		edges = append(edges, repository.EdgeBackupSchedule)
 	}
-	if m.backuppolicy != nil {
-		edges = append(edges, repository.EdgeBackuppolicy)
+	if m.backupPolicy != nil {
+		edges = append(edges, repository.EdgeBackupPolicy)
 	}
-	if m.localprovider != nil {
-		edges = append(edges, repository.EdgeLocalprovider)
+	if m.localProvider != nil {
+		edges = append(edges, repository.EdgeLocalProvider)
 	}
-	if m.b2provider != nil {
-		edges = append(edges, repository.EdgeB2provider)
+	if m._B2Provider != nil {
+		edges = append(edges, repository.EdgeB2Provider)
 	}
-	if m.awss3provider != nil {
-		edges = append(edges, repository.EdgeAwss3provider)
+	if m._AWSS3Provider != nil {
+		edges = append(edges, repository.EdgeAWSS3Provider)
 	}
-	if m.minios3provider != nil {
-		edges = append(edges, repository.EdgeMinios3provider)
+	if m._MinioS3Provider != nil {
+		edges = append(edges, repository.EdgeMinioS3Provider)
 	}
 	if m._path != nil {
 		edges = append(edges, repository.EdgePath)
@@ -6009,28 +6009,28 @@ func (m *RepositoryMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *RepositoryMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case repository.EdgeBackupschedule:
-		if id := m.backupschedule; id != nil {
+	case repository.EdgeBackupSchedule:
+		if id := m.backupSchedule; id != nil {
 			return []ent.Value{*id}
 		}
-	case repository.EdgeBackuppolicy:
-		if id := m.backuppolicy; id != nil {
+	case repository.EdgeBackupPolicy:
+		if id := m.backupPolicy; id != nil {
 			return []ent.Value{*id}
 		}
-	case repository.EdgeLocalprovider:
-		if id := m.localprovider; id != nil {
+	case repository.EdgeLocalProvider:
+		if id := m.localProvider; id != nil {
 			return []ent.Value{*id}
 		}
-	case repository.EdgeB2provider:
-		if id := m.b2provider; id != nil {
+	case repository.EdgeB2Provider:
+		if id := m._B2Provider; id != nil {
 			return []ent.Value{*id}
 		}
-	case repository.EdgeAwss3provider:
-		if id := m.awss3provider; id != nil {
+	case repository.EdgeAWSS3Provider:
+		if id := m._AWSS3Provider; id != nil {
 			return []ent.Value{*id}
 		}
-	case repository.EdgeMinios3provider:
-		if id := m.minios3provider; id != nil {
+	case repository.EdgeMinioS3Provider:
+		if id := m._MinioS3Provider; id != nil {
 			return []ent.Value{*id}
 		}
 	case repository.EdgePath:
@@ -6069,23 +6069,23 @@ func (m *RepositoryMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RepositoryMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 7)
-	if m.clearedbackupschedule {
-		edges = append(edges, repository.EdgeBackupschedule)
+	if m.clearedbackupSchedule {
+		edges = append(edges, repository.EdgeBackupSchedule)
 	}
-	if m.clearedbackuppolicy {
-		edges = append(edges, repository.EdgeBackuppolicy)
+	if m.clearedbackupPolicy {
+		edges = append(edges, repository.EdgeBackupPolicy)
 	}
-	if m.clearedlocalprovider {
-		edges = append(edges, repository.EdgeLocalprovider)
+	if m.clearedlocalProvider {
+		edges = append(edges, repository.EdgeLocalProvider)
 	}
-	if m.clearedb2provider {
-		edges = append(edges, repository.EdgeB2provider)
+	if m.cleared_B2Provider {
+		edges = append(edges, repository.EdgeB2Provider)
 	}
-	if m.clearedawss3provider {
-		edges = append(edges, repository.EdgeAwss3provider)
+	if m.cleared_AWSS3Provider {
+		edges = append(edges, repository.EdgeAWSS3Provider)
 	}
-	if m.clearedminios3provider {
-		edges = append(edges, repository.EdgeMinios3provider)
+	if m.cleared_MinioS3Provider {
+		edges = append(edges, repository.EdgeMinioS3Provider)
 	}
 	if m.cleared_path {
 		edges = append(edges, repository.EdgePath)
@@ -6097,18 +6097,18 @@ func (m *RepositoryMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *RepositoryMutation) EdgeCleared(name string) bool {
 	switch name {
-	case repository.EdgeBackupschedule:
-		return m.clearedbackupschedule
-	case repository.EdgeBackuppolicy:
-		return m.clearedbackuppolicy
-	case repository.EdgeLocalprovider:
-		return m.clearedlocalprovider
-	case repository.EdgeB2provider:
-		return m.clearedb2provider
-	case repository.EdgeAwss3provider:
-		return m.clearedawss3provider
-	case repository.EdgeMinios3provider:
-		return m.clearedminios3provider
+	case repository.EdgeBackupSchedule:
+		return m.clearedbackupSchedule
+	case repository.EdgeBackupPolicy:
+		return m.clearedbackupPolicy
+	case repository.EdgeLocalProvider:
+		return m.clearedlocalProvider
+	case repository.EdgeB2Provider:
+		return m.cleared_B2Provider
+	case repository.EdgeAWSS3Provider:
+		return m.cleared_AWSS3Provider
+	case repository.EdgeMinioS3Provider:
+		return m.cleared_MinioS3Provider
 	case repository.EdgePath:
 		return m.cleared_path
 	}
@@ -6119,23 +6119,23 @@ func (m *RepositoryMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *RepositoryMutation) ClearEdge(name string) error {
 	switch name {
-	case repository.EdgeBackupschedule:
-		m.ClearBackupschedule()
+	case repository.EdgeBackupSchedule:
+		m.ClearBackupSchedule()
 		return nil
-	case repository.EdgeBackuppolicy:
-		m.ClearBackuppolicy()
+	case repository.EdgeBackupPolicy:
+		m.ClearBackupPolicy()
 		return nil
-	case repository.EdgeLocalprovider:
-		m.ClearLocalprovider()
+	case repository.EdgeLocalProvider:
+		m.ClearLocalProvider()
 		return nil
-	case repository.EdgeB2provider:
-		m.ClearB2provider()
+	case repository.EdgeB2Provider:
+		m.ClearB2Provider()
 		return nil
-	case repository.EdgeAwss3provider:
-		m.ClearAwss3provider()
+	case repository.EdgeAWSS3Provider:
+		m.ClearAWSS3Provider()
 		return nil
-	case repository.EdgeMinios3provider:
-		m.ClearMinios3provider()
+	case repository.EdgeMinioS3Provider:
+		m.ClearMinioS3Provider()
 		return nil
 	}
 	return fmt.Errorf("unknown Repository unique edge %s", name)
@@ -6145,23 +6145,23 @@ func (m *RepositoryMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *RepositoryMutation) ResetEdge(name string) error {
 	switch name {
-	case repository.EdgeBackupschedule:
-		m.ResetBackupschedule()
+	case repository.EdgeBackupSchedule:
+		m.ResetBackupSchedule()
 		return nil
-	case repository.EdgeBackuppolicy:
-		m.ResetBackuppolicy()
+	case repository.EdgeBackupPolicy:
+		m.ResetBackupPolicy()
 		return nil
-	case repository.EdgeLocalprovider:
-		m.ResetLocalprovider()
+	case repository.EdgeLocalProvider:
+		m.ResetLocalProvider()
 		return nil
-	case repository.EdgeB2provider:
-		m.ResetB2provider()
+	case repository.EdgeB2Provider:
+		m.ResetB2Provider()
 		return nil
-	case repository.EdgeAwss3provider:
-		m.ResetAwss3provider()
+	case repository.EdgeAWSS3Provider:
+		m.ResetAWSS3Provider()
 		return nil
-	case repository.EdgeMinios3provider:
-		m.ResetMinios3provider()
+	case repository.EdgeMinioS3Provider:
+		m.ResetMinioS3Provider()
 		return nil
 	case repository.EdgePath:
 		m.ResetPath()

@@ -30,8 +30,8 @@ type BackupPolicy struct {
 	KeepAll bool `json:"keepAll,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BackupPolicyQuery when eager-loading is set.
-	Edges                   BackupPolicyEdges `json:"edges"`
-	repository_backuppolicy *int
+	Edges                    BackupPolicyEdges `json:"edges"`
+	repository_backup_policy *int
 }
 
 // BackupPolicyEdges holds the relations/edges for other nodes in the graph.
@@ -68,7 +68,7 @@ func (*BackupPolicy) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case backuppolicy.FieldName:
 			values[i] = new(sql.NullString)
-		case backuppolicy.ForeignKeys[0]: // repository_backuppolicy
+		case backuppolicy.ForeignKeys[0]: // repository_backup_policy
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type BackupPolicy", columns[i])
@@ -129,10 +129,10 @@ func (bp *BackupPolicy) assignValues(columns []string, values []interface{}) err
 			}
 		case backuppolicy.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field repository_backuppolicy", value)
+				return fmt.Errorf("unexpected type %T for edge-field repository_backup_policy", value)
 			} else if value.Valid {
-				bp.repository_backuppolicy = new(int)
-				*bp.repository_backuppolicy = int(value.Int64)
+				bp.repository_backup_policy = new(int)
+				*bp.repository_backup_policy = int(value.Int64)
 			}
 		}
 	}

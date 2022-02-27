@@ -385,10 +385,10 @@ func (msq *MinioS3ProviderQuery) sqlAll(ctx context.Context) ([]*MinioS3Provider
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*MinioS3Provider)
 		for i := range nodes {
-			if nodes[i].repository_minios3provider == nil {
+			if nodes[i].repository_minio_s3provider == nil {
 				continue
 			}
-			fk := *nodes[i].repository_minios3provider
+			fk := *nodes[i].repository_minio_s3provider
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +402,7 @@ func (msq *MinioS3ProviderQuery) sqlAll(ctx context.Context) ([]*MinioS3Provider
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "repository_minios3provider" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_minio_s3provider" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Repository = n

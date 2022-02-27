@@ -12,14 +12,14 @@ const (
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the localprovider in the database.
-	Table = "local_providers"
+	Table = "LocalProvider"
 	// RepositoryTable is the table that holds the repository relation/edge.
-	RepositoryTable = "local_providers"
+	RepositoryTable = "LocalProvider"
 	// RepositoryInverseTable is the table name for the Repository entity.
 	// It exists in this package in order to avoid circular dependency with the "repository" package.
 	RepositoryInverseTable = "repositories"
 	// RepositoryColumn is the table column denoting the repository relation/edge.
-	RepositoryColumn = "repository_localprovider"
+	RepositoryColumn = "repository_local_provider"
 )
 
 // Columns holds all SQL columns for localprovider fields.
@@ -28,10 +28,10 @@ var Columns = []string{
 	FieldRepoPath,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "local_providers"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "LocalProvider"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"repository_localprovider",
+	"repository_local_provider",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

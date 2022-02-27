@@ -30,8 +30,8 @@ type MinioS3Provider struct {
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MinioS3ProviderQuery when eager-loading is set.
-	Edges                      MinioS3ProviderEdges `json:"edges"`
-	repository_minios3provider *int
+	Edges                       MinioS3ProviderEdges `json:"edges"`
+	repository_minio_s3provider *int
 }
 
 // MinioS3ProviderEdges holds the relations/edges for other nodes in the graph.
@@ -66,7 +66,7 @@ func (*MinioS3Provider) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case minios3provider.FieldBucketName, minios3provider.FieldIP, minios3provider.FieldPort, minios3provider.FieldScheme, minios3provider.FieldAccessKeyID, minios3provider.FieldSecretAccessKey:
 			values[i] = new(sql.NullString)
-		case minios3provider.ForeignKeys[0]: // repository_minios3provider
+		case minios3provider.ForeignKeys[0]: // repository_minio_s3provider
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type MinioS3Provider", columns[i])
@@ -127,10 +127,10 @@ func (ms *MinioS3Provider) assignValues(columns []string, values []interface{}) 
 			}
 		case minios3provider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field repository_minios3provider", value)
+				return fmt.Errorf("unexpected type %T for edge-field repository_minio_s3provider", value)
 			} else if value.Valid {
-				ms.repository_minios3provider = new(int)
-				*ms.repository_minios3provider = int(value.Int64)
+				ms.repository_minio_s3provider = new(int)
+				*ms.repository_minio_s3provider = int(value.Int64)
 			}
 		}
 	}

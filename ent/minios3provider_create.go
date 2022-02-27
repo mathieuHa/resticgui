@@ -250,7 +250,7 @@ func (msc *MinioS3ProviderCreate) createSpec() (*MinioS3Provider, *sqlgraph.Crea
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.repository_minios3provider = &nodes[0]
+		_node.repository_minio_s3provider = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -627,25 +627,25 @@ func MaxSizeContainsFold(v string) predicate.Repository {
 	})
 }
 
-// HasBackupschedule applies the HasEdge predicate on the "backupschedule" edge.
-func HasBackupschedule() predicate.Repository {
+// HasBackupSchedule applies the HasEdge predicate on the "backupSchedule" edge.
+func HasBackupSchedule() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BackupscheduleTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BackupscheduleTable, BackupscheduleColumn),
+			sqlgraph.To(BackupScheduleTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackupScheduleTable, BackupScheduleColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasBackupscheduleWith applies the HasEdge predicate on the "backupschedule" edge with a given conditions (other predicates).
-func HasBackupscheduleWith(preds ...predicate.BackupSchedule) predicate.Repository {
+// HasBackupScheduleWith applies the HasEdge predicate on the "backupSchedule" edge with a given conditions (other predicates).
+func HasBackupScheduleWith(preds ...predicate.BackupSchedule) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BackupscheduleInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BackupscheduleTable, BackupscheduleColumn),
+			sqlgraph.To(BackupScheduleInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackupScheduleTable, BackupScheduleColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -655,25 +655,25 @@ func HasBackupscheduleWith(preds ...predicate.BackupSchedule) predicate.Reposito
 	})
 }
 
-// HasBackuppolicy applies the HasEdge predicate on the "backuppolicy" edge.
-func HasBackuppolicy() predicate.Repository {
+// HasBackupPolicy applies the HasEdge predicate on the "backupPolicy" edge.
+func HasBackupPolicy() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BackuppolicyTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BackuppolicyTable, BackuppolicyColumn),
+			sqlgraph.To(BackupPolicyTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackupPolicyTable, BackupPolicyColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasBackuppolicyWith applies the HasEdge predicate on the "backuppolicy" edge with a given conditions (other predicates).
-func HasBackuppolicyWith(preds ...predicate.BackupPolicy) predicate.Repository {
+// HasBackupPolicyWith applies the HasEdge predicate on the "backupPolicy" edge with a given conditions (other predicates).
+func HasBackupPolicyWith(preds ...predicate.BackupPolicy) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BackuppolicyInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BackuppolicyTable, BackuppolicyColumn),
+			sqlgraph.To(BackupPolicyInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BackupPolicyTable, BackupPolicyColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -683,25 +683,25 @@ func HasBackuppolicyWith(preds ...predicate.BackupPolicy) predicate.Repository {
 	})
 }
 
-// HasLocalprovider applies the HasEdge predicate on the "localprovider" edge.
-func HasLocalprovider() predicate.Repository {
+// HasLocalProvider applies the HasEdge predicate on the "localProvider" edge.
+func HasLocalProvider() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LocalproviderTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, LocalproviderTable, LocalproviderColumn),
+			sqlgraph.To(LocalProviderTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, LocalProviderTable, LocalProviderColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLocalproviderWith applies the HasEdge predicate on the "localprovider" edge with a given conditions (other predicates).
-func HasLocalproviderWith(preds ...predicate.LocalProvider) predicate.Repository {
+// HasLocalProviderWith applies the HasEdge predicate on the "localProvider" edge with a given conditions (other predicates).
+func HasLocalProviderWith(preds ...predicate.LocalProvider) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LocalproviderInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, LocalproviderTable, LocalproviderColumn),
+			sqlgraph.To(LocalProviderInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, LocalProviderTable, LocalProviderColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -711,25 +711,25 @@ func HasLocalproviderWith(preds ...predicate.LocalProvider) predicate.Repository
 	})
 }
 
-// HasB2provider applies the HasEdge predicate on the "b2provider" edge.
-func HasB2provider() predicate.Repository {
+// HasB2Provider applies the HasEdge predicate on the "B2Provider" edge.
+func HasB2Provider() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(B2providerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, B2providerTable, B2providerColumn),
+			sqlgraph.To(B2ProviderTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, B2ProviderTable, B2ProviderColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasB2providerWith applies the HasEdge predicate on the "b2provider" edge with a given conditions (other predicates).
-func HasB2providerWith(preds ...predicate.B2Provider) predicate.Repository {
+// HasB2ProviderWith applies the HasEdge predicate on the "B2Provider" edge with a given conditions (other predicates).
+func HasB2ProviderWith(preds ...predicate.B2Provider) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(B2providerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, B2providerTable, B2providerColumn),
+			sqlgraph.To(B2ProviderInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, B2ProviderTable, B2ProviderColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -739,25 +739,25 @@ func HasB2providerWith(preds ...predicate.B2Provider) predicate.Repository {
 	})
 }
 
-// HasAwss3provider applies the HasEdge predicate on the "awss3provider" edge.
-func HasAwss3provider() predicate.Repository {
+// HasAWSS3Provider applies the HasEdge predicate on the "AWSS3Provider" edge.
+func HasAWSS3Provider() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Awss3providerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, Awss3providerTable, Awss3providerColumn),
+			sqlgraph.To(AWSS3ProviderTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, AWSS3ProviderTable, AWSS3ProviderColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAwss3providerWith applies the HasEdge predicate on the "awss3provider" edge with a given conditions (other predicates).
-func HasAwss3providerWith(preds ...predicate.AWSS3Provider) predicate.Repository {
+// HasAWSS3ProviderWith applies the HasEdge predicate on the "AWSS3Provider" edge with a given conditions (other predicates).
+func HasAWSS3ProviderWith(preds ...predicate.AWSS3Provider) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Awss3providerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, Awss3providerTable, Awss3providerColumn),
+			sqlgraph.To(AWSS3ProviderInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, AWSS3ProviderTable, AWSS3ProviderColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -767,25 +767,25 @@ func HasAwss3providerWith(preds ...predicate.AWSS3Provider) predicate.Repository
 	})
 }
 
-// HasMinios3provider applies the HasEdge predicate on the "minios3provider" edge.
-func HasMinios3provider() predicate.Repository {
+// HasMinioS3Provider applies the HasEdge predicate on the "MinioS3Provider" edge.
+func HasMinioS3Provider() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Minios3providerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, Minios3providerTable, Minios3providerColumn),
+			sqlgraph.To(MinioS3ProviderTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, MinioS3ProviderTable, MinioS3ProviderColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasMinios3providerWith applies the HasEdge predicate on the "minios3provider" edge with a given conditions (other predicates).
-func HasMinios3providerWith(preds ...predicate.MinioS3Provider) predicate.Repository {
+// HasMinioS3ProviderWith applies the HasEdge predicate on the "MinioS3Provider" edge with a given conditions (other predicates).
+func HasMinioS3ProviderWith(preds ...predicate.MinioS3Provider) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Minios3providerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, Minios3providerTable, Minios3providerColumn),
+			sqlgraph.To(MinioS3ProviderInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, MinioS3ProviderTable, MinioS3ProviderColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

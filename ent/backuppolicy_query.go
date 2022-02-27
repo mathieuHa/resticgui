@@ -385,10 +385,10 @@ func (bpq *BackupPolicyQuery) sqlAll(ctx context.Context) ([]*BackupPolicy, erro
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*BackupPolicy)
 		for i := range nodes {
-			if nodes[i].repository_backuppolicy == nil {
+			if nodes[i].repository_backup_policy == nil {
 				continue
 			}
-			fk := *nodes[i].repository_backuppolicy
+			fk := *nodes[i].repository_backup_policy
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +402,7 @@ func (bpq *BackupPolicyQuery) sqlAll(ctx context.Context) ([]*BackupPolicy, erro
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "repository_backuppolicy" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_backup_policy" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Repository = n

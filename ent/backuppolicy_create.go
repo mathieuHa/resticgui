@@ -279,7 +279,7 @@ func (bpc *BackupPolicyCreate) createSpec() (*BackupPolicy, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.repository_backuppolicy = &nodes[0]
+		_node.repository_backup_policy = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

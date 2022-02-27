@@ -103,118 +103,118 @@ func (rc *RepositoryCreate) SetNillableMaxSize(s *string) *RepositoryCreate {
 	return rc
 }
 
-// SetBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID.
-func (rc *RepositoryCreate) SetBackupscheduleID(id int) *RepositoryCreate {
-	rc.mutation.SetBackupscheduleID(id)
+// SetBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by ID.
+func (rc *RepositoryCreate) SetBackupScheduleID(id int) *RepositoryCreate {
+	rc.mutation.SetBackupScheduleID(id)
 	return rc
 }
 
-// SetNillableBackupscheduleID sets the "backupschedule" edge to the BackupSchedule entity by ID if the given value is not nil.
-func (rc *RepositoryCreate) SetNillableBackupscheduleID(id *int) *RepositoryCreate {
+// SetNillableBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableBackupScheduleID(id *int) *RepositoryCreate {
 	if id != nil {
-		rc = rc.SetBackupscheduleID(*id)
+		rc = rc.SetBackupScheduleID(*id)
 	}
 	return rc
 }
 
-// SetBackupschedule sets the "backupschedule" edge to the BackupSchedule entity.
-func (rc *RepositoryCreate) SetBackupschedule(b *BackupSchedule) *RepositoryCreate {
-	return rc.SetBackupscheduleID(b.ID)
+// SetBackupSchedule sets the "backupSchedule" edge to the BackupSchedule entity.
+func (rc *RepositoryCreate) SetBackupSchedule(b *BackupSchedule) *RepositoryCreate {
+	return rc.SetBackupScheduleID(b.ID)
 }
 
-// SetBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by ID.
-func (rc *RepositoryCreate) SetBackuppolicyID(id int) *RepositoryCreate {
-	rc.mutation.SetBackuppolicyID(id)
+// SetBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by ID.
+func (rc *RepositoryCreate) SetBackupPolicyID(id int) *RepositoryCreate {
+	rc.mutation.SetBackupPolicyID(id)
 	return rc
 }
 
-// SetNillableBackuppolicyID sets the "backuppolicy" edge to the BackupPolicy entity by ID if the given value is not nil.
-func (rc *RepositoryCreate) SetNillableBackuppolicyID(id *int) *RepositoryCreate {
+// SetNillableBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableBackupPolicyID(id *int) *RepositoryCreate {
 	if id != nil {
-		rc = rc.SetBackuppolicyID(*id)
+		rc = rc.SetBackupPolicyID(*id)
 	}
 	return rc
 }
 
-// SetBackuppolicy sets the "backuppolicy" edge to the BackupPolicy entity.
-func (rc *RepositoryCreate) SetBackuppolicy(b *BackupPolicy) *RepositoryCreate {
-	return rc.SetBackuppolicyID(b.ID)
+// SetBackupPolicy sets the "backupPolicy" edge to the BackupPolicy entity.
+func (rc *RepositoryCreate) SetBackupPolicy(b *BackupPolicy) *RepositoryCreate {
+	return rc.SetBackupPolicyID(b.ID)
 }
 
-// SetLocalproviderID sets the "localprovider" edge to the LocalProvider entity by ID.
-func (rc *RepositoryCreate) SetLocalproviderID(id int) *RepositoryCreate {
-	rc.mutation.SetLocalproviderID(id)
+// SetLocalProviderID sets the "localProvider" edge to the LocalProvider entity by ID.
+func (rc *RepositoryCreate) SetLocalProviderID(id int) *RepositoryCreate {
+	rc.mutation.SetLocalProviderID(id)
 	return rc
 }
 
-// SetNillableLocalproviderID sets the "localprovider" edge to the LocalProvider entity by ID if the given value is not nil.
-func (rc *RepositoryCreate) SetNillableLocalproviderID(id *int) *RepositoryCreate {
+// SetNillableLocalProviderID sets the "localProvider" edge to the LocalProvider entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableLocalProviderID(id *int) *RepositoryCreate {
 	if id != nil {
-		rc = rc.SetLocalproviderID(*id)
+		rc = rc.SetLocalProviderID(*id)
 	}
 	return rc
 }
 
-// SetLocalprovider sets the "localprovider" edge to the LocalProvider entity.
-func (rc *RepositoryCreate) SetLocalprovider(l *LocalProvider) *RepositoryCreate {
-	return rc.SetLocalproviderID(l.ID)
+// SetLocalProvider sets the "localProvider" edge to the LocalProvider entity.
+func (rc *RepositoryCreate) SetLocalProvider(l *LocalProvider) *RepositoryCreate {
+	return rc.SetLocalProviderID(l.ID)
 }
 
-// SetB2providerID sets the "b2provider" edge to the B2Provider entity by ID.
-func (rc *RepositoryCreate) SetB2providerID(id int) *RepositoryCreate {
-	rc.mutation.SetB2providerID(id)
+// SetB2ProviderID sets the "B2Provider" edge to the B2Provider entity by ID.
+func (rc *RepositoryCreate) SetB2ProviderID(id int) *RepositoryCreate {
+	rc.mutation.SetB2ProviderID(id)
 	return rc
 }
 
-// SetNillableB2providerID sets the "b2provider" edge to the B2Provider entity by ID if the given value is not nil.
-func (rc *RepositoryCreate) SetNillableB2providerID(id *int) *RepositoryCreate {
+// SetNillableB2ProviderID sets the "B2Provider" edge to the B2Provider entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableB2ProviderID(id *int) *RepositoryCreate {
 	if id != nil {
-		rc = rc.SetB2providerID(*id)
+		rc = rc.SetB2ProviderID(*id)
 	}
 	return rc
 }
 
-// SetB2provider sets the "b2provider" edge to the B2Provider entity.
-func (rc *RepositoryCreate) SetB2provider(b *B2Provider) *RepositoryCreate {
-	return rc.SetB2providerID(b.ID)
+// SetB2Provider sets the "B2Provider" edge to the B2Provider entity.
+func (rc *RepositoryCreate) SetB2Provider(b *B2Provider) *RepositoryCreate {
+	return rc.SetB2ProviderID(b.ID)
 }
 
-// SetAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by ID.
-func (rc *RepositoryCreate) SetAwss3providerID(id int) *RepositoryCreate {
-	rc.mutation.SetAwss3providerID(id)
+// SetAWSS3ProviderID sets the "AWSS3Provider" edge to the AWSS3Provider entity by ID.
+func (rc *RepositoryCreate) SetAWSS3ProviderID(id int) *RepositoryCreate {
+	rc.mutation.SetAWSS3ProviderID(id)
 	return rc
 }
 
-// SetNillableAwss3providerID sets the "awss3provider" edge to the AWSS3Provider entity by ID if the given value is not nil.
-func (rc *RepositoryCreate) SetNillableAwss3providerID(id *int) *RepositoryCreate {
+// SetNillableAWSS3ProviderID sets the "AWSS3Provider" edge to the AWSS3Provider entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableAWSS3ProviderID(id *int) *RepositoryCreate {
 	if id != nil {
-		rc = rc.SetAwss3providerID(*id)
+		rc = rc.SetAWSS3ProviderID(*id)
 	}
 	return rc
 }
 
-// SetAwss3provider sets the "awss3provider" edge to the AWSS3Provider entity.
-func (rc *RepositoryCreate) SetAwss3provider(a *AWSS3Provider) *RepositoryCreate {
-	return rc.SetAwss3providerID(a.ID)
+// SetAWSS3Provider sets the "AWSS3Provider" edge to the AWSS3Provider entity.
+func (rc *RepositoryCreate) SetAWSS3Provider(a *AWSS3Provider) *RepositoryCreate {
+	return rc.SetAWSS3ProviderID(a.ID)
 }
 
-// SetMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by ID.
-func (rc *RepositoryCreate) SetMinios3providerID(id int) *RepositoryCreate {
-	rc.mutation.SetMinios3providerID(id)
+// SetMinioS3ProviderID sets the "MinioS3Provider" edge to the MinioS3Provider entity by ID.
+func (rc *RepositoryCreate) SetMinioS3ProviderID(id int) *RepositoryCreate {
+	rc.mutation.SetMinioS3ProviderID(id)
 	return rc
 }
 
-// SetNillableMinios3providerID sets the "minios3provider" edge to the MinioS3Provider entity by ID if the given value is not nil.
-func (rc *RepositoryCreate) SetNillableMinios3providerID(id *int) *RepositoryCreate {
+// SetNillableMinioS3ProviderID sets the "MinioS3Provider" edge to the MinioS3Provider entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableMinioS3ProviderID(id *int) *RepositoryCreate {
 	if id != nil {
-		rc = rc.SetMinios3providerID(*id)
+		rc = rc.SetMinioS3ProviderID(*id)
 	}
 	return rc
 }
 
-// SetMinios3provider sets the "minios3provider" edge to the MinioS3Provider entity.
-func (rc *RepositoryCreate) SetMinios3provider(m *MinioS3Provider) *RepositoryCreate {
-	return rc.SetMinios3providerID(m.ID)
+// SetMinioS3Provider sets the "MinioS3Provider" edge to the MinioS3Provider entity.
+func (rc *RepositoryCreate) SetMinioS3Provider(m *MinioS3Provider) *RepositoryCreate {
+	return rc.SetMinioS3ProviderID(m.ID)
 }
 
 // AddPathIDs adds the "path" edge to the Path entity by IDs.
@@ -416,12 +416,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		})
 		_node.MaxSize = value
 	}
-	if nodes := rc.mutation.BackupscheduleIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.BackupScheduleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   repository.BackupscheduleTable,
-			Columns: []string{repository.BackupscheduleColumn},
+			Table:   repository.BackupScheduleTable,
+			Columns: []string{repository.BackupScheduleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -435,12 +435,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.BackuppolicyIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.BackupPolicyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   repository.BackuppolicyTable,
-			Columns: []string{repository.BackuppolicyColumn},
+			Table:   repository.BackupPolicyTable,
+			Columns: []string{repository.BackupPolicyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -454,12 +454,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.LocalproviderIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.LocalProviderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   repository.LocalproviderTable,
-			Columns: []string{repository.LocalproviderColumn},
+			Table:   repository.LocalProviderTable,
+			Columns: []string{repository.LocalProviderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -473,12 +473,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.B2providerIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.B2ProviderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   repository.B2providerTable,
-			Columns: []string{repository.B2providerColumn},
+			Table:   repository.B2ProviderTable,
+			Columns: []string{repository.B2ProviderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -492,12 +492,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.Awss3providerIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.AWSS3ProviderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   repository.Awss3providerTable,
-			Columns: []string{repository.Awss3providerColumn},
+			Table:   repository.AWSS3ProviderTable,
+			Columns: []string{repository.AWSS3ProviderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -511,12 +511,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.Minios3providerIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.MinioS3ProviderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   repository.Minios3providerTable,
-			Columns: []string{repository.Minios3providerColumn},
+			Table:   repository.MinioS3ProviderTable,
+			Columns: []string{repository.MinioS3ProviderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

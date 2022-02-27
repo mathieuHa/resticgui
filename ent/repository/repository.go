@@ -24,64 +24,64 @@ const (
 	FieldPassword = "password"
 	// FieldMaxSize holds the string denoting the maxsize field in the database.
 	FieldMaxSize = "max_size"
-	// EdgeBackupschedule holds the string denoting the backupschedule edge name in mutations.
-	EdgeBackupschedule = "backupschedule"
-	// EdgeBackuppolicy holds the string denoting the backuppolicy edge name in mutations.
-	EdgeBackuppolicy = "backuppolicy"
-	// EdgeLocalprovider holds the string denoting the localprovider edge name in mutations.
-	EdgeLocalprovider = "localprovider"
-	// EdgeB2provider holds the string denoting the b2provider edge name in mutations.
-	EdgeB2provider = "b2provider"
-	// EdgeAwss3provider holds the string denoting the awss3provider edge name in mutations.
-	EdgeAwss3provider = "awss3provider"
-	// EdgeMinios3provider holds the string denoting the minios3provider edge name in mutations.
-	EdgeMinios3provider = "minios3provider"
+	// EdgeBackupSchedule holds the string denoting the backupschedule edge name in mutations.
+	EdgeBackupSchedule = "backupSchedule"
+	// EdgeBackupPolicy holds the string denoting the backuppolicy edge name in mutations.
+	EdgeBackupPolicy = "backupPolicy"
+	// EdgeLocalProvider holds the string denoting the localprovider edge name in mutations.
+	EdgeLocalProvider = "localProvider"
+	// EdgeB2Provider holds the string denoting the b2provider edge name in mutations.
+	EdgeB2Provider = "B2Provider"
+	// EdgeAWSS3Provider holds the string denoting the awss3provider edge name in mutations.
+	EdgeAWSS3Provider = "AWSS3Provider"
+	// EdgeMinioS3Provider holds the string denoting the minios3provider edge name in mutations.
+	EdgeMinioS3Provider = "MinioS3Provider"
 	// EdgePath holds the string denoting the path edge name in mutations.
 	EdgePath = "path"
 	// Table holds the table name of the repository in the database.
 	Table = "repositories"
-	// BackupscheduleTable is the table that holds the backupschedule relation/edge.
-	BackupscheduleTable = "BackupSchedule"
-	// BackupscheduleInverseTable is the table name for the BackupSchedule entity.
+	// BackupScheduleTable is the table that holds the backupSchedule relation/edge.
+	BackupScheduleTable = "BackupSchedule"
+	// BackupScheduleInverseTable is the table name for the BackupSchedule entity.
 	// It exists in this package in order to avoid circular dependency with the "backupschedule" package.
-	BackupscheduleInverseTable = "BackupSchedule"
-	// BackupscheduleColumn is the table column denoting the backupschedule relation/edge.
-	BackupscheduleColumn = "repository_backupschedule"
-	// BackuppolicyTable is the table that holds the backuppolicy relation/edge.
-	BackuppolicyTable = "backup_policies"
-	// BackuppolicyInverseTable is the table name for the BackupPolicy entity.
+	BackupScheduleInverseTable = "BackupSchedule"
+	// BackupScheduleColumn is the table column denoting the backupSchedule relation/edge.
+	BackupScheduleColumn = "repository_backup_schedule"
+	// BackupPolicyTable is the table that holds the backupPolicy relation/edge.
+	BackupPolicyTable = "BackupPolicy"
+	// BackupPolicyInverseTable is the table name for the BackupPolicy entity.
 	// It exists in this package in order to avoid circular dependency with the "backuppolicy" package.
-	BackuppolicyInverseTable = "backup_policies"
-	// BackuppolicyColumn is the table column denoting the backuppolicy relation/edge.
-	BackuppolicyColumn = "repository_backuppolicy"
-	// LocalproviderTable is the table that holds the localprovider relation/edge.
-	LocalproviderTable = "local_providers"
-	// LocalproviderInverseTable is the table name for the LocalProvider entity.
+	BackupPolicyInverseTable = "BackupPolicy"
+	// BackupPolicyColumn is the table column denoting the backupPolicy relation/edge.
+	BackupPolicyColumn = "repository_backup_policy"
+	// LocalProviderTable is the table that holds the localProvider relation/edge.
+	LocalProviderTable = "LocalProvider"
+	// LocalProviderInverseTable is the table name for the LocalProvider entity.
 	// It exists in this package in order to avoid circular dependency with the "localprovider" package.
-	LocalproviderInverseTable = "local_providers"
-	// LocalproviderColumn is the table column denoting the localprovider relation/edge.
-	LocalproviderColumn = "repository_localprovider"
-	// B2providerTable is the table that holds the b2provider relation/edge.
-	B2providerTable = "b2providers"
-	// B2providerInverseTable is the table name for the B2Provider entity.
+	LocalProviderInverseTable = "LocalProvider"
+	// LocalProviderColumn is the table column denoting the localProvider relation/edge.
+	LocalProviderColumn = "repository_local_provider"
+	// B2ProviderTable is the table that holds the B2Provider relation/edge.
+	B2ProviderTable = "B2Provider"
+	// B2ProviderInverseTable is the table name for the B2Provider entity.
 	// It exists in this package in order to avoid circular dependency with the "b2provider" package.
-	B2providerInverseTable = "b2providers"
-	// B2providerColumn is the table column denoting the b2provider relation/edge.
-	B2providerColumn = "repository_b2provider"
-	// Awss3providerTable is the table that holds the awss3provider relation/edge.
-	Awss3providerTable = "awss3providers"
-	// Awss3providerInverseTable is the table name for the AWSS3Provider entity.
+	B2ProviderInverseTable = "B2Provider"
+	// B2ProviderColumn is the table column denoting the B2Provider relation/edge.
+	B2ProviderColumn = "repository_b2provider"
+	// AWSS3ProviderTable is the table that holds the AWSS3Provider relation/edge.
+	AWSS3ProviderTable = "AWSS3Provider"
+	// AWSS3ProviderInverseTable is the table name for the AWSS3Provider entity.
 	// It exists in this package in order to avoid circular dependency with the "awss3provider" package.
-	Awss3providerInverseTable = "awss3providers"
-	// Awss3providerColumn is the table column denoting the awss3provider relation/edge.
-	Awss3providerColumn = "repository_awss3provider"
-	// Minios3providerTable is the table that holds the minios3provider relation/edge.
-	Minios3providerTable = "minio_s3providers"
-	// Minios3providerInverseTable is the table name for the MinioS3Provider entity.
+	AWSS3ProviderInverseTable = "AWSS3Provider"
+	// AWSS3ProviderColumn is the table column denoting the AWSS3Provider relation/edge.
+	AWSS3ProviderColumn = "repository_awss3provider"
+	// MinioS3ProviderTable is the table that holds the MinioS3Provider relation/edge.
+	MinioS3ProviderTable = "MinioS3Provider"
+	// MinioS3ProviderInverseTable is the table name for the MinioS3Provider entity.
 	// It exists in this package in order to avoid circular dependency with the "minios3provider" package.
-	Minios3providerInverseTable = "minio_s3providers"
-	// Minios3providerColumn is the table column denoting the minios3provider relation/edge.
-	Minios3providerColumn = "repository_minios3provider"
+	MinioS3ProviderInverseTable = "MinioS3Provider"
+	// MinioS3ProviderColumn is the table column denoting the MinioS3Provider relation/edge.
+	MinioS3ProviderColumn = "repository_minio_s3provider"
 	// PathTable is the table that holds the path relation/edge.
 	PathTable = "paths"
 	// PathInverseTable is the table name for the Path entity.

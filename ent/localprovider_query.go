@@ -385,10 +385,10 @@ func (lpq *LocalProviderQuery) sqlAll(ctx context.Context) ([]*LocalProvider, er
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*LocalProvider)
 		for i := range nodes {
-			if nodes[i].repository_localprovider == nil {
+			if nodes[i].repository_local_provider == nil {
 				continue
 			}
-			fk := *nodes[i].repository_localprovider
+			fk := *nodes[i].repository_local_provider
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +402,7 @@ func (lpq *LocalProviderQuery) sqlAll(ctx context.Context) ([]*LocalProvider, er
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "repository_localprovider" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_local_provider" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Repository = n

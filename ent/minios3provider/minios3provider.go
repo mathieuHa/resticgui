@@ -22,14 +22,14 @@ const (
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the minios3provider in the database.
-	Table = "minio_s3providers"
+	Table = "MinioS3Provider"
 	// RepositoryTable is the table that holds the repository relation/edge.
-	RepositoryTable = "minio_s3providers"
+	RepositoryTable = "MinioS3Provider"
 	// RepositoryInverseTable is the table name for the Repository entity.
 	// It exists in this package in order to avoid circular dependency with the "repository" package.
 	RepositoryInverseTable = "repositories"
 	// RepositoryColumn is the table column denoting the repository relation/edge.
-	RepositoryColumn = "repository_minios3provider"
+	RepositoryColumn = "repository_minio_s3provider"
 )
 
 // Columns holds all SQL columns for minios3provider fields.
@@ -43,10 +43,10 @@ var Columns = []string{
 	FieldSecretAccessKey,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "minio_s3providers"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "MinioS3Provider"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"repository_minios3provider",
+	"repository_minio_s3provider",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
