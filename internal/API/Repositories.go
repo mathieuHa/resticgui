@@ -37,12 +37,12 @@ func QueryRepositories(c *gin.Context) {
 
 	repositories, err := db.Repository.
 		Query().
-		WithBackupschedule().
-		WithBackuppolicy().
-		WithAwss3provider().
-		WithB2provider().
-		WithLocalprovider().
-		WithMinios3provider().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
 		WithPath().
 		All(context.Background())
 
@@ -80,12 +80,12 @@ func GetRepository(c *gin.Context) {
 
 	repository, err := db.Repository.
 		Query().
-		WithBackupschedule().
-		WithBackuppolicy().
-		WithAwss3provider().
-		WithB2provider().
-		WithLocalprovider().
-		WithMinios3provider().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
 		WithPath().
 		Where(repository.ID(newId)).
 		Only(context.Background())
@@ -140,23 +140,23 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// create backupSchedule
-	if repo.Edges.Backupschedule != nil {
+	if repo.Edges.BackupSchedule != nil {
 		_, err = db.BackupSchedule.
 			Create().
-			SetChoice(repo.Edges.Backupschedule.Choice).
-			SetCronSyntax(repo.Edges.Backupschedule.CronSyntax).
-			SetDay(repo.Edges.Backupschedule.Day).
-			SetHour(repo.Edges.Backupschedule.Hour).
-			SetEveryDay(repo.Edges.Backupschedule.EveryDay).
-			SetEveryWeek(repo.Edges.Backupschedule.EveryWeek).
-			SetEveryMonth(repo.Edges.Backupschedule.EveryMonth).
-			SetEveryMonday(repo.Edges.Backupschedule.EveryMonday).
-			SetEveryTuesday(repo.Edges.Backupschedule.EveryTuesday).
-			SetEveryWednesday(repo.Edges.Backupschedule.EveryWednesday).
-			SetEveryThursday(repo.Edges.Backupschedule.EveryThursday).
-			SetEveryFriday(repo.Edges.Backupschedule.EveryFriday).
-			SetEverySaturday(repo.Edges.Backupschedule.EverySaturday).
-			SetEverySunday(repo.Edges.Backupschedule.EverySunday).
+			SetChoice(repo.Edges.BackupSchedule.Choice).
+			SetCronSyntax(repo.Edges.BackupSchedule.CronSyntax).
+			SetDay(repo.Edges.BackupSchedule.Day).
+			SetHour(repo.Edges.BackupSchedule.Hour).
+			SetEveryDay(repo.Edges.BackupSchedule.EveryDay).
+			SetEveryWeek(repo.Edges.BackupSchedule.EveryWeek).
+			SetEveryMonth(repo.Edges.BackupSchedule.EveryMonth).
+			SetEveryMonday(repo.Edges.BackupSchedule.EveryMonday).
+			SetEveryTuesday(repo.Edges.BackupSchedule.EveryTuesday).
+			SetEveryWednesday(repo.Edges.BackupSchedule.EveryWednesday).
+			SetEveryThursday(repo.Edges.BackupSchedule.EveryThursday).
+			SetEveryFriday(repo.Edges.BackupSchedule.EveryFriday).
+			SetEverySaturday(repo.Edges.BackupSchedule.EverySaturday).
+			SetEverySunday(repo.Edges.BackupSchedule.EverySunday).
 			SetRepository(newRepository).
 			Save(ctx)
 
@@ -168,15 +168,15 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// create backupPolicy
-	if repo.Edges.Backuppolicy != nil {
+	if repo.Edges.BackupPolicy != nil {
 		_, err = db.BackupPolicy.
 			Create().
-			SetKeepAll(repo.Edges.Backuppolicy.KeepAll).
-			SetName(repo.Edges.Backuppolicy.Name).
-			SetNbLastBackup(repo.Edges.Backuppolicy.NbLastBackup).
-			SetOneByDay(repo.Edges.Backuppolicy.OneByDay).
-			SetOneByHour(repo.Edges.Backuppolicy.OneByHour).
-			SetOneByMonth(repo.Edges.Backuppolicy.OneByMonth).
+			SetKeepAll(repo.Edges.BackupPolicy.KeepAll).
+			SetName(repo.Edges.BackupPolicy.Name).
+			SetNbLastBackup(repo.Edges.BackupPolicy.NbLastBackup).
+			SetOneByDay(repo.Edges.BackupPolicy.OneByDay).
+			SetOneByHour(repo.Edges.BackupPolicy.OneByHour).
+			SetOneByMonth(repo.Edges.BackupPolicy.OneByMonth).
 			SetRepository(newRepository).
 			Save(ctx)
 
@@ -188,13 +188,13 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// create AWSS3Provider
-	if repo.Edges.Awss3provider != nil {
+	if repo.Edges.AWSS3Provider != nil {
 		_, err = db.AWSS3Provider.
 			Create().
-			SetAccessKeyID(repo.Edges.Awss3provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.Awss3provider.SecretAccessKey).
-			SetBucketName(repo.Edges.Awss3provider.BucketName).
-			SetDefaultRegion(repo.Edges.Awss3provider.DefaultRegion).
+			SetAccessKeyID(repo.Edges.AWSS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.AWSS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.AWSS3Provider.BucketName).
+			SetDefaultRegion(repo.Edges.AWSS3Provider.DefaultRegion).
 			SetRepository(newRepository).
 			Save(ctx)
 
@@ -206,12 +206,12 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// create B2Provider
-	if repo.Edges.B2provider != nil {
+	if repo.Edges.B2Provider != nil {
 		_, err = db.B2Provider.
 			Create().
-			SetAccountID(repo.Edges.B2provider.AccountID).
-			SetAccountKey(repo.Edges.B2provider.AccountKey).
-			SetBucketName(repo.Edges.B2provider.BucketName).
+			SetAccountID(repo.Edges.B2Provider.AccountID).
+			SetAccountKey(repo.Edges.B2Provider.AccountKey).
+			SetBucketName(repo.Edges.B2Provider.BucketName).
 			SetRepository(newRepository).
 			Save(ctx)
 
@@ -223,10 +223,10 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// create LocalProvider
-	if repo.Edges.Localprovider != nil {
+	if repo.Edges.LocalProvider != nil {
 		_, err = db.LocalProvider.
 			Create().
-			SetRepoPath(repo.Edges.Localprovider.RepoPath).
+			SetRepoPath(repo.Edges.LocalProvider.RepoPath).
 			SetRepository(newRepository).
 			Save(ctx)
 
@@ -238,15 +238,15 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// create MinioS3Provider
-	if repo.Edges.Minios3provider != nil {
+	if repo.Edges.MinioS3Provider != nil {
 		_, err = db.MinioS3Provider.
 			Create().
-			SetAccessKeyID(repo.Edges.Minios3provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.Minios3provider.SecretAccessKey).
-			SetBucketName(repo.Edges.Minios3provider.BucketName).
-			SetIP(repo.Edges.Minios3provider.IP).
-			SetPort(repo.Edges.Minios3provider.Port).
-			SetScheme(repo.Edges.Minios3provider.Scheme).
+			SetAccessKeyID(repo.Edges.MinioS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.MinioS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.MinioS3Provider.BucketName).
+			SetIP(repo.Edges.MinioS3Provider.IP).
+			SetPort(repo.Edges.MinioS3Provider.Port).
+			SetScheme(repo.Edges.MinioS3Provider.Scheme).
 			SetRepository(newRepository).
 			Save(ctx)
 
@@ -291,12 +291,12 @@ func CreateRepository(c *gin.Context) {
 
 	repository, err := db.Repository.
 		Query().
-		WithBackupschedule().
-		WithBackuppolicy().
-		WithAwss3provider().
-		WithB2provider().
-		WithLocalprovider().
-		WithMinios3provider().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
 		WithPath().
 		Where(repository.ID(newRepository.ID)).
 		Only(ctx)
@@ -358,23 +358,23 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Update backup schedule
-	if repo.Edges.Backupschedule != nil {
+	if repo.Edges.BackupSchedule != nil {
 		_, err = db.BackupSchedule.
-			UpdateOneID(repo.Edges.Backupschedule.ID).
-			SetChoice(repo.Edges.Backupschedule.Choice).
-			SetCronSyntax(repo.Edges.Backupschedule.CronSyntax).
-			SetDay(repo.Edges.Backupschedule.Day).
-			SetHour(repo.Edges.Backupschedule.Hour).
-			SetEveryDay(repo.Edges.Backupschedule.EveryDay).
-			SetEveryWeek(repo.Edges.Backupschedule.EveryWeek).
-			SetEveryMonth(repo.Edges.Backupschedule.EveryMonth).
-			SetEveryMonday(repo.Edges.Backupschedule.EveryMonday).
-			SetEveryTuesday(repo.Edges.Backupschedule.EveryTuesday).
-			SetEveryWednesday(repo.Edges.Backupschedule.EveryWednesday).
-			SetEveryThursday(repo.Edges.Backupschedule.EveryThursday).
-			SetEveryFriday(repo.Edges.Backupschedule.EveryFriday).
-			SetEverySaturday(repo.Edges.Backupschedule.EverySaturday).
-			SetEverySunday(repo.Edges.Backupschedule.EverySunday).
+			UpdateOneID(repo.Edges.BackupSchedule.ID).
+			SetChoice(repo.Edges.BackupSchedule.Choice).
+			SetCronSyntax(repo.Edges.BackupSchedule.CronSyntax).
+			SetDay(repo.Edges.BackupSchedule.Day).
+			SetHour(repo.Edges.BackupSchedule.Hour).
+			SetEveryDay(repo.Edges.BackupSchedule.EveryDay).
+			SetEveryWeek(repo.Edges.BackupSchedule.EveryWeek).
+			SetEveryMonth(repo.Edges.BackupSchedule.EveryMonth).
+			SetEveryMonday(repo.Edges.BackupSchedule.EveryMonday).
+			SetEveryTuesday(repo.Edges.BackupSchedule.EveryTuesday).
+			SetEveryWednesday(repo.Edges.BackupSchedule.EveryWednesday).
+			SetEveryThursday(repo.Edges.BackupSchedule.EveryThursday).
+			SetEveryFriday(repo.Edges.BackupSchedule.EveryFriday).
+			SetEverySaturday(repo.Edges.BackupSchedule.EverySaturday).
+			SetEverySunday(repo.Edges.BackupSchedule.EverySunday).
 			Save(ctx)
 
 		if err != nil {
@@ -385,15 +385,15 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Update backupPolicy
-	if repo.Edges.Backuppolicy != nil {
+	if repo.Edges.BackupPolicy != nil {
 		_, err = db.BackupPolicy.
-			UpdateOneID(repo.Edges.Backuppolicy.ID).
-			SetKeepAll(repo.Edges.Backuppolicy.KeepAll).
-			SetName(repo.Edges.Backuppolicy.Name).
-			SetNbLastBackup(repo.Edges.Backuppolicy.NbLastBackup).
-			SetOneByDay(repo.Edges.Backuppolicy.OneByDay).
-			SetOneByHour(repo.Edges.Backuppolicy.OneByHour).
-			SetOneByMonth(repo.Edges.Backuppolicy.OneByMonth).
+			UpdateOneID(repo.Edges.BackupPolicy.ID).
+			SetKeepAll(repo.Edges.BackupPolicy.KeepAll).
+			SetName(repo.Edges.BackupPolicy.Name).
+			SetNbLastBackup(repo.Edges.BackupPolicy.NbLastBackup).
+			SetOneByDay(repo.Edges.BackupPolicy.OneByDay).
+			SetOneByHour(repo.Edges.BackupPolicy.OneByHour).
+			SetOneByMonth(repo.Edges.BackupPolicy.OneByMonth).
 			Save(ctx)
 
 		if err != nil {
@@ -404,13 +404,13 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Update AWSS3Provider
-	if repo.Edges.Awss3provider != nil {
+	if repo.Edges.AWSS3Provider != nil {
 		_, err = db.AWSS3Provider.
-			UpdateOneID(repo.Edges.Awss3provider.ID).
-			SetAccessKeyID(repo.Edges.Awss3provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.Awss3provider.SecretAccessKey).
-			SetBucketName(repo.Edges.Awss3provider.BucketName).
-			SetDefaultRegion(repo.Edges.Awss3provider.DefaultRegion).
+			UpdateOneID(repo.Edges.AWSS3Provider.ID).
+			SetAccessKeyID(repo.Edges.AWSS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.AWSS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.AWSS3Provider.BucketName).
+			SetDefaultRegion(repo.Edges.AWSS3Provider.DefaultRegion).
 			Save(ctx)
 
 		if err != nil {
@@ -421,12 +421,12 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Update B2Provider
-	if repo.Edges.B2provider != nil {
+	if repo.Edges.B2Provider != nil {
 		_, err = db.B2Provider.
-			UpdateOneID(repo.Edges.B2provider.ID).
-			SetAccountID(repo.Edges.B2provider.AccountID).
-			SetAccountKey(repo.Edges.B2provider.AccountKey).
-			SetBucketName(repo.Edges.B2provider.BucketName).
+			UpdateOneID(repo.Edges.B2Provider.ID).
+			SetAccountID(repo.Edges.B2Provider.AccountID).
+			SetAccountKey(repo.Edges.B2Provider.AccountKey).
+			SetBucketName(repo.Edges.B2Provider.BucketName).
 			Save(ctx)
 
 		if err != nil {
@@ -437,10 +437,10 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// update LocalProvider
-	if repo.Edges.Localprovider != nil {
+	if repo.Edges.LocalProvider != nil {
 		_, err = db.LocalProvider.
-			UpdateOneID(repo.Edges.Localprovider.ID).
-			SetRepoPath(repo.Edges.Localprovider.RepoPath).
+			UpdateOneID(repo.Edges.LocalProvider.ID).
+			SetRepoPath(repo.Edges.LocalProvider.RepoPath).
 			Save(ctx)
 
 		if err != nil {
@@ -451,15 +451,15 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// update MinioS3Provider
-	if repo.Edges.Minios3provider != nil {
+	if repo.Edges.MinioS3Provider != nil {
 		_, err = db.MinioS3Provider.
-			UpdateOneID(repo.Edges.Minios3provider.ID).
-			SetAccessKeyID(repo.Edges.Minios3provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.Minios3provider.SecretAccessKey).
-			SetBucketName(repo.Edges.Minios3provider.BucketName).
-			SetIP(repo.Edges.Minios3provider.IP).
-			SetPort(repo.Edges.Minios3provider.Port).
-			SetScheme(repo.Edges.Minios3provider.Scheme).
+			UpdateOneID(repo.Edges.MinioS3Provider.ID).
+			SetAccessKeyID(repo.Edges.MinioS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.MinioS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.MinioS3Provider.BucketName).
+			SetIP(repo.Edges.MinioS3Provider.IP).
+			SetPort(repo.Edges.MinioS3Provider.Port).
+			SetScheme(repo.Edges.MinioS3Provider.Scheme).
 			Save(ctx)
 
 		if err != nil {
@@ -508,12 +508,12 @@ func EditRepository(c *gin.Context) {
 	// Fetch repository after update
 	repository, err := db.Repository.
 		Query().
-		WithBackupschedule().
-		WithBackuppolicy().
-		WithAwss3provider().
-		WithB2provider().
-		WithLocalprovider().
-		WithMinios3provider().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
 		WithPath().
 		Where(repository.ID(newId)).
 		First(ctx)

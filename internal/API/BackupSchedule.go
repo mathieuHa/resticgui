@@ -150,12 +150,12 @@ func addScheduledBackup(repository *ent.Repository) bool {
 	if cr != nil {
 
 		// First we remove the previous job launched for this repository
-		if repository.Edges.Backupschedule.CronID >= 0 {
-			cr.Remove(cron.EntryID(repository.Edges.Backupschedule.CronID))
+		if repository.Edges.BackupSchedule.CronID >= 0 {
+			cr.Remove(cron.EntryID(repository.Edges.BackupSchedule.CronID))
 		}
 		// Then we had the new job to be run and register it
 		var err error
-		timing := getScheduleStringSyntax(*repository.Edges.Backupschedule)
+		timing := getScheduleStringSyntax(*repository.Edges.BackupSchedule)
 		log.Debug().Msgf("timing = %v", timing)
 		// repository.Edges.Backupschedule.CronID, err = cr.AddFunc(timing, func() {
 		// 	log.Debug().Msgf("JOB HAS RUN")

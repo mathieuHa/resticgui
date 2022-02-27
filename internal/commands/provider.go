@@ -15,18 +15,18 @@ func getProviderData(repository ent.Repository) ([]string, []string) {
 	env = append(env, repository.Password)
 	switch repository.Provider {
 	case "local":
-		args = append(args, getLocalRepositoryFormat(*repository.Edges.Localprovider))
+		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
 	case "b2":
-		args = append(args, getB2RepositoryFormat(*repository.Edges.B2provider))
-		env = append(args, getB2EnvFormat(*repository.Edges.B2provider)...)
+		args = append(args, getB2RepositoryFormat(*repository.Edges.B2Provider))
+		env = append(args, getB2EnvFormat(*repository.Edges.B2Provider)...)
 	case "aws":
-		args = append(args, getAmazonS3RepositoryFormat(*repository.Edges.Awss3provider))
-		env = append(args, getAmazonS3EnvFormat(*repository.Edges.Awss3provider)...)
+		args = append(args, getAmazonS3RepositoryFormat(*repository.Edges.AWSS3Provider))
+		env = append(args, getAmazonS3EnvFormat(*repository.Edges.AWSS3Provider)...)
 	case "minio":
-		args = append(args, getMinioS3RepositoryFormat(*repository.Edges.Minios3provider))
-		env = append(args, getMinioS3EnvFormat(*repository.Edges.Minios3provider)...)
+		args = append(args, getMinioS3RepositoryFormat(*repository.Edges.MinioS3Provider))
+		env = append(args, getMinioS3EnvFormat(*repository.Edges.MinioS3Provider)...)
 	default:
-		args = append(args, getLocalRepositoryFormat(*repository.Edges.Localprovider))
+		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
 	}
 	return args, env
 
