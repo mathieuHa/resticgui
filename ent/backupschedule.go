@@ -32,8 +32,8 @@ type BackupSchedule struct {
 	EveryWednesday bool `json:"everyWednesday,omitempty"`
 	// EveryThursday holds the value of the "everyThursday" field.
 	EveryThursday bool `json:"everyThursday,omitempty"`
-	// EveryTriday holds the value of the "everyTriday" field.
-	EveryTriday bool `json:"everyTriday,omitempty"`
+	// EveryFriday holds the value of the "everyFriday" field.
+	EveryFriday bool `json:"everyFriday,omitempty"`
 	// EverySaturday holds the value of the "everySaturday" field.
 	EverySaturday bool `json:"everySaturday,omitempty"`
 	// EverySunday holds the value of the "everySunday" field.
@@ -82,7 +82,7 @@ func (*BackupSchedule) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case backupschedule.FieldEveryDay, backupschedule.FieldEveryWeek, backupschedule.FieldEveryMonth, backupschedule.FieldEveryMonday, backupschedule.FieldEveryTuesday, backupschedule.FieldEveryWednesday, backupschedule.FieldEveryThursday, backupschedule.FieldEveryTriday, backupschedule.FieldEverySaturday, backupschedule.FieldEverySunday:
+		case backupschedule.FieldEveryDay, backupschedule.FieldEveryWeek, backupschedule.FieldEveryMonth, backupschedule.FieldEveryMonday, backupschedule.FieldEveryTuesday, backupschedule.FieldEveryWednesday, backupschedule.FieldEveryThursday, backupschedule.FieldEveryFriday, backupschedule.FieldEverySaturday, backupschedule.FieldEverySunday:
 			values[i] = new(sql.NullBool)
 		case backupschedule.FieldID, backupschedule.FieldCronID:
 			values[i] = new(sql.NullInt64)
@@ -159,11 +159,11 @@ func (bs *BackupSchedule) assignValues(columns []string, values []interface{}) e
 			} else if value.Valid {
 				bs.EveryThursday = value.Bool
 			}
-		case backupschedule.FieldEveryTriday:
+		case backupschedule.FieldEveryFriday:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field everyTriday", values[i])
+				return fmt.Errorf("unexpected type %T for field everyFriday", values[i])
 			} else if value.Valid {
-				bs.EveryTriday = value.Bool
+				bs.EveryFriday = value.Bool
 			}
 		case backupschedule.FieldEverySaturday:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -263,8 +263,8 @@ func (bs *BackupSchedule) String() string {
 	builder.WriteString(fmt.Sprintf("%v", bs.EveryWednesday))
 	builder.WriteString(", everyThursday=")
 	builder.WriteString(fmt.Sprintf("%v", bs.EveryThursday))
-	builder.WriteString(", everyTriday=")
-	builder.WriteString(fmt.Sprintf("%v", bs.EveryTriday))
+	builder.WriteString(", everyFriday=")
+	builder.WriteString(fmt.Sprintf("%v", bs.EveryFriday))
 	builder.WriteString(", everySaturday=")
 	builder.WriteString(fmt.Sprintf("%v", bs.EverySaturday))
 	builder.WriteString(", everySunday=")

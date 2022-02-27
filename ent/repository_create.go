@@ -341,11 +341,6 @@ func (rc *RepositoryCreate) check() error {
 	if _, ok := rc.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Repository.active"`)}
 	}
-	if v, ok := rc.mutation.Password(); ok {
-		if err := repository.PasswordValidator(v); err != nil {
-			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "Repository.password": %w`, err)}
-		}
-	}
 	return nil
 }
 

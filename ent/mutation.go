@@ -1853,7 +1853,7 @@ type BackupScheduleMutation struct {
 	everyTuesday      *bool
 	everyWednesday    *bool
 	everyThursday     *bool
-	everyTriday       *bool
+	everyFriday       *bool
 	everySaturday     *bool
 	everySunday       *bool
 	hour              *string
@@ -2256,40 +2256,40 @@ func (m *BackupScheduleMutation) ResetEveryThursday() {
 	m.everyThursday = nil
 }
 
-// SetEveryTriday sets the "everyTriday" field.
-func (m *BackupScheduleMutation) SetEveryTriday(b bool) {
-	m.everyTriday = &b
+// SetEveryFriday sets the "everyFriday" field.
+func (m *BackupScheduleMutation) SetEveryFriday(b bool) {
+	m.everyFriday = &b
 }
 
-// EveryTriday returns the value of the "everyTriday" field in the mutation.
-func (m *BackupScheduleMutation) EveryTriday() (r bool, exists bool) {
-	v := m.everyTriday
+// EveryFriday returns the value of the "everyFriday" field in the mutation.
+func (m *BackupScheduleMutation) EveryFriday() (r bool, exists bool) {
+	v := m.everyFriday
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEveryTriday returns the old "everyTriday" field's value of the BackupSchedule entity.
+// OldEveryFriday returns the old "everyFriday" field's value of the BackupSchedule entity.
 // If the BackupSchedule object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupScheduleMutation) OldEveryTriday(ctx context.Context) (v bool, err error) {
+func (m *BackupScheduleMutation) OldEveryFriday(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEveryTriday is only allowed on UpdateOne operations")
+		return v, errors.New("OldEveryFriday is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEveryTriday requires an ID field in the mutation")
+		return v, errors.New("OldEveryFriday requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEveryTriday: %w", err)
+		return v, fmt.Errorf("querying old value for OldEveryFriday: %w", err)
 	}
-	return oldValue.EveryTriday, nil
+	return oldValue.EveryFriday, nil
 }
 
-// ResetEveryTriday resets all changes to the "everyTriday" field.
-func (m *BackupScheduleMutation) ResetEveryTriday() {
-	m.everyTriday = nil
+// ResetEveryFriday resets all changes to the "everyFriday" field.
+func (m *BackupScheduleMutation) ResetEveryFriday() {
+	m.everyFriday = nil
 }
 
 // SetEverySaturday sets the "everySaturday" field.
@@ -2395,9 +2395,22 @@ func (m *BackupScheduleMutation) OldHour(ctx context.Context) (v string, err err
 	return oldValue.Hour, nil
 }
 
+// ClearHour clears the value of the "hour" field.
+func (m *BackupScheduleMutation) ClearHour() {
+	m.hour = nil
+	m.clearedFields[backupschedule.FieldHour] = struct{}{}
+}
+
+// HourCleared returns if the "hour" field was cleared in this mutation.
+func (m *BackupScheduleMutation) HourCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldHour]
+	return ok
+}
+
 // ResetHour resets all changes to the "hour" field.
 func (m *BackupScheduleMutation) ResetHour() {
 	m.hour = nil
+	delete(m.clearedFields, backupschedule.FieldHour)
 }
 
 // SetDay sets the "day" field.
@@ -2431,9 +2444,22 @@ func (m *BackupScheduleMutation) OldDay(ctx context.Context) (v string, err erro
 	return oldValue.Day, nil
 }
 
+// ClearDay clears the value of the "day" field.
+func (m *BackupScheduleMutation) ClearDay() {
+	m.day = nil
+	m.clearedFields[backupschedule.FieldDay] = struct{}{}
+}
+
+// DayCleared returns if the "day" field was cleared in this mutation.
+func (m *BackupScheduleMutation) DayCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldDay]
+	return ok
+}
+
 // ResetDay resets all changes to the "day" field.
 func (m *BackupScheduleMutation) ResetDay() {
 	m.day = nil
+	delete(m.clearedFields, backupschedule.FieldDay)
 }
 
 // SetInterval sets the "interval" field.
@@ -2467,9 +2493,22 @@ func (m *BackupScheduleMutation) OldInterval(ctx context.Context) (v string, err
 	return oldValue.Interval, nil
 }
 
+// ClearInterval clears the value of the "interval" field.
+func (m *BackupScheduleMutation) ClearInterval() {
+	m.interval = nil
+	m.clearedFields[backupschedule.FieldInterval] = struct{}{}
+}
+
+// IntervalCleared returns if the "interval" field was cleared in this mutation.
+func (m *BackupScheduleMutation) IntervalCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldInterval]
+	return ok
+}
+
 // ResetInterval resets all changes to the "interval" field.
 func (m *BackupScheduleMutation) ResetInterval() {
 	m.interval = nil
+	delete(m.clearedFields, backupschedule.FieldInterval)
 }
 
 // SetCronSyntax sets the "cronSyntax" field.
@@ -2503,9 +2542,22 @@ func (m *BackupScheduleMutation) OldCronSyntax(ctx context.Context) (v string, e
 	return oldValue.CronSyntax, nil
 }
 
+// ClearCronSyntax clears the value of the "cronSyntax" field.
+func (m *BackupScheduleMutation) ClearCronSyntax() {
+	m.cronSyntax = nil
+	m.clearedFields[backupschedule.FieldCronSyntax] = struct{}{}
+}
+
+// CronSyntaxCleared returns if the "cronSyntax" field was cleared in this mutation.
+func (m *BackupScheduleMutation) CronSyntaxCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldCronSyntax]
+	return ok
+}
+
 // ResetCronSyntax resets all changes to the "cronSyntax" field.
 func (m *BackupScheduleMutation) ResetCronSyntax() {
 	m.cronSyntax = nil
+	delete(m.clearedFields, backupschedule.FieldCronSyntax)
 }
 
 // SetCronID sets the "cronID" field.
@@ -2558,10 +2610,24 @@ func (m *BackupScheduleMutation) AddedCronID() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearCronID clears the value of the "cronID" field.
+func (m *BackupScheduleMutation) ClearCronID() {
+	m.cronID = nil
+	m.addcronID = nil
+	m.clearedFields[backupschedule.FieldCronID] = struct{}{}
+}
+
+// CronIDCleared returns if the "cronID" field was cleared in this mutation.
+func (m *BackupScheduleMutation) CronIDCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldCronID]
+	return ok
+}
+
 // ResetCronID resets all changes to the "cronID" field.
 func (m *BackupScheduleMutation) ResetCronID() {
 	m.cronID = nil
 	m.addcronID = nil
+	delete(m.clearedFields, backupschedule.FieldCronID)
 }
 
 // SetRepositoryID sets the "repository" edge to the Repository entity by id.
@@ -2647,8 +2713,8 @@ func (m *BackupScheduleMutation) Fields() []string {
 	if m.everyThursday != nil {
 		fields = append(fields, backupschedule.FieldEveryThursday)
 	}
-	if m.everyTriday != nil {
-		fields = append(fields, backupschedule.FieldEveryTriday)
+	if m.everyFriday != nil {
+		fields = append(fields, backupschedule.FieldEveryFriday)
 	}
 	if m.everySaturday != nil {
 		fields = append(fields, backupschedule.FieldEverySaturday)
@@ -2695,8 +2761,8 @@ func (m *BackupScheduleMutation) Field(name string) (ent.Value, bool) {
 		return m.EveryWednesday()
 	case backupschedule.FieldEveryThursday:
 		return m.EveryThursday()
-	case backupschedule.FieldEveryTriday:
-		return m.EveryTriday()
+	case backupschedule.FieldEveryFriday:
+		return m.EveryFriday()
 	case backupschedule.FieldEverySaturday:
 		return m.EverySaturday()
 	case backupschedule.FieldEverySunday:
@@ -2736,8 +2802,8 @@ func (m *BackupScheduleMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldEveryWednesday(ctx)
 	case backupschedule.FieldEveryThursday:
 		return m.OldEveryThursday(ctx)
-	case backupschedule.FieldEveryTriday:
-		return m.OldEveryTriday(ctx)
+	case backupschedule.FieldEveryFriday:
+		return m.OldEveryFriday(ctx)
 	case backupschedule.FieldEverySaturday:
 		return m.OldEverySaturday(ctx)
 	case backupschedule.FieldEverySunday:
@@ -2817,12 +2883,12 @@ func (m *BackupScheduleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEveryThursday(v)
 		return nil
-	case backupschedule.FieldEveryTriday:
+	case backupschedule.FieldEveryFriday:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetEveryTriday(v)
+		m.SetEveryFriday(v)
 		return nil
 	case backupschedule.FieldEverySaturday:
 		v, ok := value.(bool)
@@ -2917,7 +2983,23 @@ func (m *BackupScheduleMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *BackupScheduleMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(backupschedule.FieldHour) {
+		fields = append(fields, backupschedule.FieldHour)
+	}
+	if m.FieldCleared(backupschedule.FieldDay) {
+		fields = append(fields, backupschedule.FieldDay)
+	}
+	if m.FieldCleared(backupschedule.FieldInterval) {
+		fields = append(fields, backupschedule.FieldInterval)
+	}
+	if m.FieldCleared(backupschedule.FieldCronSyntax) {
+		fields = append(fields, backupschedule.FieldCronSyntax)
+	}
+	if m.FieldCleared(backupschedule.FieldCronID) {
+		fields = append(fields, backupschedule.FieldCronID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2930,6 +3012,23 @@ func (m *BackupScheduleMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *BackupScheduleMutation) ClearField(name string) error {
+	switch name {
+	case backupschedule.FieldHour:
+		m.ClearHour()
+		return nil
+	case backupschedule.FieldDay:
+		m.ClearDay()
+		return nil
+	case backupschedule.FieldInterval:
+		m.ClearInterval()
+		return nil
+	case backupschedule.FieldCronSyntax:
+		m.ClearCronSyntax()
+		return nil
+	case backupschedule.FieldCronID:
+		m.ClearCronID()
+		return nil
+	}
 	return fmt.Errorf("unknown BackupSchedule nullable field %s", name)
 }
 
@@ -2961,8 +3060,8 @@ func (m *BackupScheduleMutation) ResetField(name string) error {
 	case backupschedule.FieldEveryThursday:
 		m.ResetEveryThursday()
 		return nil
-	case backupschedule.FieldEveryTriday:
-		m.ResetEveryTriday()
+	case backupschedule.FieldEveryFriday:
+		m.ResetEveryFriday()
 		return nil
 	case backupschedule.FieldEverySaturday:
 		m.ResetEverySaturday()

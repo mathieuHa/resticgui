@@ -22,14 +22,14 @@ func (BackupSchedule) Fields() []ent.Field {
 		field.Bool("everyTuesday").Default(false),
 		field.Bool("everyWednesday").Default(false),
 		field.Bool("everyThursday").Default(false),
-		field.Bool("everyTriday").Default(false),
+		field.Bool("everyFriday").Default(false),
 		field.Bool("everySaturday").Default(false),
 		field.Bool("everySunday").Default(false),
-		field.String("hour"),
-		field.String("day"),
-		field.String("interval"),
-		field.String("cronSyntax"),
-		field.Uint("cronID"),
+		field.String("hour").Optional().Default(""),
+		field.String("day").Optional().Default(""),
+		field.String("interval").Optional().Default(""),
+		field.String("cronSyntax").Optional().Default(""),
+		field.Uint("cronID").Optional().Default(1),
 	}
 }
 

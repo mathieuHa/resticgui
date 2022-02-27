@@ -371,11 +371,6 @@ func (ru *RepositoryUpdate) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Repository.provider": %w`, err)}
 		}
 	}
-	if v, ok := ru.mutation.Password(); ok {
-		if err := repository.PasswordValidator(v); err != nil {
-			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "Repository.password": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -1069,11 +1064,6 @@ func (ruo *RepositoryUpdateOne) check() error {
 	if v, ok := ruo.mutation.Provider(); ok {
 		if err := repository.ProviderValidator(v); err != nil {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Repository.provider": %w`, err)}
-		}
-	}
-	if v, ok := ruo.mutation.Password(); ok {
-		if err := repository.PasswordValidator(v); err != nil {
-			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "Repository.password": %w`, err)}
 		}
 	}
 	return nil

@@ -27,8 +27,8 @@ const (
 	FieldEveryWednesday = "every_wednesday"
 	// FieldEveryThursday holds the string denoting the everythursday field in the database.
 	FieldEveryThursday = "every_thursday"
-	// FieldEveryTriday holds the string denoting the everytriday field in the database.
-	FieldEveryTriday = "every_triday"
+	// FieldEveryFriday holds the string denoting the everyfriday field in the database.
+	FieldEveryFriday = "every_friday"
 	// FieldEverySaturday holds the string denoting the everysaturday field in the database.
 	FieldEverySaturday = "every_saturday"
 	// FieldEverySunday holds the string denoting the everysunday field in the database.
@@ -67,7 +67,7 @@ var Columns = []string{
 	FieldEveryTuesday,
 	FieldEveryWednesday,
 	FieldEveryThursday,
-	FieldEveryTriday,
+	FieldEveryFriday,
 	FieldEverySaturday,
 	FieldEverySunday,
 	FieldHour,
@@ -113,12 +113,22 @@ var (
 	DefaultEveryWednesday bool
 	// DefaultEveryThursday holds the default value on creation for the "everyThursday" field.
 	DefaultEveryThursday bool
-	// DefaultEveryTriday holds the default value on creation for the "everyTriday" field.
-	DefaultEveryTriday bool
+	// DefaultEveryFriday holds the default value on creation for the "everyFriday" field.
+	DefaultEveryFriday bool
 	// DefaultEverySaturday holds the default value on creation for the "everySaturday" field.
 	DefaultEverySaturday bool
 	// DefaultEverySunday holds the default value on creation for the "everySunday" field.
 	DefaultEverySunday bool
+	// DefaultHour holds the default value on creation for the "hour" field.
+	DefaultHour string
+	// DefaultDay holds the default value on creation for the "day" field.
+	DefaultDay string
+	// DefaultInterval holds the default value on creation for the "interval" field.
+	DefaultInterval string
+	// DefaultCronSyntax holds the default value on creation for the "cronSyntax" field.
+	DefaultCronSyntax string
+	// DefaultCronID holds the default value on creation for the "cronID" field.
+	DefaultCronID uint
 )
 
 // Choice defines the type for the "choice" enum field.

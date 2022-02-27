@@ -119,8 +119,6 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
-	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
-	PasswordValidator func(string) error
 )
 
 // Provider defines the type for the "provider" enum field.

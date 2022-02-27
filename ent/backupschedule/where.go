@@ -140,10 +140,10 @@ func EveryThursday(v bool) predicate.BackupSchedule {
 	})
 }
 
-// EveryTriday applies equality check predicate on the "everyTriday" field. It's identical to EveryTridayEQ.
-func EveryTriday(v bool) predicate.BackupSchedule {
+// EveryFriday applies equality check predicate on the "everyFriday" field. It's identical to EveryFridayEQ.
+func EveryFriday(v bool) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldEveryTriday), v))
+		s.Where(sql.EQ(s.C(FieldEveryFriday), v))
 	})
 }
 
@@ -342,17 +342,17 @@ func EveryThursdayNEQ(v bool) predicate.BackupSchedule {
 	})
 }
 
-// EveryTridayEQ applies the EQ predicate on the "everyTriday" field.
-func EveryTridayEQ(v bool) predicate.BackupSchedule {
+// EveryFridayEQ applies the EQ predicate on the "everyFriday" field.
+func EveryFridayEQ(v bool) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldEveryTriday), v))
+		s.Where(sql.EQ(s.C(FieldEveryFriday), v))
 	})
 }
 
-// EveryTridayNEQ applies the NEQ predicate on the "everyTriday" field.
-func EveryTridayNEQ(v bool) predicate.BackupSchedule {
+// EveryFridayNEQ applies the NEQ predicate on the "everyFriday" field.
+func EveryFridayNEQ(v bool) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldEveryTriday), v))
+		s.Where(sql.NEQ(s.C(FieldEveryFriday), v))
 	})
 }
 
@@ -481,6 +481,20 @@ func HourHasSuffix(v string) predicate.BackupSchedule {
 	})
 }
 
+// HourIsNil applies the IsNil predicate on the "hour" field.
+func HourIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldHour)))
+	})
+}
+
+// HourNotNil applies the NotNil predicate on the "hour" field.
+func HourNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldHour)))
+	})
+}
+
 // HourEqualFold applies the EqualFold predicate on the "hour" field.
 func HourEqualFold(v string) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
@@ -589,6 +603,20 @@ func DayHasPrefix(v string) predicate.BackupSchedule {
 func DayHasSuffix(v string) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldDay), v))
+	})
+}
+
+// DayIsNil applies the IsNil predicate on the "day" field.
+func DayIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDay)))
+	})
+}
+
+// DayNotNil applies the NotNil predicate on the "day" field.
+func DayNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDay)))
 	})
 }
 
@@ -703,6 +731,20 @@ func IntervalHasSuffix(v string) predicate.BackupSchedule {
 	})
 }
 
+// IntervalIsNil applies the IsNil predicate on the "interval" field.
+func IntervalIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldInterval)))
+	})
+}
+
+// IntervalNotNil applies the NotNil predicate on the "interval" field.
+func IntervalNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldInterval)))
+	})
+}
+
 // IntervalEqualFold applies the EqualFold predicate on the "interval" field.
 func IntervalEqualFold(v string) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
@@ -814,6 +856,20 @@ func CronSyntaxHasSuffix(v string) predicate.BackupSchedule {
 	})
 }
 
+// CronSyntaxIsNil applies the IsNil predicate on the "cronSyntax" field.
+func CronSyntaxIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCronSyntax)))
+	})
+}
+
+// CronSyntaxNotNil applies the NotNil predicate on the "cronSyntax" field.
+func CronSyntaxNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCronSyntax)))
+	})
+}
+
 // CronSyntaxEqualFold applies the EqualFold predicate on the "cronSyntax" field.
 func CronSyntaxEqualFold(v string) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
@@ -901,6 +957,20 @@ func CronIDLT(v uint) predicate.BackupSchedule {
 func CronIDLTE(v uint) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCronID), v))
+	})
+}
+
+// CronIDIsNil applies the IsNil predicate on the "cronID" field.
+func CronIDIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCronID)))
+	})
+}
+
+// CronIDNotNil applies the NotNil predicate on the "cronID" field.
+func CronIDNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCronID)))
 	})
 }
 

@@ -125,7 +125,7 @@ func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 		if schedule.EveryThursday {
 			day = fmt.Sprintf("%v4,", day)
 		}
-		if schedule.EveryTriday {
+		if schedule.EveryFriday {
 			day = fmt.Sprintf("%v5,", day)
 		}
 		if schedule.EverySaturday {

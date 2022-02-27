@@ -93,10 +93,10 @@ func init() {
 	backupscheduleDescEveryThursday := backupscheduleFields[7].Descriptor()
 	// backupschedule.DefaultEveryThursday holds the default value on creation for the everyThursday field.
 	backupschedule.DefaultEveryThursday = backupscheduleDescEveryThursday.Default.(bool)
-	// backupscheduleDescEveryTriday is the schema descriptor for everyTriday field.
-	backupscheduleDescEveryTriday := backupscheduleFields[8].Descriptor()
-	// backupschedule.DefaultEveryTriday holds the default value on creation for the everyTriday field.
-	backupschedule.DefaultEveryTriday = backupscheduleDescEveryTriday.Default.(bool)
+	// backupscheduleDescEveryFriday is the schema descriptor for everyFriday field.
+	backupscheduleDescEveryFriday := backupscheduleFields[8].Descriptor()
+	// backupschedule.DefaultEveryFriday holds the default value on creation for the everyFriday field.
+	backupschedule.DefaultEveryFriday = backupscheduleDescEveryFriday.Default.(bool)
 	// backupscheduleDescEverySaturday is the schema descriptor for everySaturday field.
 	backupscheduleDescEverySaturday := backupscheduleFields[9].Descriptor()
 	// backupschedule.DefaultEverySaturday holds the default value on creation for the everySaturday field.
@@ -105,6 +105,26 @@ func init() {
 	backupscheduleDescEverySunday := backupscheduleFields[10].Descriptor()
 	// backupschedule.DefaultEverySunday holds the default value on creation for the everySunday field.
 	backupschedule.DefaultEverySunday = backupscheduleDescEverySunday.Default.(bool)
+	// backupscheduleDescHour is the schema descriptor for hour field.
+	backupscheduleDescHour := backupscheduleFields[11].Descriptor()
+	// backupschedule.DefaultHour holds the default value on creation for the hour field.
+	backupschedule.DefaultHour = backupscheduleDescHour.Default.(string)
+	// backupscheduleDescDay is the schema descriptor for day field.
+	backupscheduleDescDay := backupscheduleFields[12].Descriptor()
+	// backupschedule.DefaultDay holds the default value on creation for the day field.
+	backupschedule.DefaultDay = backupscheduleDescDay.Default.(string)
+	// backupscheduleDescInterval is the schema descriptor for interval field.
+	backupscheduleDescInterval := backupscheduleFields[13].Descriptor()
+	// backupschedule.DefaultInterval holds the default value on creation for the interval field.
+	backupschedule.DefaultInterval = backupscheduleDescInterval.Default.(string)
+	// backupscheduleDescCronSyntax is the schema descriptor for cronSyntax field.
+	backupscheduleDescCronSyntax := backupscheduleFields[14].Descriptor()
+	// backupschedule.DefaultCronSyntax holds the default value on creation for the cronSyntax field.
+	backupschedule.DefaultCronSyntax = backupscheduleDescCronSyntax.Default.(string)
+	// backupscheduleDescCronID is the schema descriptor for cronID field.
+	backupscheduleDescCronID := backupscheduleFields[15].Descriptor()
+	// backupschedule.DefaultCronID holds the default value on creation for the cronID field.
+	backupschedule.DefaultCronID = backupscheduleDescCronID.Default.(uint)
 	pathFields := schema.Path{}.Fields()
 	_ = pathFields
 	// pathDescName is the schema descriptor for name field.
@@ -157,10 +177,6 @@ func init() {
 	repositoryDescActive := repositoryFields[3].Descriptor()
 	// repository.DefaultActive holds the default value on creation for the active field.
 	repository.DefaultActive = repositoryDescActive.Default.(bool)
-	// repositoryDescPassword is the schema descriptor for password field.
-	repositoryDescPassword := repositoryFields[4].Descriptor()
-	// repository.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
-	repository.PasswordValidator = repositoryDescPassword.Validators[0].(func(string) error)
 	roleFields := schema.Role{}.Fields()
 	_ = roleFields
 	// roleDescName is the schema descriptor for name field.

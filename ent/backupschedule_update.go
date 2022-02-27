@@ -140,16 +140,16 @@ func (bsu *BackupScheduleUpdate) SetNillableEveryThursday(b *bool) *BackupSchedu
 	return bsu
 }
 
-// SetEveryTriday sets the "everyTriday" field.
-func (bsu *BackupScheduleUpdate) SetEveryTriday(b bool) *BackupScheduleUpdate {
-	bsu.mutation.SetEveryTriday(b)
+// SetEveryFriday sets the "everyFriday" field.
+func (bsu *BackupScheduleUpdate) SetEveryFriday(b bool) *BackupScheduleUpdate {
+	bsu.mutation.SetEveryFriday(b)
 	return bsu
 }
 
-// SetNillableEveryTriday sets the "everyTriday" field if the given value is not nil.
-func (bsu *BackupScheduleUpdate) SetNillableEveryTriday(b *bool) *BackupScheduleUpdate {
+// SetNillableEveryFriday sets the "everyFriday" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableEveryFriday(b *bool) *BackupScheduleUpdate {
 	if b != nil {
-		bsu.SetEveryTriday(*b)
+		bsu.SetEveryFriday(*b)
 	}
 	return bsu
 }
@@ -188,9 +188,37 @@ func (bsu *BackupScheduleUpdate) SetHour(s string) *BackupScheduleUpdate {
 	return bsu
 }
 
+// SetNillableHour sets the "hour" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableHour(s *string) *BackupScheduleUpdate {
+	if s != nil {
+		bsu.SetHour(*s)
+	}
+	return bsu
+}
+
+// ClearHour clears the value of the "hour" field.
+func (bsu *BackupScheduleUpdate) ClearHour() *BackupScheduleUpdate {
+	bsu.mutation.ClearHour()
+	return bsu
+}
+
 // SetDay sets the "day" field.
 func (bsu *BackupScheduleUpdate) SetDay(s string) *BackupScheduleUpdate {
 	bsu.mutation.SetDay(s)
+	return bsu
+}
+
+// SetNillableDay sets the "day" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableDay(s *string) *BackupScheduleUpdate {
+	if s != nil {
+		bsu.SetDay(*s)
+	}
+	return bsu
+}
+
+// ClearDay clears the value of the "day" field.
+func (bsu *BackupScheduleUpdate) ClearDay() *BackupScheduleUpdate {
+	bsu.mutation.ClearDay()
 	return bsu
 }
 
@@ -200,9 +228,37 @@ func (bsu *BackupScheduleUpdate) SetInterval(s string) *BackupScheduleUpdate {
 	return bsu
 }
 
+// SetNillableInterval sets the "interval" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableInterval(s *string) *BackupScheduleUpdate {
+	if s != nil {
+		bsu.SetInterval(*s)
+	}
+	return bsu
+}
+
+// ClearInterval clears the value of the "interval" field.
+func (bsu *BackupScheduleUpdate) ClearInterval() *BackupScheduleUpdate {
+	bsu.mutation.ClearInterval()
+	return bsu
+}
+
 // SetCronSyntax sets the "cronSyntax" field.
 func (bsu *BackupScheduleUpdate) SetCronSyntax(s string) *BackupScheduleUpdate {
 	bsu.mutation.SetCronSyntax(s)
+	return bsu
+}
+
+// SetNillableCronSyntax sets the "cronSyntax" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableCronSyntax(s *string) *BackupScheduleUpdate {
+	if s != nil {
+		bsu.SetCronSyntax(*s)
+	}
+	return bsu
+}
+
+// ClearCronSyntax clears the value of the "cronSyntax" field.
+func (bsu *BackupScheduleUpdate) ClearCronSyntax() *BackupScheduleUpdate {
+	bsu.mutation.ClearCronSyntax()
 	return bsu
 }
 
@@ -213,9 +269,23 @@ func (bsu *BackupScheduleUpdate) SetCronID(u uint) *BackupScheduleUpdate {
 	return bsu
 }
 
+// SetNillableCronID sets the "cronID" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableCronID(u *uint) *BackupScheduleUpdate {
+	if u != nil {
+		bsu.SetCronID(*u)
+	}
+	return bsu
+}
+
 // AddCronID adds u to the "cronID" field.
 func (bsu *BackupScheduleUpdate) AddCronID(u int) *BackupScheduleUpdate {
 	bsu.mutation.AddCronID(u)
+	return bsu
+}
+
+// ClearCronID clears the value of the "cronID" field.
+func (bsu *BackupScheduleUpdate) ClearCronID() *BackupScheduleUpdate {
+	bsu.mutation.ClearCronID()
 	return bsu
 }
 
@@ -388,11 +458,11 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Column: backupschedule.FieldEveryThursday,
 		})
 	}
-	if value, ok := bsu.mutation.EveryTriday(); ok {
+	if value, ok := bsu.mutation.EveryFriday(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Value:  value,
-			Column: backupschedule.FieldEveryTriday,
+			Column: backupschedule.FieldEveryFriday,
 		})
 	}
 	if value, ok := bsu.mutation.EverySaturday(); ok {
@@ -416,10 +486,22 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Column: backupschedule.FieldHour,
 		})
 	}
+	if bsu.mutation.HourCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: backupschedule.FieldHour,
+		})
+	}
 	if value, ok := bsu.mutation.Day(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: backupschedule.FieldDay,
+		})
+	}
+	if bsu.mutation.DayCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: backupschedule.FieldDay,
 		})
 	}
@@ -430,10 +512,22 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Column: backupschedule.FieldInterval,
 		})
 	}
+	if bsu.mutation.IntervalCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: backupschedule.FieldInterval,
+		})
+	}
 	if value, ok := bsu.mutation.CronSyntax(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: backupschedule.FieldCronSyntax,
+		})
+	}
+	if bsu.mutation.CronSyntaxCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: backupschedule.FieldCronSyntax,
 		})
 	}
@@ -448,6 +542,12 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
 			Value:  value,
+			Column: backupschedule.FieldCronID,
+		})
+	}
+	if bsu.mutation.CronIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
 			Column: backupschedule.FieldCronID,
 		})
 	}
@@ -617,16 +717,16 @@ func (bsuo *BackupScheduleUpdateOne) SetNillableEveryThursday(b *bool) *BackupSc
 	return bsuo
 }
 
-// SetEveryTriday sets the "everyTriday" field.
-func (bsuo *BackupScheduleUpdateOne) SetEveryTriday(b bool) *BackupScheduleUpdateOne {
-	bsuo.mutation.SetEveryTriday(b)
+// SetEveryFriday sets the "everyFriday" field.
+func (bsuo *BackupScheduleUpdateOne) SetEveryFriday(b bool) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetEveryFriday(b)
 	return bsuo
 }
 
-// SetNillableEveryTriday sets the "everyTriday" field if the given value is not nil.
-func (bsuo *BackupScheduleUpdateOne) SetNillableEveryTriday(b *bool) *BackupScheduleUpdateOne {
+// SetNillableEveryFriday sets the "everyFriday" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableEveryFriday(b *bool) *BackupScheduleUpdateOne {
 	if b != nil {
-		bsuo.SetEveryTriday(*b)
+		bsuo.SetEveryFriday(*b)
 	}
 	return bsuo
 }
@@ -665,9 +765,37 @@ func (bsuo *BackupScheduleUpdateOne) SetHour(s string) *BackupScheduleUpdateOne 
 	return bsuo
 }
 
+// SetNillableHour sets the "hour" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableHour(s *string) *BackupScheduleUpdateOne {
+	if s != nil {
+		bsuo.SetHour(*s)
+	}
+	return bsuo
+}
+
+// ClearHour clears the value of the "hour" field.
+func (bsuo *BackupScheduleUpdateOne) ClearHour() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearHour()
+	return bsuo
+}
+
 // SetDay sets the "day" field.
 func (bsuo *BackupScheduleUpdateOne) SetDay(s string) *BackupScheduleUpdateOne {
 	bsuo.mutation.SetDay(s)
+	return bsuo
+}
+
+// SetNillableDay sets the "day" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableDay(s *string) *BackupScheduleUpdateOne {
+	if s != nil {
+		bsuo.SetDay(*s)
+	}
+	return bsuo
+}
+
+// ClearDay clears the value of the "day" field.
+func (bsuo *BackupScheduleUpdateOne) ClearDay() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearDay()
 	return bsuo
 }
 
@@ -677,9 +805,37 @@ func (bsuo *BackupScheduleUpdateOne) SetInterval(s string) *BackupScheduleUpdate
 	return bsuo
 }
 
+// SetNillableInterval sets the "interval" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableInterval(s *string) *BackupScheduleUpdateOne {
+	if s != nil {
+		bsuo.SetInterval(*s)
+	}
+	return bsuo
+}
+
+// ClearInterval clears the value of the "interval" field.
+func (bsuo *BackupScheduleUpdateOne) ClearInterval() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearInterval()
+	return bsuo
+}
+
 // SetCronSyntax sets the "cronSyntax" field.
 func (bsuo *BackupScheduleUpdateOne) SetCronSyntax(s string) *BackupScheduleUpdateOne {
 	bsuo.mutation.SetCronSyntax(s)
+	return bsuo
+}
+
+// SetNillableCronSyntax sets the "cronSyntax" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableCronSyntax(s *string) *BackupScheduleUpdateOne {
+	if s != nil {
+		bsuo.SetCronSyntax(*s)
+	}
+	return bsuo
+}
+
+// ClearCronSyntax clears the value of the "cronSyntax" field.
+func (bsuo *BackupScheduleUpdateOne) ClearCronSyntax() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearCronSyntax()
 	return bsuo
 }
 
@@ -690,9 +846,23 @@ func (bsuo *BackupScheduleUpdateOne) SetCronID(u uint) *BackupScheduleUpdateOne 
 	return bsuo
 }
 
+// SetNillableCronID sets the "cronID" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableCronID(u *uint) *BackupScheduleUpdateOne {
+	if u != nil {
+		bsuo.SetCronID(*u)
+	}
+	return bsuo
+}
+
 // AddCronID adds u to the "cronID" field.
 func (bsuo *BackupScheduleUpdateOne) AddCronID(u int) *BackupScheduleUpdateOne {
 	bsuo.mutation.AddCronID(u)
+	return bsuo
+}
+
+// ClearCronID clears the value of the "cronID" field.
+func (bsuo *BackupScheduleUpdateOne) ClearCronID() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearCronID()
 	return bsuo
 }
 
@@ -889,11 +1059,11 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 			Column: backupschedule.FieldEveryThursday,
 		})
 	}
-	if value, ok := bsuo.mutation.EveryTriday(); ok {
+	if value, ok := bsuo.mutation.EveryFriday(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Value:  value,
-			Column: backupschedule.FieldEveryTriday,
+			Column: backupschedule.FieldEveryFriday,
 		})
 	}
 	if value, ok := bsuo.mutation.EverySaturday(); ok {
@@ -917,10 +1087,22 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 			Column: backupschedule.FieldHour,
 		})
 	}
+	if bsuo.mutation.HourCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: backupschedule.FieldHour,
+		})
+	}
 	if value, ok := bsuo.mutation.Day(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: backupschedule.FieldDay,
+		})
+	}
+	if bsuo.mutation.DayCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: backupschedule.FieldDay,
 		})
 	}
@@ -931,10 +1113,22 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 			Column: backupschedule.FieldInterval,
 		})
 	}
+	if bsuo.mutation.IntervalCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: backupschedule.FieldInterval,
+		})
+	}
 	if value, ok := bsuo.mutation.CronSyntax(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: backupschedule.FieldCronSyntax,
+		})
+	}
+	if bsuo.mutation.CronSyntaxCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: backupschedule.FieldCronSyntax,
 		})
 	}
@@ -949,6 +1143,12 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
 			Value:  value,
+			Column: backupschedule.FieldCronID,
+		})
+	}
+	if bsuo.mutation.CronIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
 			Column: backupschedule.FieldCronID,
 		})
 	}

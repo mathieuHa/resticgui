@@ -21,7 +21,7 @@ func (Repository) Fields() []ent.Field {
 			Default(time.Now).Immutable(),
 		field.Enum("provider").Values("local", "AWSS3", "B2", "MinioS3").Default("local"),
 		field.Bool("active").Default(false),
-		field.String("password").Optional().MinLen(4).Sensitive(),
+		field.String("password").Optional().Sensitive(),
 		field.String("maxSize").Optional(),
 	}
 }

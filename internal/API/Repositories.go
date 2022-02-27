@@ -38,6 +38,11 @@ func QueryRepositories(c *gin.Context) {
 	repositories, err := db.Repository.
 		Query().
 		WithBackupschedule().
+		WithBackuppolicy().
+		WithAwss3provider().
+		WithB2provider().
+		WithLocalprovider().
+		WithMinios3provider().
 		WithPath().
 		All(context.Background())
 
@@ -76,6 +81,11 @@ func GetRepository(c *gin.Context) {
 	repository, err := db.Repository.
 		Query().
 		WithBackupschedule().
+		WithBackuppolicy().
+		WithAwss3provider().
+		WithB2provider().
+		WithLocalprovider().
+		WithMinios3provider().
 		WithPath().
 		Where(repository.ID(newId)).
 		Only(context.Background())
@@ -113,22 +123,141 @@ func CreateRepository(c *gin.Context) {
 	db := Database.Connect()
 	defer db.Close()
 
+	// create repository
 	newRepository, err := db.Repository.
 		Create().
 		SetName(repo.Name).
+		SetActive(repo.Active).
+		SetPassword(repo.Password).
+		SetProvider(repo.Provider).
 		SetMaxSize(repo.MaxSize).
 		Save(ctx)
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	_, err = db.BackupSchedule.
-		Create().
-		SetRepository(newRepository).
-		Save(ctx)
+	// create backupSchedule
+	if repo.Edges.Backupschedule != nil {
+		_, err = db.BackupSchedule.
+			Create().
+			SetChoice(repo.Edges.Backupschedule.Choice).
+			SetCronSyntax(repo.Edges.Backupschedule.CronSyntax).
+			SetDay(repo.Edges.Backupschedule.Day).
+			SetHour(repo.Edges.Backupschedule.Hour).
+			SetEveryDay(repo.Edges.Backupschedule.EveryDay).
+			SetEveryWeek(repo.Edges.Backupschedule.EveryWeek).
+			SetEveryMonth(repo.Edges.Backupschedule.EveryMonth).
+			SetEveryMonday(repo.Edges.Backupschedule.EveryMonday).
+			SetEveryTuesday(repo.Edges.Backupschedule.EveryTuesday).
+			SetEveryWednesday(repo.Edges.Backupschedule.EveryWednesday).
+			SetEveryThursday(repo.Edges.Backupschedule.EveryThursday).
+			SetEveryFriday(repo.Edges.Backupschedule.EveryFriday).
+			SetEverySaturday(repo.Edges.Backupschedule.EverySaturday).
+			SetEverySunday(repo.Edges.Backupschedule.EverySunday).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create backupPolicy
+	if repo.Edges.Backuppolicy != nil {
+		_, err = db.BackupPolicy.
+			Create().
+			SetKeepAll(repo.Edges.Backuppolicy.KeepAll).
+			SetName(repo.Edges.Backuppolicy.Name).
+			SetNbLastBackup(repo.Edges.Backuppolicy.NbLastBackup).
+			SetOneByDay(repo.Edges.Backuppolicy.OneByDay).
+			SetOneByHour(repo.Edges.Backuppolicy.OneByHour).
+			SetOneByMonth(repo.Edges.Backuppolicy.OneByMonth).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create AWSS3Provider
+	if repo.Edges.Awss3provider != nil {
+		_, err = db.AWSS3Provider.
+			Create().
+			SetAccessKeyID(repo.Edges.Awss3provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.Awss3provider.SecretAccessKey).
+			SetBucketName(repo.Edges.Awss3provider.BucketName).
+			SetDefaultRegion(repo.Edges.Awss3provider.DefaultRegion).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create B2Provider
+	if repo.Edges.B2provider != nil {
+		_, err = db.B2Provider.
+			Create().
+			SetAccountID(repo.Edges.B2provider.AccountID).
+			SetAccountKey(repo.Edges.B2provider.AccountKey).
+			SetBucketName(repo.Edges.B2provider.BucketName).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create LocalProvider
+	if repo.Edges.Localprovider != nil {
+		_, err = db.LocalProvider.
+			Create().
+			SetRepoPath(repo.Edges.Localprovider.RepoPath).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create MinioS3Provider
+	if repo.Edges.Minios3provider != nil {
+		_, err = db.MinioS3Provider.
+			Create().
+			SetAccessKeyID(repo.Edges.Minios3provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.Minios3provider.SecretAccessKey).
+			SetBucketName(repo.Edges.Minios3provider.BucketName).
+			SetIP(repo.Edges.Minios3provider.IP).
+			SetPort(repo.Edges.Minios3provider.Port).
+			SetScheme(repo.Edges.Minios3provider.Scheme).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Creates paths
 	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
 		for _, p := range repo.Edges.Path {
 			path, err := db.Path.
@@ -163,6 +292,11 @@ func CreateRepository(c *gin.Context) {
 	repository, err := db.Repository.
 		Query().
 		WithBackupschedule().
+		WithBackuppolicy().
+		WithAwss3provider().
+		WithB2provider().
+		WithLocalprovider().
+		WithMinios3provider().
 		WithPath().
 		Where(repository.ID(newRepository.ID)).
 		Only(ctx)
@@ -228,10 +362,109 @@ func EditRepository(c *gin.Context) {
 		_, err = db.BackupSchedule.
 			UpdateOneID(repo.Edges.Backupschedule.ID).
 			SetChoice(repo.Edges.Backupschedule.Choice).
+			SetCronSyntax(repo.Edges.Backupschedule.CronSyntax).
+			SetDay(repo.Edges.Backupschedule.Day).
+			SetHour(repo.Edges.Backupschedule.Hour).
+			SetEveryDay(repo.Edges.Backupschedule.EveryDay).
+			SetEveryWeek(repo.Edges.Backupschedule.EveryWeek).
+			SetEveryMonth(repo.Edges.Backupschedule.EveryMonth).
+			SetEveryMonday(repo.Edges.Backupschedule.EveryMonday).
+			SetEveryTuesday(repo.Edges.Backupschedule.EveryTuesday).
+			SetEveryWednesday(repo.Edges.Backupschedule.EveryWednesday).
+			SetEveryThursday(repo.Edges.Backupschedule.EveryThursday).
+			SetEveryFriday(repo.Edges.Backupschedule.EveryFriday).
+			SetEverySaturday(repo.Edges.Backupschedule.EverySaturday).
+			SetEverySunday(repo.Edges.Backupschedule.EverySunday).
 			Save(ctx)
+
 		if err != nil {
-			log.Err(err).Msgf("error: backup %v", errUpdate)
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Update backupPolicy
+	if repo.Edges.Backuppolicy != nil {
+		_, err = db.BackupPolicy.
+			UpdateOneID(repo.Edges.Backuppolicy.ID).
+			SetKeepAll(repo.Edges.Backuppolicy.KeepAll).
+			SetName(repo.Edges.Backuppolicy.Name).
+			SetNbLastBackup(repo.Edges.Backuppolicy.NbLastBackup).
+			SetOneByDay(repo.Edges.Backuppolicy.OneByDay).
+			SetOneByHour(repo.Edges.Backuppolicy.OneByHour).
+			SetOneByMonth(repo.Edges.Backuppolicy.OneByMonth).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Update AWSS3Provider
+	if repo.Edges.Awss3provider != nil {
+		_, err = db.AWSS3Provider.
+			UpdateOneID(repo.Edges.Awss3provider.ID).
+			SetAccessKeyID(repo.Edges.Awss3provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.Awss3provider.SecretAccessKey).
+			SetBucketName(repo.Edges.Awss3provider.BucketName).
+			SetDefaultRegion(repo.Edges.Awss3provider.DefaultRegion).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Update B2Provider
+	if repo.Edges.B2provider != nil {
+		_, err = db.B2Provider.
+			UpdateOneID(repo.Edges.B2provider.ID).
+			SetAccountID(repo.Edges.B2provider.AccountID).
+			SetAccountKey(repo.Edges.B2provider.AccountKey).
+			SetBucketName(repo.Edges.B2provider.BucketName).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// update LocalProvider
+	if repo.Edges.Localprovider != nil {
+		_, err = db.LocalProvider.
+			UpdateOneID(repo.Edges.Localprovider.ID).
+			SetRepoPath(repo.Edges.Localprovider.RepoPath).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// update MinioS3Provider
+	if repo.Edges.Minios3provider != nil {
+		_, err = db.MinioS3Provider.
+			UpdateOneID(repo.Edges.Minios3provider.ID).
+			SetAccessKeyID(repo.Edges.Minios3provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.Minios3provider.SecretAccessKey).
+			SetBucketName(repo.Edges.Minios3provider.BucketName).
+			SetIP(repo.Edges.Minios3provider.IP).
+			SetPort(repo.Edges.Minios3provider.Port).
+			SetScheme(repo.Edges.Minios3provider.Scheme).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 			return
 		}
 	}
@@ -269,8 +502,6 @@ func EditRepository(c *gin.Context) {
 				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
 				return
 			}
-			// }
-
 		}
 	}
 
@@ -278,6 +509,11 @@ func EditRepository(c *gin.Context) {
 	repository, err := db.Repository.
 		Query().
 		WithBackupschedule().
+		WithBackuppolicy().
+		WithAwss3provider().
+		WithB2provider().
+		WithLocalprovider().
+		WithMinios3provider().
 		WithPath().
 		Where(repository.ID(newId)).
 		First(ctx)
