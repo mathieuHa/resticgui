@@ -44,7 +44,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	Database.Connect()
+	Database.Migrate()
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {

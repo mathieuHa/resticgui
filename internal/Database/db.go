@@ -18,9 +18,6 @@ func Connect() (_db *ent.Client) {
 	}
 	// defer client.Close()
 	// Run the auto migration tool.
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
 	return client
 }
 
