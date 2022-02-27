@@ -46,9 +46,9 @@ const (
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the backupschedule in the database.
-	Table = "backup_schedules"
+	Table = "BackupSchedule"
 	// RepositoryTable is the table that holds the repository relation/edge.
-	RepositoryTable = "backup_schedules"
+	RepositoryTable = "BackupSchedule"
 	// RepositoryInverseTable is the table name for the Repository entity.
 	// It exists in this package in order to avoid circular dependency with the "repository" package.
 	RepositoryInverseTable = "repositories"
@@ -77,7 +77,7 @@ var Columns = []string{
 	FieldCronID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "backup_schedules"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "BackupSchedule"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"repository_backupschedule",

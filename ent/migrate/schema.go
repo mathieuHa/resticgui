@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -27,7 +28,7 @@ var (
 				Symbol:     "awss3providers_repositories_awss3provider",
 				Columns:    []*schema.Column{Awss3providersColumns[5]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -50,7 +51,7 @@ var (
 				Symbol:     "b2providers_repositories_b2provider",
 				Columns:    []*schema.Column{B2providersColumns[5]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -75,12 +76,12 @@ var (
 				Symbol:     "backup_policies_repositories_backuppolicy",
 				Columns:    []*schema.Column{BackupPoliciesColumns[7]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
-	// BackupSchedulesColumns holds the columns for the "backup_schedules" table.
-	BackupSchedulesColumns = []*schema.Column{
+	// BackupScheduleColumns holds the columns for the "BackupSchedule" table.
+	BackupScheduleColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "choice", Type: field.TypeEnum, Enums: []string{"cron", "interval", "monthly", "weekly"}, Default: "cron"},
 		{Name: "every_day", Type: field.TypeBool, Default: false},
@@ -100,17 +101,17 @@ var (
 		{Name: "cron_id", Type: field.TypeUint, Nullable: true, Default: 1},
 		{Name: "repository_backupschedule", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
-	// BackupSchedulesTable holds the schema information for the "backup_schedules" table.
-	BackupSchedulesTable = &schema.Table{
-		Name:       "backup_schedules",
-		Columns:    BackupSchedulesColumns,
-		PrimaryKey: []*schema.Column{BackupSchedulesColumns[0]},
+	// BackupScheduleTable holds the schema information for the "BackupSchedule" table.
+	BackupScheduleTable = &schema.Table{
+		Name:       "BackupSchedule",
+		Columns:    BackupScheduleColumns,
+		PrimaryKey: []*schema.Column{BackupScheduleColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "backup_schedules_repositories_backupschedule",
-				Columns:    []*schema.Column{BackupSchedulesColumns[17]},
+				Symbol:     "BackupSchedule_repositories_backupschedule",
+				Columns:    []*schema.Column{BackupScheduleColumns[17]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -130,7 +131,7 @@ var (
 				Symbol:     "local_providers_repositories_localprovider",
 				Columns:    []*schema.Column{LocalProvidersColumns[2]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -155,7 +156,7 @@ var (
 				Symbol:     "minio_s3providers_repositories_minios3provider",
 				Columns:    []*schema.Column{MinioS3providersColumns[7]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -179,7 +180,7 @@ var (
 				Symbol:     "paths_repositories_path",
 				Columns:    []*schema.Column{PathsColumns[6]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -245,7 +246,7 @@ var (
 		Awss3providersTable,
 		B2providersTable,
 		BackupPoliciesTable,
-		BackupSchedulesTable,
+		BackupScheduleTable,
 		LocalProvidersTable,
 		MinioS3providersTable,
 		PathsTable,
@@ -260,7 +261,10 @@ func init() {
 	Awss3providersTable.ForeignKeys[0].RefTable = RepositoriesTable
 	B2providersTable.ForeignKeys[0].RefTable = RepositoriesTable
 	BackupPoliciesTable.ForeignKeys[0].RefTable = RepositoriesTable
-	BackupSchedulesTable.ForeignKeys[0].RefTable = RepositoriesTable
+	BackupScheduleTable.ForeignKeys[0].RefTable = RepositoriesTable
+	BackupScheduleTable.Annotation = &entsql.Annotation{
+		Table: "BackupSchedule",
+	}
 	LocalProvidersTable.ForeignKeys[0].RefTable = RepositoriesTable
 	MinioS3providersTable.ForeignKeys[0].RefTable = RepositoriesTable
 	PathsTable.ForeignKeys[0].RefTable = RepositoriesTable

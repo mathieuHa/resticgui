@@ -41,10 +41,10 @@ const (
 	// Table holds the table name of the repository in the database.
 	Table = "repositories"
 	// BackupscheduleTable is the table that holds the backupschedule relation/edge.
-	BackupscheduleTable = "backup_schedules"
+	BackupscheduleTable = "BackupSchedule"
 	// BackupscheduleInverseTable is the table name for the BackupSchedule entity.
 	// It exists in this package in order to avoid circular dependency with the "backupschedule" package.
-	BackupscheduleInverseTable = "backup_schedules"
+	BackupscheduleInverseTable = "BackupSchedule"
 	// BackupscheduleColumn is the table column denoting the backupschedule relation/edge.
 	BackupscheduleColumn = "repository_backupschedule"
 	// BackuppolicyTable is the table that holds the backuppolicy relation/edge.

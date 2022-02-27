@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -9,6 +11,13 @@ import (
 // BackupSchedule holds the schema definition for the BackupSchedule entity.
 type BackupSchedule struct {
 	ent.Schema
+}
+
+// Annotations of the BackupSchedule.
+func (BackupSchedule) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "BackupSchedule"},
+	}
 }
 
 // Fields of the BackupSchedule.
