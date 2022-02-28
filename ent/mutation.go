@@ -2578,7 +2578,7 @@ func (m *BackupScheduleMutation) CronID() (r uint, exists bool) {
 // OldCronID returns the old "cronID" field's value of the BackupSchedule entity.
 // If the BackupSchedule object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupScheduleMutation) OldCronID(ctx context.Context) (v uint, err error) {
+func (m *BackupScheduleMutation) OldCronID(ctx context.Context) (v *uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCronID is only allowed on UpdateOne operations")
 	}

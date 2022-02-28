@@ -98,7 +98,7 @@ var (
 		{Name: "day", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "interval", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "cron_syntax", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "cron_id", Type: field.TypeUint, Nullable: true, Default: 1},
+		{Name: "cron_id", Type: field.TypeUint, Nullable: true},
 		{Name: "repository_backup_schedule", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// BackupScheduleTable holds the schema information for the "BackupSchedule" table.

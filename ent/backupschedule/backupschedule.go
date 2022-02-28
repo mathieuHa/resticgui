@@ -127,8 +127,6 @@ var (
 	DefaultInterval string
 	// DefaultCronSyntax holds the default value on creation for the "cronSyntax" field.
 	DefaultCronSyntax string
-	// DefaultCronID holds the default value on creation for the "cronID" field.
-	DefaultCronID uint
 )
 
 // Choice defines the type for the "choice" enum field.

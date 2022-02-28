@@ -121,10 +121,6 @@ func init() {
 	backupscheduleDescCronSyntax := backupscheduleFields[14].Descriptor()
 	// backupschedule.DefaultCronSyntax holds the default value on creation for the cronSyntax field.
 	backupschedule.DefaultCronSyntax = backupscheduleDescCronSyntax.Default.(string)
-	// backupscheduleDescCronID is the schema descriptor for cronID field.
-	backupscheduleDescCronID := backupscheduleFields[15].Descriptor()
-	// backupschedule.DefaultCronID holds the default value on creation for the cronID field.
-	backupschedule.DefaultCronID = backupscheduleDescCronID.Default.(uint)
 	pathFields := schema.Path{}.Fields()
 	_ = pathFields
 	// pathDescName is the schema descriptor for name field.

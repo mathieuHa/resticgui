@@ -47,7 +47,7 @@ type BackupSchedule struct {
 	// CronSyntax holds the value of the "cronSyntax" field.
 	CronSyntax string `json:"cronSyntax,omitempty"`
 	// CronID holds the value of the "cronID" field.
-	CronID uint `json:"cronID,omitempty"`
+	CronID *uint `json:"cronID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BackupScheduleQuery when eager-loading is set.
 	Edges                      BackupScheduleEdges `json:"edges"`
@@ -205,7 +205,8 @@ func (bs *BackupSchedule) assignValues(columns []string, values []interface{}) e
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field cronID", values[i])
 			} else if value.Valid {
-				bs.CronID = uint(value.Int64)
+				bs.CronID = new(uint)
+				*bs.CronID = uint(value.Int64)
 			}
 		case backupschedule.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -277,8 +278,10 @@ func (bs *BackupSchedule) String() string {
 	builder.WriteString(bs.Interval)
 	builder.WriteString(", cronSyntax=")
 	builder.WriteString(bs.CronSyntax)
-	builder.WriteString(", cronID=")
-	builder.WriteString(fmt.Sprintf("%v", bs.CronID))
+	if v := bs.CronID; v != nil {
+		builder.WriteString(", cronID=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -386,10 +386,6 @@ func (bsc *BackupScheduleCreate) defaults() {
 		v := backupschedule.DefaultCronSyntax
 		bsc.mutation.SetCronSyntax(v)
 	}
-	if _, ok := bsc.mutation.CronID(); !ok {
-		v := backupschedule.DefaultCronID
-		bsc.mutation.SetCronID(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -588,7 +584,7 @@ func (bsc *BackupScheduleCreate) createSpec() (*BackupSchedule, *sqlgraph.Create
 			Value:  value,
 			Column: backupschedule.FieldCronID,
 		})
-		_node.CronID = value
+		_node.CronID = &value
 	}
 	if nodes := bsc.mutation.RepositoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
