@@ -217,14 +217,14 @@ func (rc *RepositoryCreate) SetMinioS3Provider(m *MinioS3Provider) *RepositoryCr
 	return rc.SetMinioS3ProviderID(m.ID)
 }
 
-// AddPathIDs adds the "path" edge to the Path entity by IDs.
+// AddPathIDs adds the "paths" edge to the Path entity by IDs.
 func (rc *RepositoryCreate) AddPathIDs(ids ...int) *RepositoryCreate {
 	rc.mutation.AddPathIDs(ids...)
 	return rc
 }
 
-// AddPath adds the "path" edges to the Path entity.
-func (rc *RepositoryCreate) AddPath(p ...*Path) *RepositoryCreate {
+// AddPaths adds the "paths" edges to the Path entity.
+func (rc *RepositoryCreate) AddPaths(p ...*Path) *RepositoryCreate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -530,12 +530,12 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.PathIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.PathsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

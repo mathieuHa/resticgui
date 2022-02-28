@@ -43,7 +43,7 @@ func QueryRepositories(c *gin.Context) {
 		WithB2Provider().
 		WithLocalProvider().
 		WithMinioS3Provider().
-		WithPath().
+		WithPaths().
 		All(context.Background())
 
 	if err != nil {
@@ -86,7 +86,7 @@ func GetRepository(c *gin.Context) {
 		WithB2Provider().
 		WithLocalProvider().
 		WithMinioS3Provider().
-		WithPath().
+		WithPaths().
 		Where(repository.ID(newId)).
 		Only(context.Background())
 
@@ -258,8 +258,8 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// Creates paths
-	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
-		for _, p := range repo.Edges.Path {
+	if repo.Edges.Paths != nil && len(repo.Edges.Paths) > 0 {
+		for _, p := range repo.Edges.Paths {
 			path, err := db.Path.
 				Create().
 				SetAbsPath(p.AbsPath).
@@ -274,7 +274,7 @@ func CreateRepository(c *gin.Context) {
 				return
 			}
 			_, err = db.Repository.
-				UpdateOneID(newRepository.ID).AddPath(path).Save(ctx)
+				UpdateOneID(newRepository.ID).AddPaths(path).Save(ctx)
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
 				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
@@ -297,7 +297,7 @@ func CreateRepository(c *gin.Context) {
 		WithB2Provider().
 		WithLocalProvider().
 		WithMinioS3Provider().
-		WithPath().
+		WithPaths().
 		Where(repository.ID(newRepository.ID)).
 		Only(ctx)
 
@@ -471,7 +471,7 @@ func EditRepository(c *gin.Context) {
 
 	// Remove old path edges
 	_, err = db.Repository.
-		UpdateOneID(newId).RemovePath(db.Repository.Query().QueryPath().AllX(ctx)...).Save(ctx)
+		UpdateOneID(newId).RemovePaths(db.Repository.Query().QueryPaths().AllX(ctx)...).Save(ctx)
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
@@ -479,8 +479,8 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Update path edges
-	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
-		for _, p := range repo.Edges.Path {
+	if repo.Edges.Paths != nil && len(repo.Edges.Paths) > 0 {
+		for _, p := range repo.Edges.Paths {
 			// ID has not been provided if p.ID == 0 -> new path
 			path, err := db.Path.
 				Create().
@@ -496,7 +496,7 @@ func EditRepository(c *gin.Context) {
 				return
 			}
 			_, err = db.Repository.
-				UpdateOneID(newId).AddPath(path).Save(ctx)
+				UpdateOneID(newId).AddPaths(path).Save(ctx)
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
 				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
@@ -514,7 +514,7 @@ func EditRepository(c *gin.Context) {
 		WithB2Provider().
 		WithLocalProvider().
 		WithMinioS3Provider().
-		WithPath().
+		WithPaths().
 		Where(repository.ID(newId)).
 		First(ctx)
 

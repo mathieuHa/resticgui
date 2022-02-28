@@ -385,10 +385,10 @@ func (pq *PathQuery) sqlAll(ctx context.Context) ([]*Path, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Path)
 		for i := range nodes {
-			if nodes[i].repository_path == nil {
+			if nodes[i].repository_paths == nil {
 				continue
 			}
-			fk := *nodes[i].repository_path
+			fk := *nodes[i].repository_paths
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +402,7 @@ func (pq *PathQuery) sqlAll(ctx context.Context) ([]*Path, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "repository_path" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_paths" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Repository = n

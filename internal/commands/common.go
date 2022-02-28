@@ -154,7 +154,7 @@ func getIncludedAndExludedFiles(repository ent.Repository) []string {
 	var files []string
 	var included []string
 	var excluded []string
-	for _, path := range repository.Edges.Path {
+	for _, path := range repository.Edges.Paths {
 		if path.Included {
 			included = append(included, path.AbsPath)
 		} else {

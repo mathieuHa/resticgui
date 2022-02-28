@@ -168,7 +168,7 @@ var (
 		{Name: "exists", Type: field.TypeBool, Default: true},
 		{Name: "is_dir", Type: field.TypeBool},
 		{Name: "included", Type: field.TypeBool, Default: true},
-		{Name: "repository_path", Type: field.TypeInt, Nullable: true},
+		{Name: "repository_paths", Type: field.TypeInt, Nullable: true},
 	}
 	// PathsTable holds the schema information for the "paths" table.
 	PathsTable = &schema.Table{
@@ -177,7 +177,7 @@ var (
 		PrimaryKey: []*schema.Column{PathsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "paths_repositories_path",
+				Symbol:     "paths_repositories_paths",
 				Columns:    []*schema.Column{PathsColumns[6]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
@@ -200,7 +200,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "provider", Type: field.TypeEnum, Enums: []string{"local", "AWSS3", "B2", "MinioS3"}, Default: "local"},
+		{Name: "provider", Type: field.TypeEnum, Enums: []string{"localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"}, Default: "localProvider"},
 		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "max_size", Type: field.TypeString, Nullable: true},

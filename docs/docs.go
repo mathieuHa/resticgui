@@ -661,8 +661,8 @@ const docTemplate = `{
                     "description": "LocalProvider holds the value of the localProvider edge.",
                     "$ref": "#/definitions/ent.LocalProvider"
                 },
-                "path": {
-                    "description": "Path holds the value of the path edge.",
+                "paths": {
+                    "description": "Paths holds the value of the paths edge.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Path"

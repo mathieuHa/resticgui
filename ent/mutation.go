@@ -5126,9 +5126,9 @@ type RepositoryMutation struct {
 	cleared_AWSS3Provider   bool
 	_MinioS3Provider        *int
 	cleared_MinioS3Provider bool
-	_path                   map[int]struct{}
-	removed_path            map[int]struct{}
-	cleared_path            bool
+	paths                   map[int]struct{}
+	removedpaths            map[int]struct{}
+	clearedpaths            bool
 	done                    bool
 	oldValue                func(context.Context) (*Repository, error)
 	predicates              []predicate.Repository
@@ -5708,58 +5708,58 @@ func (m *RepositoryMutation) ResetMinioS3Provider() {
 	m.cleared_MinioS3Provider = false
 }
 
-// AddPathIDs adds the "path" edge to the Path entity by ids.
+// AddPathIDs adds the "paths" edge to the Path entity by ids.
 func (m *RepositoryMutation) AddPathIDs(ids ...int) {
-	if m._path == nil {
-		m._path = make(map[int]struct{})
+	if m.paths == nil {
+		m.paths = make(map[int]struct{})
 	}
 	for i := range ids {
-		m._path[ids[i]] = struct{}{}
+		m.paths[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPath clears the "path" edge to the Path entity.
-func (m *RepositoryMutation) ClearPath() {
-	m.cleared_path = true
+// ClearPaths clears the "paths" edge to the Path entity.
+func (m *RepositoryMutation) ClearPaths() {
+	m.clearedpaths = true
 }
 
-// PathCleared reports if the "path" edge to the Path entity was cleared.
-func (m *RepositoryMutation) PathCleared() bool {
-	return m.cleared_path
+// PathsCleared reports if the "paths" edge to the Path entity was cleared.
+func (m *RepositoryMutation) PathsCleared() bool {
+	return m.clearedpaths
 }
 
-// RemovePathIDs removes the "path" edge to the Path entity by IDs.
+// RemovePathIDs removes the "paths" edge to the Path entity by IDs.
 func (m *RepositoryMutation) RemovePathIDs(ids ...int) {
-	if m.removed_path == nil {
-		m.removed_path = make(map[int]struct{})
+	if m.removedpaths == nil {
+		m.removedpaths = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m._path, ids[i])
-		m.removed_path[ids[i]] = struct{}{}
+		delete(m.paths, ids[i])
+		m.removedpaths[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPath returns the removed IDs of the "path" edge to the Path entity.
-func (m *RepositoryMutation) RemovedPathIDs() (ids []int) {
-	for id := range m.removed_path {
+// RemovedPaths returns the removed IDs of the "paths" edge to the Path entity.
+func (m *RepositoryMutation) RemovedPathsIDs() (ids []int) {
+	for id := range m.removedpaths {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// PathIDs returns the "path" edge IDs in the mutation.
-func (m *RepositoryMutation) PathIDs() (ids []int) {
-	for id := range m._path {
+// PathsIDs returns the "paths" edge IDs in the mutation.
+func (m *RepositoryMutation) PathsIDs() (ids []int) {
+	for id := range m.paths {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPath resets all changes to the "path" edge.
-func (m *RepositoryMutation) ResetPath() {
-	m._path = nil
-	m.cleared_path = false
-	m.removed_path = nil
+// ResetPaths resets all changes to the "paths" edge.
+func (m *RepositoryMutation) ResetPaths() {
+	m.paths = nil
+	m.clearedpaths = false
+	m.removedpaths = nil
 }
 
 // Where appends a list predicates to the RepositoryMutation builder.
@@ -5999,8 +5999,8 @@ func (m *RepositoryMutation) AddedEdges() []string {
 	if m._MinioS3Provider != nil {
 		edges = append(edges, repository.EdgeMinioS3Provider)
 	}
-	if m._path != nil {
-		edges = append(edges, repository.EdgePath)
+	if m.paths != nil {
+		edges = append(edges, repository.EdgePaths)
 	}
 	return edges
 }
@@ -6033,9 +6033,9 @@ func (m *RepositoryMutation) AddedIDs(name string) []ent.Value {
 		if id := m._MinioS3Provider; id != nil {
 			return []ent.Value{*id}
 		}
-	case repository.EdgePath:
-		ids := make([]ent.Value, 0, len(m._path))
-		for id := range m._path {
+	case repository.EdgePaths:
+		ids := make([]ent.Value, 0, len(m.paths))
+		for id := range m.paths {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6046,8 +6046,8 @@ func (m *RepositoryMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RepositoryMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 7)
-	if m.removed_path != nil {
-		edges = append(edges, repository.EdgePath)
+	if m.removedpaths != nil {
+		edges = append(edges, repository.EdgePaths)
 	}
 	return edges
 }
@@ -6056,9 +6056,9 @@ func (m *RepositoryMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *RepositoryMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case repository.EdgePath:
-		ids := make([]ent.Value, 0, len(m.removed_path))
-		for id := range m.removed_path {
+	case repository.EdgePaths:
+		ids := make([]ent.Value, 0, len(m.removedpaths))
+		for id := range m.removedpaths {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6087,8 +6087,8 @@ func (m *RepositoryMutation) ClearedEdges() []string {
 	if m.cleared_MinioS3Provider {
 		edges = append(edges, repository.EdgeMinioS3Provider)
 	}
-	if m.cleared_path {
-		edges = append(edges, repository.EdgePath)
+	if m.clearedpaths {
+		edges = append(edges, repository.EdgePaths)
 	}
 	return edges
 }
@@ -6109,8 +6109,8 @@ func (m *RepositoryMutation) EdgeCleared(name string) bool {
 		return m.cleared_AWSS3Provider
 	case repository.EdgeMinioS3Provider:
 		return m.cleared_MinioS3Provider
-	case repository.EdgePath:
-		return m.cleared_path
+	case repository.EdgePaths:
+		return m.clearedpaths
 	}
 	return false
 }
@@ -6163,8 +6163,8 @@ func (m *RepositoryMutation) ResetEdge(name string) error {
 	case repository.EdgeMinioS3Provider:
 		m.ResetMinioS3Provider()
 		return nil
-	case repository.EdgePath:
-		m.ResetPath()
+	case repository.EdgePaths:
+		m.ResetPaths()
 		return nil
 	}
 	return fmt.Errorf("unknown Repository edge %s", name)

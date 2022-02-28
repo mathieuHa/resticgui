@@ -26,7 +26,7 @@ func (Path) Fields() []ent.Field {
 func (Path) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("repository", Repository.Type).
-			Ref("path").
+			Ref("paths").
 			Unique(),
 	}
 }

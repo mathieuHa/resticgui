@@ -795,25 +795,25 @@ func HasMinioS3ProviderWith(preds ...predicate.MinioS3Provider) predicate.Reposi
 	})
 }
 
-// HasPath applies the HasEdge predicate on the "path" edge.
-func HasPath() predicate.Repository {
+// HasPaths applies the HasEdge predicate on the "paths" edge.
+func HasPaths() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PathTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PathTable, PathColumn),
+			sqlgraph.To(PathsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PathsTable, PathsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPathWith applies the HasEdge predicate on the "path" edge with a given conditions (other predicates).
-func HasPathWith(preds ...predicate.Path) predicate.Repository {
+// HasPathsWith applies the HasEdge predicate on the "paths" edge with a given conditions (other predicates).
+func HasPathsWith(preds ...predicate.Path) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PathInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PathTable, PathColumn),
+			sqlgraph.To(PathsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PathsTable, PathsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

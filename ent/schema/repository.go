@@ -48,7 +48,7 @@ func (Repository) Edges() []ent.Edge {
 		edge.To("MinioS3Provider", MinioS3Provider.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("path", Path.Type).Annotations(entsql.Annotation{
+		edge.To("paths", Path.Type).Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
 	}

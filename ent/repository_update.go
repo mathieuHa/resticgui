@@ -222,14 +222,14 @@ func (ru *RepositoryUpdate) SetMinioS3Provider(m *MinioS3Provider) *RepositoryUp
 	return ru.SetMinioS3ProviderID(m.ID)
 }
 
-// AddPathIDs adds the "path" edge to the Path entity by IDs.
+// AddPathIDs adds the "paths" edge to the Path entity by IDs.
 func (ru *RepositoryUpdate) AddPathIDs(ids ...int) *RepositoryUpdate {
 	ru.mutation.AddPathIDs(ids...)
 	return ru
 }
 
-// AddPath adds the "path" edges to the Path entity.
-func (ru *RepositoryUpdate) AddPath(p ...*Path) *RepositoryUpdate {
+// AddPaths adds the "paths" edges to the Path entity.
+func (ru *RepositoryUpdate) AddPaths(p ...*Path) *RepositoryUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -278,20 +278,20 @@ func (ru *RepositoryUpdate) ClearMinioS3Provider() *RepositoryUpdate {
 	return ru
 }
 
-// ClearPath clears all "path" edges to the Path entity.
-func (ru *RepositoryUpdate) ClearPath() *RepositoryUpdate {
-	ru.mutation.ClearPath()
+// ClearPaths clears all "paths" edges to the Path entity.
+func (ru *RepositoryUpdate) ClearPaths() *RepositoryUpdate {
+	ru.mutation.ClearPaths()
 	return ru
 }
 
-// RemovePathIDs removes the "path" edge to Path entities by IDs.
+// RemovePathIDs removes the "paths" edge to Path entities by IDs.
 func (ru *RepositoryUpdate) RemovePathIDs(ids ...int) *RepositoryUpdate {
 	ru.mutation.RemovePathIDs(ids...)
 	return ru
 }
 
-// RemovePath removes "path" edges to Path entities.
-func (ru *RepositoryUpdate) RemovePath(p ...*Path) *RepositoryUpdate {
+// RemovePaths removes "paths" edges to Path entities.
+func (ru *RepositoryUpdate) RemovePaths(p ...*Path) *RepositoryUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -649,12 +649,12 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.PathCleared() {
+	if ru.mutation.PathsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -665,12 +665,12 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedPathIDs(); len(nodes) > 0 && !ru.mutation.PathCleared() {
+	if nodes := ru.mutation.RemovedPathsIDs(); len(nodes) > 0 && !ru.mutation.PathsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -684,12 +684,12 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.PathIDs(); len(nodes) > 0 {
+	if nodes := ru.mutation.PathsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -910,14 +910,14 @@ func (ruo *RepositoryUpdateOne) SetMinioS3Provider(m *MinioS3Provider) *Reposito
 	return ruo.SetMinioS3ProviderID(m.ID)
 }
 
-// AddPathIDs adds the "path" edge to the Path entity by IDs.
+// AddPathIDs adds the "paths" edge to the Path entity by IDs.
 func (ruo *RepositoryUpdateOne) AddPathIDs(ids ...int) *RepositoryUpdateOne {
 	ruo.mutation.AddPathIDs(ids...)
 	return ruo
 }
 
-// AddPath adds the "path" edges to the Path entity.
-func (ruo *RepositoryUpdateOne) AddPath(p ...*Path) *RepositoryUpdateOne {
+// AddPaths adds the "paths" edges to the Path entity.
+func (ruo *RepositoryUpdateOne) AddPaths(p ...*Path) *RepositoryUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -966,20 +966,20 @@ func (ruo *RepositoryUpdateOne) ClearMinioS3Provider() *RepositoryUpdateOne {
 	return ruo
 }
 
-// ClearPath clears all "path" edges to the Path entity.
-func (ruo *RepositoryUpdateOne) ClearPath() *RepositoryUpdateOne {
-	ruo.mutation.ClearPath()
+// ClearPaths clears all "paths" edges to the Path entity.
+func (ruo *RepositoryUpdateOne) ClearPaths() *RepositoryUpdateOne {
+	ruo.mutation.ClearPaths()
 	return ruo
 }
 
-// RemovePathIDs removes the "path" edge to Path entities by IDs.
+// RemovePathIDs removes the "paths" edge to Path entities by IDs.
 func (ruo *RepositoryUpdateOne) RemovePathIDs(ids ...int) *RepositoryUpdateOne {
 	ruo.mutation.RemovePathIDs(ids...)
 	return ruo
 }
 
-// RemovePath removes "path" edges to Path entities.
-func (ruo *RepositoryUpdateOne) RemovePath(p ...*Path) *RepositoryUpdateOne {
+// RemovePaths removes "paths" edges to Path entities.
+func (ruo *RepositoryUpdateOne) RemovePaths(p ...*Path) *RepositoryUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -1361,12 +1361,12 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.PathCleared() {
+	if ruo.mutation.PathsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1377,12 +1377,12 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedPathIDs(); len(nodes) > 0 && !ruo.mutation.PathCleared() {
+	if nodes := ruo.mutation.RemovedPathsIDs(); len(nodes) > 0 && !ruo.mutation.PathsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1396,12 +1396,12 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.PathIDs(); len(nodes) > 0 {
+	if nodes := ruo.mutation.PathsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   repository.PathTable,
-			Columns: []string{repository.PathColumn},
+			Table:   repository.PathsTable,
+			Columns: []string{repository.PathsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

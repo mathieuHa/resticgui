@@ -277,7 +277,7 @@ func (pc *PathCreate) createSpec() (*Path, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.repository_path = &nodes[0]
+		_node.repository_paths = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

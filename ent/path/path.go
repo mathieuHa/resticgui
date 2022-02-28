@@ -27,7 +27,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "repository" package.
 	RepositoryInverseTable = "repositories"
 	// RepositoryColumn is the table column denoting the repository relation/edge.
-	RepositoryColumn = "repository_path"
+	RepositoryColumn = "repository_paths"
 )
 
 // Columns holds all SQL columns for path fields.
@@ -43,7 +43,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "paths"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"repository_path",
+	"repository_paths",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

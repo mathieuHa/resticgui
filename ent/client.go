@@ -1206,15 +1206,15 @@ func (c *RepositoryClient) QueryMinioS3Provider(r *Repository) *MinioS3ProviderQ
 	return query
 }
 
-// QueryPath queries the path edge of a Repository.
-func (c *RepositoryClient) QueryPath(r *Repository) *PathQuery {
+// QueryPaths queries the paths edge of a Repository.
+func (c *RepositoryClient) QueryPaths(r *Repository) *PathQuery {
 	query := &PathQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(path.Table, path.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathTable, repository.PathColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathsTable, repository.PathsColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil

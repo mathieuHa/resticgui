@@ -290,8 +290,8 @@ definitions:
       localProvider:
         $ref: '#/definitions/ent.LocalProvider'
         description: LocalProvider holds the value of the localProvider edge.
-      path:
-        description: Path holds the value of the path edge.
+      paths:
+        description: Paths holds the value of the paths edge.
         items:
           $ref: '#/definitions/ent.Path'
         type: array

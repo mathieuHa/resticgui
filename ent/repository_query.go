@@ -39,7 +39,7 @@ type RepositoryQuery struct {
 	withB2Provider      *B2ProviderQuery
 	withAWSS3Provider   *AWSS3ProviderQuery
 	withMinioS3Provider *MinioS3ProviderQuery
-	withPath            *PathQuery
+	withPaths           *PathQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -208,8 +208,8 @@ func (rq *RepositoryQuery) QueryMinioS3Provider() *MinioS3ProviderQuery {
 	return query
 }
 
-// QueryPath chains the current query on the "path" edge.
-func (rq *RepositoryQuery) QueryPath() *PathQuery {
+// QueryPaths chains the current query on the "paths" edge.
+func (rq *RepositoryQuery) QueryPaths() *PathQuery {
 	query := &PathQuery{config: rq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
@@ -222,7 +222,7 @@ func (rq *RepositoryQuery) QueryPath() *PathQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(repository.Table, repository.FieldID, selector),
 			sqlgraph.To(path.Table, path.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathTable, repository.PathColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathsTable, repository.PathsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -417,7 +417,7 @@ func (rq *RepositoryQuery) Clone() *RepositoryQuery {
 		withB2Provider:      rq.withB2Provider.Clone(),
 		withAWSS3Provider:   rq.withAWSS3Provider.Clone(),
 		withMinioS3Provider: rq.withMinioS3Provider.Clone(),
-		withPath:            rq.withPath.Clone(),
+		withPaths:           rq.withPaths.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -490,14 +490,14 @@ func (rq *RepositoryQuery) WithMinioS3Provider(opts ...func(*MinioS3ProviderQuer
 	return rq
 }
 
-// WithPath tells the query-builder to eager-load the nodes that are connected to
-// the "path" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RepositoryQuery) WithPath(opts ...func(*PathQuery)) *RepositoryQuery {
+// WithPaths tells the query-builder to eager-load the nodes that are connected to
+// the "paths" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithPaths(opts ...func(*PathQuery)) *RepositoryQuery {
 	query := &PathQuery{config: rq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withPath = query
+	rq.withPaths = query
 	return rq
 }
 
@@ -573,7 +573,7 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 			rq.withB2Provider != nil,
 			rq.withAWSS3Provider != nil,
 			rq.withMinioS3Provider != nil,
-			rq.withPath != nil,
+			rq.withPaths != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -764,32 +764,32 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 		}
 	}
 
-	if query := rq.withPath; query != nil {
+	if query := rq.withPaths; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Repository)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Path = []*Path{}
+			nodes[i].Edges.Paths = []*Path{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Path(func(s *sql.Selector) {
-			s.Where(sql.InValues(repository.PathColumn, fks...))
+			s.Where(sql.InValues(repository.PathsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.repository_path
+			fk := n.repository_paths
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "repository_path" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "repository_paths" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "repository_path" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_paths" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Path = append(node.Edges.Path, n)
+			node.Edges.Paths = append(node.Edges.Paths, n)
 		}
 	}
 

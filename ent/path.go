@@ -28,8 +28,8 @@ type Path struct {
 	Included bool `json:"included,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PathQuery when eager-loading is set.
-	Edges           PathEdges `json:"edges"`
-	repository_path *int
+	Edges            PathEdges `json:"edges"`
+	repository_paths *int
 }
 
 // PathEdges holds the relations/edges for other nodes in the graph.
@@ -66,7 +66,7 @@ func (*Path) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case path.FieldName, path.FieldAbsPath:
 			values[i] = new(sql.NullString)
-		case path.ForeignKeys[0]: // repository_path
+		case path.ForeignKeys[0]: // repository_paths
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Path", columns[i])
@@ -121,10 +121,10 @@ func (pa *Path) assignValues(columns []string, values []interface{}) error {
 			}
 		case path.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field repository_path", value)
+				return fmt.Errorf("unexpected type %T for edge-field repository_paths", value)
 			} else if value.Valid {
-				pa.repository_path = new(int)
-				*pa.repository_path = int(value.Int64)
+				pa.repository_paths = new(int)
+				*pa.repository_paths = int(value.Int64)
 			}
 		}
 	}

@@ -36,8 +36,8 @@ const (
 	EdgeAWSS3Provider = "AWSS3Provider"
 	// EdgeMinioS3Provider holds the string denoting the minios3provider edge name in mutations.
 	EdgeMinioS3Provider = "MinioS3Provider"
-	// EdgePath holds the string denoting the path edge name in mutations.
-	EdgePath = "path"
+	// EdgePaths holds the string denoting the paths edge name in mutations.
+	EdgePaths = "paths"
 	// Table holds the table name of the repository in the database.
 	Table = "repositories"
 	// BackupScheduleTable is the table that holds the backupSchedule relation/edge.
@@ -82,13 +82,13 @@ const (
 	MinioS3ProviderInverseTable = "MinioS3Provider"
 	// MinioS3ProviderColumn is the table column denoting the MinioS3Provider relation/edge.
 	MinioS3ProviderColumn = "repository_minio_s3provider"
-	// PathTable is the table that holds the path relation/edge.
-	PathTable = "paths"
-	// PathInverseTable is the table name for the Path entity.
+	// PathsTable is the table that holds the paths relation/edge.
+	PathsTable = "paths"
+	// PathsInverseTable is the table name for the Path entity.
 	// It exists in this package in order to avoid circular dependency with the "path" package.
-	PathInverseTable = "paths"
-	// PathColumn is the table column denoting the path relation/edge.
-	PathColumn = "repository_path"
+	PathsInverseTable = "paths"
+	// PathsColumn is the table column denoting the paths relation/edge.
+	PathsColumn = "repository_paths"
 )
 
 // Columns holds all SQL columns for repository fields.
@@ -124,15 +124,15 @@ var (
 // Provider defines the type for the "provider" enum field.
 type Provider string
 
-// ProviderLocal is the default value of the Provider enum.
-const DefaultProvider = ProviderLocal
+// ProviderLocalProvider is the default value of the Provider enum.
+const DefaultProvider = ProviderLocalProvider
 
 // Provider values.
 const (
-	ProviderLocal   Provider = "local"
-	ProviderAWSS3   Provider = "AWSS3"
-	ProviderB2      Provider = "B2"
-	ProviderMinioS3 Provider = "MinioS3"
+	ProviderLocalProvider   Provider = "localProvider"
+	ProviderAWSS3Provider   Provider = "AWSS3Provider"
+	ProviderB2Provider      Provider = "B2Provider"
+	ProviderMinioS3Provider Provider = "MinioS3Provider"
 )
 
 func (pr Provider) String() string {
@@ -142,7 +142,7 @@ func (pr Provider) String() string {
 // ProviderValidator is a validator for the "provider" field enum values. It is called by the builders before save.
 func ProviderValidator(pr Provider) error {
 	switch pr {
-	case ProviderLocal, ProviderAWSS3, ProviderB2, ProviderMinioS3:
+	case ProviderLocalProvider, ProviderAWSS3Provider, ProviderB2Provider, ProviderMinioS3Provider:
 		return nil
 	default:
 		return fmt.Errorf("repository: invalid enum value for provider field: %q", pr)
