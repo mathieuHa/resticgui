@@ -200,7 +200,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "provider", Type: field.TypeEnum, Enums: []string{"localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"}, Default: "localProvider"},
+		{Name: "provider", Type: field.TypeEnum, Nullable: true, Enums: []string{"localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"}, Default: "localProvider"},
 		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "max_size", Type: field.TypeString, Nullable: true},

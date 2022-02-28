@@ -5335,9 +5335,22 @@ func (m *RepositoryMutation) OldProvider(ctx context.Context) (v repository.Prov
 	return oldValue.Provider, nil
 }
 
+// ClearProvider clears the value of the "provider" field.
+func (m *RepositoryMutation) ClearProvider() {
+	m.provider = nil
+	m.clearedFields[repository.FieldProvider] = struct{}{}
+}
+
+// ProviderCleared returns if the "provider" field was cleared in this mutation.
+func (m *RepositoryMutation) ProviderCleared() bool {
+	_, ok := m.clearedFields[repository.FieldProvider]
+	return ok
+}
+
 // ResetProvider resets all changes to the "provider" field.
 func (m *RepositoryMutation) ResetProvider() {
 	m.provider = nil
+	delete(m.clearedFields, repository.FieldProvider)
 }
 
 // SetActive sets the "active" field.
@@ -5922,6 +5935,9 @@ func (m *RepositoryMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *RepositoryMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(repository.FieldProvider) {
+		fields = append(fields, repository.FieldProvider)
+	}
 	if m.FieldCleared(repository.FieldPassword) {
 		fields = append(fields, repository.FieldPassword)
 	}
@@ -5942,6 +5958,9 @@ func (m *RepositoryMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *RepositoryMutation) ClearField(name string) error {
 	switch name {
+	case repository.FieldProvider:
+		m.ClearProvider()
+		return nil
 	case repository.FieldPassword:
 		m.ClearPassword()
 		return nil

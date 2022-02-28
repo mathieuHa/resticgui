@@ -123,6 +123,9 @@ func CreateRepository(c *gin.Context) {
 	db := Database.Connect()
 	defer db.Close()
 
+	if repo.Provider == "" {
+		repo.Provider = "localProvider"
+	}
 	// create repository
 	newRepository, err := db.Repository.
 		Create().

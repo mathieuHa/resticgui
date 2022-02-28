@@ -363,6 +363,20 @@ func ProviderNotIn(vs ...Provider) predicate.Repository {
 	})
 }
 
+// ProviderIsNil applies the IsNil predicate on the "provider" field.
+func ProviderIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldProvider)))
+	})
+}
+
+// ProviderNotNil applies the NotNil predicate on the "provider" field.
+func ProviderNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldProvider)))
+	})
+}
+
 // ActiveEQ applies the EQ predicate on the "active" field.
 func ActiveEQ(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {

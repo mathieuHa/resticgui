@@ -54,6 +54,12 @@ func (ru *RepositoryUpdate) SetNillableProvider(r *repository.Provider) *Reposit
 	return ru
 }
 
+// ClearProvider clears the value of the "provider" field.
+func (ru *RepositoryUpdate) ClearProvider() *RepositoryUpdate {
+	ru.mutation.ClearProvider()
+	return ru
+}
+
 // SetActive sets the "active" field.
 func (ru *RepositoryUpdate) SetActive(b bool) *RepositoryUpdate {
 	ru.mutation.SetActive(b)
@@ -406,6 +412,12 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: repository.FieldProvider,
 		})
 	}
+	if ru.mutation.ProviderCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: repository.FieldProvider,
+		})
+	}
 	if value, ok := ru.mutation.Active(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -739,6 +751,12 @@ func (ruo *RepositoryUpdateOne) SetNillableProvider(r *repository.Provider) *Rep
 	if r != nil {
 		ruo.SetProvider(*r)
 	}
+	return ruo
+}
+
+// ClearProvider clears the value of the "provider" field.
+func (ruo *RepositoryUpdateOne) ClearProvider() *RepositoryUpdateOne {
+	ruo.mutation.ClearProvider()
 	return ruo
 }
 
@@ -1115,6 +1133,12 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  value,
+			Column: repository.FieldProvider,
+		})
+	}
+	if ruo.mutation.ProviderCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
 			Column: repository.FieldProvider,
 		})
 	}

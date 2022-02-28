@@ -330,9 +330,6 @@ func (rc *RepositoryCreate) check() error {
 	if _, ok := rc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Repository.createdAt"`)}
 	}
-	if _, ok := rc.mutation.Provider(); !ok {
-		return &ValidationError{Name: "provider", err: errors.New(`ent: missing required field "Repository.provider"`)}
-	}
 	if v, ok := rc.mutation.Provider(); ok {
 		if err := repository.ProviderValidator(v); err != nil {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Repository.provider": %w`, err)}
