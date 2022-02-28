@@ -1,83 +1,69 @@
 package API
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+// func TestQueryUsersRoute(t *testing.T) {
+// 	Utils.TestConfig()
+// 	Database.Migrate()
+// 	db := Database.Connect()
+// 	router := SetupRouter()
+// 	Utils.CleanDatabaseTest(db, t, "users")
 
-	"github.com/rs/zerolog/log"
-	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-)
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("GET", "/api/v1/users", nil)
+// 	router.ServeHTTP(w, req)
 
-func TestQueryUsersRoute(t *testing.T) {
-	Utils.TestConfig()
-	Database.Migrate()
-	db := Database.Connect()
-	router := SetupRouter()
-	Utils.CleanDatabaseTest(db, t, "users")
+// 	assert.Equal(t, 200, w.Code)
+// 	assert.Equal(t, "[]", w.Body.String())
+// }
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/users", nil)
-	router.ServeHTTP(w, req)
+// func TestGetUsersRoute(t *testing.T) {
+// 	Utils.TestConfig()
+// 	Database.Migrate()
+// 	db := Database.Connect()
+// 	router := SetupRouter()
+// 	Utils.CleanDatabaseTest(db, t, "users")
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "[]", w.Body.String())
-}
+// 	// Check invalid ID
+// 	id := "4ed79fc4"
+// 	url := fmt.Sprintf("/api/v1/users/%s", id)
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("GET", url, nil)
+// 	router.ServeHTTP(w, req)
 
-func TestGetUsersRoute(t *testing.T) {
-	Utils.TestConfig()
-	Database.Migrate()
-	db := Database.Connect()
-	router := SetupRouter()
-	Utils.CleanDatabaseTest(db, t, "users")
+// 	b := "{\n    \"error\": \"id not valid\"\n}"
 
-	// Check invalid ID
-	id := "4ed79fc4"
-	url := fmt.Sprintf("/api/v1/users/%s", id)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", url, nil)
-	router.ServeHTTP(w, req)
+// 	assert.Equal(t, http.StatusBadRequest, w.Code)
+// 	assert.Equal(t, b, w.Body.String())
 
-	b := "{\n    \"error\": \"id not valid\"\n}"
+// 	// Check Unknown UUID
+// 	id = "132319"
+// 	url = fmt.Sprintf("/api/v1/users/%s", id)
+// 	w = httptest.NewRecorder()
+// 	req, _ = http.NewRequest("GET", url, nil)
+// 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, b, w.Body.String())
+// 	b = "{\n    \"error\": \"user not found\"\n}"
 
-	// Check Unknown UUID
-	id = "132319"
-	url = fmt.Sprintf("/api/v1/users/%s", id)
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", url, nil)
-	router.ServeHTTP(w, req)
+// 	// Check Valid ID get
+// 	userEmail := "myEmail"
+// 	user := Models.User{Email: userEmail}
+// 	result := db.Create(&user)
+// 	assert.Nil(t, result.Error)
+// 	id2 := user.ID
+// 	log.Debug().Msgf("%v", id2)
 
-	b = "{\n    \"error\": \"user not found\"\n}"
+// 	url = fmt.Sprintf("/api/v1/users/%v", id2)
+// 	w = httptest.NewRecorder()
+// 	req, _ = http.NewRequest("GET", url, nil)
+// 	router.ServeHTTP(w, req)
 
-	// Check Valid ID get
-	userEmail := "myEmail"
-	user := Models.User{Email: userEmail}
-	result := db.Create(&user)
-	assert.Nil(t, result.Error)
-	id2 := user.ID
-	log.Debug().Msgf("%v", id2)
+// 	log.Debug().Msg(w.Body.String())
+// 	var userReceived Models.User
+// 	err := json.Unmarshal(w.Body.Bytes(), &userReceived)
+// 	log.Debug().Err(err)
 
-	url = fmt.Sprintf("/api/v1/users/%v", id2)
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", url, nil)
-	router.ServeHTTP(w, req)
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, userReceived.ID, id2)
+// 	assert.Equal(t, userReceived.Email, userEmail)
 
-	log.Debug().Msg(w.Body.String())
-	var userReceived Models.User
-	err := json.Unmarshal(w.Body.Bytes(), &userReceived)
-	log.Debug().Err(err)
-
-	assert.Nil(t, err)
-	assert.Equal(t, userReceived.ID, id2)
-	assert.Equal(t, userReceived.Email, userEmail)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-}
+// 	assert.Equal(t, http.StatusOK, w.Code)
+// }

@@ -1,207 +1,300 @@
 definitions:
-  Models.AWSS3Provider:
+  ent.AWSS3Provider:
     properties:
       accessKeyID:
+        description: AccessKeyID holds the value of the "accessKeyID" field.
         type: string
       bucketName:
-        type: string
-      createdAt:
+        description: BucketName holds the value of the "bucketName" field.
         type: string
       defaultRegion:
+        description: DefaultRegion holds the value of the "defaultRegion" field.
         type: string
+      edges:
+        $ref: '#/definitions/ent.AWSS3ProviderEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the AWSS3ProviderQuery when eager-loading is set.
       id:
-        type: integer
-      repositoryID:
+        description: ID of the ent.
         type: integer
       secretAccessKey:
-        type: string
-      updatedAt:
+        description: SecretAccessKey holds the value of the "secretAccessKey" field.
         type: string
     type: object
-  Models.B2Provider:
+  ent.AWSS3ProviderEdges:
+    properties:
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.B2Provider:
     properties:
       accountID:
+        description: AccountID holds the value of the "accountID" field.
         type: string
       accountKey:
+        description: AccountKey holds the value of the "accountKey" field.
         type: string
       bucketName:
+        description: BucketName holds the value of the "bucketName" field.
         type: string
-      createdAt:
-        type: string
+      edges:
+        $ref: '#/definitions/ent.B2ProviderEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the B2ProviderQuery when eager-loading is set.
       id:
+        description: ID of the ent.
         type: integer
       repoName:
-        type: string
-      repositoryID:
-        type: integer
-      updatedAt:
+        description: RepoName holds the value of the "repoName" field.
         type: string
     type: object
-  Models.BackupPolicy:
+  ent.B2ProviderEdges:
     properties:
-      createdAt:
-        type: string
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.BackupPolicy:
+    properties:
+      edges:
+        $ref: '#/definitions/ent.BackupPolicyEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the BackupPolicyQuery when eager-loading is set.
       id:
+        description: ID of the ent.
         type: integer
       keepAll:
+        description: KeepAll holds the value of the "keepAll" field.
         type: boolean
       name:
+        description: Name holds the value of the "name" field.
         type: string
       nbLastBackup:
+        description: NbLastBackup holds the value of the "nbLastBackup" field.
         type: integer
       oneByDay:
+        description: OneByDay holds the value of the "oneByDay" field.
         type: boolean
       oneByHour:
+        description: OneByHour holds the value of the "oneByHour" field.
         type: boolean
       oneByMonth:
+        description: OneByMonth holds the value of the "oneByMonth" field.
         type: boolean
-      repositoryID:
-        type: integer
-      updatedAt:
-        type: string
     type: object
-  Models.BackupSchedule:
+  ent.BackupPolicyEdges:
+    properties:
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.BackupSchedule:
     properties:
       choice:
-        type: string
-      createdAt:
+        description: Choice holds the value of the "choice" field.
         type: string
       cronID:
+        description: CronID holds the value of the "cronID" field.
         type: integer
       cronSyntax:
+        description: CronSyntax holds the value of the "cronSyntax" field.
         type: string
       day:
+        description: Day holds the value of the "day" field.
         type: string
+      edges:
+        $ref: '#/definitions/ent.BackupScheduleEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the BackupScheduleQuery when eager-loading is set.
       everyDay:
+        description: EveryDay holds the value of the "everyDay" field.
         type: boolean
       everyMonday:
+        description: EveryMonday holds the value of the "everyMonday" field.
         type: boolean
       everyMonth:
+        description: EveryMonth holds the value of the "everyMonth" field.
         type: boolean
       everySaturday:
+        description: EverySaturday holds the value of the "everySaturday" field.
         type: boolean
       everySunday:
+        description: EverySunday holds the value of the "everySunday" field.
         type: boolean
       everyThursday:
+        description: EveryThursday holds the value of the "everyThursday" field.
         type: boolean
       everyTriday:
+        description: EveryTriday holds the value of the "everyTriday" field.
         type: boolean
       everyTuesday:
+        description: EveryTuesday holds the value of the "everyTuesday" field.
         type: boolean
       everyWednesday:
+        description: EveryWednesday holds the value of the "everyWednesday" field.
         type: boolean
       everyWeek:
+        description: EveryWeek holds the value of the "everyWeek" field.
         type: boolean
       hour:
+        description: Hour holds the value of the "hour" field.
         type: string
       id:
+        description: ID of the ent.
         type: integer
       interval:
-        type: string
-      repositoryID:
-        type: integer
-      updatedAt:
+        description: Interval holds the value of the "interval" field.
         type: string
     type: object
-  Models.LocalProvider:
+  ent.BackupScheduleEdges:
     properties:
-      createdAt:
-        type: string
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.LocalProvider:
+    properties:
+      edges:
+        $ref: '#/definitions/ent.LocalProviderEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the LocalProviderQuery when eager-loading is set.
       id:
+        description: ID of the ent.
         type: integer
-      repoName:
-        type: string
-      repositoryID:
-        type: integer
-      updatedAt:
+      repoPath:
+        description: RepoPath holds the value of the "repoPath" field.
         type: string
     type: object
-  Models.MinioS3Provider:
+  ent.LocalProviderEdges:
+    properties:
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.MinioS3Provider:
     properties:
       IP:
+        description: IP holds the value of the "IP" field.
         type: string
       accessKeyID:
+        description: AccessKeyID holds the value of the "accessKeyID" field.
         type: string
       bucketName:
+        description: BucketName holds the value of the "bucketName" field.
         type: string
-      createdAt:
-        type: string
+      edges:
+        $ref: '#/definitions/ent.MinioS3ProviderEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the MinioS3ProviderQuery when eager-loading is set.
       id:
+        description: ID of the ent.
         type: integer
       port:
+        description: Port holds the value of the "port" field.
         type: string
-      repositoryID:
-        type: integer
       scheme:
+        description: Scheme holds the value of the "scheme" field.
         type: string
       secretAccessKey:
-        type: string
-      updatedAt:
+        description: SecretAccessKey holds the value of the "secretAccessKey" field.
         type: string
     type: object
-  Models.Path:
+  ent.MinioS3ProviderEdges:
     properties:
-      absPath:
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.Path:
+    properties:
+      abs_path:
+        description: AbsPath holds the value of the "abs_path" field.
         type: string
-      createdAt:
-        type: string
+      edges:
+        $ref: '#/definitions/ent.PathEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the PathQuery when eager-loading is set.
       exists:
+        description: Exists holds the value of the "exists" field.
         type: boolean
       id:
+        description: ID of the ent.
         type: integer
       included:
+        description: Included holds the value of the "included" field.
         type: boolean
-      isDir:
+      is_dir:
+        description: IsDir holds the value of the "is_dir" field.
         type: boolean
       name:
-        minLength: 1
+        description: Name holds the value of the "name" field.
         type: string
-      repositoryID:
-        type: integer
-      updatedAt:
-        type: string
-    required:
-    - name
     type: object
-  Models.Repository:
+  ent.PathEdges:
     properties:
-      AWSS3Provider:
-        $ref: '#/definitions/Models.AWSS3Provider'
-      B2Provider:
-        $ref: '#/definitions/Models.B2Provider'
-      MinioS3Provider:
-        $ref: '#/definitions/Models.MinioS3Provider'
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
+  ent.Repository:
+    properties:
       active:
+        description: Active holds the value of the "active" field.
         type: boolean
-      backupPolicy:
-        $ref: '#/definitions/Models.BackupPolicy'
-      backupSchedule:
-        $ref: '#/definitions/Models.BackupSchedule'
       createdAt:
+        description: CreatedAt holds the value of the "createdAt" field.
         type: string
+      edges:
+        $ref: '#/definitions/ent.RepositoryEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the RepositoryQuery when eager-loading is set.
       id:
+        description: ID of the ent.
         type: integer
-      local:
-        type: string
-      localProvider:
-        $ref: '#/definitions/Models.LocalProvider'
       maxSize:
+        description: MaxSize holds the value of the "maxSize" field.
         type: string
       name:
-        minLength: 3
+        description: Name holds the value of the "name" field.
         type: string
-      password:
-        type: string
-      paths:
-        items:
-          $ref: '#/definitions/Models.Path'
-        type: array
       provider:
+        description: Provider holds the value of the "provider" field.
         type: string
-      updatedAt:
-        type: string
-    required:
-    - name
+    type: object
+  ent.RepositoryEdges:
+    properties:
+      awss3provider:
+        $ref: '#/definitions/ent.AWSS3Provider'
+        description: Awss3provider holds the value of the awss3provider edge.
+      b2provider:
+        $ref: '#/definitions/ent.B2Provider'
+        description: B2provider holds the value of the b2provider edge.
+      backuppolicy:
+        $ref: '#/definitions/ent.BackupPolicy'
+        description: Backuppolicy holds the value of the backuppolicy edge.
+      backupschedule:
+        $ref: '#/definitions/ent.BackupSchedule'
+        description: Backupschedule holds the value of the backupschedule edge.
+      localprovider:
+        $ref: '#/definitions/ent.LocalProvider'
+        description: Localprovider holds the value of the localprovider edge.
+      minios3provider:
+        $ref: '#/definitions/ent.MinioS3Provider'
+        description: Minios3provider holds the value of the minios3provider edge.
+      path:
+        description: Path holds the value of the path edge.
+        items:
+          $ref: '#/definitions/ent.Path'
+        type: array
     type: object
 info:
   contact: {}
@@ -266,7 +359,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Models.Repository'
+              $ref: '#/definitions/ent.Repository'
             type: array
       summary: get all repositories
     post:
@@ -279,14 +372,14 @@ paths:
         name: repository
         required: true
         schema:
-          $ref: '#/definitions/Models.Repository'
+          $ref: '#/definitions/ent.Repository'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/Models.Repository'
+            $ref: '#/definitions/ent.Repository'
         "400":
           description: Bad Request
           schema:
@@ -341,7 +434,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Models.Repository'
+            $ref: '#/definitions/ent.Repository'
         "404":
           description: Not Found
           schema:
@@ -362,14 +455,14 @@ paths:
         name: repository
         required: true
         schema:
-          $ref: '#/definitions/Models.Repository'
+          $ref: '#/definitions/ent.Repository'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Models.Repository'
+            $ref: '#/definitions/ent.Repository'
         "400":
           description: Bad Request
           schema:

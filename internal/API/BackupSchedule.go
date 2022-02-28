@@ -2,86 +2,84 @@ package API
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func QueryBackupSchedule(c *gin.Context) {
-	var schedules []Models.BackupSchedule
+// func QueryBackupSchedule(c *gin.Context) {
+// 	var schedules []ent.BackupSchedule
 
-	db := Database.Connect()
+// 	db := Database.Connect()
 
-	db.Find(&schedules)
+// 	db.Find(&schedules)
 
-	c.IndentedJSON(http.StatusOK, schedules)
-}
+// 	c.IndentedJSON(http.StatusOK, schedules)
+// }
 
-func GetBackupSchedule(c *gin.Context) {
-	id := c.Param("id")
+// func GetBackupSchedule(c *gin.Context) {
+// 	id := c.Param("id")
 
-	var schedule Models.BackupSchedule
+// 	var schedule ent.BackupSchedule
 
-	db := Database.Connect()
+// 	db := Database.Connect()
 
-	result := db.Find(&schedule, "id = ?", id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "schedule not found"})
-		return
-	}
+// 	result := db.Find(&schedule, "id = ?", id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "schedule not found"})
+// 		return
+// 	}
 
-	c.IndentedJSON(http.StatusOK, schedule)
-}
+// 	c.IndentedJSON(http.StatusOK, schedule)
+// }
 
-func UpdateBackupSchedule(c *gin.Context) {
-	id := c.Param("id") // id of the repository
+// func UpdateBackupSchedule(c *gin.Context) {
+// 	id := c.Param("id") // id of the repository
 
-	var repository Models.Repository
+// 	var repository ent.Repository
 
-	db := Database.Connect()
+// 	db := Database.Connect()
 
-	result := db.Preload("BackupSchedule").Find(&repository, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
-		return
-	}
+// 	result := db.Preload("BackupSchedule").Find(&repository, id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository not found"})
+// 		return
+// 	}
 
-	// Here we add repository schedule
-	//var schedule Models.BackupSchedule
-	if err := c.BindJSON(&repository.BackupSchedule); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bind error"})
-		log.Info().Err(err).Msg("Bind Error schedule")
-		return
-	}
+// 	// Here we add repository schedule
+// 	//var schedule ent.BackupSchedule
+// 	if err := c.BindJSON(&repository.BackupSchedule); err != nil {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bind error"})
+// 		log.Info().Err(err).Msg("Bind Error schedule")
+// 		return
+// 	}
 
-	if !validSchedule(repository.BackupSchedule) {
-		// we check the schedule can be parsed
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "schedule not valid"})
-		log.Warn().Msg("schedule not valid")
-		return
-	}
-	if repository.Active {
-		// we add the scheduled backup
-		resultAdd := addScheduledBackup(&repository)
-		if !resultAdd {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "start cron error"})
-			log.Warn().Msg("start cron error")
-			return
-		}
-	}
+// 	if !validSchedule(repository.BackupSchedule) {
+// 		// we check the schedule can be parsed
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "schedule not valid"})
+// 		log.Warn().Msg("schedule not valid")
+// 		return
+// 	}
+// 	if repository.Active {
+// 		// we add the scheduled backup
+// 		resultAdd := addScheduledBackup(&repository)
+// 		if !resultAdd {
+// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "start cron error"})
+// 			log.Warn().Msg("start cron error")
+// 			return
+// 		}
+// 	}
 
-	db.Model(&repository).Association("BackupScheduled").Replace(&repository.BackupSchedule)
+// 	db.Model(&repository).Association("BackupScheduled").Replace(&repository.BackupSchedule)
 
-	// Check if the file exist ?
+// 	// Check if the file exist ?
 
-	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
-}
+// 	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
+// }
 
-func validSchedule(schedule Models.BackupSchedule) bool {
+func validSchedule(schedule ent.BackupSchedule) bool {
 	if schedule.Choice == "cron" {
 		// check cron
 	} else if schedule.Choice == "interval" {
@@ -95,7 +93,7 @@ func validSchedule(schedule Models.BackupSchedule) bool {
 }
 
 // This returns the schedule in string format that can be used by cron
-func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
+func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 	if schedule.Choice == "cron" {
 		return schedule.CronSyntax
 	} else if schedule.Choice == "interval" {
@@ -147,21 +145,21 @@ func getScheduleStringSyntax(schedule Models.BackupSchedule) string {
 	return ""
 }
 
-func addScheduledBackup(repository *Models.Repository) bool {
+func addScheduledBackup(repository *ent.Repository) bool {
 	// we check if the cron has been initialized
 	if cr != nil {
 
 		// First we remove the previous job launched for this repository
-		if repository.BackupSchedule.CronID >= 0 {
-			cr.Remove(repository.BackupSchedule.CronID)
+		if repository.Edges.BackupSchedule.CronID >= 0 {
+			cr.Remove(cron.EntryID(repository.Edges.BackupSchedule.CronID))
 		}
 		// Then we had the new job to be run and register it
 		var err error
-		timing := getScheduleStringSyntax(repository.BackupSchedule)
+		timing := getScheduleStringSyntax(*repository.Edges.BackupSchedule)
 		log.Debug().Msgf("timing = %v", timing)
-		repository.BackupSchedule.CronID, err = cr.AddFunc(timing, func() {
-			log.Debug().Msgf("JOB HAS RUN")
-		})
+		// repository.Edges.Backupschedule.CronID, err = cr.AddFunc(timing, func() {
+		// 	log.Debug().Msgf("JOB HAS RUN")
+		// })
 		if err != nil {
 			log.Error().Err(err)
 			return false
@@ -174,24 +172,24 @@ func addScheduledBackup(repository *Models.Repository) bool {
 }
 
 func CreateAllScheduledBackup() {
-	var repositories []Models.Repository
+	// var repositories []ent.Repository
 
-	db := Database.Connect()
+	// db := Database.Connect()
 
-	db.Where("active = ?", true).Preload("BackupSchedule").Find(&repositories)
+	// db.Where("active = ?", true).Preload("BackupSchedule").Find(&repositories)
 
-	for _, repo := range repositories {
-		log.Debug().Msgf("start repos %v", repo.ID)
-		addScheduledBackup(&repo)
-	}
+	// for _, repo := range repositories {
+	// 	log.Debug().Msgf("start repos %v", repo.ID)
+	// 	addScheduledBackup(&repo)
+	// }
 }
 
-func removeScheduledBackup(repository Models.Repository) {
+func removeScheduledBackup(repository ent.Repository) {
 	// Here we need to
 	if cr != nil {
 		// First we remove the previous job launched for this repository
-		if repository.BackupSchedule.CronID >= 0 {
-			cr.Remove(repository.BackupSchedule.CronID)
-		}
+		// if repository.BackupSchedule.CronID >= 0 {
+		// 	cr.Remove(repository.BackupSchedule.CronID)
+		// }
 	}
 }

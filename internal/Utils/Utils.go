@@ -1,14 +1,10 @@
 package Utils
 
 import (
-	"fmt"
-
 	"strconv"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func TestConfig() {
@@ -21,12 +17,12 @@ func TestConfig() {
 	}
 }
 
-// Clean database before test
-func CleanDatabaseTest(db *gorm.DB, t assert.TestingT, table string) {
-	request := fmt.Sprintf("DELETE FROM %s", table)
-	result := db.Exec(request)
-	assert.Nil(t, result.Error)
-}
+// // Clean database before test
+// func CleanDatabaseTest(db *gorm.DB, t assert.TestingT, table string) {
+// 	request := fmt.Sprintf("DELETE FROM %s", table)
+// 	result := db.Exec(request)
+// 	assert.Nil(t, result.Error)
+// }
 
 func IsValidInt(s string) bool {
 	_, err := strconv.Atoi(s)

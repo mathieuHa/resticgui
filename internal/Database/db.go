@@ -1,51 +1,29 @@
 package Database
 
 import (
-	"github.com/spf13/viper"
-	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"context"
 
 	"log"
-	"os"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/spf13/viper"
+	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func Connect() (_db *gorm.DB) {
+func Connect() (_db *ent.Client) {
 	dbname := viper.GetString("db.name")
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			LogLevel: logger.Error, // Log level Info will output everything
-		},
-	)
-	_db, err := gorm.Open(sqlite.Open(dbname), &gorm.Config{
-		Logger: newLogger,
-	})
+	client, err := ent.Open("sqlite3", dbname+"?_fk=1")
 	if err != nil {
-		panic("failed to connect database {err} ")
-	} else {
-		//log.Debug().Msgf("Connected to database: %v", dbname)
+		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	return _db
+	// defer client.Close()
+	// Run the auto migration tool.
+	return client
 }
 
 func Migrate() {
 	db := Connect()
-	err := db.AutoMigrate(
-		&Models.User{},
-		&Models.Path{},
-		&Models.BackupPolicy{},
-		&Models.BackupSchedule{},
-		&Models.Permission{},
-		&Models.Role{},
-		&Models.Repository{},
-		&Models.MinioS3Provider{},
-		&Models.AWSS3Provider{},
-		&Models.B2Provider{},
-		&Models.LocalProvider{},
-	)
-	if err != nil {
-		panic("failed to migrate {err} ")
+	if err := db.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
 	}
 }

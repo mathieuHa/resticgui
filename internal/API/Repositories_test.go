@@ -1,126 +1,113 @@
 package API
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+// func TestQueryRepositoriesRoute(t *testing.T) {
+// 	Utils.TestConfig()
+// 	Database.Migrate()
+// 	db := Database.Connect()
+// 	router := SetupRouter()
+// 	Utils.CleanDatabaseTest(db, t, "repositories")
 
-	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-)
+// 	const apiURL = "/api/v1/repositories"
 
-func TestQueryRepositoriesRoute(t *testing.T) {
-	Utils.TestConfig()
-	Database.Migrate()
-	db := Database.Connect()
-	router := SetupRouter()
-	Utils.CleanDatabaseTest(db, t, "repositories")
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("GET", apiURL, nil)
+// 	router.ServeHTTP(w, req)
 
-	const apiURL = "/api/v1/repositories"
+// 	assert.Equal(t, 200, w.Code)
+// 	assert.Equal(t, "[]", w.Body.String())
+// }
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", apiURL, nil)
-	router.ServeHTTP(w, req)
+// func TestGetRepositoriesRoute(t *testing.T) {
+// 	Utils.TestConfig()
+// 	Database.Migrate()
+// 	db := Database.Connect()
+// 	router := SetupRouter()
+// 	Utils.CleanDatabaseTest(db, t, "repositories")
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "[]", w.Body.String())
-}
+// 	const apiURL = "/api/v1/repositories/%v"
 
-func TestGetRepositoriesRoute(t *testing.T) {
-	Utils.TestConfig()
-	Database.Migrate()
-	db := Database.Connect()
-	router := SetupRouter()
-	Utils.CleanDatabaseTest(db, t, "repositories")
+// 	t.Run("invalid id", func(t *testing.T) {
+// 		// Check invalid id
+// 		id := "aze"
+// 		url := fmt.Sprintf(apiURL, id)
+// 		w := httptest.NewRecorder()
+// 		req, _ := http.NewRequest("GET", url, nil)
+// 		router.ServeHTTP(w, req)
 
-	const apiURL = "/api/v1/repositories/%v"
+// 		b := "{\n    \"error\": \"id not valid\"\n}"
 
-	t.Run("invalid id", func(t *testing.T) {
-		// Check invalid id
-		id := "aze"
-		url := fmt.Sprintf(apiURL, id)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
-		router.ServeHTTP(w, req)
+// 		assert.Equal(t, http.StatusBadRequest, w.Code)
+// 		assert.Equal(t, b, w.Body.String())
+// 	})
 
-		b := "{\n    \"error\": \"id not valid\"\n}"
+// 	t.Run("invalid id", func(t *testing.T) {
+// 		// Check Unknown ID
+// 		id := "1280898"
+// 		url := fmt.Sprintf(apiURL, id)
+// 		w := httptest.NewRecorder()
+// 		req, _ := http.NewRequest("GET", url, nil)
+// 		router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, b, w.Body.String())
-	})
+// 		b := "{\n    \"error\": \"repository not found\"\n}"
 
-	t.Run("invalid id", func(t *testing.T) {
-		// Check Unknown ID
-		id := "1280898"
-		url := fmt.Sprintf(apiURL, id)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
-		router.ServeHTTP(w, req)
+// 		assert.Equal(t, http.StatusNotFound, w.Code)
+// 		assert.Equal(t, b, w.Body.String())
+// 	})
 
-		b := "{\n    \"error\": \"repository not found\"\n}"
+// 	t.Run("valid ID", func(t *testing.T) {
+// 		// Check Valid ID get
+// 		repositoryName := "myRepo"
+// 		repository := Models.Repository{Name: repositoryName}
+// 		result := db.Create(&repository)
+// 		assert.Nil(t, result.Error)
+// 		id := repository.ID
 
-		assert.Equal(t, http.StatusNotFound, w.Code)
-		assert.Equal(t, b, w.Body.String())
-	})
+// 		url := fmt.Sprintf(apiURL, id)
+// 		w := httptest.NewRecorder()
+// 		req, _ := http.NewRequest("GET", url, nil)
+// 		router.ServeHTTP(w, req)
 
-	t.Run("valid ID", func(t *testing.T) {
-		// Check Valid ID get
-		repositoryName := "myRepo"
-		repository := Models.Repository{Name: repositoryName}
-		result := db.Create(&repository)
-		assert.Nil(t, result.Error)
-		id := repository.ID
+// 		var repositoryReceived Models.Repository
+// 		err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
+// 		assert.Nil(t, err)
+// 		assert.Equal(t, repositoryReceived.ID, id)
+// 		assert.Equal(t, repositoryReceived.Name, repositoryName)
+// 		assert.Equal(t, http.StatusOK, w.Code)
+// 	})
+// }
 
-		url := fmt.Sprintf(apiURL, id)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
-		router.ServeHTTP(w, req)
+// func TestRemoveRepositoriesRoute(t *testing.T) {
+// 	Utils.TestConfig()
+// 	Database.Migrate()
+// 	db := Database.Connect()
+// 	router := SetupRouter()
+// 	Utils.CleanDatabaseTest(db, t, "repositories")
 
-		var repositoryReceived Models.Repository
-		err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
-		assert.Nil(t, err)
-		assert.Equal(t, repositoryReceived.ID, id)
-		assert.Equal(t, repositoryReceived.Name, repositoryName)
-		assert.Equal(t, http.StatusOK, w.Code)
-	})
-}
+// 	const apiURL = "/api/v1/repositories/%v"
 
-func TestRemoveRepositoriesRoute(t *testing.T) {
-	Utils.TestConfig()
-	Database.Migrate()
-	db := Database.Connect()
-	router := SetupRouter()
-	Utils.CleanDatabaseTest(db, t, "repositories")
+// 	// Check invalid id
+// 	id := "aze"
+// 	url := fmt.Sprintf(apiURL, id)
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("DELETE", url, nil)
+// 	router.ServeHTTP(w, req)
 
-	const apiURL = "/api/v1/repositories/%v"
+// 	b := "{\n    \"error\": \"id not valid\"\n}"
 
-	// Check invalid id
-	id := "aze"
-	url := fmt.Sprintf(apiURL, id)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", url, nil)
-	router.ServeHTTP(w, req)
+// 	assert.Equal(t, http.StatusBadRequest, w.Code)
+// 	assert.Equal(t, b, w.Body.String())
 
-	b := "{\n    \"error\": \"id not valid\"\n}"
+// 	// Check Valid ID get
+// 	repositoryName := "myRepo"
+// 	repository := Models.Repository{Name: repositoryName}
+// 	result := db.Create(&repository)
+// 	assert.Nil(t, result.Error)
+// 	id2 := repository.ID
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, b, w.Body.String())
+// 	url = fmt.Sprintf(apiURL, id2)
+// 	w = httptest.NewRecorder()
+// 	req, _ = http.NewRequest("DELETE", url, nil)
+// 	router.ServeHTTP(w, req)
 
-	// Check Valid ID get
-	repositoryName := "myRepo"
-	repository := Models.Repository{Name: repositoryName}
-	result := db.Create(&repository)
-	assert.Nil(t, result.Error)
-	id2 := repository.ID
-
-	url = fmt.Sprintf(apiURL, id2)
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("DELETE", url, nil)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusNoContent, w.Code)
-}
+// 	assert.Equal(t, http.StatusNoContent, w.Code)
+// }

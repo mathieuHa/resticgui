@@ -43,14 +43,14 @@ func SetupRouter() *gin.Engine {
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 	// API routes
-	grpUsers := router.Group(APIBasePath + "/users")
-	{
-		grpUsers.GET("", QueryUsers)
-		grpUsers.GET(":id", GetUsers)
-		grpUsers.POST("", CreateUser)
-		grpUsers.PATCH(":id", EditUser)
-		grpUsers.DELETE(":id", RemoveUser)
-	}
+	// grpUsers := router.Group(APIBasePath + "/users")
+	// {
+	// 	grpUsers.GET("", QueryUsers)
+	// 	grpUsers.GET(":id", GetUsers)
+	// 	grpUsers.POST("", CreateUser)
+	// 	grpUsers.PATCH(":id", EditUser)
+	// 	grpUsers.DELETE(":id", RemoveUser)
+	// }
 
 	grpRepositories := router.Group(APIBasePath + "repositories")
 	{
@@ -72,12 +72,12 @@ func SetupRouter() *gin.Engine {
 		grpCmds.GET("", ExecuteCmd)
 	}
 
-	grpBackupSchedules := router.Group(APIBasePath + "repositories/:id/schedules")
-	{
-		grpBackupSchedules.PUT("", UpdateBackupSchedule)
-		grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
-		grpBackupSchedules.GET("", QueryBackupSchedule)
-	}
+	// grpBackupSchedules := router.Group(APIBasePath + "repositories/:id/schedules")
+	// {
+	// 	grpBackupSchedules.PUT("", UpdateBackupSchedule)
+	// 	grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
+	// 	grpBackupSchedules.GET("", QueryBackupSchedule)
+	// }
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

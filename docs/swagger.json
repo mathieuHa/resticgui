@@ -92,7 +92,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Models.Repository"
+                                "$ref": "#/definitions/ent.Repository"
                             }
                         }
                     }
@@ -114,7 +114,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     }
                 ],
@@ -122,7 +122,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     },
                     "400": {
@@ -163,7 +163,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     },
                     "404": {
@@ -239,7 +239,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     }
                 ],
@@ -247,7 +247,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Models.Repository"
+                            "$ref": "#/definitions/ent.Repository"
                         }
                     },
                     "400": {
@@ -267,312 +267,394 @@
         }
     },
     "definitions": {
-        "Models.AWSS3Provider": {
+        "ent.AWSS3Provider": {
             "type": "object",
             "properties": {
                 "accessKeyID": {
+                    "description": "AccessKeyID holds the value of the \"accessKeyID\" field.",
                     "type": "string"
                 },
                 "bucketName": {
-                    "type": "string"
-                },
-                "createdAt": {
+                    "description": "BucketName holds the value of the \"bucketName\" field.",
                     "type": "string"
                 },
                 "defaultRegion": {
+                    "description": "DefaultRegion holds the value of the \"defaultRegion\" field.",
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the AWSS3ProviderQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.AWSS3ProviderEdges"
                 },
-                "repositoryID": {
+                "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "secretAccessKey": {
-                    "type": "string"
-                },
-                "updatedAt": {
+                    "description": "SecretAccessKey holds the value of the \"secretAccessKey\" field.",
                     "type": "string"
                 }
             }
         },
-        "Models.B2Provider": {
+        "ent.AWSS3ProviderEdges": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.B2Provider": {
             "type": "object",
             "properties": {
                 "accountID": {
+                    "description": "AccountID holds the value of the \"accountID\" field.",
                     "type": "string"
                 },
                 "accountKey": {
+                    "description": "AccountKey holds the value of the \"accountKey\" field.",
                     "type": "string"
                 },
                 "bucketName": {
+                    "description": "BucketName holds the value of the \"bucketName\" field.",
                     "type": "string"
                 },
-                "createdAt": {
-                    "type": "string"
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the B2ProviderQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.B2ProviderEdges"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "repoName": {
-                    "type": "string"
-                },
-                "repositoryID": {
-                    "type": "integer"
-                },
-                "updatedAt": {
+                    "description": "RepoName holds the value of the \"repoName\" field.",
                     "type": "string"
                 }
             }
         },
-        "Models.BackupPolicy": {
+        "ent.B2ProviderEdges": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.BackupPolicy": {
+            "type": "object",
+            "properties": {
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the BackupPolicyQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.BackupPolicyEdges"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "keepAll": {
+                    "description": "KeepAll holds the value of the \"keepAll\" field.",
                     "type": "boolean"
                 },
                 "name": {
+                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 },
                 "nbLastBackup": {
+                    "description": "NbLastBackup holds the value of the \"nbLastBackup\" field.",
                     "type": "integer"
                 },
                 "oneByDay": {
+                    "description": "OneByDay holds the value of the \"oneByDay\" field.",
                     "type": "boolean"
                 },
                 "oneByHour": {
+                    "description": "OneByHour holds the value of the \"oneByHour\" field.",
                     "type": "boolean"
                 },
                 "oneByMonth": {
+                    "description": "OneByMonth holds the value of the \"oneByMonth\" field.",
                     "type": "boolean"
-                },
-                "repositoryID": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
-        "Models.BackupSchedule": {
+        "ent.BackupPolicyEdges": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.BackupSchedule": {
             "type": "object",
             "properties": {
                 "choice": {
-                    "type": "string"
-                },
-                "createdAt": {
+                    "description": "Choice holds the value of the \"choice\" field.",
                     "type": "string"
                 },
                 "cronID": {
+                    "description": "CronID holds the value of the \"cronID\" field.",
                     "type": "integer"
                 },
                 "cronSyntax": {
+                    "description": "CronSyntax holds the value of the \"cronSyntax\" field.",
                     "type": "string"
                 },
                 "day": {
+                    "description": "Day holds the value of the \"day\" field.",
                     "type": "string"
                 },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the BackupScheduleQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.BackupScheduleEdges"
+                },
                 "everyDay": {
+                    "description": "EveryDay holds the value of the \"everyDay\" field.",
                     "type": "boolean"
                 },
                 "everyMonday": {
+                    "description": "EveryMonday holds the value of the \"everyMonday\" field.",
                     "type": "boolean"
                 },
                 "everyMonth": {
+                    "description": "EveryMonth holds the value of the \"everyMonth\" field.",
                     "type": "boolean"
                 },
                 "everySaturday": {
+                    "description": "EverySaturday holds the value of the \"everySaturday\" field.",
                     "type": "boolean"
                 },
                 "everySunday": {
+                    "description": "EverySunday holds the value of the \"everySunday\" field.",
                     "type": "boolean"
                 },
                 "everyThursday": {
+                    "description": "EveryThursday holds the value of the \"everyThursday\" field.",
                     "type": "boolean"
                 },
                 "everyTriday": {
+                    "description": "EveryTriday holds the value of the \"everyTriday\" field.",
                     "type": "boolean"
                 },
                 "everyTuesday": {
+                    "description": "EveryTuesday holds the value of the \"everyTuesday\" field.",
                     "type": "boolean"
                 },
                 "everyWednesday": {
+                    "description": "EveryWednesday holds the value of the \"everyWednesday\" field.",
                     "type": "boolean"
                 },
                 "everyWeek": {
+                    "description": "EveryWeek holds the value of the \"everyWeek\" field.",
                     "type": "boolean"
                 },
                 "hour": {
+                    "description": "Hour holds the value of the \"hour\" field.",
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "interval": {
-                    "type": "string"
-                },
-                "repositoryID": {
-                    "type": "integer"
-                },
-                "updatedAt": {
+                    "description": "Interval holds the value of the \"interval\" field.",
                     "type": "string"
                 }
             }
         },
-        "Models.LocalProvider": {
+        "ent.BackupScheduleEdges": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.LocalProvider": {
+            "type": "object",
+            "properties": {
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the LocalProviderQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.LocalProviderEdges"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
-                "repoName": {
-                    "type": "string"
-                },
-                "repositoryID": {
-                    "type": "integer"
-                },
-                "updatedAt": {
+                "repoPath": {
+                    "description": "RepoPath holds the value of the \"repoPath\" field.",
                     "type": "string"
                 }
             }
         },
-        "Models.MinioS3Provider": {
+        "ent.LocalProviderEdges": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.MinioS3Provider": {
             "type": "object",
             "properties": {
                 "IP": {
+                    "description": "IP holds the value of the \"IP\" field.",
                     "type": "string"
                 },
                 "accessKeyID": {
+                    "description": "AccessKeyID holds the value of the \"accessKeyID\" field.",
                     "type": "string"
                 },
                 "bucketName": {
+                    "description": "BucketName holds the value of the \"bucketName\" field.",
                     "type": "string"
                 },
-                "createdAt": {
-                    "type": "string"
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the MinioS3ProviderQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.MinioS3ProviderEdges"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "port": {
+                    "description": "Port holds the value of the \"port\" field.",
                     "type": "string"
                 },
-                "repositoryID": {
-                    "type": "integer"
-                },
                 "scheme": {
+                    "description": "Scheme holds the value of the \"scheme\" field.",
                     "type": "string"
                 },
                 "secretAccessKey": {
-                    "type": "string"
-                },
-                "updatedAt": {
+                    "description": "SecretAccessKey holds the value of the \"secretAccessKey\" field.",
                     "type": "string"
                 }
             }
         },
-        "Models.Path": {
+        "ent.MinioS3ProviderEdges": {
             "type": "object",
-            "required": [
-                "name"
-            ],
             "properties": {
-                "absPath": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.Path": {
+            "type": "object",
+            "properties": {
+                "abs_path": {
+                    "description": "AbsPath holds the value of the \"abs_path\" field.",
                     "type": "string"
                 },
-                "createdAt": {
-                    "type": "string"
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the PathQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.PathEdges"
                 },
                 "exists": {
+                    "description": "Exists holds the value of the \"exists\" field.",
                     "type": "boolean"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "included": {
+                    "description": "Included holds the value of the \"included\" field.",
                     "type": "boolean"
                 },
-                "isDir": {
+                "is_dir": {
+                    "description": "IsDir holds the value of the \"is_dir\" field.",
                     "type": "boolean"
                 },
                 "name": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "repositoryID": {
-                    "type": "integer"
-                },
-                "updatedAt": {
+                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 }
             }
         },
-        "Models.Repository": {
+        "ent.PathEdges": {
             "type": "object",
-            "required": [
-                "name"
-            ],
             "properties": {
-                "AWSS3Provider": {
-                    "$ref": "#/definitions/Models.AWSS3Provider"
-                },
-                "B2Provider": {
-                    "$ref": "#/definitions/Models.B2Provider"
-                },
-                "MinioS3Provider": {
-                    "$ref": "#/definitions/Models.MinioS3Provider"
-                },
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
+        "ent.Repository": {
+            "type": "object",
+            "properties": {
                 "active": {
+                    "description": "Active holds the value of the \"active\" field.",
                     "type": "boolean"
                 },
-                "backupPolicy": {
-                    "$ref": "#/definitions/Models.BackupPolicy"
-                },
-                "backupSchedule": {
-                    "$ref": "#/definitions/Models.BackupSchedule"
-                },
                 "createdAt": {
+                    "description": "CreatedAt holds the value of the \"createdAt\" field.",
                     "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the RepositoryQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.RepositoryEdges"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
-                "local": {
-                    "type": "string"
-                },
-                "localProvider": {
-                    "$ref": "#/definitions/Models.LocalProvider"
-                },
                 "maxSize": {
+                    "description": "MaxSize holds the value of the \"maxSize\" field.",
                     "type": "string"
                 },
                 "name": {
-                    "type": "string",
-                    "minLength": 3
-                },
-                "password": {
+                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
-                },
-                "paths": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Models.Path"
-                    }
                 },
                 "provider": {
+                    "description": "Provider holds the value of the \"provider\" field.",
                     "type": "string"
+                }
+            }
+        },
+        "ent.RepositoryEdges": {
+            "type": "object",
+            "properties": {
+                "awss3provider": {
+                    "description": "Awss3provider holds the value of the awss3provider edge.",
+                    "$ref": "#/definitions/ent.AWSS3Provider"
                 },
-                "updatedAt": {
-                    "type": "string"
+                "b2provider": {
+                    "description": "B2provider holds the value of the b2provider edge.",
+                    "$ref": "#/definitions/ent.B2Provider"
+                },
+                "backuppolicy": {
+                    "description": "Backuppolicy holds the value of the backuppolicy edge.",
+                    "$ref": "#/definitions/ent.BackupPolicy"
+                },
+                "backupschedule": {
+                    "description": "Backupschedule holds the value of the backupschedule edge.",
+                    "$ref": "#/definitions/ent.BackupSchedule"
+                },
+                "localprovider": {
+                    "description": "Localprovider holds the value of the localprovider edge.",
+                    "$ref": "#/definitions/ent.LocalProvider"
+                },
+                "minios3provider": {
+                    "description": "Minios3provider holds the value of the minios3provider edge.",
+                    "$ref": "#/definitions/ent.MinioS3Provider"
+                },
+                "path": {
+                    "description": "Path holds the value of the path edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Path"
+                    }
                 }
             }
         }

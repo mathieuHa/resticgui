@@ -1,134 +1,124 @@
 package API
 
-import (
-	"net/http"
+// func QueryUsers(c *gin.Context) {
+// 	users := []Models.User{}
 
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
-)
+// 	db := Database.Connect()
 
-func QueryUsers(c *gin.Context) {
-	users := []Models.User{}
+// 	db.Find(&users)
 
-	db := Database.Connect()
+// 	c.IndentedJSON(http.StatusOK, users)
+// }
 
-	db.Find(&users)
+// func GetUsers(c *gin.Context) {
+// 	id := c.Param("id")
 
-	c.IndentedJSON(http.StatusOK, users)
-}
+// 	if !Utils.IsValidInt(id) {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+// 		return
+// 	}
 
-func GetUsers(c *gin.Context) {
-	id := c.Param("id")
+// 	var users Models.User
 
-	if !Utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	}
+// 	db := Database.Connect()
 
-	var users Models.User
+// 	result := db.Find(&users, id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+// 		return
+// 	}
+// 	c.IndentedJSON(http.StatusOK, users)
+// }
 
-	db := Database.Connect()
+// func CreateUser(c *gin.Context) {
+// 	var user Models.User
 
-	result := db.Find(&users, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
-	}
-	c.IndentedJSON(http.StatusOK, users)
-}
+// 	if err := c.BindJSON(&user); err != nil {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		log.Info().Err(err).Msg("Bind Error User")
+// 		return
+// 	}
+// 	db := Database.Connect()
 
-func CreateUser(c *gin.Context) {
-	var user Models.User
+// 	result := db.Create(&user)
+// 	if result.Error != nil {
+// 		log.Debug().Err(result.Error)
+// 		err := db.Find(&user).Error
 
-	if err := c.BindJSON(&user); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg("Bind Error User")
-		return
-	}
-	db := Database.Connect()
+// 		if err == nil {
+// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
+// 			return
+// 		} else {
+// 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
+// 			return
+// 		}
+// 	}
 
-	result := db.Create(&user)
-	if result.Error != nil {
-		log.Debug().Err(result.Error)
-		err := db.Find(&user).Error
+// 	c.IndentedJSON(http.StatusCreated, user)
+// }
 
-		if err == nil {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "email already in use"})
-			return
-		} else {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "creation failed"})
-			return
-		}
-	}
+// func EditUser(c *gin.Context) {
+// 	id := c.Param("id")
 
-	c.IndentedJSON(http.StatusCreated, user)
-}
+// 	if !Utils.IsValidInt(id) {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+// 		return
+// 	}
 
-func EditUser(c *gin.Context) {
-	id := c.Param("id")
+// 	var editedUser Models.User
 
-	if !Utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	}
+// 	if err := c.BindJSON(&editedUser); err != nil {
+// 		log.Info().Err(err).Msg("Bind Error User")
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	var editedUser Models.User
+// 	var users Models.User
 
-	if err := c.BindJSON(&editedUser); err != nil {
-		log.Info().Err(err).Msg("Bind Error User")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	db := Database.Connect()
 
-	var users Models.User
+// 	result := db.Find(&users, id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+// 		return
+// 	}
 
-	db := Database.Connect()
+// 	result = db.Model(&users).Updates(&editedUser)
+// 	if result.Error != nil {
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
+// 		log.Info().Err(result.Error).Msg("Error updating")
+// 		return
+// 	}
 
-	result := db.Find(&users, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
-	}
+// 	var updatedUser Models.User
 
-	result = db.Model(&users).Updates(&editedUser)
-	if result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": "Error Updating"})
-		log.Info().Err(result.Error).Msg("Error updating")
-		return
-	}
+// 	result = db.Find(&updatedUser, id)
+// 	if result.RowsAffected == 0 { // Not found entity by id
+// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+// 		return
+// 	}
+// 	c.IndentedJSON(http.StatusOK, updatedUser)
+// }
 
-	var updatedUser Models.User
+// func RemoveUser(c *gin.Context) {
+// 	id := c.Param("id")
 
-	result = db.Find(&updatedUser, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
-	}
-	c.IndentedJSON(http.StatusOK, updatedUser)
-}
+// 	if !Utils.IsValidInt(id) {
+// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
+// 		return
+// 	}
 
-func RemoveUser(c *gin.Context) {
-	id := c.Param("id")
+// 	var users Models.User
 
-	if !Utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
-		return
-	}
+// 	db := Database.Connect()
 
-	var users Models.User
+// 	result := db.Delete(&users, id)
 
-	db := Database.Connect()
+// 	if result.Error != nil {
+// 		log.Error().Err(result.Error)
+// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "user not deleted"})
+// 		return
+// 	}
 
-	result := db.Delete(&users, id)
-
-	if result.Error != nil {
-		log.Error().Err(result.Error)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "user not deleted"})
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}
+// 	c.Status(http.StatusNoContent)
+// }

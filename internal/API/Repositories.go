@@ -1,15 +1,16 @@
 package API
 
 import (
+	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/resticgui/resticgui/ent"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/internal/Database"
-	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 const entity = "repository "
@@ -18,8 +19,8 @@ const errIDNotValid = "id not valid"
 const errNotDeleted = entity + "not deleted"
 const errNotBind = entity + "bind error"
 const errUpdate = entity + "update error"
-const errNameUsed = entity + "name already in use"
 const errCreate = entity + "creation failed"
+const errQuery = entity + "query failed"
 
 // QueryRepositories godoc
 // @Summary get all repositories
@@ -27,13 +28,29 @@ const errCreate = entity + "creation failed"
 // @Description returns all respositories
 // @Accept json
 // @Produce json
-// @Success 200 {array} Models.Repository
+// @Success 200 {array} ent.Repository
 // @Router /repositories [get]
 func QueryRepositories(c *gin.Context) {
-	repositories := []Models.Repository{}
 
 	db := Database.Connect()
-	db.Preload(clause.Associations).Find(&repositories)
+	defer db.Close()
+
+	repositories, err := db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPath().
+		All(context.Background())
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
 
 	c.IndentedJSON(http.StatusOK, repositories)
 }
@@ -45,7 +62,7 @@ func QueryRepositories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Repository ID"
-// @Success 200 {object} Models.Repository
+// @Success 200 {object} ent.Repository
 // @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [get]
 func GetRepository(c *gin.Context) {
@@ -56,19 +73,30 @@ func GetRepository(c *gin.Context) {
 		return
 	}
 
-	var repositories Models.Repository
+	newId, _ := strconv.Atoi(id)
 
 	db := Database.Connect()
-	result := db.Preload(clause.Associations).Find(&repositories, id)
+	defer db.Close()
 
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	repository, err := db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPath().
+		Where(repository.ID(newId)).
+		Only(context.Background())
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errNotFound)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
-	// check all path and update entity in memory if path changed
-	checkAllPath(repositories.Paths)
 
-	c.IndentedJSON(http.StatusOK, repositories)
+	c.IndentedJSON(http.StatusOK, repository)
 }
 
 // GetRepository godoc
@@ -76,38 +104,209 @@ func GetRepository(c *gin.Context) {
 // @Schemes
 // @Description create a repository
 // @Accept json
-// @Param repository body Models.Repository true "Add account"
+// @Param repository body ent.Repository true "Add account"
 // @Produce json
-// @Success 201 {object} Models.Repository
+// @Success 201 {object} ent.Repository
 // @Failure 400 {string} errNameUsed
 // @Failure 500 {string} errCreate
 // @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
-	var repository Models.Repository
+	ctx := context.Background()
+	var repo ent.Repository
 
-	if err := c.BindJSON(&repository); err != nil {
+	if err := c.BindJSON(&repo); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
 
 	db := Database.Connect()
-	result := db.Create(&repository) // pass pointer of data to Create
+	defer db.Close()
 
-	if result.Error != nil {
-		if result.Error != nil {
-			log.Debug().Err(result.Error)
-			err := db.Find(&repository).Error
+	// create repository
+	newRepository, err := db.Repository.
+		Create().
+		SetName(repo.Name).
+		SetActive(repo.Active).
+		SetPassword(repo.Password).
+		SetProvider(repo.Provider).
+		SetMaxSize(repo.MaxSize).
+		Save(ctx)
 
-			if err == nil {
-				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errNameUsed})
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		return
+	}
+
+	// create backupSchedule
+	if repo.Edges.BackupSchedule != nil {
+		_, err = db.BackupSchedule.
+			Create().
+			SetChoice(repo.Edges.BackupSchedule.Choice).
+			SetCronSyntax(repo.Edges.BackupSchedule.CronSyntax).
+			SetDay(repo.Edges.BackupSchedule.Day).
+			SetHour(repo.Edges.BackupSchedule.Hour).
+			SetEveryDay(repo.Edges.BackupSchedule.EveryDay).
+			SetEveryWeek(repo.Edges.BackupSchedule.EveryWeek).
+			SetEveryMonth(repo.Edges.BackupSchedule.EveryMonth).
+			SetEveryMonday(repo.Edges.BackupSchedule.EveryMonday).
+			SetEveryTuesday(repo.Edges.BackupSchedule.EveryTuesday).
+			SetEveryWednesday(repo.Edges.BackupSchedule.EveryWednesday).
+			SetEveryThursday(repo.Edges.BackupSchedule.EveryThursday).
+			SetEveryFriday(repo.Edges.BackupSchedule.EveryFriday).
+			SetEverySaturday(repo.Edges.BackupSchedule.EverySaturday).
+			SetEverySunday(repo.Edges.BackupSchedule.EverySunday).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create backupPolicy
+	if repo.Edges.BackupPolicy != nil {
+		_, err = db.BackupPolicy.
+			Create().
+			SetKeepAll(repo.Edges.BackupPolicy.KeepAll).
+			SetName(repo.Edges.BackupPolicy.Name).
+			SetNbLastBackup(repo.Edges.BackupPolicy.NbLastBackup).
+			SetOneByDay(repo.Edges.BackupPolicy.OneByDay).
+			SetOneByHour(repo.Edges.BackupPolicy.OneByHour).
+			SetOneByMonth(repo.Edges.BackupPolicy.OneByMonth).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create AWSS3Provider
+	if repo.Edges.AWSS3Provider != nil {
+		_, err = db.AWSS3Provider.
+			Create().
+			SetAccessKeyID(repo.Edges.AWSS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.AWSS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.AWSS3Provider.BucketName).
+			SetDefaultRegion(repo.Edges.AWSS3Provider.DefaultRegion).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create B2Provider
+	if repo.Edges.B2Provider != nil {
+		_, err = db.B2Provider.
+			Create().
+			SetAccountID(repo.Edges.B2Provider.AccountID).
+			SetAccountKey(repo.Edges.B2Provider.AccountKey).
+			SetBucketName(repo.Edges.B2Provider.BucketName).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create LocalProvider
+	if repo.Edges.LocalProvider != nil {
+		_, err = db.LocalProvider.
+			Create().
+			SetRepoPath(repo.Edges.LocalProvider.RepoPath).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// create MinioS3Provider
+	if repo.Edges.MinioS3Provider != nil {
+		_, err = db.MinioS3Provider.
+			Create().
+			SetAccessKeyID(repo.Edges.MinioS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.MinioS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.MinioS3Provider.BucketName).
+			SetIP(repo.Edges.MinioS3Provider.IP).
+			SetPort(repo.Edges.MinioS3Provider.Port).
+			SetScheme(repo.Edges.MinioS3Provider.Scheme).
+			SetRepository(newRepository).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Creates paths
+	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
+		for _, p := range repo.Edges.Path {
+			path, err := db.Path.
+				Create().
+				SetAbsPath(p.AbsPath).
+				SetIsDir(p.IsDir).
+				SetExists(p.Exists).
+				SetIncluded(p.Included).
+				SetName(p.Name).
+				Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
 				return
-			} else {
-				c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate})
+			}
+			_, err = db.Repository.
+				UpdateOneID(newRepository.ID).AddPath(path).Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
 				return
 			}
 		}
 	}
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+		return
+	}
+
+	repository, err := db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPath().
+		Where(repository.ID(newRepository.ID)).
+		Only(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
@@ -118,12 +317,13 @@ func CreateRepository(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Repository ID"
-// @Param repository body Models.Repository true "Edit account"
-// @Success 200 {object} Models.Repository
+// @Param repository body ent.Repository true "Edit account"
+// @Success 200 {object} ent.Repository
 // @Failure 400 {string} errBindRepository
 // @Failure 404 {string} errIDNotValid
 // @Router /repositories/{id} [patch]
 func EditRepository(c *gin.Context) {
+	ctx := context.Background()
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -131,46 +331,200 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	var editedRepository Models.Repository
+	newId, _ := strconv.Atoi(id)
+	var repo ent.Repository
 
-	if err := c.BindJSON(&editedRepository); err != nil {
-		log.Info().Err(err).Msg(errNotBind)
+	if err := c.BindJSON(&repo); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
-
-	var repository Models.Repository
 
 	db := Database.Connect()
-	result := db.Preload(clause.Associations).Find(&repository, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		log.Info().Msg(errNotFound)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	defer db.Close()
+
+	// Update repository
+	_, err := db.Repository.
+		UpdateOneID(newId).
+		SetName(repo.Name).
+		SetMaxSize(repo.MaxSize).
+		SetActive(repo.Active).
+		SetProvider(repo.Provider).
+		Save(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: repository %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 
-	db.Session(&gorm.Session{FullSaveAssociations: true}).Model(&repository).Association("Paths").Replace(&editedRepository.Paths)
-	db.Model(&repository.B2Provider).Updates(&editedRepository.B2Provider)
-	db.Model(&repository.AWSS3Provider).Updates(&editedRepository.AWSS3Provider)
-	db.Model(&repository.LocalProvider).Updates(&editedRepository.LocalProvider)
-	db.Model(&repository.MinioS3Provider).Updates(&editedRepository.MinioS3Provider)
-	db.Model(&repository.BackupSchedule).Updates(&editedRepository.BackupSchedule)
-	db.Model(&repository.BackupPolicy).Updates(&editedRepository.BackupPolicy)
-	result = db.Model(repository).Updates(&editedRepository)
-	if result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": result.Error.Error(), "message": errUpdate})
-		log.Info().Err(result.Error).Msg(errUpdate)
+	// Update backup schedule
+	if repo.Edges.BackupSchedule != nil {
+		_, err = db.BackupSchedule.
+			UpdateOneID(repo.Edges.BackupSchedule.ID).
+			SetChoice(repo.Edges.BackupSchedule.Choice).
+			SetCronSyntax(repo.Edges.BackupSchedule.CronSyntax).
+			SetDay(repo.Edges.BackupSchedule.Day).
+			SetHour(repo.Edges.BackupSchedule.Hour).
+			SetEveryDay(repo.Edges.BackupSchedule.EveryDay).
+			SetEveryWeek(repo.Edges.BackupSchedule.EveryWeek).
+			SetEveryMonth(repo.Edges.BackupSchedule.EveryMonth).
+			SetEveryMonday(repo.Edges.BackupSchedule.EveryMonday).
+			SetEveryTuesday(repo.Edges.BackupSchedule.EveryTuesday).
+			SetEveryWednesday(repo.Edges.BackupSchedule.EveryWednesday).
+			SetEveryThursday(repo.Edges.BackupSchedule.EveryThursday).
+			SetEveryFriday(repo.Edges.BackupSchedule.EveryFriday).
+			SetEverySaturday(repo.Edges.BackupSchedule.EverySaturday).
+			SetEverySunday(repo.Edges.BackupSchedule.EverySunday).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Update backupPolicy
+	if repo.Edges.BackupPolicy != nil {
+		_, err = db.BackupPolicy.
+			UpdateOneID(repo.Edges.BackupPolicy.ID).
+			SetKeepAll(repo.Edges.BackupPolicy.KeepAll).
+			SetName(repo.Edges.BackupPolicy.Name).
+			SetNbLastBackup(repo.Edges.BackupPolicy.NbLastBackup).
+			SetOneByDay(repo.Edges.BackupPolicy.OneByDay).
+			SetOneByHour(repo.Edges.BackupPolicy.OneByHour).
+			SetOneByMonth(repo.Edges.BackupPolicy.OneByMonth).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Update AWSS3Provider
+	if repo.Edges.AWSS3Provider != nil {
+		_, err = db.AWSS3Provider.
+			UpdateOneID(repo.Edges.AWSS3Provider.ID).
+			SetAccessKeyID(repo.Edges.AWSS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.AWSS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.AWSS3Provider.BucketName).
+			SetDefaultRegion(repo.Edges.AWSS3Provider.DefaultRegion).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Update B2Provider
+	if repo.Edges.B2Provider != nil {
+		_, err = db.B2Provider.
+			UpdateOneID(repo.Edges.B2Provider.ID).
+			SetAccountID(repo.Edges.B2Provider.AccountID).
+			SetAccountKey(repo.Edges.B2Provider.AccountKey).
+			SetBucketName(repo.Edges.B2Provider.BucketName).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// update LocalProvider
+	if repo.Edges.LocalProvider != nil {
+		_, err = db.LocalProvider.
+			UpdateOneID(repo.Edges.LocalProvider.ID).
+			SetRepoPath(repo.Edges.LocalProvider.RepoPath).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// update MinioS3Provider
+	if repo.Edges.MinioS3Provider != nil {
+		_, err = db.MinioS3Provider.
+			UpdateOneID(repo.Edges.MinioS3Provider.ID).
+			SetAccessKeyID(repo.Edges.MinioS3Provider.AccessKeyID).
+			SetSecretAccessKey(repo.Edges.MinioS3Provider.SecretAccessKey).
+			SetBucketName(repo.Edges.MinioS3Provider.BucketName).
+			SetIP(repo.Edges.MinioS3Provider.IP).
+			SetPort(repo.Edges.MinioS3Provider.Port).
+			SetScheme(repo.Edges.MinioS3Provider.Scheme).
+			Save(ctx)
+
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
+	}
+
+	// Remove old path edges
+	_, err = db.Repository.
+		UpdateOneID(newId).RemovePath(db.Repository.Query().QueryPath().AllX(ctx)...).Save(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	var updatedRepository Models.Repository
+	// Update path edges
+	if repo.Edges.Path != nil && len(repo.Edges.Path) > 0 {
+		for _, p := range repo.Edges.Path {
+			// ID has not been provided if p.ID == 0 -> new path
+			path, err := db.Path.
+				Create().
+				SetAbsPath(p.AbsPath).
+				SetIsDir(p.IsDir).
+				SetExists(p.Exists).
+				SetIncluded(p.Included).
+				SetName(p.Name).
+				Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
+			_, err = db.Repository.
+				UpdateOneID(newId).AddPath(path).Save(ctx)
+			if err != nil {
+				log.Err(err).Msgf("error: %v", errQuery)
+				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
+		}
+	}
 
-	result = db.Preload(clause.Associations).Find(&updatedRepository, id)
-	if result.RowsAffected == 0 { // Not found entity by id
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	// Fetch repository after update
+	repository, err := db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPath().
+		Where(repository.ID(newId)).
+		First(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, updatedRepository)
+
+	c.IndentedJSON(http.StatusOK, repository)
 }
 
 // RemoveRepository godoc
@@ -186,6 +540,7 @@ func EditRepository(c *gin.Context) {
 // @Failure 500 {string} errNotDeleted
 // @Router /repositories/{id} [delete]
 func RemoveRepository(c *gin.Context) {
+	ctx := context.Background()
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -193,22 +548,27 @@ func RemoveRepository(c *gin.Context) {
 		return
 	}
 
-	var repository Models.Repository
+	newId, _ := strconv.Atoi(id)
+	var repo ent.Repository
+
+	if err := c.BindJSON(&repo); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
 
 	db := Database.Connect()
-	result := db.Find(&repository, id)
-	if result.RowsAffected == 0 {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotFound})
+	defer db.Close()
+
+	// Delete repository
+	err := db.Repository.
+		DeleteOneID(newId).
+		Exec(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
 		return
 	}
 
-	removeScheduledBackup(repository)
-
-	result = db.Select(clause.Associations).Delete(&repository, id)
-	if result.Error != nil {
-		log.Error().Err(result.Error)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errNotDeleted})
-		return
-	}
 	c.Status(http.StatusNoContent)
 }

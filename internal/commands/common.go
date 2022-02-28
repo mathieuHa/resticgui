@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gitlab.com/resticgui/resticgui/ent"
 )
 
 const backupCmd = "backup"
@@ -33,7 +33,7 @@ func GetResticHelp() string {
 	return runRestic(args, getDefaultEnv())
 }
 
-func GetSnapshots(repository Models.Repository) string {
+func GetSnapshots(repository ent.Repository) string {
 	var args []string
 	var env []string
 
@@ -43,7 +43,7 @@ func GetSnapshots(repository Models.Repository) string {
 	return runRestic(args, env)
 }
 
-func InitRepository(repository Models.Repository) string {
+func InitRepository(repository ent.Repository) string {
 	var args []string
 	var env []string
 
@@ -53,7 +53,7 @@ func InitRepository(repository Models.Repository) string {
 	return runRestic(args, env)
 }
 
-func RestoreRepository(repository Models.Repository, path string, version string) string {
+func RestoreRepository(repository ent.Repository, path string, version string) string {
 	var args []string
 	var env []string
 
@@ -74,7 +74,7 @@ func getRestoreCommonArgs(path string, version string) []string {
 	return args
 }
 
-func ForgetSnaphots(repository Models.Repository, version string) string {
+func ForgetSnaphots(repository ent.Repository, version string) string {
 	var args []string
 	var env []string
 
@@ -85,7 +85,7 @@ func ForgetSnaphots(repository Models.Repository, version string) string {
 	return runRestic(args, env)
 }
 
-func PruneSnaphots(repository Models.Repository, version string) string {
+func PruneSnaphots(repository ent.Repository, version string) string {
 	var args []string
 	var env []string
 
@@ -96,7 +96,7 @@ func PruneSnaphots(repository Models.Repository, version string) string {
 	return runRestic(args, env)
 }
 
-func BackupRepository(repository Models.Repository, dryRun bool) string {
+func BackupRepository(repository ent.Repository, dryRun bool) string {
 	var args []string
 	var env []string
 
@@ -108,7 +108,7 @@ func BackupRepository(repository Models.Repository, dryRun bool) string {
 	return runRestic(args, env)
 }
 
-func StatsRepository(repository Models.Repository, dryRun bool) string {
+func StatsRepository(repository ent.Repository, dryRun bool) string {
 	var args []string
 	var env []string
 
@@ -118,7 +118,7 @@ func StatsRepository(repository Models.Repository, dryRun bool) string {
 	return runRestic(args, env)
 }
 
-func getBackupCommonArgs(repository Models.Repository, dryRun bool) []string {
+func getBackupCommonArgs(repository ent.Repository, dryRun bool) []string {
 	var args []string
 
 	dryRunParameter := getDryRunParameter(dryRun)
@@ -138,7 +138,7 @@ func getDryRunParameter(dryRun bool) string {
 	}
 }
 
-func getMaxSizeParameter(repository Models.Repository) []string {
+func getMaxSizeParameter(repository ent.Repository) []string {
 	var args []string
 	// todo check size is correct
 	if repository.MaxSize != "" {
@@ -150,11 +150,11 @@ func getMaxSizeParameter(repository Models.Repository) []string {
 	return args
 }
 
-func getIncludedAndExludedFiles(repository Models.Repository) []string {
+func getIncludedAndExludedFiles(repository ent.Repository) []string {
 	var files []string
 	var included []string
 	var excluded []string
-	for _, path := range repository.Paths {
+	for _, path := range repository.Edges.Path {
 		if path.Included {
 			included = append(included, path.AbsPath)
 		} else {
@@ -169,7 +169,7 @@ func getIncludedAndExludedFiles(repository Models.Repository) []string {
 	return files
 }
 
-func CheckIntegrity(repository Models.Repository, full bool, pourcentage float64) string {
+func CheckIntegrity(repository ent.Repository, full bool, pourcentage float64) string {
 	// todo check repository string and pourcentage
 	var args []string
 	var env []string
