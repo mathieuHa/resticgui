@@ -416,6 +416,10 @@
                     "description": "EveryDay holds the value of the \"everyDay\" field.",
                     "type": "boolean"
                 },
+                "everyFriday": {
+                    "description": "EveryFriday holds the value of the \"everyFriday\" field.",
+                    "type": "boolean"
+                },
                 "everyMonday": {
                     "description": "EveryMonday holds the value of the \"everyMonday\" field.",
                     "type": "boolean"
@@ -434,10 +438,6 @@
                 },
                 "everyThursday": {
                     "description": "EveryThursday holds the value of the \"everyThursday\" field.",
-                    "type": "boolean"
-                },
-                "everyTriday": {
-                    "description": "EveryTriday holds the value of the \"everyTriday\" field.",
                     "type": "boolean"
                 },
                 "everyTuesday": {
@@ -550,8 +550,8 @@
         "ent.Path": {
             "type": "object",
             "properties": {
-                "abs_path": {
-                    "description": "AbsPath holds the value of the \"abs_path\" field.",
+                "absPath": {
+                    "description": "AbsPath holds the value of the \"absPath\" field.",
                     "type": "string"
                 },
                 "edges": {
@@ -570,8 +570,8 @@
                     "description": "Included holds the value of the \"included\" field.",
                     "type": "boolean"
                 },
-                "is_dir": {
-                    "description": "IsDir holds the value of the \"is_dir\" field.",
+                "isDir": {
+                    "description": "IsDir holds the value of the \"isDir\" field.",
                     "type": "boolean"
                 },
                 "name": {
@@ -625,29 +625,29 @@
         "ent.RepositoryEdges": {
             "type": "object",
             "properties": {
-                "awss3provider": {
-                    "description": "Awss3provider holds the value of the awss3provider edge.",
+                "AWSS3Provider": {
+                    "description": "AWSS3Provider holds the value of the AWSS3Provider edge.",
                     "$ref": "#/definitions/ent.AWSS3Provider"
                 },
-                "b2provider": {
-                    "description": "B2provider holds the value of the b2provider edge.",
+                "B2Provider": {
+                    "description": "B2Provider holds the value of the B2Provider edge.",
                     "$ref": "#/definitions/ent.B2Provider"
                 },
-                "backuppolicy": {
-                    "description": "Backuppolicy holds the value of the backuppolicy edge.",
+                "MinioS3Provider": {
+                    "description": "MinioS3Provider holds the value of the MinioS3Provider edge.",
+                    "$ref": "#/definitions/ent.MinioS3Provider"
+                },
+                "backupPolicy": {
+                    "description": "BackupPolicy holds the value of the backupPolicy edge.",
                     "$ref": "#/definitions/ent.BackupPolicy"
                 },
-                "backupschedule": {
-                    "description": "Backupschedule holds the value of the backupschedule edge.",
+                "backupSchedule": {
+                    "description": "BackupSchedule holds the value of the backupSchedule edge.",
                     "$ref": "#/definitions/ent.BackupSchedule"
                 },
-                "localprovider": {
-                    "description": "Localprovider holds the value of the localprovider edge.",
+                "localProvider": {
+                    "description": "LocalProvider holds the value of the localProvider edge.",
                     "$ref": "#/definitions/ent.LocalProvider"
-                },
-                "minios3provider": {
-                    "description": "Minios3provider holds the value of the minios3provider edge.",
-                    "$ref": "#/definitions/ent.MinioS3Provider"
                 },
                 "path": {
                     "description": "Path holds the value of the path edge.",

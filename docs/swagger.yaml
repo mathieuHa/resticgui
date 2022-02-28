@@ -114,6 +114,9 @@ definitions:
       everyDay:
         description: EveryDay holds the value of the "everyDay" field.
         type: boolean
+      everyFriday:
+        description: EveryFriday holds the value of the "everyFriday" field.
+        type: boolean
       everyMonday:
         description: EveryMonday holds the value of the "everyMonday" field.
         type: boolean
@@ -128,9 +131,6 @@ definitions:
         type: boolean
       everyThursday:
         description: EveryThursday holds the value of the "everyThursday" field.
-        type: boolean
-      everyTriday:
-        description: EveryTriday holds the value of the "everyTriday" field.
         type: boolean
       everyTuesday:
         description: EveryTuesday holds the value of the "everyTuesday" field.
@@ -214,8 +214,8 @@ definitions:
     type: object
   ent.Path:
     properties:
-      abs_path:
-        description: AbsPath holds the value of the "abs_path" field.
+      absPath:
+        description: AbsPath holds the value of the "absPath" field.
         type: string
       edges:
         $ref: '#/definitions/ent.PathEdges'
@@ -231,8 +231,8 @@ definitions:
       included:
         description: Included holds the value of the "included" field.
         type: boolean
-      is_dir:
-        description: IsDir holds the value of the "is_dir" field.
+      isDir:
+        description: IsDir holds the value of the "isDir" field.
         type: boolean
       name:
         description: Name holds the value of the "name" field.
@@ -272,24 +272,24 @@ definitions:
     type: object
   ent.RepositoryEdges:
     properties:
-      awss3provider:
+      AWSS3Provider:
         $ref: '#/definitions/ent.AWSS3Provider'
-        description: Awss3provider holds the value of the awss3provider edge.
-      b2provider:
+        description: AWSS3Provider holds the value of the AWSS3Provider edge.
+      B2Provider:
         $ref: '#/definitions/ent.B2Provider'
-        description: B2provider holds the value of the b2provider edge.
-      backuppolicy:
-        $ref: '#/definitions/ent.BackupPolicy'
-        description: Backuppolicy holds the value of the backuppolicy edge.
-      backupschedule:
-        $ref: '#/definitions/ent.BackupSchedule'
-        description: Backupschedule holds the value of the backupschedule edge.
-      localprovider:
-        $ref: '#/definitions/ent.LocalProvider'
-        description: Localprovider holds the value of the localprovider edge.
-      minios3provider:
+        description: B2Provider holds the value of the B2Provider edge.
+      MinioS3Provider:
         $ref: '#/definitions/ent.MinioS3Provider'
-        description: Minios3provider holds the value of the minios3provider edge.
+        description: MinioS3Provider holds the value of the MinioS3Provider edge.
+      backupPolicy:
+        $ref: '#/definitions/ent.BackupPolicy'
+        description: BackupPolicy holds the value of the backupPolicy edge.
+      backupSchedule:
+        $ref: '#/definitions/ent.BackupSchedule'
+        description: BackupSchedule holds the value of the backupSchedule edge.
+      localProvider:
+        $ref: '#/definitions/ent.LocalProvider'
+        description: LocalProvider holds the value of the localProvider edge.
       path:
         description: Path holds the value of the path edge.
         items:
