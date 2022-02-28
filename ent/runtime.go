@@ -150,21 +150,7 @@ func init() {
 	// repositoryDescName is the schema descriptor for name field.
 	repositoryDescName := repositoryFields[0].Descriptor()
 	// repository.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	repository.NameValidator = func() func(string) error {
-		validators := repositoryDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
+	repository.NameValidator = repositoryDescName.Validators[0].(func(string) error)
 	// repositoryDescCreatedAt is the schema descriptor for createdAt field.
 	repositoryDescCreatedAt := repositoryFields[1].Descriptor()
 	// repository.DefaultCreatedAt holds the default value on creation for the createdAt field.

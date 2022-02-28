@@ -17,7 +17,7 @@ type Repository struct {
 // Fields of the Repository.
 func (Repository) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique().NotEmpty().MinLen(3),
+		field.String("name").Unique().NotEmpty(),
 		field.Time("createdAt").
 			Default(time.Now).Immutable(),
 		field.Enum("provider").Values("localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider").Default("localProvider"),
