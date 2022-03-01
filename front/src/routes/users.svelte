@@ -34,7 +34,7 @@
     }
     console.log(values);
     try {
-      await agent[values.ID ? 'patch' : 'post'](`/users/${values.ID || ''}`, values);
+      await agent[values.id ? 'patch' : 'post'](`/users/${values.id || ''}`, values);
       await onRefresh();
       values = null;
     } catch (err) {
@@ -44,7 +44,7 @@
   const onRemove = async (user) => {
     console.log(user);
     try {
-      await agent.delete(`/users/${user.ID}`);
+      await agent.delete(`/users/${user.id}`);
       await onRefresh()
     } catch (err) {
       console.log(err)

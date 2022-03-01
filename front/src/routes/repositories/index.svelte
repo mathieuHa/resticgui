@@ -1,6 +1,7 @@
 <script>
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
+  import BackupSchedule from '../../components/BackupSchedule.svelte';
   import Provider from '../../components/Provider.svelte';
 
   import agent from '../../utils/api';
@@ -33,34 +34,18 @@
     }
   }
   const onSubmit = async () => {
-    if (step < 3) {
-      step += 1;
-      return;
-    }
-    // try {
-    //   await schema.validate(values, { abortEarly: false });
-    // } catch (err) {
-    //   errors = extractErrors(err);
-    //   console.log(errors)
-    // }
     console.log(values);
     try {
-      await agent[values.ID ? 'patch' : 'post'](`/repositories/${values.ID || ''}`, {
-        ...values,
-        backupSchedule: {
-          ...values.backupSchedule,
-          choice: 'cron',
-        },
-      });
+      const data = await agent[values.id ? 'patch' : 'post'](`/repositories/${values.id || ''}`, values);
       await onRefresh();
-      values = null;
+      values = data;
     } catch (err) {
       console.log(err);
     }
   }
   const onRemove = async (repo) => {
     try {
-      await agent.delete(`/repositories/${repo.ID}`);
+      await agent.delete(`/repositories/${repo.id}`);
       await onRefresh()
     } catch (err) {
       console.log(err)
@@ -104,51 +89,31 @@
         </div>
         <p class="my-2">
           [
-          {#each values.paths as path}
+          {#each (values.edges && values.edges.path || []) as path}
             "<span class={!path.included ? 'text-orange-500' : ''}>{path.name}</span>",&nbsp;
           {/each}
           ]
         </p>
         <div class="max-w-xl">
           <Paths
-            initialPaths={values.paths.map(({ name, included }) => included ? name : `!${name}`)}
-            on:update={({ detail: paths }) => { values = { ...values, paths }; }}
+            initialPaths={values.edges && values.edges.path
+             ? values.edges.path.map(({ name, included }) => included ? name : `!${name}`)
+             : []}
+            on:update={({ detail: path }) => { values = { ...values, edges: { path } }; }}
           />
         </div>
       </div>
-      <div class="flex flex-col {step !== 2 ? 'hidden' : ''}">
-        <div class="w-full flex justify-between">
-          <label for="cronSyntax">Syntax Cron</label>
-          <span class="text-red-500">{errors.cronSyntax || ''}</span>
-        </div>
-        <input
-          class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-          id="cronSyntax"
-          name="cronSyntax"
-          type="text"
-          placeholder="*/30 * * * *"
-          bind:value={values.backupSchedule.cronSyntax}
-        />
-        <div class="w-full flex justify-between">
-          <label for="interval">Interval</label>
-          <span class="text-red-500">{errors.interval || ''}</span>
-        </div>
-        <input
-          class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-          id="interval"
-          name="interval"
-          type="text"
-          placeholder="1h30"
-          bind:value={values.backupSchedule.interval}
+      <div class="text-sm flex flex-col {step !== 2 ? 'hidden' : ''}">
+        <BackupSchedule
+          initialBackupSchedule={(values.edges && values.edges.backup_schedule) || {}}
+          on:update={({ detail: backup_schedule }) => { values = { ...values, edges: { backup_schedule } }; }}
         />
       </div>
-      <div class="flex flex-col {step !== 3 ? 'hidden' : ''}">
+      <div class="text-sm flex flex-col {step !== 3 ? 'hidden' : ''}">
         <Provider
-          initialProvider="{values}"
-          on:update={(providers) => {
-            console.log(providers);
-            values = { ...values, ...providers };
-          }}/>
+          initialProvider={values}
+          on:update={({ detail: providers }) => { values = Object.assign(values, providers); }}
+        />
       </div>
       <button
         class="mt-4 py-1 rounded transition bg-blue-500 hover:bg-blue-600"
@@ -164,11 +129,11 @@
   {#each repos as repo, i}
     <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
       <p class="truncate text-lg font-bold">{repo.name}</p>
-      <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('D/MM/YY')}</p>
+      <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('DD/MM/YY')}</p>
 
       <div class="flex mt-auto pt-2 h-8 mb-1">
         <button class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600">
-          <a href="/repositories/{repo.ID}">
+          <a href="/repositories/{repo.id}">
             <Eye />
           </a>
         </button>
@@ -188,18 +153,7 @@
     </div>
   {/each}
   <div
-    on:click={() => {
-      values = {
-        name: '',
-        paths: [],
-        backupSchedule: {
-          cronSyntax: '',
-          interval: '',
-          choice: '',
-        },
-        provider: '',
-      };
-    }}
+    on:click={() => { values = { name: '' }; }}
     class="text-3xl p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
     +

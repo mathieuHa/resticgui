@@ -5,9 +5,9 @@
 
   import AddPaths from './AddPaths.svelte';
 
-  export let initialPaths;
+  export let initialPaths = [];
   let tree = {};
-  let paths = initialPaths || [];
+  let paths = initialPaths;
 
   const dispatch = createEventDispatcher();
 
@@ -56,7 +56,7 @@
 
   onMount(() => onLoad('/'));
   $:dispatch('update', paths.map((path) => path[0] === '!'
-    ? { name: path.slice(1), included: false}
+    ? { name: path.slice(1), included: false }
     : { name: path, included: true }));
   $:console.log(paths);
 </script>
