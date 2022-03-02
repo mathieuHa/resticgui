@@ -589,6 +589,10 @@ const docTemplate = `{
                 "name": {
                     "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
+                },
+                "relPath": {
+                    "description": "RelPath holds the value of the \"relPath\" field.",
+                    "type": "string"
                 }
             }
         },

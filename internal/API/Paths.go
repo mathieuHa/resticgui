@@ -42,6 +42,7 @@ func GetPath(c *gin.Context) {
 
 	for _, file := range files {
 		var path Models.PathStruct
+		path.RelPath = root.RelPath
 		path.Name = file.Name()
 		path.IsDir = file.IsDir()
 		path.AbsPath, _ = filepath.Abs(file.Name())

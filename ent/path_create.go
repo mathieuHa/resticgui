@@ -32,6 +32,12 @@ func (pc *PathCreate) SetAbsPath(s string) *PathCreate {
 	return pc
 }
 
+// SetRelPath sets the "relPath" field.
+func (pc *PathCreate) SetRelPath(s string) *PathCreate {
+	pc.mutation.SetRelPath(s)
+	return pc
+}
+
 // SetExists sets the "exists" field.
 func (pc *PathCreate) SetExists(b bool) *PathCreate {
 	pc.mutation.SetExists(b)
@@ -184,6 +190,9 @@ func (pc *PathCreate) check() error {
 			return &ValidationError{Name: "absPath", err: fmt.Errorf(`ent: validator failed for field "Path.absPath": %w`, err)}
 		}
 	}
+	if _, ok := pc.mutation.RelPath(); !ok {
+		return &ValidationError{Name: "relPath", err: errors.New(`ent: missing required field "Path.relPath"`)}
+	}
 	if _, ok := pc.mutation.Exists(); !ok {
 		return &ValidationError{Name: "exists", err: errors.New(`ent: missing required field "Path.exists"`)}
 	}
@@ -235,6 +244,14 @@ func (pc *PathCreate) createSpec() (*Path, *sqlgraph.CreateSpec) {
 			Column: path.FieldAbsPath,
 		})
 		_node.AbsPath = value
+	}
+	if value, ok := pc.mutation.RelPath(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: path.FieldRelPath,
+		})
+		_node.RelPath = value
 	}
 	if value, ok := pc.mutation.Exists(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

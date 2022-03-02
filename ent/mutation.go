@@ -4202,6 +4202,7 @@ type PathMutation struct {
 	id                *int
 	name              *string
 	absPath           *string
+	relPath           *string
 	exists            *bool
 	isDir             *bool
 	included          *bool
@@ -4383,6 +4384,42 @@ func (m *PathMutation) ResetAbsPath() {
 	m.absPath = nil
 }
 
+// SetRelPath sets the "relPath" field.
+func (m *PathMutation) SetRelPath(s string) {
+	m.relPath = &s
+}
+
+// RelPath returns the value of the "relPath" field in the mutation.
+func (m *PathMutation) RelPath() (r string, exists bool) {
+	v := m.relPath
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRelPath returns the old "relPath" field's value of the Path entity.
+// If the Path object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PathMutation) OldRelPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRelPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRelPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRelPath: %w", err)
+	}
+	return oldValue.RelPath, nil
+}
+
+// ResetRelPath resets all changes to the "relPath" field.
+func (m *PathMutation) ResetRelPath() {
+	m.relPath = nil
+}
+
 // SetExists sets the "exists" field.
 func (m *PathMutation) SetExists(b bool) {
 	m.exists = &b
@@ -4549,12 +4586,15 @@ func (m *PathMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PathMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, path.FieldName)
 	}
 	if m.absPath != nil {
 		fields = append(fields, path.FieldAbsPath)
+	}
+	if m.relPath != nil {
+		fields = append(fields, path.FieldRelPath)
 	}
 	if m.exists != nil {
 		fields = append(fields, path.FieldExists)
@@ -4577,6 +4617,8 @@ func (m *PathMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case path.FieldAbsPath:
 		return m.AbsPath()
+	case path.FieldRelPath:
+		return m.RelPath()
 	case path.FieldExists:
 		return m.Exists()
 	case path.FieldIsDir:
@@ -4596,6 +4638,8 @@ func (m *PathMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case path.FieldAbsPath:
 		return m.OldAbsPath(ctx)
+	case path.FieldRelPath:
+		return m.OldRelPath(ctx)
 	case path.FieldExists:
 		return m.OldExists(ctx)
 	case path.FieldIsDir:
@@ -4624,6 +4668,13 @@ func (m *PathMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAbsPath(v)
+		return nil
+	case path.FieldRelPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRelPath(v)
 		return nil
 	case path.FieldExists:
 		v, ok := value.(bool)
@@ -4700,6 +4751,9 @@ func (m *PathMutation) ResetField(name string) error {
 		return nil
 	case path.FieldAbsPath:
 		m.ResetAbsPath()
+		return nil
+	case path.FieldRelPath:
+		m.ResetRelPath()
 		return nil
 	case path.FieldExists:
 		m.ResetExists()

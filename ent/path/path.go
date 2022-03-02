@@ -11,6 +11,8 @@ const (
 	FieldName = "name"
 	// FieldAbsPath holds the string denoting the abspath field in the database.
 	FieldAbsPath = "abs_path"
+	// FieldRelPath holds the string denoting the relpath field in the database.
+	FieldRelPath = "rel_path"
 	// FieldExists holds the string denoting the exists field in the database.
 	FieldExists = "exists"
 	// FieldIsDir holds the string denoting the isdir field in the database.
@@ -35,6 +37,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldAbsPath,
+	FieldRelPath,
 	FieldExists,
 	FieldIsDir,
 	FieldIncluded,

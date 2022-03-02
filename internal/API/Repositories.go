@@ -270,6 +270,7 @@ func CreateRepository(c *gin.Context) {
 				SetExists(p.Exists).
 				SetIncluded(p.Included).
 				SetName(p.Name).
+				SetRelPath(p.RelPath).
 				Save(ctx)
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
@@ -492,6 +493,7 @@ func EditRepository(c *gin.Context) {
 				SetExists(p.Exists).
 				SetIncluded(p.Included).
 				SetName(p.Name).
+				SetRelPath(p.RelPath).
 				Save(ctx)
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)

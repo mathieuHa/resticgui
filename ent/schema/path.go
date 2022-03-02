@@ -16,6 +16,7 @@ func (Path) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").NotEmpty(),
 		field.String("absPath").NotEmpty(),
+		field.String("relPath"),
 		field.Bool("exists").Default(true),
 		field.Bool("isDir"),
 		field.Bool("included").Default(true),

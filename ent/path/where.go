@@ -105,6 +105,13 @@ func AbsPath(v string) predicate.Path {
 	})
 }
 
+// RelPath applies equality check predicate on the "relPath" field. It's identical to RelPathEQ.
+func RelPath(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRelPath), v))
+	})
+}
+
 // Exists applies equality check predicate on the "exists" field. It's identical to ExistsEQ.
 func Exists(v bool) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
@@ -345,6 +352,117 @@ func AbsPathEqualFold(v string) predicate.Path {
 func AbsPathContainsFold(v string) predicate.Path {
 	return predicate.Path(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldAbsPath), v))
+	})
+}
+
+// RelPathEQ applies the EQ predicate on the "relPath" field.
+func RelPathEQ(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathNEQ applies the NEQ predicate on the "relPath" field.
+func RelPathNEQ(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathIn applies the In predicate on the "relPath" field.
+func RelPathIn(vs ...string) predicate.Path {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Path(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRelPath), v...))
+	})
+}
+
+// RelPathNotIn applies the NotIn predicate on the "relPath" field.
+func RelPathNotIn(vs ...string) predicate.Path {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Path(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRelPath), v...))
+	})
+}
+
+// RelPathGT applies the GT predicate on the "relPath" field.
+func RelPathGT(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathGTE applies the GTE predicate on the "relPath" field.
+func RelPathGTE(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathLT applies the LT predicate on the "relPath" field.
+func RelPathLT(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathLTE applies the LTE predicate on the "relPath" field.
+func RelPathLTE(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathContains applies the Contains predicate on the "relPath" field.
+func RelPathContains(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathHasPrefix applies the HasPrefix predicate on the "relPath" field.
+func RelPathHasPrefix(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathHasSuffix applies the HasSuffix predicate on the "relPath" field.
+func RelPathHasSuffix(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathEqualFold applies the EqualFold predicate on the "relPath" field.
+func RelPathEqualFold(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRelPath), v))
+	})
+}
+
+// RelPathContainsFold applies the ContainsFold predicate on the "relPath" field.
+func RelPathContainsFold(v string) predicate.Path {
+	return predicate.Path(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRelPath), v))
 	})
 }
 

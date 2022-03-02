@@ -132,11 +132,11 @@ func init() {
 	// path.AbsPathValidator is a validator for the "absPath" field. It is called by the builders before save.
 	path.AbsPathValidator = pathDescAbsPath.Validators[0].(func(string) error)
 	// pathDescExists is the schema descriptor for exists field.
-	pathDescExists := pathFields[2].Descriptor()
+	pathDescExists := pathFields[3].Descriptor()
 	// path.DefaultExists holds the default value on creation for the exists field.
 	path.DefaultExists = pathDescExists.Default.(bool)
 	// pathDescIncluded is the schema descriptor for included field.
-	pathDescIncluded := pathFields[4].Descriptor()
+	pathDescIncluded := pathFields[5].Descriptor()
 	// path.DefaultIncluded holds the default value on creation for the included field.
 	path.DefaultIncluded = pathDescIncluded.Default.(bool)
 	permissionFields := schema.Permission{}.Fields()

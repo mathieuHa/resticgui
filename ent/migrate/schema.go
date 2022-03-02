@@ -165,6 +165,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "abs_path", Type: field.TypeString},
+		{Name: "rel_path", Type: field.TypeString},
 		{Name: "exists", Type: field.TypeBool, Default: true},
 		{Name: "is_dir", Type: field.TypeBool},
 		{Name: "included", Type: field.TypeBool, Default: true},
@@ -178,7 +179,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "paths_repositories_paths",
-				Columns:    []*schema.Column{PathsColumns[6]},
+				Columns:    []*schema.Column{PathsColumns[7]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

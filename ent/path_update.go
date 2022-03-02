@@ -40,6 +40,12 @@ func (pu *PathUpdate) SetAbsPath(s string) *PathUpdate {
 	return pu
 }
 
+// SetRelPath sets the "relPath" field.
+func (pu *PathUpdate) SetRelPath(s string) *PathUpdate {
+	pu.mutation.SetRelPath(s)
+	return pu
+}
+
 // SetExists sets the "exists" field.
 func (pu *PathUpdate) SetExists(b bool) *PathUpdate {
 	pu.mutation.SetExists(b)
@@ -211,6 +217,13 @@ func (pu *PathUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: path.FieldAbsPath,
 		})
 	}
+	if value, ok := pu.mutation.RelPath(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: path.FieldRelPath,
+		})
+	}
 	if value, ok := pu.mutation.Exists(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -295,6 +308,12 @@ func (puo *PathUpdateOne) SetName(s string) *PathUpdateOne {
 // SetAbsPath sets the "absPath" field.
 func (puo *PathUpdateOne) SetAbsPath(s string) *PathUpdateOne {
 	puo.mutation.SetAbsPath(s)
+	return puo
+}
+
+// SetRelPath sets the "relPath" field.
+func (puo *PathUpdateOne) SetRelPath(s string) *PathUpdateOne {
+	puo.mutation.SetRelPath(s)
 	return puo
 }
 
@@ -491,6 +510,13 @@ func (puo *PathUpdateOne) sqlSave(ctx context.Context) (_node *Path, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: path.FieldAbsPath,
+		})
+	}
+	if value, ok := puo.mutation.RelPath(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: path.FieldRelPath,
 		})
 	}
 	if value, ok := puo.mutation.Exists(); ok {

@@ -20,6 +20,8 @@ type Path struct {
 	Name string `json:"name,omitempty"`
 	// AbsPath holds the value of the "absPath" field.
 	AbsPath string `json:"absPath,omitempty"`
+	// RelPath holds the value of the "relPath" field.
+	RelPath string `json:"relPath,omitempty"`
 	// Exists holds the value of the "exists" field.
 	Exists bool `json:"exists,omitempty"`
 	// IsDir holds the value of the "isDir" field.
@@ -64,7 +66,7 @@ func (*Path) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case path.FieldID:
 			values[i] = new(sql.NullInt64)
-		case path.FieldName, path.FieldAbsPath:
+		case path.FieldName, path.FieldAbsPath, path.FieldRelPath:
 			values[i] = new(sql.NullString)
 		case path.ForeignKeys[0]: // repository_paths
 			values[i] = new(sql.NullInt64)
@@ -100,6 +102,12 @@ func (pa *Path) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field absPath", values[i])
 			} else if value.Valid {
 				pa.AbsPath = value.String
+			}
+		case path.FieldRelPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field relPath", values[i])
+			} else if value.Valid {
+				pa.RelPath = value.String
 			}
 		case path.FieldExists:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -163,6 +171,8 @@ func (pa *Path) String() string {
 	builder.WriteString(pa.Name)
 	builder.WriteString(", absPath=")
 	builder.WriteString(pa.AbsPath)
+	builder.WriteString(", relPath=")
+	builder.WriteString(pa.RelPath)
 	builder.WriteString(", exists=")
 	builder.WriteString(fmt.Sprintf("%v", pa.Exists))
 	builder.WriteString(", isDir=")
