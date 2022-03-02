@@ -19,7 +19,7 @@
   type="text"
   placeholder="*/30 * * * *"
   bind:value={values.cronSyntax}
-  on:change={() => { values = { choice: 'cronSyntax', cronSyntax: values.cronSyntax } }}
+  on:change={() => { values = { choice: 'cron', cronSyntax: values.cronSyntax } }}
 />
 <div class="w-full flex justify-between">
   <label for="interval">Interval</label>

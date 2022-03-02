@@ -9,6 +9,7 @@
   let tree = {};
   let paths = initialPaths;
 
+  const leaves = {};
   const dispatch = createEventDispatcher();
 
   const populateTree = (treeCopy, root, leaf) => {
@@ -28,6 +29,7 @@
     }
     const leaf = { __fetched: true, __visible: true };
     for (let value of result) {
+      leaves[`${root}${value.name}`] = value;
       if (value.isDir) leaf[value.name] = { __fetched: false, __visible: false };
       else leaf[value.name] = value.name;
     }
@@ -55,10 +57,10 @@
   };
 
   onMount(() => onLoad('/'));
-  $:dispatch('update', paths.map((path) => path[0] === '!'
-    ? { name: path.slice(1), included: false }
-    : { name: path, included: true }));
-  $:console.log(paths);
+  $:dispatch('update', paths.map((relPath) => relPath[0] === '!'
+    ? { ...leaves[relPath.slice(1)], included: false, relPath }
+    : { ...leaves[relPath], included: true, relPath }));
+  $:console.log(paths, leaves);
 </script>
 
 <AddPaths path="" tree={tree} {paths} {onTogglePaths} {onDirClick} />

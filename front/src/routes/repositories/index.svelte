@@ -89,30 +89,39 @@
         </div>
         <p class="my-2">
           [
-          {#each (values.edges && values.edges.path || []) as path}
-            "<span class={!path.included ? 'text-orange-500' : ''}>{path.name}</span>",&nbsp;
+          {#each (values.edges && values.edges.paths || []) as path}
+            "<span class={!path.included ? 'text-orange-500' : ''}>{path.relPath}</span>",&nbsp;
           {/each}
           ]
         </p>
         <div class="max-w-xl">
           <Paths
-            initialPaths={values.edges && values.edges.path
-             ? values.edges.path.map(({ name, included }) => included ? name : `!${name}`)
-             : []}
-            on:update={({ detail: path }) => { values = { ...values, edges: { path } }; }}
+            initialPaths={values.edges && values.edges.paths
+              ? values.edges.paths.map(({ relPath = '/root', included }) => included ? relPath : `!${relPath}`)
+              : []}
+            on:update={({ detail: paths }) => { values = { ...values, edges: { paths } }; }}
           />
         </div>
       </div>
       <div class="text-sm flex flex-col {step !== 2 ? 'hidden' : ''}">
         <BackupSchedule
-          initialBackupSchedule={(values.edges && values.edges.backup_schedule) || {}}
-          on:update={({ detail: backup_schedule }) => { values = { ...values, edges: { backup_schedule } }; }}
+          initialBackupSchedule={(values.edges && values.edges.backupSchedule) || {}}
+          on:update={({ detail: backupSchedule }) => { values = { ...values, edges: { ...values.edges, backupSchedule } }; }}
         />
       </div>
       <div class="text-sm flex flex-col {step !== 3 ? 'hidden' : ''}">
         <Provider
           initialProvider={values}
-          on:update={({ detail: providers }) => { values = Object.assign(values, providers); }}
+          on:update={({ detail: providers }) => {
+            values = {
+              ...values,
+              provider: providers.provider,
+              edges: {
+                ...values.edges,
+                ...providers.edges,
+              },
+            };
+          }}
         />
       </div>
       <button

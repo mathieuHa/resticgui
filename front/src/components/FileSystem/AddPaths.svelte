@@ -33,7 +33,7 @@
     {:else if typeof value === 'boolean'}
     {:else if typeof value === 'object'}
       <div class="flex items-center">
-        <div class="w-3 h-3 mr-2 cursor-pointer {tree[key].__visible ? 'rotate-180' : 'rotate-90'} transition" on:click={async () => onDirClick(`${path}/${key}`, tree[key].__fetched, tree[key].__visible)}>
+        <div class="w-3 h-3 mr-2 cursor-pointer {tree[key].__visible ? 'rotate-180' : 'rotate-90'} transition" on:click={async () => onDirClick(`${path}/${key}/`, tree[key].__fetched, tree[key].__visible)}>
           <Arrow />
         </div>
         <p class="flex-1 h-5 leading-4 truncate overflow-hidden {(paths.includes(`!${path}/${key}`) && 'text-orange-500') || ((included || paths.includes(`${path}/${key}`)) && 'text-green-500') || paths.find((p) => p.startsWith(`${path}/${key}`)) && 'text-blue-500' || ''}">
