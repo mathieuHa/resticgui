@@ -144,120 +144,43 @@ func CreateRepository(c *gin.Context) {
 
 	// create backupSchedule
 	if repo.Edges.BackupSchedule != nil {
-		_, err = db.BackupSchedule.
-			Create().
-			SetChoice(repo.Edges.BackupSchedule.Choice).
-			SetCronSyntax(repo.Edges.BackupSchedule.CronSyntax).
-			SetDay(repo.Edges.BackupSchedule.Day).
-			SetHour(repo.Edges.BackupSchedule.Hour).
-			SetEveryDay(repo.Edges.BackupSchedule.EveryDay).
-			SetEveryWeek(repo.Edges.BackupSchedule.EveryWeek).
-			SetEveryMonth(repo.Edges.BackupSchedule.EveryMonth).
-			SetEveryMonday(repo.Edges.BackupSchedule.EveryMonday).
-			SetEveryTuesday(repo.Edges.BackupSchedule.EveryTuesday).
-			SetEveryWednesday(repo.Edges.BackupSchedule.EveryWednesday).
-			SetEveryThursday(repo.Edges.BackupSchedule.EveryThursday).
-			SetEveryFriday(repo.Edges.BackupSchedule.EveryFriday).
-			SetEverySaturday(repo.Edges.BackupSchedule.EverySaturday).
-			SetEverySunday(repo.Edges.BackupSchedule.EverySunday).
-			SetRepository(newRepository).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-			return
-		}
+		createBackupSchedule(db, *newRepository.Edges.BackupSchedule, newRepository.ID, ctx)
+		// if err != nil {
+		// 	log.Err(err).Msgf("error: %v", errQuery)
+		// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		// 	return
+		// }
 	}
 
 	// create backupPolicy
 	if repo.Edges.BackupPolicy != nil {
-		_, err = db.BackupPolicy.
-			Create().
-			SetKeepAll(repo.Edges.BackupPolicy.KeepAll).
-			SetName(repo.Edges.BackupPolicy.Name).
-			SetNbLastBackup(repo.Edges.BackupPolicy.NbLastBackup).
-			SetOneByDay(repo.Edges.BackupPolicy.OneByDay).
-			SetOneByHour(repo.Edges.BackupPolicy.OneByHour).
-			SetOneByMonth(repo.Edges.BackupPolicy.OneByMonth).
-			SetRepository(newRepository).
-			Save(ctx)
+		createBackupPolicy(db, *newRepository.Edges.BackupPolicy, newRepository.ID, ctx)
 
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
-		}
+		// if err != nil {
+		// 	log.Err(err).Msgf("error: %v", errQuery)
+		// 	c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+		// 	return
+		// }
 	}
 
 	// create AWSS3Provider
 	if repo.Edges.AWSS3Provider != nil {
-		_, err = db.AWSS3Provider.
-			Create().
-			SetAccessKeyID(repo.Edges.AWSS3Provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.AWSS3Provider.SecretAccessKey).
-			SetBucketName(repo.Edges.AWSS3Provider.BucketName).
-			SetDefaultRegion(repo.Edges.AWSS3Provider.DefaultRegion).
-			SetRepository(newRepository).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
-		}
+		createAWSS3Provider(db, *newRepository.Edges.AWSS3Provider, newRepository.ID, ctx)
 	}
 
 	// create B2Provider
 	if repo.Edges.B2Provider != nil {
-		_, err = db.B2Provider.
-			Create().
-			SetAccountID(repo.Edges.B2Provider.AccountID).
-			SetAccountKey(repo.Edges.B2Provider.AccountKey).
-			SetBucketName(repo.Edges.B2Provider.BucketName).
-			SetRepository(newRepository).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
-		}
+		createB2Provider(db, *newRepository.Edges.B2Provider, newRepository.ID, ctx)
 	}
 
 	// create LocalProvider
 	if repo.Edges.LocalProvider != nil {
-		_, err = db.LocalProvider.
-			Create().
-			SetRepoPath(repo.Edges.LocalProvider.RepoPath).
-			SetRepository(newRepository).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
-		}
+		createLocalProvider(db, *newRepository.Edges.LocalProvider, newRepository.ID, ctx)
 	}
 
 	// create MinioS3Provider
 	if repo.Edges.MinioS3Provider != nil {
-		_, err = db.MinioS3Provider.
-			Create().
-			SetAccessKeyID(repo.Edges.MinioS3Provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.MinioS3Provider.SecretAccessKey).
-			SetBucketName(repo.Edges.MinioS3Provider.BucketName).
-			SetIP(repo.Edges.MinioS3Provider.IP).
-			SetPort(repo.Edges.MinioS3Provider.Port).
-			SetScheme(repo.Edges.MinioS3Provider.Scheme).
-			SetRepository(newRepository).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
-		}
+		createMinioS3Provider(db, *newRepository.Edges.MinioS3Provider, newRepository.ID, ctx)
 	}
 
 	// Creates paths
@@ -363,113 +286,58 @@ func EditRepository(c *gin.Context) {
 
 	// Update backup schedule
 	if repo.Edges.BackupSchedule != nil {
-		_, err = db.BackupSchedule.
-			UpdateOneID(repo.Edges.BackupSchedule.ID).
-			SetChoice(repo.Edges.BackupSchedule.Choice).
-			SetCronSyntax(repo.Edges.BackupSchedule.CronSyntax).
-			SetDay(repo.Edges.BackupSchedule.Day).
-			SetHour(repo.Edges.BackupSchedule.Hour).
-			SetEveryDay(repo.Edges.BackupSchedule.EveryDay).
-			SetEveryWeek(repo.Edges.BackupSchedule.EveryWeek).
-			SetEveryMonth(repo.Edges.BackupSchedule.EveryMonth).
-			SetEveryMonday(repo.Edges.BackupSchedule.EveryMonday).
-			SetEveryTuesday(repo.Edges.BackupSchedule.EveryTuesday).
-			SetEveryWednesday(repo.Edges.BackupSchedule.EveryWednesday).
-			SetEveryThursday(repo.Edges.BackupSchedule.EveryThursday).
-			SetEveryFriday(repo.Edges.BackupSchedule.EveryFriday).
-			SetEverySaturday(repo.Edges.BackupSchedule.EverySaturday).
-			SetEverySunday(repo.Edges.BackupSchedule.EverySunday).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
-			return
+		if repo.Edges.BackupSchedule.ID == 0 {
+			log.Debug().Msgf("id = %v", repo.Edges.BackupSchedule.ID)
+			createBackupSchedule(db, *repo.Edges.BackupSchedule, newId, ctx)
+		} else {
+			updateBackupSchedule(db, *repo.Edges.BackupSchedule, ctx)
 		}
 	}
 
 	// Update backupPolicy
 	if repo.Edges.BackupPolicy != nil {
-		_, err = db.BackupPolicy.
-			UpdateOneID(repo.Edges.BackupPolicy.ID).
-			SetKeepAll(repo.Edges.BackupPolicy.KeepAll).
-			SetName(repo.Edges.BackupPolicy.Name).
-			SetNbLastBackup(repo.Edges.BackupPolicy.NbLastBackup).
-			SetOneByDay(repo.Edges.BackupPolicy.OneByDay).
-			SetOneByHour(repo.Edges.BackupPolicy.OneByHour).
-			SetOneByMonth(repo.Edges.BackupPolicy.OneByMonth).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
+		if repo.Edges.BackupPolicy.ID == 0 {
+			createBackupPolicy(db, *repo.Edges.BackupPolicy, newId, ctx)
+		} else {
+			updateBackupPolicy(db, *repo.Edges.BackupPolicy, ctx)
 		}
 	}
 
 	// Update AWSS3Provider
 	if repo.Edges.AWSS3Provider != nil {
-		_, err = db.AWSS3Provider.
-			UpdateOneID(repo.Edges.AWSS3Provider.ID).
-			SetAccessKeyID(repo.Edges.AWSS3Provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.AWSS3Provider.SecretAccessKey).
-			SetBucketName(repo.Edges.AWSS3Provider.BucketName).
-			SetDefaultRegion(repo.Edges.AWSS3Provider.DefaultRegion).
-			Save(ctx)
 
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
+		if repo.Edges.AWSS3Provider.ID == 0 {
+			createAWSS3Provider(db, *repo.Edges.AWSS3Provider, newId, ctx)
+		} else {
+			updateAWSS3Provider(db, *repo.Edges.AWSS3Provider, ctx)
 		}
+
 	}
 
 	// Update B2Provider
 	if repo.Edges.B2Provider != nil {
-		_, err = db.B2Provider.
-			UpdateOneID(repo.Edges.B2Provider.ID).
-			SetAccountID(repo.Edges.B2Provider.AccountID).
-			SetAccountKey(repo.Edges.B2Provider.AccountKey).
-			SetBucketName(repo.Edges.B2Provider.BucketName).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
+		if repo.Edges.B2Provider != nil {
+			createB2Provider(db, *repo.Edges.B2Provider, newId, ctx)
+		} else {
+			updateB2Provider(db, *repo.Edges.B2Provider, ctx)
 		}
 	}
 
 	// update LocalProvider
 	if repo.Edges.LocalProvider != nil {
-		_, err = db.LocalProvider.
-			UpdateOneID(repo.Edges.LocalProvider.ID).
-			SetRepoPath(repo.Edges.LocalProvider.RepoPath).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
+		if repo.Edges.LocalProvider != nil {
+			createLocalProvider(db, *repo.Edges.LocalProvider, newId, ctx)
+		} else {
+			updateLocalProvider(db, *repo.Edges.LocalProvider, ctx)
 		}
 	}
 
 	// update MinioS3Provider
 	if repo.Edges.MinioS3Provider != nil {
-		_, err = db.MinioS3Provider.
-			UpdateOneID(repo.Edges.MinioS3Provider.ID).
-			SetAccessKeyID(repo.Edges.MinioS3Provider.AccessKeyID).
-			SetSecretAccessKey(repo.Edges.MinioS3Provider.SecretAccessKey).
-			SetBucketName(repo.Edges.MinioS3Provider.BucketName).
-			SetIP(repo.Edges.MinioS3Provider.IP).
-			SetPort(repo.Edges.MinioS3Provider.Port).
-			SetScheme(repo.Edges.MinioS3Provider.Scheme).
-			Save(ctx)
-
-		if err != nil {
-			log.Err(err).Msgf("error: %v", errQuery)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-			return
+		if repo.Edges.MinioS3Provider != nil {
+			createMinioS3Provider(db, *repo.Edges.MinioS3Provider, newId, ctx)
+		} else {
+			updateMinioS3Provider(db, *repo.Edges.MinioS3Provider, ctx)
 		}
 	}
 

@@ -1,6 +1,7 @@
 package API
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -191,5 +192,55 @@ func removeScheduledBackup(repository ent.Repository) {
 		// if repository.BackupSchedule.CronID >= 0 {
 		// 	cr.Remove(repository.BackupSchedule.CronID)
 		// }
+	}
+}
+
+func createBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, repoID int, ctx context.Context) {
+	_, err := db.BackupSchedule.
+		Create().
+		SetChoice(backupSchedule.Choice).
+		SetCronSyntax(backupSchedule.CronSyntax).
+		SetDay(backupSchedule.Day).
+		SetHour(backupSchedule.Hour).
+		SetEveryDay(backupSchedule.EveryDay).
+		SetEveryWeek(backupSchedule.EveryWeek).
+		SetEveryMonth(backupSchedule.EveryMonth).
+		SetEveryMonday(backupSchedule.EveryMonday).
+		SetEveryTuesday(backupSchedule.EveryTuesday).
+		SetEveryWednesday(backupSchedule.EveryWednesday).
+		SetEveryThursday(backupSchedule.EveryThursday).
+		SetEveryFriday(backupSchedule.EveryFriday).
+		SetEverySaturday(backupSchedule.EverySaturday).
+		SetEverySunday(backupSchedule.EverySunday).
+		SetRepositoryID(repoID).
+		Save(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errCreate)
+		// return err
+	}
+}
+
+func updateBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, ctx context.Context) {
+	_, err := db.BackupSchedule.
+		UpdateOneID(backupSchedule.ID).
+		SetChoice(backupSchedule.Choice).
+		SetCronSyntax(backupSchedule.CronSyntax).
+		SetDay(backupSchedule.Day).
+		SetHour(backupSchedule.Hour).
+		SetEveryDay(backupSchedule.EveryDay).
+		SetEveryWeek(backupSchedule.EveryWeek).
+		SetEveryMonth(backupSchedule.EveryMonth).
+		SetEveryMonday(backupSchedule.EveryMonday).
+		SetEveryTuesday(backupSchedule.EveryTuesday).
+		SetEveryWednesday(backupSchedule.EveryWednesday).
+		SetEveryThursday(backupSchedule.EveryThursday).
+		SetEveryFriday(backupSchedule.EveryFriday).
+		SetEverySaturday(backupSchedule.EverySaturday).
+		SetEverySunday(backupSchedule.EverySunday).
+		Save(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errCreate)
+		// return err
 	}
 }
