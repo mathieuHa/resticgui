@@ -8,7 +8,16 @@ import (
 )
 
 func updateLocalProvider(db *ent.Client, localProvider ent.LocalProvider, ctx context.Context) {
+	_, err := db.LocalProvider.
+		UpdateOneID(localProvider.ID).
+		SetRepoPath(localProvider.RepoPath).
+		Save(ctx)
 
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+		// return
+	}
 }
 
 func createLocalProvider(db *ent.Client, localProvider ent.LocalProvider, repoID int, ctx context.Context) {
