@@ -184,37 +184,7 @@ func CreateRepository(c *gin.Context) {
 	}
 
 	// Creates paths
-	if repo.Edges.Paths != nil && len(repo.Edges.Paths) > 0 {
-		for _, p := range repo.Edges.Paths {
-			path, err := db.Path.
-				Create().
-				SetAbsPath(p.AbsPath).
-				SetIsDir(p.IsDir).
-				SetExists(p.Exists).
-				SetIncluded(p.Included).
-				SetName(p.Name).
-				SetRelPath(p.RelPath).
-				Save(ctx)
-			if err != nil {
-				log.Err(err).Msgf("error: %v", errQuery)
-				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				return
-			}
-			_, err = db.Repository.
-				UpdateOneID(newRepository.ID).AddPaths(path).Save(ctx)
-			if err != nil {
-				log.Err(err).Msgf("error: %v", errQuery)
-				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				return
-			}
-		}
-	}
-
-	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-		return
-	}
+	createPaths(db, newRepository.Edges.Paths, newRepository.ID, ctx)
 
 	repository, err := db.Repository.
 		Query().
@@ -341,42 +311,7 @@ func EditRepository(c *gin.Context) {
 		}
 	}
 
-	// Remove old path edges
-	_, err = db.Repository.
-		UpdateOneID(newId).RemovePaths(db.Repository.Query().QueryPaths().AllX(ctx)...).Save(ctx)
-	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-		return
-	}
-
-	// Update path edges
-	if repo.Edges.Paths != nil && len(repo.Edges.Paths) > 0 {
-		for _, p := range repo.Edges.Paths {
-			// ID has not been provided if p.ID == 0 -> new path
-			path, err := db.Path.
-				Create().
-				SetAbsPath(p.AbsPath).
-				SetIsDir(p.IsDir).
-				SetExists(p.Exists).
-				SetIncluded(p.Included).
-				SetName(p.Name).
-				SetRelPath(p.RelPath).
-				Save(ctx)
-			if err != nil {
-				log.Err(err).Msgf("error: %v", errQuery)
-				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				return
-			}
-			_, err = db.Repository.
-				UpdateOneID(newId).AddPaths(path).Save(ctx)
-			if err != nil {
-				log.Err(err).Msgf("error: %v", errQuery)
-				c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				return
-			}
-		}
-	}
+	updatePaths(db, repo.Edges.Paths, newId, ctx)
 
 	// Fetch repository after update
 	repository, err := db.Repository.
