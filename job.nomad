@@ -16,8 +16,13 @@ job "resticgui_job" {
 
   constraint {
     attribute = "${attr.unique.hostname}"
-    value     = "^[^reverse]"
+    value     = "^nomad.*"
     operator  = "regexp"
+  }
+
+  constraint {
+    attribute = "${attr.cpu.arch}"
+    value     = "amd64"
   }
 
   group "resticgui" {
@@ -88,11 +93,11 @@ job "resticgui_job" {
         cpu    = 200 # MHz
         memory = 256 # MB
       }
-      volume_mount {
-        volume      = "resticgui-db"
-        destination = "/opt/db"
-        read_only   = false
-      }
+      // volume_mount {
+      //   volume      = "resticgui-db"
+      //   destination = "/opt/test"
+      //   read_only   = false
+      // }
       volume_mount {
         volume      = "resticgui-data"
         destination = "/data"
