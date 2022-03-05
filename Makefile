@@ -59,6 +59,8 @@ test: testgo ## Launch Tests for the go backend
 
 printvars: ## Print vars for debug
 	 echo DISTDIR = ${DISTDIR}
+	 echo WEBDIR = ${WEBDIR}
+	 echo BUILDDIR = ${BUILDDIR}
 	 echo os = ${os}
 	 echo arch = ${arch}
 
