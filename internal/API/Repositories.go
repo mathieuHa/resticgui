@@ -397,13 +397,6 @@ func RemoveRepository(c *gin.Context) {
 	}
 
 	newId, _ := strconv.Atoi(id)
-	var repo ent.Repository
-
-	if err := c.BindJSON(&repo); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 
 	db := Database.Connect()
 	defer db.Close()
