@@ -195,8 +195,8 @@ func removeScheduledBackup(repository ent.Repository) {
 	}
 }
 
-func createBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, repoID int, ctx context.Context) {
-	_, err := db.BackupSchedule.
+func createBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, repoID int, ctx context.Context) (err error) {
+	_, err = db.BackupSchedule.
 		Create().
 		SetChoice(backupSchedule.Choice).
 		SetCronSyntax(backupSchedule.CronSyntax).
@@ -216,12 +216,14 @@ func createBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, rep
 		Save(ctx)
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errCreate)
-		// return err
+		return err
+	} else {
+		return nil
 	}
 }
 
-func updateBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, ctx context.Context) {
-	_, err := db.BackupSchedule.
+func updateBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, ctx context.Context) (err error) {
+	_, err = db.BackupSchedule.
 		UpdateOneID(backupSchedule.ID).
 		SetChoice(backupSchedule.Choice).
 		SetCronSyntax(backupSchedule.CronSyntax).
@@ -241,6 +243,8 @@ func updateBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, ctx
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errCreate)
-		// return err
+		return err
+	} else {
+		return nil
 	}
 }

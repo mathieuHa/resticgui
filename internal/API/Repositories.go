@@ -144,12 +144,11 @@ func CreateRepository(c *gin.Context) {
 
 	// create backupSchedule
 	if repo.Edges.BackupSchedule != nil {
-		createBackupSchedule(db, *newRepository.Edges.BackupSchedule, newRepository.ID, ctx)
-		// if err != nil {
-		// 	log.Err(err).Msgf("error: %v", errQuery)
-		// 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-		// 	return
-		// }
+		err = createBackupSchedule(db, *newRepository.Edges.BackupSchedule, newRepository.ID, ctx)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
 	}
 
 	// create backupPolicy
@@ -258,9 +257,17 @@ func EditRepository(c *gin.Context) {
 	if repo.Edges.BackupSchedule != nil {
 		if repo.Edges.BackupSchedule.ID == 0 {
 			log.Debug().Msgf("id = %v", repo.Edges.BackupSchedule.ID)
-			createBackupSchedule(db, *repo.Edges.BackupSchedule, newId, ctx)
+			err = createBackupSchedule(db, *repo.Edges.BackupSchedule, newId, ctx)
+			if err != nil {
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
 		} else {
-			updateBackupSchedule(db, *repo.Edges.BackupSchedule, ctx)
+			err = updateBackupSchedule(db, *repo.Edges.BackupSchedule, ctx)
+			if err != nil {
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+				return
+			}
 		}
 	}
 
