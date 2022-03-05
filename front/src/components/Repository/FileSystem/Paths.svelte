@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
 
-  import agent from '../../utils/api';
+  import agent from '../../../utils/api';
 
   import AddPaths from './AddPaths.svelte';
 
@@ -63,4 +63,14 @@
   $:console.log(paths, leaves);
 </script>
 
+<label>Paths</label>
+<p class="my-2">
+  [
+  {#each paths as path, i}
+    "<span class={path[0] === '!' ? 'text-orange-500' : ''}>
+      {path[0] === '!' ? path.slice(1) : path}
+    </span>"{i !== paths.length - 1 ? ', ' : ''}
+  {/each}
+  ]
+</p>
 <AddPaths path="" tree={tree} {paths} {onTogglePaths} {onDirClick} />

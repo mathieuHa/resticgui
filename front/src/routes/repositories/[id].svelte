@@ -20,6 +20,4 @@
   onMount(onRefresh);
 </script>
 
-<pre class="text-sm">
-  {JSON.stringify(repo, null, 1)}
-</pre>
+<pre class="text-sm">{JSON.stringify(repo, null, 1)}</pre>

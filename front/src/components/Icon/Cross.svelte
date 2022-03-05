@@ -1,5 +1,5 @@
 <svg
-  class="absolute text-gray-900 dark:text-gray-100"
+  class="text-gray-900 dark:text-gray-100"
   viewBox="0 0 24 24"
   width="20"
   height="20"

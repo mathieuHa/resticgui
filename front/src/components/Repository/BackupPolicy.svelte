@@ -8,7 +8,7 @@
 
   $:dispatch('update', {
     ...values,
-    keepAll: values.nbLastBackup === -1,
+    keepAll: values.nbLastBackup === 0,
     nbLastBackup: values.nbLastBackup > 0 ? values.nbLastBackup : null,
   });
   $:console.log(values)
@@ -22,12 +22,13 @@
   type="text"
   bind:value={values.name}
 />
-<label for="nbLastBackup">Number last backup <span class="text-sm">(if -1, keep all)</span></label>
+<label for="nbLastBackup">Number last backup <span class="text-sm">(if 0, keep all)</span></label>
 <input
   class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
   id="nbLastBackup"
   name="nbLastBackup"
   type="number"
+  min="0"
   bind:value={values.nbLastBackup}
 />
 <div>
