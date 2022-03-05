@@ -639,6 +639,10 @@ const docTemplate = `{
                 "running": {
                     "description": "Running holds the value of the \"running\" field.",
                     "type": "boolean"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
