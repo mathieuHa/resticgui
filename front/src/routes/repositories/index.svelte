@@ -1,6 +1,7 @@
 <script>
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
+  import BackupPolicy from '../../components/BackupPolicy.svelte';
   import BackupSchedule from '../../components/BackupSchedule.svelte';
   import Provider from '../../components/Provider.svelte';
 
@@ -13,8 +14,9 @@
 
   let repos = [];
   let errors = {};
-  let values = null;
   let step = 0;
+  let values = null;
+  let initialValues = null;
 
   // const schema = yup.object?.().shape({
   //   name: yup.string().min(4, 'too short').required('required'),
@@ -38,7 +40,7 @@
     try {
       const data = await agent[values.id ? 'patch' : 'post'](`/repositories/${values.id || ''}`, values);
       await onRefresh();
-      values = data;
+      initialValues = data;
     } catch (err) {
       console.log(err);
     }
@@ -52,24 +54,28 @@
     }
   }
 
-  $:if (values === null) step = 0;
+  $:if (initialValues === null) step = 0;
+  $:values = Object.assign({}, initialValues) || step;
+  $:console.log(initialValues, values)
 
   onMount(onRefresh);
 </script>
 
-{#if values}
-  <Modal on:close={() => { values = null; }}>
-    <div class="flex max-w-min m-auto justify-between">
-      {#each [0, 1, 2, 3] as stepped}
+{#if initialValues}
+  <Modal on:close={() => { initialValues = null; }}>
+    <div class="flex justify-between mb-2 flex-wrap">
+      {#each ['name', 'paths', 'schedule', 'backup', 'provider'] as stepped, i}
         <div
-          class="w-3 h-3 mx-2 rounded-xl cursor-pointer bg-{step === stepped ? 'orange' : 'blue'}-500"
-          on:click={() => { step = stepped; }}
-        ></div>
+          class="flex-1 px-2 border rounded-t-xl {step === i ? `order-4 md:order-unset shadow-sm shadow-yellow-500/[.5]` : ''} border-gray-500 {step === i ? 'bg-yellow-500/[.5]' : 'cursor-pointer hover:bg-orange-600/[.5]'}"
+          on:click={() => { step = i; }}
+        >
+          <span class="rounded-xl px-2 ">{stepped}</span>
+        </div>
       {/each}
     </div>
     <h1 class="mb-2">Update repository</h1>
     <form on:submit|preventDefault|stopPropagation={onSubmit} class="flex flex-col">
-      <div class="flex flex-col {step !== 0 ? 'hidden' : ''}">
+      {#if step === 0}
         <div class="w-full flex justify-between">
           <label for="name">Name</label>
           <span class="text-red-500">{errors.name || ''}</span>
@@ -81,8 +87,7 @@
           type="text"
           bind:value={values.name}
         />
-      </div>
-      <div class="text-sm flex flex-col {step !== 1 ? 'hidden' : ''}">
+      {:else if step === 1}
         <div class="w-full flex justify-between">
           <label>Paths</label>
           <span class="text-red-500">{errors.path || ''}</span>
@@ -102,33 +107,33 @@
             on:update={({ detail: paths }) => { values = { ...values, edges: { paths } }; }}
           />
         </div>
-      </div>
-      <div class="text-sm flex flex-col {step !== 2 ? 'hidden' : ''}">
+      {:else if step === 2}
         <BackupSchedule
           initialBackupSchedule={(values.edges && values.edges.backupSchedule) || {}}
-          on:update={({ detail: backupSchedule }) => { values = { ...values, edges: { ...values.edges, backupSchedule } }; }}
+          on:update={({ detail: backupSchedule }) => { values = { ...values, edges: { backupSchedule } }; }}
         />
-      </div>
-      <div class="text-sm flex flex-col {step !== 3 ? 'hidden' : ''}">
+      {:else if step === 3}
+        <BackupPolicy
+          initialBackupPolicy={(values.edges && values.edges.backupPolicy) || {}}
+          on:update={({ detail: backupPolicy }) => { values = { ...values, edges: { backupPolicy } }; }}
+        />
+      {:else if step === 4}
         <Provider
           initialProvider={values}
           on:update={({ detail: providers }) => {
             values = {
               ...values,
               provider: providers.provider,
-              edges: {
-                ...values.edges,
-                ...providers.edges,
-              },
+              edges: { ...providers.edges },
             };
           }}
         />
-      </div>
+      {/if}
       <button
         class="mt-4 py-1 rounded transition bg-blue-500 hover:bg-blue-600"
         type="submit"
       >
-        {step === 2 ? 'Submit' : 'Next'}
+        Save
       </button>
     </form>
   </Modal>
@@ -148,7 +153,7 @@
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 ml-2 transition bg-blue-500 hover:bg-blue-600"
-          on:click|preventDefault|stopPropagation={() => { values = Object.assign({}, repo); }}
+          on:click|preventDefault|stopPropagation={() => { initialValues = Object.assign({}, repo); }}
         >
           <Pen />
         </button>
@@ -162,7 +167,7 @@
     </div>
   {/each}
   <div
-    on:click={() => { values = { name: '' }; }}
+    on:click={() => { initialValues = {}; }}
     class="text-3xl p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
     +

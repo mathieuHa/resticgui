@@ -5,7 +5,7 @@
 
   const dispatch = createEventDispatcher();
   const providers = {
-    localProvider: ['repoName'],
+    localProvider: ['repoPath'],
     MinioS3Provider: ['accessKeyID', 'bucketName', 'port', 'secretAccessKey', 'scheme'],
     B2Provider: ['accountID', 'accountKey', 'bucketName', 'repoName'],
     AWSS3Provider: ['accessKeyID', 'secretAccessKey', 'bucketName', 'defaultRegion'],

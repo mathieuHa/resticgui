@@ -7,6 +7,12 @@ module.exports = {
 	darkMode: 'class',
 	theme: {
 		extend: {
+			order: {
+				unset: 'unset',
+			},
+			border: {
+				unset: 'unset',
+			},
 			typography: (theme) => ({
 				DEFAULT: {
 					css: {
