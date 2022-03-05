@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import Input from '../Input.svelte';
 
   export let initialBackupPolicy = {};
   let values = initialBackupPolicy;
@@ -14,50 +15,39 @@
   $:console.log(values)
 </script>
 
-<label for="name">File name</label>
-<input
-  class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
+<Input
   id="name"
   name="name"
   type="text"
+  label="File name"
   bind:value={values.name}
 />
-<label for="nbLastBackup">Number last backup <span class="text-sm">(if 0, keep all)</span></label>
-<input
-  class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
+<Input
   id="nbLastBackup"
   name="nbLastBackup"
   type="number"
+  label="Number last backup (if 0, keep all)"
   min="0"
   bind:value={values.nbLastBackup}
 />
-<div>
-  <input
-    class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-    id="oneByHour"
-    name="oneByHour"
-    type="checkbox"
-    bind:checked={values.oneByHour}
-  />
-  <label for="oneByHour">One by hour</label>
-</div>
-<div>
-  <input
-    class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-    id="oneByDay"
-    name="oneByDay"
-    type="checkbox"
-    bind:checked={values.oneByDay}
-  />
-  <label for="oneByDay">One by day</label>
-</div>
-<div>
-  <input
-    class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-    id="oneByMonth"
-    name="oneByMonth"
-    type="checkbox"
-    bind:checked={values.oneByMonth}
-  />
-  <label for="oneByMonth">One by month</label>
-</div>
+<Input
+  id="oneByHour"
+  name="oneByHour"
+  type="checkbox"
+  label="One by hour"
+  bind:checked={values.oneByHour}
+/>
+<Input
+  id="oneByDay"
+  name="oneByDay"
+  type="checkbox"
+  label="One by day"
+  bind:checked={values.oneByDay}
+/>
+<Input
+  id="oneByMonth"
+  name="oneByMonth"
+  type="checkbox"
+  label="One by month"
+  bind:checked={values.oneByMonth}
+/>

@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import Input from '../Input.svelte';
 
   export let initialProvider = {};
 
@@ -31,19 +32,15 @@
     />
   {/each}
 </div>
+<p>{provider}</p>
 {#if provider !== null}
-  <div>
-    {#each providers[provider] as input}
-      <div class="w-full flex justify-between">
-        <label for={input}>{input}</label>
-      </div>
-      <input
-        class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-        id={input}
-        name={input}
-        type="text"
-        bind:value={values.edges[provider][input]}
-      />
-    {/each}
-  </div>
+  {#each providers[provider] as input}
+    <Input
+      id={input}
+      name={input}
+      label={input}
+      type="text"
+      bind:value={values.edges[provider][input]}
+    />
+  {/each}
 {/if}

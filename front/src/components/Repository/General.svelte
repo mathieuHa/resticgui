@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import Input from '../Input.svelte';
 
   export let initialValues = {};
 
@@ -10,21 +11,14 @@
   $:dispatch('update', values);
 </script>
 
-<label for="name">Name</label>
-<input
-  class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
+<Input
   id="name"
-  name="name"
-  type="text"
+  label="Name"
   bind:value={values.name}
 />
-<div>
-  <input
-    class="px-2 py-1 border-2 border-indigo-900 rounded dark:bg-gray-700"
-    id="active"
-    name="active"
-    type="checkbox"
-    bind:checked={values.active}
-  />
-  <label for="active">Enable backup</label>
-</div>
+<Input
+  id="active"
+  label="Enable backup"
+  type="checkbox"
+  bind:checked={values.active}
+/>
