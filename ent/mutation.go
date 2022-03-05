@@ -5165,6 +5165,7 @@ type RepositoryMutation struct {
 	createdAt               *time.Time
 	provider                *repository.Provider
 	active                  *bool
+	running                 *bool
 	password                *string
 	maxSize                 *string
 	clearedFields           map[string]struct{}
@@ -5441,6 +5442,42 @@ func (m *RepositoryMutation) OldActive(ctx context.Context) (v bool, err error) 
 // ResetActive resets all changes to the "active" field.
 func (m *RepositoryMutation) ResetActive() {
 	m.active = nil
+}
+
+// SetRunning sets the "running" field.
+func (m *RepositoryMutation) SetRunning(b bool) {
+	m.running = &b
+}
+
+// Running returns the value of the "running" field in the mutation.
+func (m *RepositoryMutation) Running() (r bool, exists bool) {
+	v := m.running
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRunning returns the old "running" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldRunning(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRunning is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRunning requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRunning: %w", err)
+	}
+	return oldValue.Running, nil
+}
+
+// ResetRunning resets all changes to the "running" field.
+func (m *RepositoryMutation) ResetRunning() {
+	m.running = nil
 }
 
 // SetPassword sets the "password" field.
@@ -5848,7 +5885,7 @@ func (m *RepositoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RepositoryMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.name != nil {
 		fields = append(fields, repository.FieldName)
 	}
@@ -5860,6 +5897,9 @@ func (m *RepositoryMutation) Fields() []string {
 	}
 	if m.active != nil {
 		fields = append(fields, repository.FieldActive)
+	}
+	if m.running != nil {
+		fields = append(fields, repository.FieldRunning)
 	}
 	if m.password != nil {
 		fields = append(fields, repository.FieldPassword)
@@ -5883,6 +5923,8 @@ func (m *RepositoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Provider()
 	case repository.FieldActive:
 		return m.Active()
+	case repository.FieldRunning:
+		return m.Running()
 	case repository.FieldPassword:
 		return m.Password()
 	case repository.FieldMaxSize:
@@ -5904,6 +5946,8 @@ func (m *RepositoryMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldProvider(ctx)
 	case repository.FieldActive:
 		return m.OldActive(ctx)
+	case repository.FieldRunning:
+		return m.OldRunning(ctx)
 	case repository.FieldPassword:
 		return m.OldPassword(ctx)
 	case repository.FieldMaxSize:
@@ -5944,6 +5988,13 @@ func (m *RepositoryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetActive(v)
+		return nil
+	case repository.FieldRunning:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRunning(v)
 		return nil
 	case repository.FieldPassword:
 		v, ok := value.(string)
@@ -6040,6 +6091,9 @@ func (m *RepositoryMutation) ResetField(name string) error {
 		return nil
 	case repository.FieldActive:
 		m.ResetActive()
+		return nil
+	case repository.FieldRunning:
+		m.ResetRunning()
 		return nil
 	case repository.FieldPassword:
 		m.ResetPassword()

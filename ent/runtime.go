@@ -159,6 +159,10 @@ func init() {
 	repositoryDescActive := repositoryFields[3].Descriptor()
 	// repository.DefaultActive holds the default value on creation for the active field.
 	repository.DefaultActive = repositoryDescActive.Default.(bool)
+	// repositoryDescRunning is the schema descriptor for running field.
+	repositoryDescRunning := repositoryFields[4].Descriptor()
+	// repository.DefaultRunning holds the default value on creation for the running field.
+	repository.DefaultRunning = repositoryDescRunning.Default.(bool)
 	roleFields := schema.Role{}.Fields()
 	_ = roleFields
 	// roleDescName is the schema descriptor for name field.

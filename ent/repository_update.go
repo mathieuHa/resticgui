@@ -74,6 +74,20 @@ func (ru *RepositoryUpdate) SetNillableActive(b *bool) *RepositoryUpdate {
 	return ru
 }
 
+// SetRunning sets the "running" field.
+func (ru *RepositoryUpdate) SetRunning(b bool) *RepositoryUpdate {
+	ru.mutation.SetRunning(b)
+	return ru
+}
+
+// SetNillableRunning sets the "running" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableRunning(b *bool) *RepositoryUpdate {
+	if b != nil {
+		ru.SetRunning(*b)
+	}
+	return ru
+}
+
 // SetPassword sets the "password" field.
 func (ru *RepositoryUpdate) SetPassword(s string) *RepositoryUpdate {
 	ru.mutation.SetPassword(s)
@@ -425,6 +439,13 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: repository.FieldActive,
 		})
 	}
+	if value, ok := ru.mutation.Running(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldRunning,
+		})
+	}
 	if value, ok := ru.mutation.Password(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -770,6 +791,20 @@ func (ruo *RepositoryUpdateOne) SetActive(b bool) *RepositoryUpdateOne {
 func (ruo *RepositoryUpdateOne) SetNillableActive(b *bool) *RepositoryUpdateOne {
 	if b != nil {
 		ruo.SetActive(*b)
+	}
+	return ruo
+}
+
+// SetRunning sets the "running" field.
+func (ruo *RepositoryUpdateOne) SetRunning(b bool) *RepositoryUpdateOne {
+	ruo.mutation.SetRunning(b)
+	return ruo
+}
+
+// SetNillableRunning sets the "running" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableRunning(b *bool) *RepositoryUpdateOne {
+	if b != nil {
+		ruo.SetRunning(*b)
 	}
 	return ruo
 }
@@ -1147,6 +1182,13 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: repository.FieldActive,
+		})
+	}
+	if value, ok := ruo.mutation.Running(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldRunning,
 		})
 	}
 	if value, ok := ruo.mutation.Password(); ok {

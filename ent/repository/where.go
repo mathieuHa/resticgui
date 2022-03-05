@@ -114,6 +114,13 @@ func Active(v bool) predicate.Repository {
 	})
 }
 
+// Running applies equality check predicate on the "running" field. It's identical to RunningEQ.
+func Running(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRunning), v))
+	})
+}
+
 // Password applies equality check predicate on the "password" field. It's identical to PasswordEQ.
 func Password(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
@@ -388,6 +395,20 @@ func ActiveEQ(v bool) predicate.Repository {
 func ActiveNEQ(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldActive), v))
+	})
+}
+
+// RunningEQ applies the EQ predicate on the "running" field.
+func RunningEQ(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRunning), v))
+	})
+}
+
+// RunningNEQ applies the NEQ predicate on the "running" field.
+func RunningNEQ(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRunning), v))
 	})
 }
 

@@ -75,6 +75,20 @@ func (rc *RepositoryCreate) SetNillableActive(b *bool) *RepositoryCreate {
 	return rc
 }
 
+// SetRunning sets the "running" field.
+func (rc *RepositoryCreate) SetRunning(b bool) *RepositoryCreate {
+	rc.mutation.SetRunning(b)
+	return rc
+}
+
+// SetNillableRunning sets the "running" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableRunning(b *bool) *RepositoryCreate {
+	if b != nil {
+		rc.SetRunning(*b)
+	}
+	return rc
+}
+
 // SetPassword sets the "password" field.
 func (rc *RepositoryCreate) SetPassword(s string) *RepositoryCreate {
 	rc.mutation.SetPassword(s)
@@ -315,6 +329,10 @@ func (rc *RepositoryCreate) defaults() {
 		v := repository.DefaultActive
 		rc.mutation.SetActive(v)
 	}
+	if _, ok := rc.mutation.Running(); !ok {
+		v := repository.DefaultRunning
+		rc.mutation.SetRunning(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -337,6 +355,9 @@ func (rc *RepositoryCreate) check() error {
 	}
 	if _, ok := rc.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Repository.active"`)}
+	}
+	if _, ok := rc.mutation.Running(); !ok {
+		return &ValidationError{Name: "running", err: errors.New(`ent: missing required field "Repository.running"`)}
 	}
 	return nil
 }
@@ -396,6 +417,14 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 			Column: repository.FieldActive,
 		})
 		_node.Active = value
+	}
+	if value, ok := rc.mutation.Running(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldRunning,
+		})
+		_node.Running = value
 	}
 	if value, ok := rc.mutation.Password(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

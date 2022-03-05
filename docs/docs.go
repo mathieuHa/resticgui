@@ -635,6 +635,10 @@ const docTemplate = `{
                 "provider": {
                     "description": "Provider holds the value of the \"provider\" field.",
                     "type": "string"
+                },
+                "running": {
+                    "description": "Running holds the value of the \"running\" field.",
+                    "type": "boolean"
                 }
             }
         },

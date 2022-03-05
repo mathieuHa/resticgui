@@ -20,6 +20,8 @@ const (
 	FieldProvider = "provider"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
+	// FieldRunning holds the string denoting the running field in the database.
+	FieldRunning = "running"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
 	// FieldMaxSize holds the string denoting the maxsize field in the database.
@@ -98,6 +100,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldProvider,
 	FieldActive,
+	FieldRunning,
 	FieldPassword,
 	FieldMaxSize,
 }
@@ -119,6 +122,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
+	// DefaultRunning holds the default value on creation for the "running" field.
+	DefaultRunning bool
 )
 
 // Provider defines the type for the "provider" enum field.
