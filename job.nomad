@@ -16,8 +16,13 @@ job "resticgui_job" {
 
   constraint {
     attribute = "${attr.unique.hostname}"
-    value     = "^[^reverse]"
+    value     = "^nomad.*"
     operator  = "regexp"
+  }
+
+  constraint {
+    attribute = "${attr.cpu.arch}"
+    value     = "amd64"
   }
 
   group "resticgui" {
