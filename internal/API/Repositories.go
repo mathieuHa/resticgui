@@ -111,6 +111,7 @@ func GetRepository(c *gin.Context) {
 // @Failure 500 {string} errCreate
 // @Router /repositories [post]
 func CreateRepository(c *gin.Context) {
+	log.Debug().Msg("CreateRepository()")
 	ctx := context.Background()
 	var repo ent.Repository
 
@@ -120,13 +121,16 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
+	log.Debug().Msg("DatabaseConnect()")
 	db := Database.Connect()
 	defer db.Close()
 
 	if repo.Provider == "" {
 		repo.Provider = "localProvider"
 	}
+
 	// create repository
+	log.Debug().Msg("create repository")
 	newRepository, err := db.Repository.
 		Create().
 		SetName(repo.Name).
@@ -137,14 +141,15 @@ func CreateRepository(c *gin.Context) {
 		Save(ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
+		log.Err(err).Msgf("error: %v", errCreate)
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
 	// create backupSchedule
 	if repo.Edges.BackupSchedule != nil {
-		err = createBackupSchedule(db, *newRepository.Edges.BackupSchedule, newRepository.ID, ctx)
+		log.Debug().Msg("create backupSchedule")
+		err = createBackupSchedule(db, repo.Edges.BackupSchedule, newRepository.ID, ctx)
 		if err != nil {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 			return
@@ -153,37 +158,46 @@ func CreateRepository(c *gin.Context) {
 
 	// create backupPolicy
 	if repo.Edges.BackupPolicy != nil {
-		createBackupPolicy(db, *newRepository.Edges.BackupPolicy, newRepository.ID, ctx)
-
-		// if err != nil {
-		// 	log.Err(err).Msgf("error: %v", errQuery)
-		// 	c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-		// 	return
-		// }
+		log.Debug().Msg("create backupPolicy")
+		err = createBackupPolicy(db, repo.Edges.BackupPolicy, newRepository.ID, ctx)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
 	}
 
 	// create AWSS3Provider
+	log.Debug().Msg("create AWSS3Provider")
 	if repo.Edges.AWSS3Provider != nil {
-		createAWSS3Provider(db, *newRepository.Edges.AWSS3Provider, newRepository.ID, ctx)
+		err = createAWSS3Provider(db, repo.Edges.AWSS3Provider, newRepository.ID, ctx)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
 	}
 
 	// create B2Provider
+	log.Debug().Msg("create B2Provider")
 	if repo.Edges.B2Provider != nil {
-		createB2Provider(db, *newRepository.Edges.B2Provider, newRepository.ID, ctx)
+		err = createB2Provider(db, repo.Edges.B2Provider, newRepository.ID, ctx)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
+			return
+		}
 	}
 
 	// create LocalProvider
 	if repo.Edges.LocalProvider != nil {
-		createLocalProvider(db, *newRepository.Edges.LocalProvider, newRepository.ID, ctx)
+		createLocalProvider(db, repo.Edges.LocalProvider, newRepository.ID, ctx)
 	}
 
 	// create MinioS3Provider
 	if repo.Edges.MinioS3Provider != nil {
-		createMinioS3Provider(db, *newRepository.Edges.MinioS3Provider, newRepository.ID, ctx)
+		createMinioS3Provider(db, repo.Edges.MinioS3Provider, newRepository.ID, ctx)
 	}
 
 	// Creates paths
-	createPaths(db, newRepository.Edges.Paths, newRepository.ID, ctx)
+	createPaths(db, repo.Edges.Paths, newRepository.ID, ctx)
 
 	repository, err := db.Repository.
 		Query().
@@ -257,36 +271,39 @@ func EditRepository(c *gin.Context) {
 	if repo.Edges.BackupSchedule != nil {
 		if repo.Edges.BackupSchedule.ID == 0 {
 			log.Debug().Msgf("id = %v", repo.Edges.BackupSchedule.ID)
-			err = createBackupSchedule(db, *repo.Edges.BackupSchedule, newId, ctx)
-			if err != nil {
-				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-				return
-			}
+			err = createBackupSchedule(db, repo.Edges.BackupSchedule, newId, ctx)
 		} else {
-			err = updateBackupSchedule(db, *repo.Edges.BackupSchedule, ctx)
-			if err != nil {
-				c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-				return
-			}
+			err = updateBackupSchedule(db, repo.Edges.BackupSchedule, ctx)
+		}
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
 		}
 	}
 
 	// Update backupPolicy
 	if repo.Edges.BackupPolicy != nil {
 		if repo.Edges.BackupPolicy.ID == 0 {
-			createBackupPolicy(db, *repo.Edges.BackupPolicy, newId, ctx)
+			err = createBackupPolicy(db, repo.Edges.BackupPolicy, newId, ctx)
 		} else {
-			updateBackupPolicy(db, *repo.Edges.BackupPolicy, ctx)
+			err = updateBackupPolicy(db, repo.Edges.BackupPolicy, ctx)
+		}
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
 		}
 	}
 
 	// Update AWSS3Provider
 	if repo.Edges.AWSS3Provider != nil {
-
 		if repo.Edges.AWSS3Provider.ID == 0 {
-			createAWSS3Provider(db, *repo.Edges.AWSS3Provider, newId, ctx)
+			err = createAWSS3Provider(db, repo.Edges.AWSS3Provider, newId, ctx)
 		} else {
-			updateAWSS3Provider(db, *repo.Edges.AWSS3Provider, ctx)
+			err = updateAWSS3Provider(db, repo.Edges.AWSS3Provider, ctx)
+		}
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
 		}
 
 	}
@@ -294,31 +311,47 @@ func EditRepository(c *gin.Context) {
 	// Update B2Provider
 	if repo.Edges.B2Provider != nil {
 		if repo.Edges.B2Provider != nil {
-			createB2Provider(db, *repo.Edges.B2Provider, newId, ctx)
+			err = createB2Provider(db, repo.Edges.B2Provider, newId, ctx)
 		} else {
-			updateB2Provider(db, *repo.Edges.B2Provider, ctx)
+			err = updateB2Provider(db, repo.Edges.B2Provider, ctx)
+		}
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
 		}
 	}
 
 	// update LocalProvider
 	if repo.Edges.LocalProvider != nil {
 		if repo.Edges.LocalProvider != nil {
-			createLocalProvider(db, *repo.Edges.LocalProvider, newId, ctx)
+			err = createLocalProvider(db, repo.Edges.LocalProvider, newId, ctx)
 		} else {
-			updateLocalProvider(db, *repo.Edges.LocalProvider, ctx)
+			err = updateLocalProvider(db, repo.Edges.LocalProvider, ctx)
+		}
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
 		}
 	}
 
 	// update MinioS3Provider
 	if repo.Edges.MinioS3Provider != nil {
 		if repo.Edges.MinioS3Provider != nil {
-			createMinioS3Provider(db, *repo.Edges.MinioS3Provider, newId, ctx)
+			err = createMinioS3Provider(db, repo.Edges.MinioS3Provider, newId, ctx)
 		} else {
-			updateMinioS3Provider(db, *repo.Edges.MinioS3Provider, ctx)
+			err = updateMinioS3Provider(db, repo.Edges.MinioS3Provider, ctx)
+		}
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+			return
 		}
 	}
 
-	updatePaths(db, repo.Edges.Paths, newId, ctx)
+	err = updatePaths(db, repo.Edges.Paths, newId, ctx)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		return
+	}
 
 	// Fetch repository after update
 	repository, err := db.Repository.

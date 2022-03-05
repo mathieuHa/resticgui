@@ -195,7 +195,8 @@ func removeScheduledBackup(repository ent.Repository) {
 	}
 }
 
-func createBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, repoID int, ctx context.Context) (err error) {
+func createBackupSchedule(db *ent.Client, backupSchedule *ent.BackupSchedule, repoID int, ctx context.Context) (err error) {
+	log.Debug().Msg("createBackupSchedule()")
 	_, err = db.BackupSchedule.
 		Create().
 		SetChoice(backupSchedule.Choice).
@@ -222,7 +223,8 @@ func createBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, rep
 	}
 }
 
-func updateBackupSchedule(db *ent.Client, backupSchedule ent.BackupSchedule, ctx context.Context) (err error) {
+func updateBackupSchedule(db *ent.Client, backupSchedule *ent.BackupSchedule, ctx context.Context) (err error) {
+	log.Debug().Msg("updateBackupSchedule()")
 	_, err = db.BackupSchedule.
 		UpdateOneID(backupSchedule.ID).
 		SetChoice(backupSchedule.Choice).

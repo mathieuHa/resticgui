@@ -7,8 +7,8 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func updateB2Provider(db *ent.Client, b2Provider ent.B2Provider, ctx context.Context) {
-	_, err := db.B2Provider.
+func updateB2Provider(db *ent.Client, b2Provider *ent.B2Provider, ctx context.Context) (err error) {
+	_, err = db.B2Provider.
 		UpdateOneID(b2Provider.ID).
 		SetAccountID(b2Provider.AccountID).
 		SetAccountKey(b2Provider.AccountKey).
@@ -20,10 +20,11 @@ func updateB2Provider(db *ent.Client, b2Provider ent.B2Provider, ctx context.Con
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }
 
-func createB2Provider(db *ent.Client, b2Provider ent.B2Provider, repoID int, ctx context.Context) {
-	_, err := db.B2Provider.
+func createB2Provider(db *ent.Client, b2Provider *ent.B2Provider, repoID int, ctx context.Context) (err error) {
+	_, err = db.B2Provider.
 		Create().
 		SetAccountID(b2Provider.AccountID).
 		SetAccountKey(b2Provider.AccountKey).
@@ -36,4 +37,5 @@ func createB2Provider(db *ent.Client, b2Provider ent.B2Provider, repoID int, ctx
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }

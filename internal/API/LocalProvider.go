@@ -7,8 +7,8 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func updateLocalProvider(db *ent.Client, localProvider ent.LocalProvider, ctx context.Context) {
-	_, err := db.LocalProvider.
+func updateLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, ctx context.Context) (err error) {
+	_, err = db.LocalProvider.
 		UpdateOneID(localProvider.ID).
 		SetRepoPath(localProvider.RepoPath).
 		Save(ctx)
@@ -18,10 +18,11 @@ func updateLocalProvider(db *ent.Client, localProvider ent.LocalProvider, ctx co
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }
 
-func createLocalProvider(db *ent.Client, localProvider ent.LocalProvider, repoID int, ctx context.Context) {
-	_, err := db.LocalProvider.
+func createLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, repoID int, ctx context.Context) (err error) {
+	_, err = db.LocalProvider.
 		Create().
 		SetRepoPath(localProvider.RepoPath).
 		SetRepositoryID(repoID).
@@ -32,4 +33,5 @@ func createLocalProvider(db *ent.Client, localProvider ent.LocalProvider, repoID
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }

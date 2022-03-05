@@ -7,8 +7,10 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func createBackupPolicy(db *ent.Client, backupPolicy ent.BackupPolicy, repoID int, ctx context.Context) {
-	_, err := db.BackupPolicy.
+func createBackupPolicy(db *ent.Client, backupPolicy *ent.BackupPolicy, repoID int, ctx context.Context) (err error) {
+	log.Debug().Msg("createBackupPolicy()")
+	log.Debug().Msgf("test %v", &backupPolicy)
+	_, err = db.BackupPolicy.
 		Create().
 		SetKeepAll(backupPolicy.KeepAll).
 		SetName(backupPolicy.Name).
@@ -18,16 +20,19 @@ func createBackupPolicy(db *ent.Client, backupPolicy ent.BackupPolicy, repoID in
 		SetOneByMonth(backupPolicy.OneByMonth).
 		SetRepositoryID(repoID).
 		Save(ctx)
+	log.Debug().Msg("after db")
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }
 
-func updateBackupPolicy(db *ent.Client, backupPolicy ent.BackupPolicy, ctx context.Context) {
-	_, err := db.BackupPolicy.
+func updateBackupPolicy(db *ent.Client, backupPolicy *ent.BackupPolicy, ctx context.Context) (err error) {
+	log.Debug().Msg("updateBackupPolicy()")
+	_, err = db.BackupPolicy.
 		UpdateOneID(backupPolicy.ID).
 		SetKeepAll(backupPolicy.KeepAll).
 		SetName(backupPolicy.Name).
@@ -40,7 +45,7 @@ func updateBackupPolicy(db *ent.Client, backupPolicy ent.BackupPolicy, ctx conte
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-		// return
 	}
+	return err
 
 }

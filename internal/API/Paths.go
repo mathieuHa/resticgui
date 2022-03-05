@@ -121,14 +121,15 @@ func checkAllPath(entities []ent.Path) bool {
 	return changed
 }
 
-func updatePaths(db *ent.Client, paths []*ent.Path, repoID int, ctx context.Context) {
+func updatePaths(db *ent.Client, paths []*ent.Path, repoID int, ctx context.Context) (err error) {
+	log.Debug().Msg("updatePaths()")
 	// Remove old path edges
-	_, err := db.Repository.
+	_, err = db.Repository.
 		UpdateOneID(repoID).RemovePaths(db.Repository.Query().QueryPaths().AllX(ctx)...).Save(ctx)
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
+		log.Err(err).Msgf("error: %v", errUpdate)
 		// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-		// return
+		return err
 	}
 
 	// Update path edges
@@ -147,21 +148,22 @@ func updatePaths(db *ent.Client, paths []*ent.Path, repoID int, ctx context.Cont
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
 				// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				// return
+				return err
 			}
 			_, err = db.Repository.
 				UpdateOneID(repoID).AddPaths(path).Save(ctx)
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
 				// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				// return
+				return err
 			}
 		}
 	}
-
+	return nil
 }
 
-func createPaths(db *ent.Client, paths []*ent.Path, repoID int, ctx context.Context) {
+func createPaths(db *ent.Client, paths []*ent.Path, repoID int, ctx context.Context) (err error) {
+	log.Debug().Msg("createPaths()")
 	if len(paths) > 0 {
 		for _, p := range paths {
 			path, err := db.Path.
@@ -176,16 +178,16 @@ func createPaths(db *ent.Client, paths []*ent.Path, repoID int, ctx context.Cont
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
 				// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				// return
+				return err
 			}
 			_, err = db.Repository.
 				UpdateOneID(repoID).AddPaths(path).Save(ctx)
 			if err != nil {
 				log.Err(err).Msgf("error: %v", errQuery)
 				// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errCreate, "message": err.Error()})
-				// return
+				return err
 			}
 		}
 	}
-
+	return nil
 }

@@ -7,8 +7,9 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func updateMinioS3Provider(db *ent.Client, minioS3Provider ent.MinioS3Provider, ctx context.Context) {
-	_, err := db.MinioS3Provider.
+func updateMinioS3Provider(db *ent.Client, minioS3Provider *ent.MinioS3Provider, ctx context.Context) (err error) {
+	log.Debug().Msg("updateMinioS3Provider()")
+	_, err = db.MinioS3Provider.
 		UpdateOneID(minioS3Provider.ID).
 		SetAccessKeyID(minioS3Provider.AccessKeyID).
 		SetSecretAccessKey(minioS3Provider.SecretAccessKey).
@@ -23,10 +24,12 @@ func updateMinioS3Provider(db *ent.Client, minioS3Provider ent.MinioS3Provider, 
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }
 
-func createMinioS3Provider(db *ent.Client, minioS3Provider ent.MinioS3Provider, repoID int, ctx context.Context) {
-	_, err := db.MinioS3Provider.
+func createMinioS3Provider(db *ent.Client, minioS3Provider *ent.MinioS3Provider, repoID int, ctx context.Context) (err error) {
+	log.Debug().Msg("createMinioS3Provider()")
+	_, err = db.MinioS3Provider.
 		Create().
 		SetAccessKeyID(minioS3Provider.AccessKeyID).
 		SetSecretAccessKey(minioS3Provider.SecretAccessKey).
@@ -42,4 +45,5 @@ func createMinioS3Provider(db *ent.Client, minioS3Provider ent.MinioS3Provider, 
 		// c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
 		// return
 	}
+	return err
 }
