@@ -69,7 +69,7 @@
         title={!initialValues.id ? 'Give to repository a name' : null}
         class="flex justify-between flex-wrap {!initialValues.id ? 'cursor-not-allowed' : ''}"
       >
-        {#each ['name', 'paths', 'schedule', 'backup', 'provider'] as stepped, i}
+        {#each ['general', 'paths', 'schedule', 'backup', 'provider'] as stepped, i}
           <div
             class="flex-1 px-2 rounded-t border border-gray-500 {!initialValues.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
             on:click={() => { step = i; }}
@@ -80,7 +80,10 @@
       </div>
       <div class="flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
         {#if step === 0}
-          <General initialValues={values} />
+          <General
+            initialValues={values}
+            on:update={({ detail: general }) => { values = { ...values, ...general }; }}
+          />
         {:else if step === 1}
           <Paths
             initialPaths={values.edges && values.edges.paths
