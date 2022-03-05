@@ -98,7 +98,7 @@ var (
 		{Name: "day", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "interval", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "cron_syntax", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "cron_id", Type: field.TypeUint, Nullable: true},
+		{Name: "cron_id", Type: field.TypeInt, Nullable: true},
 		{Name: "repository_backup_schedule", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// BackupScheduleTable holds the schema information for the "BackupSchedule" table.
@@ -204,6 +204,7 @@ var (
 		{Name: "provider", Type: field.TypeEnum, Nullable: true, Enums: []string{"localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"}, Default: "localProvider"},
 		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "running", Type: field.TypeBool, Default: false},
+		{Name: "valid", Type: field.TypeBool, Default: false},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "max_size", Type: field.TypeString, Nullable: true},
 	}

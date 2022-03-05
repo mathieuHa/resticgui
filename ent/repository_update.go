@@ -88,6 +88,20 @@ func (ru *RepositoryUpdate) SetNillableRunning(b *bool) *RepositoryUpdate {
 	return ru
 }
 
+// SetValid sets the "valid" field.
+func (ru *RepositoryUpdate) SetValid(b bool) *RepositoryUpdate {
+	ru.mutation.SetValid(b)
+	return ru
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableValid(b *bool) *RepositoryUpdate {
+	if b != nil {
+		ru.SetValid(*b)
+	}
+	return ru
+}
+
 // SetPassword sets the "password" field.
 func (ru *RepositoryUpdate) SetPassword(s string) *RepositoryUpdate {
 	ru.mutation.SetPassword(s)
@@ -444,6 +458,13 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: repository.FieldRunning,
+		})
+	}
+	if value, ok := ru.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldValid,
 		})
 	}
 	if value, ok := ru.mutation.Password(); ok {
@@ -805,6 +826,20 @@ func (ruo *RepositoryUpdateOne) SetRunning(b bool) *RepositoryUpdateOne {
 func (ruo *RepositoryUpdateOne) SetNillableRunning(b *bool) *RepositoryUpdateOne {
 	if b != nil {
 		ruo.SetRunning(*b)
+	}
+	return ruo
+}
+
+// SetValid sets the "valid" field.
+func (ruo *RepositoryUpdateOne) SetValid(b bool) *RepositoryUpdateOne {
+	ruo.mutation.SetValid(b)
+	return ruo
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableValid(b *bool) *RepositoryUpdateOne {
+	if b != nil {
+		ruo.SetValid(*b)
 	}
 	return ruo
 }
@@ -1189,6 +1224,13 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: repository.FieldRunning,
+		})
+	}
+	if value, ok := ruo.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldValid,
 		})
 	}
 	if value, ok := ruo.mutation.Password(); ok {

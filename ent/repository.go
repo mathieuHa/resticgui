@@ -32,6 +32,8 @@ type Repository struct {
 	Active bool `json:"active,omitempty"`
 	// Running holds the value of the "running" field.
 	Running bool `json:"running,omitempty"`
+	// Valid holds the value of the "valid" field.
+	Valid bool `json:"valid,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"-"`
 	// MaxSize holds the value of the "maxSize" field.
@@ -160,7 +162,7 @@ func (*Repository) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case repository.FieldActive, repository.FieldRunning:
+		case repository.FieldActive, repository.FieldRunning, repository.FieldValid:
 			values[i] = new(sql.NullBool)
 		case repository.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -218,6 +220,12 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field running", values[i])
 			} else if value.Valid {
 				r.Running = value.Bool
+			}
+		case repository.FieldValid:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field valid", values[i])
+			} else if value.Valid {
+				r.Valid = value.Bool
 			}
 		case repository.FieldPassword:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -304,6 +312,8 @@ func (r *Repository) String() string {
 	builder.WriteString(fmt.Sprintf("%v", r.Active))
 	builder.WriteString(", running=")
 	builder.WriteString(fmt.Sprintf("%v", r.Running))
+	builder.WriteString(", valid=")
+	builder.WriteString(fmt.Sprintf("%v", r.Valid))
 	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", maxSize=")
 	builder.WriteString(r.MaxSize)

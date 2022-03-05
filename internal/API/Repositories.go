@@ -218,6 +218,10 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
+	if repository.Active {
+		addScheduledBackup(repository)
+	}
+
 	c.IndentedJSON(http.StatusCreated, repository)
 }
 
@@ -371,6 +375,10 @@ func EditRepository(c *gin.Context) {
 		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
+	}
+
+	if repository.Active {
+		addScheduledBackup(repository)
 	}
 
 	c.IndentedJSON(http.StatusOK, repository)

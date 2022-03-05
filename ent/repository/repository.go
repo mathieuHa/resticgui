@@ -22,6 +22,8 @@ const (
 	FieldActive = "active"
 	// FieldRunning holds the string denoting the running field in the database.
 	FieldRunning = "running"
+	// FieldValid holds the string denoting the valid field in the database.
+	FieldValid = "valid"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
 	// FieldMaxSize holds the string denoting the maxsize field in the database.
@@ -101,6 +103,7 @@ var Columns = []string{
 	FieldProvider,
 	FieldActive,
 	FieldRunning,
+	FieldValid,
 	FieldPassword,
 	FieldMaxSize,
 }
@@ -124,6 +127,8 @@ var (
 	DefaultActive bool
 	// DefaultRunning holds the default value on creation for the "running" field.
 	DefaultRunning bool
+	// DefaultValid holds the default value on creation for the "valid" field.
+	DefaultValid bool
 )
 
 // Provider defines the type for the "provider" enum field.

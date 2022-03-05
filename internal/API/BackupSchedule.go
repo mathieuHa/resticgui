@@ -8,6 +8,8 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
+	"gitlab.com/resticgui/resticgui/ent/repository"
+	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 // func QueryBackupSchedule(c *gin.Context) {
@@ -148,7 +150,7 @@ func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 
 func addScheduledBackup(repository *ent.Repository) bool {
 	// we check if the cron has been initialized
-	if cr != nil {
+	if cr != nil && repository.Valid {
 
 		// First we remove the previous job launched for this repository
 		if *repository.Edges.BackupSchedule.CronID >= 0 {
@@ -156,14 +158,22 @@ func addScheduledBackup(repository *ent.Repository) bool {
 		}
 		// Then we had the new job to be run and register it
 		var err error
+		var cronID cron.EntryID
 		timing := getScheduleStringSyntax(*repository.Edges.BackupSchedule)
 		log.Debug().Msgf("timing = %v", timing)
-		// repository.Edges.Backupschedule.CronID, err = cr.AddFunc(timing, func() {
-		// 	log.Debug().Msgf("JOB HAS RUN")
-		// })
+		cronID, err = cr.AddFunc(timing, func() {
+			log.Info().Msgf("JOB HAS RUN %v", repository.ID)
+		})
 		if err != nil {
 			log.Error().Err(err)
 			return false
+		}
+		db := Database.Connect()
+		defer db.Close()
+		*repository.Edges.BackupSchedule.CronID = int(cronID)
+		err = updateBackupSchedule(db, repository.Edges.BackupSchedule, context.Background())
+		if err != nil {
+			log.Err(err).Msgf("error: repository %v", errUpdate)
 		}
 		return true
 	} else {
@@ -175,23 +185,28 @@ func addScheduledBackup(repository *ent.Repository) bool {
 func CreateAllScheduledBackup() {
 	// var repositories []ent.Repository
 
-	// db := Database.Connect()
-
-	// db.Where("active = ?", true).Preload("BackupSchedule").Find(&repositories)
-
-	// for _, repo := range repositories {
-	// 	log.Debug().Msgf("start repos %v", repo.ID)
-	// 	addScheduledBackup(&repo)
-	// }
+	db := Database.Connect()
+	defer db.Close()
+	// Check the validity of the provider and repository in general
+	repositories, err := db.Repository.Query().Where(repository.Active(true)).All(context.Background())
+	if err != nil {
+		log.Err(err).Msgf("error quering active backups")
+	}
+	for _, repo := range repositories {
+		log.Debug().Msgf("start repos %v", repo.ID)
+		addScheduledBackup(repo)
+	}
 }
 
 func removeScheduledBackup(repository ent.Repository) {
 	// Here we need to
 	if cr != nil {
+		log.Debug().Msg("Removing backups")
 		// First we remove the previous job launched for this repository
-		// if repository.BackupSchedule.CronID >= 0 {
-		// 	cr.Remove(repository.BackupSchedule.CronID)
-		// }
+		if repository.Edges.BackupSchedule != nil && *repository.Edges.BackupSchedule.CronID > 0 {
+			id := cron.EntryID(*repository.Edges.BackupSchedule.CronID)
+			cr.Remove(id)
+		}
 	}
 }
 

@@ -263,23 +263,23 @@ func (bsu *BackupScheduleUpdate) ClearCronSyntax() *BackupScheduleUpdate {
 }
 
 // SetCronID sets the "cronID" field.
-func (bsu *BackupScheduleUpdate) SetCronID(u uint) *BackupScheduleUpdate {
+func (bsu *BackupScheduleUpdate) SetCronID(i int) *BackupScheduleUpdate {
 	bsu.mutation.ResetCronID()
-	bsu.mutation.SetCronID(u)
+	bsu.mutation.SetCronID(i)
 	return bsu
 }
 
 // SetNillableCronID sets the "cronID" field if the given value is not nil.
-func (bsu *BackupScheduleUpdate) SetNillableCronID(u *uint) *BackupScheduleUpdate {
-	if u != nil {
-		bsu.SetCronID(*u)
+func (bsu *BackupScheduleUpdate) SetNillableCronID(i *int) *BackupScheduleUpdate {
+	if i != nil {
+		bsu.SetCronID(*i)
 	}
 	return bsu
 }
 
-// AddCronID adds u to the "cronID" field.
-func (bsu *BackupScheduleUpdate) AddCronID(u int) *BackupScheduleUpdate {
-	bsu.mutation.AddCronID(u)
+// AddCronID adds i to the "cronID" field.
+func (bsu *BackupScheduleUpdate) AddCronID(i int) *BackupScheduleUpdate {
+	bsu.mutation.AddCronID(i)
 	return bsu
 }
 
@@ -533,21 +533,21 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if value, ok := bsu.mutation.CronID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: backupschedule.FieldCronID,
 		})
 	}
 	if value, ok := bsu.mutation.AddedCronID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: backupschedule.FieldCronID,
 		})
 	}
 	if bsu.mutation.CronIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Column: backupschedule.FieldCronID,
 		})
 	}
@@ -840,23 +840,23 @@ func (bsuo *BackupScheduleUpdateOne) ClearCronSyntax() *BackupScheduleUpdateOne 
 }
 
 // SetCronID sets the "cronID" field.
-func (bsuo *BackupScheduleUpdateOne) SetCronID(u uint) *BackupScheduleUpdateOne {
+func (bsuo *BackupScheduleUpdateOne) SetCronID(i int) *BackupScheduleUpdateOne {
 	bsuo.mutation.ResetCronID()
-	bsuo.mutation.SetCronID(u)
+	bsuo.mutation.SetCronID(i)
 	return bsuo
 }
 
 // SetNillableCronID sets the "cronID" field if the given value is not nil.
-func (bsuo *BackupScheduleUpdateOne) SetNillableCronID(u *uint) *BackupScheduleUpdateOne {
-	if u != nil {
-		bsuo.SetCronID(*u)
+func (bsuo *BackupScheduleUpdateOne) SetNillableCronID(i *int) *BackupScheduleUpdateOne {
+	if i != nil {
+		bsuo.SetCronID(*i)
 	}
 	return bsuo
 }
 
-// AddCronID adds u to the "cronID" field.
-func (bsuo *BackupScheduleUpdateOne) AddCronID(u int) *BackupScheduleUpdateOne {
-	bsuo.mutation.AddCronID(u)
+// AddCronID adds i to the "cronID" field.
+func (bsuo *BackupScheduleUpdateOne) AddCronID(i int) *BackupScheduleUpdateOne {
+	bsuo.mutation.AddCronID(i)
 	return bsuo
 }
 
@@ -1134,21 +1134,21 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 	}
 	if value, ok := bsuo.mutation.CronID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: backupschedule.FieldCronID,
 		})
 	}
 	if value, ok := bsuo.mutation.AddedCronID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: backupschedule.FieldCronID,
 		})
 	}
 	if bsuo.mutation.CronIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Column: backupschedule.FieldCronID,
 		})
 	}

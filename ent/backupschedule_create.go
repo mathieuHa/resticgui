@@ -231,15 +231,15 @@ func (bsc *BackupScheduleCreate) SetNillableCronSyntax(s *string) *BackupSchedul
 }
 
 // SetCronID sets the "cronID" field.
-func (bsc *BackupScheduleCreate) SetCronID(u uint) *BackupScheduleCreate {
-	bsc.mutation.SetCronID(u)
+func (bsc *BackupScheduleCreate) SetCronID(i int) *BackupScheduleCreate {
+	bsc.mutation.SetCronID(i)
 	return bsc
 }
 
 // SetNillableCronID sets the "cronID" field if the given value is not nil.
-func (bsc *BackupScheduleCreate) SetNillableCronID(u *uint) *BackupScheduleCreate {
-	if u != nil {
-		bsc.SetCronID(*u)
+func (bsc *BackupScheduleCreate) SetNillableCronID(i *int) *BackupScheduleCreate {
+	if i != nil {
+		bsc.SetCronID(*i)
 	}
 	return bsc
 }
@@ -580,7 +580,7 @@ func (bsc *BackupScheduleCreate) createSpec() (*BackupSchedule, *sqlgraph.Create
 	}
 	if value, ok := bsc.mutation.CronID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: backupschedule.FieldCronID,
 		})

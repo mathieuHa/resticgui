@@ -1860,7 +1860,7 @@ type BackupScheduleMutation struct {
 	day               *string
 	interval          *string
 	cronSyntax        *string
-	cronID            *uint
+	cronID            *int
 	addcronID         *int
 	clearedFields     map[string]struct{}
 	repository        *int
@@ -2561,13 +2561,13 @@ func (m *BackupScheduleMutation) ResetCronSyntax() {
 }
 
 // SetCronID sets the "cronID" field.
-func (m *BackupScheduleMutation) SetCronID(u uint) {
-	m.cronID = &u
+func (m *BackupScheduleMutation) SetCronID(i int) {
+	m.cronID = &i
 	m.addcronID = nil
 }
 
 // CronID returns the value of the "cronID" field in the mutation.
-func (m *BackupScheduleMutation) CronID() (r uint, exists bool) {
+func (m *BackupScheduleMutation) CronID() (r int, exists bool) {
 	v := m.cronID
 	if v == nil {
 		return
@@ -2578,7 +2578,7 @@ func (m *BackupScheduleMutation) CronID() (r uint, exists bool) {
 // OldCronID returns the old "cronID" field's value of the BackupSchedule entity.
 // If the BackupSchedule object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupScheduleMutation) OldCronID(ctx context.Context) (v *uint, err error) {
+func (m *BackupScheduleMutation) OldCronID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCronID is only allowed on UpdateOne operations")
 	}
@@ -2592,12 +2592,12 @@ func (m *BackupScheduleMutation) OldCronID(ctx context.Context) (v *uint, err er
 	return oldValue.CronID, nil
 }
 
-// AddCronID adds u to the "cronID" field.
-func (m *BackupScheduleMutation) AddCronID(u int) {
+// AddCronID adds i to the "cronID" field.
+func (m *BackupScheduleMutation) AddCronID(i int) {
 	if m.addcronID != nil {
-		*m.addcronID += u
+		*m.addcronID += i
 	} else {
-		m.addcronID = &u
+		m.addcronID = &i
 	}
 }
 
@@ -2933,7 +2933,7 @@ func (m *BackupScheduleMutation) SetField(name string, value ent.Value) error {
 		m.SetCronSyntax(v)
 		return nil
 	case backupschedule.FieldCronID:
-		v, ok := value.(uint)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5166,6 +5166,7 @@ type RepositoryMutation struct {
 	provider                *repository.Provider
 	active                  *bool
 	running                 *bool
+	valid                   *bool
 	password                *string
 	maxSize                 *string
 	clearedFields           map[string]struct{}
@@ -5478,6 +5479,42 @@ func (m *RepositoryMutation) OldRunning(ctx context.Context) (v bool, err error)
 // ResetRunning resets all changes to the "running" field.
 func (m *RepositoryMutation) ResetRunning() {
 	m.running = nil
+}
+
+// SetValid sets the "valid" field.
+func (m *RepositoryMutation) SetValid(b bool) {
+	m.valid = &b
+}
+
+// Valid returns the value of the "valid" field in the mutation.
+func (m *RepositoryMutation) Valid() (r bool, exists bool) {
+	v := m.valid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValid returns the old "valid" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldValid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValid: %w", err)
+	}
+	return oldValue.Valid, nil
+}
+
+// ResetValid resets all changes to the "valid" field.
+func (m *RepositoryMutation) ResetValid() {
+	m.valid = nil
 }
 
 // SetPassword sets the "password" field.
@@ -5885,7 +5922,7 @@ func (m *RepositoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RepositoryMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.name != nil {
 		fields = append(fields, repository.FieldName)
 	}
@@ -5900,6 +5937,9 @@ func (m *RepositoryMutation) Fields() []string {
 	}
 	if m.running != nil {
 		fields = append(fields, repository.FieldRunning)
+	}
+	if m.valid != nil {
+		fields = append(fields, repository.FieldValid)
 	}
 	if m.password != nil {
 		fields = append(fields, repository.FieldPassword)
@@ -5925,6 +5965,8 @@ func (m *RepositoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Active()
 	case repository.FieldRunning:
 		return m.Running()
+	case repository.FieldValid:
+		return m.Valid()
 	case repository.FieldPassword:
 		return m.Password()
 	case repository.FieldMaxSize:
@@ -5948,6 +5990,8 @@ func (m *RepositoryMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldActive(ctx)
 	case repository.FieldRunning:
 		return m.OldRunning(ctx)
+	case repository.FieldValid:
+		return m.OldValid(ctx)
 	case repository.FieldPassword:
 		return m.OldPassword(ctx)
 	case repository.FieldMaxSize:
@@ -5995,6 +6039,13 @@ func (m *RepositoryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRunning(v)
+		return nil
+	case repository.FieldValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValid(v)
 		return nil
 	case repository.FieldPassword:
 		v, ok := value.(string)
@@ -6094,6 +6145,9 @@ func (m *RepositoryMutation) ResetField(name string) error {
 		return nil
 	case repository.FieldRunning:
 		m.ResetRunning()
+		return nil
+	case repository.FieldValid:
+		m.ResetValid()
 		return nil
 	case repository.FieldPassword:
 		m.ResetPassword()

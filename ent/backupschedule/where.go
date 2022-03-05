@@ -190,7 +190,7 @@ func CronSyntax(v string) predicate.BackupSchedule {
 }
 
 // CronID applies equality check predicate on the "cronID" field. It's identical to CronIDEQ.
-func CronID(v uint) predicate.BackupSchedule {
+func CronID(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCronID), v))
 	})
@@ -885,21 +885,21 @@ func CronSyntaxContainsFold(v string) predicate.BackupSchedule {
 }
 
 // CronIDEQ applies the EQ predicate on the "cronID" field.
-func CronIDEQ(v uint) predicate.BackupSchedule {
+func CronIDEQ(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCronID), v))
 	})
 }
 
 // CronIDNEQ applies the NEQ predicate on the "cronID" field.
-func CronIDNEQ(v uint) predicate.BackupSchedule {
+func CronIDNEQ(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldCronID), v))
 	})
 }
 
 // CronIDIn applies the In predicate on the "cronID" field.
-func CronIDIn(vs ...uint) predicate.BackupSchedule {
+func CronIDIn(vs ...int) predicate.BackupSchedule {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -916,7 +916,7 @@ func CronIDIn(vs ...uint) predicate.BackupSchedule {
 }
 
 // CronIDNotIn applies the NotIn predicate on the "cronID" field.
-func CronIDNotIn(vs ...uint) predicate.BackupSchedule {
+func CronIDNotIn(vs ...int) predicate.BackupSchedule {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -933,28 +933,28 @@ func CronIDNotIn(vs ...uint) predicate.BackupSchedule {
 }
 
 // CronIDGT applies the GT predicate on the "cronID" field.
-func CronIDGT(v uint) predicate.BackupSchedule {
+func CronIDGT(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldCronID), v))
 	})
 }
 
 // CronIDGTE applies the GTE predicate on the "cronID" field.
-func CronIDGTE(v uint) predicate.BackupSchedule {
+func CronIDGTE(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldCronID), v))
 	})
 }
 
 // CronIDLT applies the LT predicate on the "cronID" field.
-func CronIDLT(v uint) predicate.BackupSchedule {
+func CronIDLT(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldCronID), v))
 	})
 }
 
 // CronIDLTE applies the LTE predicate on the "cronID" field.
-func CronIDLTE(v uint) predicate.BackupSchedule {
+func CronIDLTE(v int) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCronID), v))
 	})
