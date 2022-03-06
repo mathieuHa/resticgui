@@ -32,8 +32,8 @@
     />
   {/each}
 </div>
-<p>{provider}</p>
-{#if provider !== null}
+<p class="my-2">{provider ? provider.replace('Provider', '') : 'Select a provider'}</p>
+{#if provider}
   {#each providers[provider] as input}
     <Input
       id={input}
