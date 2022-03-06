@@ -5,6 +5,7 @@
 <script>
 	import '../tailwind.css';
 	import Nav from '../components/Nav.svelte';
+	import Toast from '../components/Toast.svelte';
 </script>
 
 <svelte:head>
@@ -19,6 +20,7 @@
 <main class="px-8 mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 dark:border-gray-700 text-black dark:text-white">
 	<slot />
 	<div id="modals"></div>
+	<Toast />
 </main>
 
 

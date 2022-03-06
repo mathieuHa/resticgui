@@ -8,6 +8,7 @@
   import Provider from '../../components/Repository/Provider.svelte';
 
   import agent from '../../utils/api';
+  import { toasts } from '../../utils/stores';
   import Eye from '../../components/Icon/Eye.svelte';
   import Pen from '../../components/Icon/Pen.svelte';
   import Trash from '../../components/Icon/Trash.svelte';
@@ -37,13 +38,24 @@
       // Pass
     }
   }
+  const onCheck = async (id) => {
+    if (!id) return;
+    try {
+      await agent.get(`/repositories/${id}/valid`);
+      toasts.addToast('Repository valid');
+    } catch (err) {
+      toasts.addToast('Repository not valid', 'failure');
+    }
+  }
   const onSubmit = async () => {
     console.log(values);
     try {
       const data = await agent[values.id ? 'patch' : 'post'](`/repositories/${values.id || ''}`, values);
+      toasts.addToast('Repository updated !');
       await onRefresh();
       initialValues = data;
     } catch (err) {
+      toasts.addToast(err, 'failure');
       console.log(err);
     }
   }
@@ -69,12 +81,12 @@
         title={!initialValues.id ? 'Give to repository a name' : null}
         class="flex justify-between flex-wrap {!initialValues.id ? 'cursor-not-allowed' : ''}"
       >
-        {#each ['general', 'paths', 'schedule', 'backup', 'provider'] as stepped, i}
+        {#each ['General', 'Paths', 'Schedule', 'Policy', 'Provider'] as stepped, i}
           <div
-            class="flex-1 px-2 rounded-t border border-gray-500 {!initialValues.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
+            class="flex-1 text-center pb-1 px-2 rounded-t border border-gray-500 {!initialValues.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
             on:click={() => { step = i; }}
           >
-            <span class="rounded-xl px-2 ">{stepped}</span>
+            <span class="rounded-xl px-2">{stepped}</span>
           </div>
         {/each}
       </div>
@@ -114,9 +126,16 @@
           />
         {/if}
       </div>
-      <div class="flex">
+      <div class="flex mt-2">
         <div class="flex-1"></div>
-        <button type="submit" class="px-5 mt-2 min-w-[100px] rounded transition bg-blue-500 hover:bg-blue-600">
+        <button
+          class="pb-1 px-5 mr-2 min-w-[100px] rounded transition bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500"
+          disabled={!initialValues.id}
+          on:click|preventDefault={() => onCheck(initialValues.id)}
+        >
+          Check
+        </button>
+        <button type="submit" class="pb-1 px-5 min-w-[100px] rounded transition bg-blue-500 hover:bg-blue-600">
           Save
         </button>
       </div>
@@ -131,11 +150,11 @@
       <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('DD/MM/YY')}</p>
 
       <div class="flex mt-auto pt-2 h-8 mb-1">
-        <button class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600">
-          <a href="/repositories/{repo.id}">
+        <a href="/repositories/{repo.id}">
+          <button class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600">
             <Eye />
-          </a>
-        </button>
+          </button>
+        </a>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 ml-2 transition bg-blue-500 hover:bg-blue-600"
           on:click|preventDefault|stopPropagation={() => { initialValues = Object.assign({}, repo); }}

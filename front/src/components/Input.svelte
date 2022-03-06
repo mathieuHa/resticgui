@@ -6,7 +6,6 @@
   export let id = '';
   export let label = '';
   export let type = 'text';
-  export let placeholder = '';
 
   let idCheckbox = id;
   let idNumber = id;
@@ -25,9 +24,9 @@
       class="px-2 py-1 focus:shadow-sm shadow-gray-300 dark:shadow-gray-700 rounded bg-gray-200 dark:bg-gray-700 transition-all"
       id={id}
       type="text"
-      placeholder={placeholder}
       bind:value={val}
       on:change={() => { value = val; dispatch('change'); }}
+      {...$$props}
     />
   </div>
 {:else if type === 'number'}
@@ -40,6 +39,7 @@
       min="0"
       bind:value={val}
       on:change={() => { value = val; dispatch('change'); }}
+      {...$$props}
     />
   </div>
 {:else if type === 'checkbox'}
@@ -53,7 +53,7 @@
         bind:checked={check}
         on:change={() => { checked = check; dispatch('change'); }}
       />
-      <span class="slider absolute top-0 left-0 right-0 bottom-0 bg-gray-200 rounded-lg transition-all"></span>
+      <span class="slider absolute top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-lg transition-all"></span>
     </div>
     <span class="ml-2 leading-8">{label}</span>
   </label>

@@ -67,9 +67,7 @@
 <p class="my-2">
   [
   {#each paths as path, i}
-    "<span class={path[0] === '!' ? 'text-orange-500' : ''}>
-      {path[0] === '!' ? path.slice(1) : path}
-    </span>"{i !== paths.length - 1 ? ', ' : ''}
+    "<span class={path[0] === '!' ? 'text-orange-500' : ''}>{path[0] === '!' ? path.slice(1) : path}</span>"{i !== paths.length - 1 ? ', ' : ''}
   {/each}
   ]
 </p>

@@ -23,10 +23,10 @@
   $: dispatch('update', { provider, edges: { [provider]: values.edges[provider] } });
 </script>
 
-<div class="flex">
+<div class="flex justify-between">
   {#each Object.keys(providers) as backupProvider}
     <img
-      class="h-7 w-7 mr-2 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-transparent'}"
+      class="h-10 w-10 mr-2 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-all"
       src="/{backupProvider}.svg"
       on:click={() => { provider = backupProvider }}
     />
