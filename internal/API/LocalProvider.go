@@ -43,6 +43,8 @@ func createLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, repoI
 }
 
 func validLocalProvider(provider *ent.LocalProvider) (valid bool, err error) {
+	log.Debug().Msg("validLocalProvider()")
+
 	if provider == nil {
 		valid = false
 		err = errors.New("localProvider is nil")

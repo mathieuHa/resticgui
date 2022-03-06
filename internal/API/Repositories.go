@@ -3,6 +3,7 @@ package API
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -446,7 +447,125 @@ func RemoveRepository(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// ValidRepository godoc
+// @Summary valid repository
+// @Schemes
+// @Description valid the repository by ID
+// @Param id path int true "Repository ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/valid [get]
+func ValidRepository(c *gin.Context) {
+	log.Debug().Msg("ValidRepository()")
+
+	ctx := context.Background()
+	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+		return
+	}
+
+	newId, _ := strconv.Atoi(id)
+
+	db := Database.Connect()
+	defer db.Close()
+
+	repository, err := db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPaths().
+		Where(repository.ID(newId)).
+		First(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
+	if repository != nil {
+		valid, _ := validRepository(*repository)
+		_, err = db.Repository.UpdateOneID(newId).SetValid(valid).Save(ctx)
+		if err != nil {
+			log.Err(err).Msg("Could not update valid for repository")
+		}
+		c.IndentedJSON(http.StatusOK, gin.H{"valid": valid})
+	} else {
+		c.IndentedJSON(http.StatusOK, gin.H{"valid": false})
+	}
+
+	c.Status(http.StatusOK)
+}
+
+// ValidProvider godoc
+// @Summary valid provider of the repository
+// @Schemes
+// @Description valid the repository by ID
+// @Param id path int true "Repository ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/provider/valid [get]
+func ValidProvider(c *gin.Context) {
+	log.Debug().Msg("ValidProvider()")
+
+	ctx := context.Background()
+	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+		return
+	}
+
+	newId, _ := strconv.Atoi(id)
+
+	db := Database.Connect()
+	defer db.Close()
+
+	repository, err := db.Repository.
+		Query().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		Where(repository.ID(newId)).
+		First(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
+	if repository != nil {
+		valid, err := validProvider(*repository)
+		if err != nil {
+			log.Err(err).Msgf("Failed to validate provider")
+		}
+		c.IndentedJSON(http.StatusOK, gin.H{"valid": valid})
+	} else {
+		c.IndentedJSON(http.StatusOK, gin.H{"valid": false})
+	}
+
+	c.Status(http.StatusOK)
+}
+
 func validRepository(repository ent.Repository) (valid bool, err error) {
+	log.Debug().Msg("validRepository()")
+
 	valid, err = validProvider(repository)
 	if err != nil {
 		log.Err(err).Msg("Valid repository has failed on provider check")
@@ -467,6 +586,8 @@ func validRepository(repository ent.Repository) (valid bool, err error) {
 }
 
 func validProvider(repository ent.Repository) (valid bool, err error) {
+	log.Debug().Msg("validProvider()")
+
 	switch repository.Provider {
 	case "localProvider":
 		valid, err = validLocalProvider(repository.Edges.LocalProvider)
@@ -480,5 +601,47 @@ func validProvider(repository ent.Repository) (valid bool, err error) {
 		valid = false
 		err = errors.New("provider does not exist")
 	}
+	if err != nil {
+		log.Err(err).Msg("Error in validation of provider")
+	}
 	return valid, err
+}
+
+func updateValidProvider(db *ent.Client, repository ent.Repository, valid bool) (err error) {
+	log.Debug().Msg("updateValidProvider()")
+	ctx := context.Background()
+
+	switch repository.Provider {
+	case "localProvider":
+		if repository.Edges.LocalProvider != nil {
+			_, err = db.LocalProvider.UpdateOneID(repository.Edges.LocalProvider.ID).SetValid(valid).Save(ctx)
+		} else {
+			err = fmt.Errorf("%v is nil", repository.Provider)
+		}
+	case "minioS3Provider":
+		if repository.Edges.MinioS3Provider != nil {
+			_, err = db.MinioS3Provider.UpdateOneID(repository.Edges.MinioS3Provider.ID).SetValid(valid).Save(ctx)
+		} else {
+			err = fmt.Errorf("%v is nil", repository.Provider)
+		}
+	case "AWSS3Provider":
+		if repository.Edges.AWSS3Provider != nil {
+			_, err = db.AWSS3Provider.UpdateOneID(repository.Edges.AWSS3Provider.ID).SetValid(valid).Save(ctx)
+		} else {
+			err = fmt.Errorf("%v is nil", repository.Provider)
+		}
+	case "B2Provider":
+		if repository.Edges.B2Provider != nil {
+			_, err = db.B2Provider.UpdateOneID(repository.Edges.B2Provider.ID).SetValid(valid).Save(ctx)
+		} else {
+			err = fmt.Errorf("%v is nil", repository.Provider)
+		}
+	default:
+		err = errors.New("provider does not exist")
+	}
+	if err != nil {
+		log.Err(err).Msg("Could not update valid for repository")
+	}
+
+	return err
 }

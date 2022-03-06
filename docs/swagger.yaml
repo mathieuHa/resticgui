@@ -493,4 +493,62 @@ paths:
           schema:
             type: string
       summary: edit repository
+  /repositories/{id}/provider/valid:
+    get:
+      consumes:
+      - application/json
+      description: valid the repository by ID
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: valid provider of the repository
+  /repositories/{id}/valid:
+    get:
+      consumes:
+      - application/json
+      description: valid the repository by ID
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: valid repository
 swagger: "2.0"

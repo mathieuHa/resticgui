@@ -53,6 +53,8 @@ func createMinioS3Provider(db *ent.Client, minioS3Provider *ent.MinioS3Provider,
 }
 
 func validMinioS3Provider(provider *ent.MinioS3Provider) (valid bool, err error) {
+	log.Debug().Msg("validMinioS3Provider()")
+
 	if provider == nil {
 		valid = false
 		err = errors.New("MinioS3Provider is nil")

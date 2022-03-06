@@ -43,6 +43,8 @@ func createAWSS3Provider(db *ent.Client, awsS3Provider *ent.AWSS3Provider, repoI
 }
 
 func validAWSS3Provider(provider *ent.AWSS3Provider) (valid bool, err error) {
+	log.Debug().Msg("validAWSS3Provider()")
+
 	if provider == nil {
 		valid = false
 		err = errors.New("AWSS3Provider is nil")

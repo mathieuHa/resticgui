@@ -52,6 +52,8 @@ func httpClient() *http.Client {
 }
 
 func validB2Provider(provider *ent.B2Provider) (valid bool, err error) {
+	log.Debug().Msg("validB2Provider()")
+
 	if provider == nil {
 		valid = false
 		err = errors.New("B2Provider is nil")
