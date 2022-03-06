@@ -35,7 +35,7 @@ type Repository struct {
 	// Valid holds the value of the "valid" field.
 	Valid bool `json:"valid,omitempty"`
 	// Password holds the value of the "password" field.
-	Password string `json:"-"`
+	Password string `json:"password,omitempty"`
 	// MaxSize holds the value of the "maxSize" field.
 	MaxSize string `json:"maxSize,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -314,7 +314,8 @@ func (r *Repository) String() string {
 	builder.WriteString(fmt.Sprintf("%v", r.Running))
 	builder.WriteString(", valid=")
 	builder.WriteString(fmt.Sprintf("%v", r.Valid))
-	builder.WriteString(", password=<sensitive>")
+	builder.WriteString(", password=")
+	builder.WriteString(r.Password)
 	builder.WriteString(", maxSize=")
 	builder.WriteString(r.MaxSize)
 	builder.WriteByte(')')

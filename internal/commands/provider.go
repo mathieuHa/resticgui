@@ -14,15 +14,15 @@ func getProviderData(repository ent.Repository) ([]string, []string) {
 	args = append(args, "-r")
 	env = append(env, repository.Password)
 	switch repository.Provider {
-	case "local":
+	case "localProvider":
 		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
-	case "b2":
+	case "B2Provider":
 		args = append(args, getB2RepositoryFormat(*repository.Edges.B2Provider))
 		env = append(args, getB2EnvFormat(*repository.Edges.B2Provider)...)
-	case "aws":
+	case "AWSS3Provider":
 		args = append(args, getAmazonS3RepositoryFormat(*repository.Edges.AWSS3Provider))
 		env = append(args, getAmazonS3EnvFormat(*repository.Edges.AWSS3Provider)...)
-	case "minio":
+	case "MinioS3Provider":
 		args = append(args, getMinioS3RepositoryFormat(*repository.Edges.MinioS3Provider))
 		env = append(args, getMinioS3EnvFormat(*repository.Edges.MinioS3Provider)...)
 	default:

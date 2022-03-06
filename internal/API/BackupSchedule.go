@@ -167,30 +167,46 @@ func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 	return ""
 }
 
-func addScheduledBackup(repository *ent.Repository) bool {
+func addScheduledBackup(repo *ent.Repository) bool {
 	log.Debug().Msg("addScheduledBackup()")
 
 	// we check if the cron has been initialized
-	if cr != nil && repository.Valid {
+	if cr != nil && repo.Valid {
 		log.Debug().Msg("repository is valid")
 
 		// First we remove the previous job launched for this repository
 		log.Debug().Msg("remove previous job for the repository")
-		if repository.Edges.BackupSchedule != nil {
-			if repository.Edges.BackupSchedule.CronID != nil {
+		if repo.Edges.BackupSchedule != nil {
+			if repo.Edges.BackupSchedule.CronID != nil {
 				log.Debug().Msg("in if")
-				log.Debug().Msgf("cron id: %v", *repository.Edges.BackupSchedule.CronID)
-				cr.Remove(cron.EntryID(*repository.Edges.BackupSchedule.CronID))
+				log.Debug().Msgf("cron id: %v", *repo.Edges.BackupSchedule.CronID)
+				cr.Remove(cron.EntryID(*repo.Edges.BackupSchedule.CronID))
 			} else {
 				log.Debug().Msg("in else")
 			}
 			// Then we had the new job to be run and register it
-
-			timing := getScheduleStringSyntax(*repository.Edges.BackupSchedule)
+			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
 			log.Debug().Msgf("timing = %v", timing)
 			cronID, err := cr.AddFunc(timing, func() {
-				log.Info().Msgf("JOB HAS RUN ")
+				log.Info().Msgf("JOB HAS RUN %v", repo.ID)
+				log.Info().Msgf("JOB HAS RUN %v", repo.Name)
 				commands.GetResticVersion()
+				db := Database.Connect()
+				defer db.Close()
+				// Check the validity of the provider and repository in general
+				r, _ := db.Repository.
+					Query().
+					WithBackupSchedule().
+					WithBackupPolicy().
+					WithAWSS3Provider().
+					WithB2Provider().
+					WithLocalProvider().
+					WithMinioS3Provider().
+					WithPaths().
+					Where(repository.ID(repo.ID)).
+					First(context.Background())
+
+				commands.InitRepository(*r)
 			})
 			if err != nil {
 				log.Error().Err(err)
@@ -198,7 +214,7 @@ func addScheduledBackup(repository *ent.Repository) bool {
 			}
 			log.Info().Msgf("cronID: %v", int(cronID))
 
-			err = updateCronID(*repository.Edges.BackupSchedule, int(cronID))
+			err = updateCronID(*repo.Edges.BackupSchedule, int(cronID))
 			if err != nil {
 				log.Err(err).Msgf("error: repository %v", errUpdate)
 			}

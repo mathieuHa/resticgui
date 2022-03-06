@@ -24,7 +24,9 @@ func (Repository) Fields() []ent.Field {
 		field.Bool("active").Default(false),
 		field.Bool("running").Default(false),
 		field.Bool("valid").Default(false),
-		field.String("password").Optional().Sensitive(),
+		// Password should be set as sensitve, but should be accessible
+		// field.String("password").Optional().Sensitive(),
+		field.String("password").Optional(),
 		field.String("maxSize").Optional(),
 	}
 }

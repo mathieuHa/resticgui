@@ -270,6 +270,7 @@ func EditRepository(c *gin.Context) {
 		SetName(repo.Name).
 		SetMaxSize(repo.MaxSize).
 		SetActive(repo.Active).
+		SetPassword(repo.Password).
 		SetProvider(repo.Provider).
 		Save(ctx)
 	if err != nil {
