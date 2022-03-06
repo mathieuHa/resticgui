@@ -266,7 +266,7 @@ func EditRepository(c *gin.Context) {
 	defer db.Close()
 
 	// Update repository
-	_, err := db.Repository.
+	r, err := db.Repository.
 		UpdateOneID(newId).
 		SetName(repo.Name).
 		SetMaxSize(repo.MaxSize).
@@ -281,7 +281,8 @@ func EditRepository(c *gin.Context) {
 
 	// Update backup schedule
 	if repo.Edges.BackupSchedule != nil {
-		if repo.Edges.BackupSchedule.ID == 0 {
+		_, err := db.Repository.QueryBackupSchedule(r).FirstID(ctx)
+		if repo.Edges.BackupSchedule.ID == 0 && err != nil {
 			log.Debug().Msgf("id = %v", repo.Edges.BackupSchedule.ID)
 			err = createBackupSchedule(db, repo.Edges.BackupSchedule, newId, ctx)
 		} else {
@@ -335,7 +336,8 @@ func EditRepository(c *gin.Context) {
 
 	// update LocalProvider
 	if repo.Edges.LocalProvider != nil {
-		if repo.Edges.LocalProvider.ID == 0 {
+		_, err := db.Repository.QueryLocalProvider(r).FirstID(ctx)
+		if repo.Edges.LocalProvider.ID == 0 && err != nil {
 			err = createLocalProvider(db, repo.Edges.LocalProvider, newId, ctx)
 		} else {
 			err = updateLocalProvider(db, repo.Edges.LocalProvider, ctx)
@@ -366,7 +368,7 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Fetch repository after update
-	repository, err := db.Repository.
+	r, err = db.Repository.
 		Query().
 		WithBackupSchedule().
 		WithBackupPolicy().
@@ -384,16 +386,16 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	repository.Valid, err = validRepository(*repository)
+	r.Valid, err = validRepository(*r)
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 	}
 
-	if repository.Active && repository.Valid {
-		addScheduledBackup(repository)
+	if r.Active && r.Valid {
+		addScheduledBackup(r)
 	}
 
-	c.IndentedJSON(http.StatusOK, repository)
+	c.IndentedJSON(http.StatusOK, r)
 }
 
 // RemoveRepository godoc

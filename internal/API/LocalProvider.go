@@ -51,6 +51,7 @@ func validLocalProvider(provider *ent.LocalProvider) (valid bool, err error) {
 		return valid, err
 	}
 
+	log.Info().Msgf("repoPath: %v", provider.RepoPath)
 	fileinfo, err := os.Stat(provider.RepoPath)
 	if os.IsNotExist(err) {
 		log.Err(err).Msgf("Repository Path %v does not exist", provider.RepoPath)
