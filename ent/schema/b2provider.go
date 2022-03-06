@@ -27,6 +27,7 @@ func (B2Provider) Fields() []ent.Field {
 		field.String("accountKey").NotEmpty(),
 		field.String("accountID").NotEmpty(),
 		field.String("repoName").NotEmpty(),
+		field.Bool("valid").Default(false),
 	}
 }
 

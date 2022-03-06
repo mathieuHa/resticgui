@@ -9,6 +9,8 @@ const (
 	FieldID = "id"
 	// FieldRepoPath holds the string denoting the repopath field in the database.
 	FieldRepoPath = "repo_path"
+	// FieldValid holds the string denoting the valid field in the database.
+	FieldValid = "valid"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the localprovider in the database.
@@ -26,6 +28,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldRepoPath,
+	FieldValid,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "LocalProvider"
@@ -48,3 +51,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultValid holds the default value on creation for the "valid" field.
+	DefaultValid bool
+)

@@ -18,6 +18,8 @@ type LocalProvider struct {
 	ID int `json:"id,omitempty"`
 	// RepoPath holds the value of the "repoPath" field.
 	RepoPath string `json:"repoPath,omitempty"`
+	// Valid holds the value of the "valid" field.
+	Valid bool `json:"valid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LocalProviderQuery when eager-loading is set.
 	Edges                     LocalProviderEdges `json:"edges"`
@@ -52,6 +54,8 @@ func (*LocalProvider) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case localprovider.FieldValid:
+			values[i] = new(sql.NullBool)
 		case localprovider.FieldID:
 			values[i] = new(sql.NullInt64)
 		case localprovider.FieldRepoPath:
@@ -84,6 +88,12 @@ func (lp *LocalProvider) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field repoPath", values[i])
 			} else if value.Valid {
 				lp.RepoPath = value.String
+			}
+		case localprovider.FieldValid:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field valid", values[i])
+			} else if value.Valid {
+				lp.Valid = value.Bool
 			}
 		case localprovider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -127,6 +137,8 @@ func (lp *LocalProvider) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", lp.ID))
 	builder.WriteString(", repoPath=")
 	builder.WriteString(lp.RepoPath)
+	builder.WriteString(", valid=")
+	builder.WriteString(fmt.Sprintf("%v", lp.Valid))
 	builder.WriteByte(')')
 	return builder.String()
 }

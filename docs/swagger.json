@@ -293,6 +293,10 @@
                 "secretAccessKey": {
                     "description": "SecretAccessKey holds the value of the \"secretAccessKey\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
@@ -331,6 +335,10 @@
                 "repoName": {
                     "description": "RepoName holds the value of the \"repoName\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
@@ -489,6 +497,10 @@
                 "repoPath": {
                     "description": "RepoPath holds the value of the \"repoPath\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
@@ -535,6 +547,10 @@
                 "secretAccessKey": {
                     "description": "SecretAccessKey holds the value of the \"secretAccessKey\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },

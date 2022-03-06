@@ -64,6 +64,20 @@ func (msu *MinioS3ProviderUpdate) SetSecretAccessKey(s string) *MinioS3ProviderU
 	return msu
 }
 
+// SetValid sets the "valid" field.
+func (msu *MinioS3ProviderUpdate) SetValid(b bool) *MinioS3ProviderUpdate {
+	msu.mutation.SetValid(b)
+	return msu
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (msu *MinioS3ProviderUpdate) SetNillableValid(b *bool) *MinioS3ProviderUpdate {
+	if b != nil {
+		msu.SetValid(*b)
+	}
+	return msu
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (msu *MinioS3ProviderUpdate) SetRepositoryID(id int) *MinioS3ProviderUpdate {
 	msu.mutation.SetRepositoryID(id)
@@ -214,6 +228,13 @@ func (msu *MinioS3ProviderUpdate) sqlSave(ctx context.Context) (n int, err error
 			Column: minios3provider.FieldSecretAccessKey,
 		})
 	}
+	if value, ok := msu.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: minios3provider.FieldValid,
+		})
+	}
 	if msu.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -301,6 +322,20 @@ func (msuo *MinioS3ProviderUpdateOne) SetAccessKeyID(s string) *MinioS3ProviderU
 // SetSecretAccessKey sets the "secretAccessKey" field.
 func (msuo *MinioS3ProviderUpdateOne) SetSecretAccessKey(s string) *MinioS3ProviderUpdateOne {
 	msuo.mutation.SetSecretAccessKey(s)
+	return msuo
+}
+
+// SetValid sets the "valid" field.
+func (msuo *MinioS3ProviderUpdateOne) SetValid(b bool) *MinioS3ProviderUpdateOne {
+	msuo.mutation.SetValid(b)
+	return msuo
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (msuo *MinioS3ProviderUpdateOne) SetNillableValid(b *bool) *MinioS3ProviderUpdateOne {
+	if b != nil {
+		msuo.SetValid(*b)
+	}
 	return msuo
 }
 
@@ -476,6 +511,13 @@ func (msuo *MinioS3ProviderUpdateOne) sqlSave(ctx context.Context) (_node *Minio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: minios3provider.FieldSecretAccessKey,
+		})
+	}
+	if value, ok := msuo.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: minios3provider.FieldValid,
 		})
 	}
 	if msuo.mutation.RepositoryCleared() {

@@ -15,6 +15,8 @@ const (
 	FieldAccessKeyID = "access_key_id"
 	// FieldDefaultRegion holds the string denoting the defaultregion field in the database.
 	FieldDefaultRegion = "default_region"
+	// FieldValid holds the string denoting the valid field in the database.
+	FieldValid = "valid"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the awss3provider in the database.
@@ -35,6 +37,7 @@ var Columns = []string{
 	FieldSecretAccessKey,
 	FieldAccessKeyID,
 	FieldDefaultRegion,
+	FieldValid,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "AWSS3Provider"
@@ -65,4 +68,6 @@ var (
 	SecretAccessKeyValidator func(string) error
 	// AccessKeyIDValidator is a validator for the "accessKeyID" field. It is called by the builders before save.
 	AccessKeyIDValidator func(string) error
+	// DefaultValid holds the default value on creation for the "valid" field.
+	DefaultValid bool
 )

@@ -29,6 +29,7 @@ func (MinioS3Provider) Fields() []ent.Field {
 		field.String("scheme"),
 		field.String("accessKeyID"),
 		field.String("secretAccessKey"),
+		field.Bool("valid").Default(false),
 	}
 }
 

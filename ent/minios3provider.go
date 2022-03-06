@@ -28,6 +28,8 @@ type MinioS3Provider struct {
 	AccessKeyID string `json:"accessKeyID,omitempty"`
 	// SecretAccessKey holds the value of the "secretAccessKey" field.
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
+	// Valid holds the value of the "valid" field.
+	Valid bool `json:"valid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MinioS3ProviderQuery when eager-loading is set.
 	Edges                       MinioS3ProviderEdges `json:"edges"`
@@ -62,6 +64,8 @@ func (*MinioS3Provider) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case minios3provider.FieldValid:
+			values[i] = new(sql.NullBool)
 		case minios3provider.FieldID:
 			values[i] = new(sql.NullInt64)
 		case minios3provider.FieldBucketName, minios3provider.FieldIP, minios3provider.FieldPort, minios3provider.FieldScheme, minios3provider.FieldAccessKeyID, minios3provider.FieldSecretAccessKey:
@@ -125,6 +129,12 @@ func (ms *MinioS3Provider) assignValues(columns []string, values []interface{}) 
 			} else if value.Valid {
 				ms.SecretAccessKey = value.String
 			}
+		case minios3provider.FieldValid:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field valid", values[i])
+			} else if value.Valid {
+				ms.Valid = value.Bool
+			}
 		case minios3provider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field repository_minio_s3provider", value)
@@ -177,6 +187,8 @@ func (ms *MinioS3Provider) String() string {
 	builder.WriteString(ms.AccessKeyID)
 	builder.WriteString(", secretAccessKey=")
 	builder.WriteString(ms.SecretAccessKey)
+	builder.WriteString(", valid=")
+	builder.WriteString(fmt.Sprintf("%v", ms.Valid))
 	builder.WriteByte(')')
 	return builder.String()
 }

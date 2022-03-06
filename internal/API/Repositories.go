@@ -219,7 +219,12 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	if repository.Active {
+	repository.Valid, err = validRepository(*repository)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+	}
+
+	if repository.Active && repository.Valid {
 		addScheduledBackup(repository)
 	}
 
@@ -378,7 +383,12 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	if repository.Active {
+	repository.Valid, err = validRepository(*repository)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+	}
+
+	if repository.Active && repository.Valid {
 		addScheduledBackup(repository)
 	}
 

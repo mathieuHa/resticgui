@@ -52,6 +52,20 @@ func (bu *B2ProviderUpdate) SetRepoName(s string) *B2ProviderUpdate {
 	return bu
 }
 
+// SetValid sets the "valid" field.
+func (bu *B2ProviderUpdate) SetValid(b bool) *B2ProviderUpdate {
+	bu.mutation.SetValid(b)
+	return bu
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (bu *B2ProviderUpdate) SetNillableValid(b *bool) *B2ProviderUpdate {
+	if b != nil {
+		bu.SetValid(*b)
+	}
+	return bu
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (bu *B2ProviderUpdate) SetRepositoryID(id int) *B2ProviderUpdate {
 	bu.mutation.SetRepositoryID(id)
@@ -208,6 +222,13 @@ func (bu *B2ProviderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: b2provider.FieldRepoName,
 		})
 	}
+	if value, ok := bu.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: b2provider.FieldValid,
+		})
+	}
 	if bu.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -283,6 +304,20 @@ func (buo *B2ProviderUpdateOne) SetAccountID(s string) *B2ProviderUpdateOne {
 // SetRepoName sets the "repoName" field.
 func (buo *B2ProviderUpdateOne) SetRepoName(s string) *B2ProviderUpdateOne {
 	buo.mutation.SetRepoName(s)
+	return buo
+}
+
+// SetValid sets the "valid" field.
+func (buo *B2ProviderUpdateOne) SetValid(b bool) *B2ProviderUpdateOne {
+	buo.mutation.SetValid(b)
+	return buo
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (buo *B2ProviderUpdateOne) SetNillableValid(b *bool) *B2ProviderUpdateOne {
+	if b != nil {
+		buo.SetValid(*b)
+	}
 	return buo
 }
 
@@ -464,6 +499,13 @@ func (buo *B2ProviderUpdateOne) sqlSave(ctx context.Context) (_node *B2Provider,
 			Type:   field.TypeString,
 			Value:  value,
 			Column: b2provider.FieldRepoName,
+		})
+	}
+	if value, ok := buo.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: b2provider.FieldValid,
 		})
 	}
 	if buo.mutation.RepositoryCleared() {

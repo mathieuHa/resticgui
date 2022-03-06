@@ -57,6 +57,7 @@ type AWSS3ProviderMutation struct {
 	secretAccessKey   *string
 	accessKeyID       *string
 	defaultRegion     *string
+	valid             *bool
 	clearedFields     map[string]struct{}
 	repository        *int
 	clearedrepository bool
@@ -320,6 +321,42 @@ func (m *AWSS3ProviderMutation) ResetDefaultRegion() {
 	delete(m.clearedFields, awss3provider.FieldDefaultRegion)
 }
 
+// SetValid sets the "valid" field.
+func (m *AWSS3ProviderMutation) SetValid(b bool) {
+	m.valid = &b
+}
+
+// Valid returns the value of the "valid" field in the mutation.
+func (m *AWSS3ProviderMutation) Valid() (r bool, exists bool) {
+	v := m.valid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValid returns the old "valid" field's value of the AWSS3Provider entity.
+// If the AWSS3Provider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AWSS3ProviderMutation) OldValid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValid: %w", err)
+	}
+	return oldValue.Valid, nil
+}
+
+// ResetValid resets all changes to the "valid" field.
+func (m *AWSS3ProviderMutation) ResetValid() {
+	m.valid = nil
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by id.
 func (m *AWSS3ProviderMutation) SetRepositoryID(id int) {
 	m.repository = &id
@@ -378,7 +415,7 @@ func (m *AWSS3ProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AWSS3ProviderMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.bucketName != nil {
 		fields = append(fields, awss3provider.FieldBucketName)
 	}
@@ -390,6 +427,9 @@ func (m *AWSS3ProviderMutation) Fields() []string {
 	}
 	if m.defaultRegion != nil {
 		fields = append(fields, awss3provider.FieldDefaultRegion)
+	}
+	if m.valid != nil {
+		fields = append(fields, awss3provider.FieldValid)
 	}
 	return fields
 }
@@ -407,6 +447,8 @@ func (m *AWSS3ProviderMutation) Field(name string) (ent.Value, bool) {
 		return m.AccessKeyID()
 	case awss3provider.FieldDefaultRegion:
 		return m.DefaultRegion()
+	case awss3provider.FieldValid:
+		return m.Valid()
 	}
 	return nil, false
 }
@@ -424,6 +466,8 @@ func (m *AWSS3ProviderMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldAccessKeyID(ctx)
 	case awss3provider.FieldDefaultRegion:
 		return m.OldDefaultRegion(ctx)
+	case awss3provider.FieldValid:
+		return m.OldValid(ctx)
 	}
 	return nil, fmt.Errorf("unknown AWSS3Provider field %s", name)
 }
@@ -460,6 +504,13 @@ func (m *AWSS3ProviderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDefaultRegion(v)
+		return nil
+	case awss3provider.FieldValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValid(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AWSS3Provider field %s", name)
@@ -530,6 +581,9 @@ func (m *AWSS3ProviderMutation) ResetField(name string) error {
 		return nil
 	case awss3provider.FieldDefaultRegion:
 		m.ResetDefaultRegion()
+		return nil
+	case awss3provider.FieldValid:
+		m.ResetValid()
 		return nil
 	}
 	return fmt.Errorf("unknown AWSS3Provider field %s", name)
@@ -621,6 +675,7 @@ type B2ProviderMutation struct {
 	accountKey        *string
 	accountID         *string
 	repoName          *string
+	valid             *bool
 	clearedFields     map[string]struct{}
 	repository        *int
 	clearedrepository bool
@@ -871,6 +926,42 @@ func (m *B2ProviderMutation) ResetRepoName() {
 	m.repoName = nil
 }
 
+// SetValid sets the "valid" field.
+func (m *B2ProviderMutation) SetValid(b bool) {
+	m.valid = &b
+}
+
+// Valid returns the value of the "valid" field in the mutation.
+func (m *B2ProviderMutation) Valid() (r bool, exists bool) {
+	v := m.valid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValid returns the old "valid" field's value of the B2Provider entity.
+// If the B2Provider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *B2ProviderMutation) OldValid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValid: %w", err)
+	}
+	return oldValue.Valid, nil
+}
+
+// ResetValid resets all changes to the "valid" field.
+func (m *B2ProviderMutation) ResetValid() {
+	m.valid = nil
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by id.
 func (m *B2ProviderMutation) SetRepositoryID(id int) {
 	m.repository = &id
@@ -929,7 +1020,7 @@ func (m *B2ProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *B2ProviderMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.bucketName != nil {
 		fields = append(fields, b2provider.FieldBucketName)
 	}
@@ -941,6 +1032,9 @@ func (m *B2ProviderMutation) Fields() []string {
 	}
 	if m.repoName != nil {
 		fields = append(fields, b2provider.FieldRepoName)
+	}
+	if m.valid != nil {
+		fields = append(fields, b2provider.FieldValid)
 	}
 	return fields
 }
@@ -958,6 +1052,8 @@ func (m *B2ProviderMutation) Field(name string) (ent.Value, bool) {
 		return m.AccountID()
 	case b2provider.FieldRepoName:
 		return m.RepoName()
+	case b2provider.FieldValid:
+		return m.Valid()
 	}
 	return nil, false
 }
@@ -975,6 +1071,8 @@ func (m *B2ProviderMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldAccountID(ctx)
 	case b2provider.FieldRepoName:
 		return m.OldRepoName(ctx)
+	case b2provider.FieldValid:
+		return m.OldValid(ctx)
 	}
 	return nil, fmt.Errorf("unknown B2Provider field %s", name)
 }
@@ -1011,6 +1109,13 @@ func (m *B2ProviderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRepoName(v)
+		return nil
+	case b2provider.FieldValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValid(v)
 		return nil
 	}
 	return fmt.Errorf("unknown B2Provider field %s", name)
@@ -1072,6 +1177,9 @@ func (m *B2ProviderMutation) ResetField(name string) error {
 		return nil
 	case b2provider.FieldRepoName:
 		m.ResetRepoName()
+		return nil
+	case b2provider.FieldValid:
+		m.ResetValid()
 		return nil
 	}
 	return fmt.Errorf("unknown B2Provider field %s", name)
@@ -3171,6 +3279,7 @@ type LocalProviderMutation struct {
 	typ               string
 	id                *int
 	repoPath          *string
+	valid             *bool
 	clearedFields     map[string]struct{}
 	repository        *int
 	clearedrepository bool
@@ -3313,6 +3422,42 @@ func (m *LocalProviderMutation) ResetRepoPath() {
 	m.repoPath = nil
 }
 
+// SetValid sets the "valid" field.
+func (m *LocalProviderMutation) SetValid(b bool) {
+	m.valid = &b
+}
+
+// Valid returns the value of the "valid" field in the mutation.
+func (m *LocalProviderMutation) Valid() (r bool, exists bool) {
+	v := m.valid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValid returns the old "valid" field's value of the LocalProvider entity.
+// If the LocalProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LocalProviderMutation) OldValid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValid: %w", err)
+	}
+	return oldValue.Valid, nil
+}
+
+// ResetValid resets all changes to the "valid" field.
+func (m *LocalProviderMutation) ResetValid() {
+	m.valid = nil
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by id.
 func (m *LocalProviderMutation) SetRepositoryID(id int) {
 	m.repository = &id
@@ -3371,9 +3516,12 @@ func (m *LocalProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LocalProviderMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.repoPath != nil {
 		fields = append(fields, localprovider.FieldRepoPath)
+	}
+	if m.valid != nil {
+		fields = append(fields, localprovider.FieldValid)
 	}
 	return fields
 }
@@ -3385,6 +3533,8 @@ func (m *LocalProviderMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case localprovider.FieldRepoPath:
 		return m.RepoPath()
+	case localprovider.FieldValid:
+		return m.Valid()
 	}
 	return nil, false
 }
@@ -3396,6 +3546,8 @@ func (m *LocalProviderMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case localprovider.FieldRepoPath:
 		return m.OldRepoPath(ctx)
+	case localprovider.FieldValid:
+		return m.OldValid(ctx)
 	}
 	return nil, fmt.Errorf("unknown LocalProvider field %s", name)
 }
@@ -3411,6 +3563,13 @@ func (m *LocalProviderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRepoPath(v)
+		return nil
+	case localprovider.FieldValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValid(v)
 		return nil
 	}
 	return fmt.Errorf("unknown LocalProvider field %s", name)
@@ -3463,6 +3622,9 @@ func (m *LocalProviderMutation) ResetField(name string) error {
 	switch name {
 	case localprovider.FieldRepoPath:
 		m.ResetRepoPath()
+		return nil
+	case localprovider.FieldValid:
+		m.ResetValid()
 		return nil
 	}
 	return fmt.Errorf("unknown LocalProvider field %s", name)
@@ -3556,6 +3718,7 @@ type MinioS3ProviderMutation struct {
 	scheme            *string
 	accessKeyID       *string
 	secretAccessKey   *string
+	valid             *bool
 	clearedFields     map[string]struct{}
 	repository        *int
 	clearedrepository bool
@@ -3878,6 +4041,42 @@ func (m *MinioS3ProviderMutation) ResetSecretAccessKey() {
 	m.secretAccessKey = nil
 }
 
+// SetValid sets the "valid" field.
+func (m *MinioS3ProviderMutation) SetValid(b bool) {
+	m.valid = &b
+}
+
+// Valid returns the value of the "valid" field in the mutation.
+func (m *MinioS3ProviderMutation) Valid() (r bool, exists bool) {
+	v := m.valid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValid returns the old "valid" field's value of the MinioS3Provider entity.
+// If the MinioS3Provider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MinioS3ProviderMutation) OldValid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValid: %w", err)
+	}
+	return oldValue.Valid, nil
+}
+
+// ResetValid resets all changes to the "valid" field.
+func (m *MinioS3ProviderMutation) ResetValid() {
+	m.valid = nil
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by id.
 func (m *MinioS3ProviderMutation) SetRepositoryID(id int) {
 	m.repository = &id
@@ -3936,7 +4135,7 @@ func (m *MinioS3ProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MinioS3ProviderMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.bucketName != nil {
 		fields = append(fields, minios3provider.FieldBucketName)
 	}
@@ -3954,6 +4153,9 @@ func (m *MinioS3ProviderMutation) Fields() []string {
 	}
 	if m.secretAccessKey != nil {
 		fields = append(fields, minios3provider.FieldSecretAccessKey)
+	}
+	if m.valid != nil {
+		fields = append(fields, minios3provider.FieldValid)
 	}
 	return fields
 }
@@ -3975,6 +4177,8 @@ func (m *MinioS3ProviderMutation) Field(name string) (ent.Value, bool) {
 		return m.AccessKeyID()
 	case minios3provider.FieldSecretAccessKey:
 		return m.SecretAccessKey()
+	case minios3provider.FieldValid:
+		return m.Valid()
 	}
 	return nil, false
 }
@@ -3996,6 +4200,8 @@ func (m *MinioS3ProviderMutation) OldField(ctx context.Context, name string) (en
 		return m.OldAccessKeyID(ctx)
 	case minios3provider.FieldSecretAccessKey:
 		return m.OldSecretAccessKey(ctx)
+	case minios3provider.FieldValid:
+		return m.OldValid(ctx)
 	}
 	return nil, fmt.Errorf("unknown MinioS3Provider field %s", name)
 }
@@ -4046,6 +4252,13 @@ func (m *MinioS3ProviderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSecretAccessKey(v)
+		return nil
+	case minios3provider.FieldValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValid(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MinioS3Provider field %s", name)
@@ -4113,6 +4326,9 @@ func (m *MinioS3ProviderMutation) ResetField(name string) error {
 		return nil
 	case minios3provider.FieldSecretAccessKey:
 		m.ResetSecretAccessKey()
+		return nil
+	case minios3provider.FieldValid:
+		m.ResetValid()
 		return nil
 	}
 	return fmt.Errorf("unknown MinioS3Provider field %s", name)

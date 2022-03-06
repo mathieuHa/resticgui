@@ -119,6 +119,13 @@ func RepoName(v string) predicate.B2Provider {
 	})
 }
 
+// Valid applies equality check predicate on the "valid" field. It's identical to ValidEQ.
+func Valid(v bool) predicate.B2Provider {
+	return predicate.B2Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
 // BucketNameEQ applies the EQ predicate on the "bucketName" field.
 func BucketNameEQ(v string) predicate.B2Provider {
 	return predicate.B2Provider(func(s *sql.Selector) {
@@ -560,6 +567,20 @@ func RepoNameEqualFold(v string) predicate.B2Provider {
 func RepoNameContainsFold(v string) predicate.B2Provider {
 	return predicate.B2Provider(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldRepoName), v))
+	})
+}
+
+// ValidEQ applies the EQ predicate on the "valid" field.
+func ValidEQ(v bool) predicate.B2Provider {
+	return predicate.B2Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
+// ValidNEQ applies the NEQ predicate on the "valid" field.
+func ValidNEQ(v bool) predicate.B2Provider {
+	return predicate.B2Provider(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldValid), v))
 	})
 }
 

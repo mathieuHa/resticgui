@@ -24,6 +24,8 @@ type AWSS3Provider struct {
 	AccessKeyID string `json:"accessKeyID,omitempty"`
 	// DefaultRegion holds the value of the "defaultRegion" field.
 	DefaultRegion string `json:"defaultRegion,omitempty"`
+	// Valid holds the value of the "valid" field.
+	Valid bool `json:"valid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AWSS3ProviderQuery when eager-loading is set.
 	Edges                    AWSS3ProviderEdges `json:"edges"`
@@ -58,6 +60,8 @@ func (*AWSS3Provider) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case awss3provider.FieldValid:
+			values[i] = new(sql.NullBool)
 		case awss3provider.FieldID:
 			values[i] = new(sql.NullInt64)
 		case awss3provider.FieldBucketName, awss3provider.FieldSecretAccessKey, awss3provider.FieldAccessKeyID, awss3provider.FieldDefaultRegion:
@@ -109,6 +113,12 @@ func (a *AWSS3Provider) assignValues(columns []string, values []interface{}) err
 			} else if value.Valid {
 				a.DefaultRegion = value.String
 			}
+		case awss3provider.FieldValid:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field valid", values[i])
+			} else if value.Valid {
+				a.Valid = value.Bool
+			}
 		case awss3provider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field repository_awss3provider", value)
@@ -157,6 +167,8 @@ func (a *AWSS3Provider) String() string {
 	builder.WriteString(a.AccessKeyID)
 	builder.WriteString(", defaultRegion=")
 	builder.WriteString(a.DefaultRegion)
+	builder.WriteString(", valid=")
+	builder.WriteString(fmt.Sprintf("%v", a.Valid))
 	builder.WriteByte(')')
 	return builder.String()
 }

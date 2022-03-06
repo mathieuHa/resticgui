@@ -34,6 +34,20 @@ func (lpu *LocalProviderUpdate) SetRepoPath(s string) *LocalProviderUpdate {
 	return lpu
 }
 
+// SetValid sets the "valid" field.
+func (lpu *LocalProviderUpdate) SetValid(b bool) *LocalProviderUpdate {
+	lpu.mutation.SetValid(b)
+	return lpu
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (lpu *LocalProviderUpdate) SetNillableValid(b *bool) *LocalProviderUpdate {
+	if b != nil {
+		lpu.SetValid(*b)
+	}
+	return lpu
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (lpu *LocalProviderUpdate) SetRepositoryID(id int) *LocalProviderUpdate {
 	lpu.mutation.SetRepositoryID(id)
@@ -149,6 +163,13 @@ func (lpu *LocalProviderUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Column: localprovider.FieldRepoPath,
 		})
 	}
+	if value, ok := lpu.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: localprovider.FieldValid,
+		})
+	}
 	if lpu.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -206,6 +227,20 @@ type LocalProviderUpdateOne struct {
 // SetRepoPath sets the "repoPath" field.
 func (lpuo *LocalProviderUpdateOne) SetRepoPath(s string) *LocalProviderUpdateOne {
 	lpuo.mutation.SetRepoPath(s)
+	return lpuo
+}
+
+// SetValid sets the "valid" field.
+func (lpuo *LocalProviderUpdateOne) SetValid(b bool) *LocalProviderUpdateOne {
+	lpuo.mutation.SetValid(b)
+	return lpuo
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (lpuo *LocalProviderUpdateOne) SetNillableValid(b *bool) *LocalProviderUpdateOne {
+	if b != nil {
+		lpuo.SetValid(*b)
+	}
 	return lpuo
 }
 
@@ -346,6 +381,13 @@ func (lpuo *LocalProviderUpdateOne) sqlSave(ctx context.Context) (_node *LocalPr
 			Type:   field.TypeString,
 			Value:  value,
 			Column: localprovider.FieldRepoPath,
+		})
+	}
+	if value, ok := lpuo.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: localprovider.FieldValid,
 		})
 	}
 	if lpuo.mutation.RepositoryCleared() {

@@ -133,6 +133,13 @@ func SecretAccessKey(v string) predicate.MinioS3Provider {
 	})
 }
 
+// Valid applies equality check predicate on the "valid" field. It's identical to ValidEQ.
+func Valid(v bool) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
 // BucketNameEQ applies the EQ predicate on the "bucketName" field.
 func BucketNameEQ(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
@@ -796,6 +803,20 @@ func SecretAccessKeyEqualFold(v string) predicate.MinioS3Provider {
 func SecretAccessKeyContainsFold(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldSecretAccessKey), v))
+	})
+}
+
+// ValidEQ applies the EQ predicate on the "valid" field.
+func ValidEQ(v bool) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
+// ValidNEQ applies the NEQ predicate on the "valid" field.
+func ValidNEQ(v bool) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldValid), v))
 	})
 }
 

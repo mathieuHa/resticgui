@@ -44,6 +44,20 @@ func (bc *B2ProviderCreate) SetRepoName(s string) *B2ProviderCreate {
 	return bc
 }
 
+// SetValid sets the "valid" field.
+func (bc *B2ProviderCreate) SetValid(b bool) *B2ProviderCreate {
+	bc.mutation.SetValid(b)
+	return bc
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (bc *B2ProviderCreate) SetNillableValid(b *bool) *B2ProviderCreate {
+	if b != nil {
+		bc.SetValid(*b)
+	}
+	return bc
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (bc *B2ProviderCreate) SetRepositoryID(id int) *B2ProviderCreate {
 	bc.mutation.SetRepositoryID(id)
@@ -66,6 +80,7 @@ func (bc *B2ProviderCreate) Save(ctx context.Context) (*B2Provider, error) {
 		err  error
 		node *B2Provider
 	)
+	bc.defaults()
 	if len(bc.hooks) == 0 {
 		if err = bc.check(); err != nil {
 			return nil, err
@@ -123,6 +138,14 @@ func (bc *B2ProviderCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (bc *B2ProviderCreate) defaults() {
+	if _, ok := bc.mutation.Valid(); !ok {
+		v := b2provider.DefaultValid
+		bc.mutation.SetValid(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bc *B2ProviderCreate) check() error {
 	if _, ok := bc.mutation.BucketName(); !ok {
@@ -156,6 +179,9 @@ func (bc *B2ProviderCreate) check() error {
 		if err := b2provider.RepoNameValidator(v); err != nil {
 			return &ValidationError{Name: "repoName", err: fmt.Errorf(`ent: validator failed for field "B2Provider.repoName": %w`, err)}
 		}
+	}
+	if _, ok := bc.mutation.Valid(); !ok {
+		return &ValidationError{Name: "valid", err: errors.New(`ent: missing required field "B2Provider.valid"`)}
 	}
 	if _, ok := bc.mutation.RepositoryID(); !ok {
 		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required edge "B2Provider.repository"`)}
@@ -219,6 +245,14 @@ func (bc *B2ProviderCreate) createSpec() (*B2Provider, *sqlgraph.CreateSpec) {
 		})
 		_node.RepoName = value
 	}
+	if value, ok := bc.mutation.Valid(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: b2provider.FieldValid,
+		})
+		_node.Valid = value
+	}
 	if nodes := bc.mutation.RepositoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -256,6 +290,7 @@ func (bcb *B2ProviderCreateBulk) Save(ctx context.Context) ([]*B2Provider, error
 	for i := range bcb.builders {
 		func(i int, root context.Context) {
 			builder := bcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*B2ProviderMutation)
 				if !ok {

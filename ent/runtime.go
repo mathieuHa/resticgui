@@ -9,6 +9,8 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/b2provider"
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
+	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
 	"gitlab.com/resticgui/resticgui/ent/repository"
@@ -35,6 +37,10 @@ func init() {
 	awss3providerDescAccessKeyID := awss3providerFields[2].Descriptor()
 	// awss3provider.AccessKeyIDValidator is a validator for the "accessKeyID" field. It is called by the builders before save.
 	awss3provider.AccessKeyIDValidator = awss3providerDescAccessKeyID.Validators[0].(func(string) error)
+	// awss3providerDescValid is the schema descriptor for valid field.
+	awss3providerDescValid := awss3providerFields[4].Descriptor()
+	// awss3provider.DefaultValid holds the default value on creation for the valid field.
+	awss3provider.DefaultValid = awss3providerDescValid.Default.(bool)
 	b2providerFields := schema.B2Provider{}.Fields()
 	_ = b2providerFields
 	// b2providerDescBucketName is the schema descriptor for bucketName field.
@@ -53,6 +59,10 @@ func init() {
 	b2providerDescRepoName := b2providerFields[3].Descriptor()
 	// b2provider.RepoNameValidator is a validator for the "repoName" field. It is called by the builders before save.
 	b2provider.RepoNameValidator = b2providerDescRepoName.Validators[0].(func(string) error)
+	// b2providerDescValid is the schema descriptor for valid field.
+	b2providerDescValid := b2providerFields[4].Descriptor()
+	// b2provider.DefaultValid holds the default value on creation for the valid field.
+	b2provider.DefaultValid = b2providerDescValid.Default.(bool)
 	backuppolicyFields := schema.BackupPolicy{}.Fields()
 	_ = backuppolicyFields
 	// backuppolicyDescNbLastBackup is the schema descriptor for nbLastBackup field.
@@ -121,6 +131,18 @@ func init() {
 	backupscheduleDescCronSyntax := backupscheduleFields[14].Descriptor()
 	// backupschedule.DefaultCronSyntax holds the default value on creation for the cronSyntax field.
 	backupschedule.DefaultCronSyntax = backupscheduleDescCronSyntax.Default.(string)
+	localproviderFields := schema.LocalProvider{}.Fields()
+	_ = localproviderFields
+	// localproviderDescValid is the schema descriptor for valid field.
+	localproviderDescValid := localproviderFields[1].Descriptor()
+	// localprovider.DefaultValid holds the default value on creation for the valid field.
+	localprovider.DefaultValid = localproviderDescValid.Default.(bool)
+	minios3providerFields := schema.MinioS3Provider{}.Fields()
+	_ = minios3providerFields
+	// minios3providerDescValid is the schema descriptor for valid field.
+	minios3providerDescValid := minios3providerFields[6].Descriptor()
+	// minios3provider.DefaultValid holds the default value on creation for the valid field.
+	minios3provider.DefaultValid = minios3providerDescValid.Default.(bool)
 	pathFields := schema.Path{}.Fields()
 	_ = pathFields
 	// pathDescName is the schema descriptor for name field.
