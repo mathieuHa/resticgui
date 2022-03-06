@@ -197,7 +197,6 @@ func addScheduledBackup(repository *ent.Repository) bool {
 }
 
 func CreateAllScheduledBackup() {
-	// var repositories []ent.Repository
 
 	db := Database.Connect()
 	defer db.Close()
@@ -210,6 +209,23 @@ func CreateAllScheduledBackup() {
 		log.Debug().Msgf("start repos %v", repo.ID)
 		addScheduledBackup(repo)
 	}
+}
+
+func RemoveAllScheduledBackup() {
+
+	db := Database.Connect()
+	defer db.Close()
+	// Check the validity of the provider and repository in general
+	repositories, err := db.Repository.Query().WithBackupSchedule().All(context.Background())
+	if err != nil {
+		log.Err(err).Msgf("error quering active backups")
+	} else {
+		for _, repo := range repositories {
+			log.Debug().Msgf("start repos %v", repo.ID)
+			removeScheduledBackup(repo)
+		}
+	}
+
 }
 
 func removeScheduledBackup(repository *ent.Repository) {

@@ -27,8 +27,10 @@ func main() {
 
 	log.Info().Msg("Start main")
 
-	commands.ResticInit()
 	//Run the cron scheduler
+	commands.ResticInit()
+
+	Database.Migrate()
 
 	router := API.SetupRouter()
 
@@ -43,8 +45,6 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
-	Database.Migrate()
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
