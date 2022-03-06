@@ -171,32 +171,39 @@ func addScheduledBackup(repository *ent.Repository) bool {
 
 	// we check if the cron has been initialized
 	if cr != nil && repository.Valid {
+		log.Debug().Msg("repository is valid")
 
 		// First we remove the previous job launched for this repository
-		if *repository.Edges.BackupSchedule.CronID >= 0 {
-			cr.Remove(cron.EntryID(*repository.Edges.BackupSchedule.CronID))
-		}
-		// Then we had the new job to be run and register it
-		var err error
-		var cronID cron.EntryID
-		timing := getScheduleStringSyntax(*repository.Edges.BackupSchedule)
-		log.Debug().Msgf("timing = %v", timing)
-		cronID, err = cr.AddFunc(timing, func() {
-			log.Info().Msgf("JOB HAS RUN %v", repository.ID)
-		})
-		if err != nil {
-			log.Error().Err(err)
-			return false
-		}
-		db := Database.Connect()
-		defer db.Close()
-		*repository.Edges.BackupSchedule.CronID = int(cronID)
-		err = updateBackupSchedule(db, repository.Edges.BackupSchedule, context.Background())
-		if err != nil {
-			log.Err(err).Msgf("error: repository %v", errUpdate)
+		log.Debug().Msg("remove previous job for the repository")
+		if repository.Edges.BackupSchedule != nil {
+			if repository.Edges.BackupSchedule.CronID != nil {
+				log.Debug().Msg("in if")
+				log.Debug().Msgf("cron id: %v", *repository.Edges.BackupSchedule.CronID)
+				cr.Remove(cron.EntryID(*repository.Edges.BackupSchedule.CronID))
+			} else {
+				log.Debug().Msg("in else")
+			}
+			// Then we had the new job to be run and register it
+
+			timing := getScheduleStringSyntax(*repository.Edges.BackupSchedule)
+			log.Debug().Msgf("timing = %v", timing)
+			cronID, err := cr.AddFunc(timing, func() {
+				log.Info().Msgf("JOB HAS RUN ")
+			})
+			if err != nil {
+				log.Error().Err(err)
+				return false
+			}
+			log.Info().Msgf("cronID: %v", int(cronID))
+
+			err = updateCronID(*repository.Edges.BackupSchedule, int(cronID))
+			if err != nil {
+				log.Err(err).Msgf("error: repository %v", errUpdate)
+			}
 		}
 		return true
 	} else {
+		log.Debug().Msg("repository is not valid")
 		return false
 	}
 
@@ -208,7 +215,7 @@ func CreateAllScheduledBackup() {
 	db := Database.Connect()
 	defer db.Close()
 	// Check the validity of the provider and repository in general
-	repositories, err := db.Repository.Query().Where(repository.Active(true)).All(context.Background())
+	repositories, err := db.Repository.Query().WithBackupSchedule().Where(repository.Active(true)).All(context.Background())
 	if err != nil {
 		log.Err(err).Msgf("error quering active backups")
 	}
@@ -236,6 +243,21 @@ func RemoveAllScheduledBackup() {
 
 }
 
+func updateCronID(backupSchedule ent.BackupSchedule, newCronID int) (err error) {
+	log.Debug().Msg("updateCronID()")
+
+	ctx := context.Background()
+	db := Database.Connect()
+	defer db.Close()
+
+	_, err = db.BackupSchedule.UpdateOneID(backupSchedule.ID).SetCronID(newCronID).Save(ctx)
+	if err != nil {
+		log.Err(err).Msg("Error updating cronID")
+	}
+
+	return err
+}
+
 func removeScheduledBackup(repository *ent.Repository) {
 	log.Debug().Msg("removeScheduledBackup()")
 
@@ -251,6 +273,7 @@ func removeScheduledBackup(repository *ent.Repository) {
 
 			id := cron.EntryID(*repository.Edges.BackupSchedule.CronID)
 			cr.Remove(id)
+			updateCronID(*repository.Edges.BackupSchedule, 0)
 		}
 	}
 }

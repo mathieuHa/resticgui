@@ -385,13 +385,16 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = validRepository(*r)
+	r.Valid, _ = validRepository(*r)
+	_, err = db.Repository.UpdateOneID(newId).SetValid(r.Valid).Save(ctx)
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
+		log.Err(err).Msg("Could not update valid for repository")
 	}
 
 	if r.Active && r.Valid {
 		addScheduledBackup(r)
+	} else {
+		removeScheduledBackup(r)
 	}
 
 	c.IndentedJSON(http.StatusOK, r)
