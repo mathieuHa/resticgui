@@ -63,6 +63,9 @@ func main() {
 	// Block until we receive our signal.
 	<-c
 
+	// Remove current running backups
+	API.RemoveAllScheduledBackup()
+
 	// Create a deadline to wait for.
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

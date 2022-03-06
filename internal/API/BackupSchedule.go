@@ -84,6 +84,8 @@ import (
 // }
 
 func validSchedule(schedule *ent.BackupSchedule) (valid bool, err error) {
+	log.Debug().Msg("validSchedule()")
+
 	if schedule == nil {
 		valid = false
 		err = errors.New("schedule is nil")
@@ -111,6 +113,8 @@ func validSchedule(schedule *ent.BackupSchedule) (valid bool, err error) {
 
 // This returns the schedule in string format that can be used by cron
 func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
+	log.Debug().Msg("getScheduleStringSyntax()")
+
 	if schedule.Choice == "cron" {
 		return schedule.CronSyntax
 	} else if schedule.Choice == "interval" {
@@ -163,6 +167,8 @@ func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 }
 
 func addScheduledBackup(repository *ent.Repository) bool {
+	log.Debug().Msg("addScheduledBackup()")
+
 	// we check if the cron has been initialized
 	if cr != nil && repository.Valid {
 
@@ -197,6 +203,7 @@ func addScheduledBackup(repository *ent.Repository) bool {
 }
 
 func CreateAllScheduledBackup() {
+	log.Debug().Msg("CreateAllScheduledBackup()")
 
 	db := Database.Connect()
 	defer db.Close()
@@ -212,6 +219,7 @@ func CreateAllScheduledBackup() {
 }
 
 func RemoveAllScheduledBackup() {
+	log.Debug().Msg("RemoveAllScheduledBackup()")
 
 	db := Database.Connect()
 	defer db.Close()
@@ -229,10 +237,11 @@ func RemoveAllScheduledBackup() {
 }
 
 func removeScheduledBackup(repository *ent.Repository) {
+	log.Debug().Msg("removeScheduledBackup()")
+
 	if repository == nil {
 		return
 	}
-	log.Debug().Msg("removeScheduledBackup()")
 	// Here we need to
 	if cr != nil {
 		log.Debug().Msg("Removing backups")
@@ -248,6 +257,7 @@ func removeScheduledBackup(repository *ent.Repository) {
 
 func createBackupSchedule(db *ent.Client, backupSchedule *ent.BackupSchedule, repoID int, ctx context.Context) (err error) {
 	log.Debug().Msg("createBackupSchedule()")
+
 	_, err = db.BackupSchedule.
 		Create().
 		SetChoice(backupSchedule.Choice).
@@ -276,6 +286,7 @@ func createBackupSchedule(db *ent.Client, backupSchedule *ent.BackupSchedule, re
 
 func updateBackupSchedule(db *ent.Client, backupSchedule *ent.BackupSchedule, ctx context.Context) (err error) {
 	log.Debug().Msg("updateBackupSchedule()")
+
 	_, err = db.BackupSchedule.
 		UpdateOneID(backupSchedule.ID).
 		SetChoice(backupSchedule.Choice).
