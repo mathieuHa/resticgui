@@ -574,6 +574,10 @@ func ValidProvider(c *gin.Context) {
 func validRepository(repository ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("validRepository()")
 
+	valid = (repository.Password != "")
+	if !valid { // If password is empty, repository cannot be valid
+		return false, nil
+	}
 	valid, err = validProvider(repository)
 	if err != nil {
 		log.Err(err).Msg("Valid repository has failed on provider check")
