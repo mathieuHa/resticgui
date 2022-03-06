@@ -11,6 +11,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/internal/Database"
+	"gitlab.com/resticgui/resticgui/internal/commands"
 )
 
 // func QueryBackupSchedule(c *gin.Context) {
@@ -189,6 +190,7 @@ func addScheduledBackup(repository *ent.Repository) bool {
 			log.Debug().Msgf("timing = %v", timing)
 			cronID, err := cr.AddFunc(timing, func() {
 				log.Info().Msgf("JOB HAS RUN ")
+				commands.GetResticVersion()
 			})
 			if err != nil {
 				log.Error().Err(err)
