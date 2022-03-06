@@ -213,6 +213,9 @@ func CreateAllScheduledBackup() {
 }
 
 func removeScheduledBackup(repository *ent.Repository) {
+	if repository == nil {
+		return
+	}
 	log.Debug().Msg("removeScheduledBackup()")
 	// Here we need to
 	if cr != nil {

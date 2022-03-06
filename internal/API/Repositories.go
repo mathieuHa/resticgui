@@ -412,22 +412,25 @@ func RemoveRepository(c *gin.Context) {
 	defer db.Close()
 
 	// Query repository to remove backup Schedule
+	log.Debug().Msg("Query repository to remove backup Schedule")
 	repository := db.Repository.
 		Query().
 		WithBackupSchedule().
 		FirstX(ctx)
 
-	// Remove backup scheduled
-	removeScheduledBackup(repository)
+	if repository != nil {
+		// Remove backup scheduled
+		removeScheduledBackup(repository)
 
-	// Delete repository
-	err := db.Repository.
-		DeleteOneID(newId).
-		Exec(ctx)
-	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
-		return
+		// Delete repository
+		log.Debug().Msg("Delete repository")
+		err := db.Repository.
+			DeleteOneID(newId).
+			Exec(ctx)
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
+		}
 	}
 
 	c.Status(http.StatusNoContent)
