@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"os"
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
@@ -34,4 +35,22 @@ func createLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, repoI
 		// return
 	}
 	return err
+}
+
+func validLocalProvider(localprovider ent.LocalProvider) (valid bool, err error) {
+	fileinfo, err := os.Stat(localprovider.RepoPath)
+	if os.IsNotExist(err) {
+		log.Err(err).Msgf("Repository Path %v does not exist", localprovider.RepoPath)
+		return false, err
+	}
+	if !fileinfo.IsDir() {
+		log.Err(err).Msgf("Repository Path %v is not a directory", localprovider.RepoPath)
+		return false, err
+	}
+	if fileinfo.Mode().Perm()&(1<<(uint(7))) == 0 {
+		log.Err(err).Msgf("Repository Path %v is not writable by user", localprovider.RepoPath)
+		return false, err
+	}
+
+	return true, nil
 }
