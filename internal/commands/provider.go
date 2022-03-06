@@ -12,7 +12,8 @@ func getProviderData(repository ent.Repository) ([]string, []string) {
 	var env []string
 
 	args = append(args, "-r")
-	env = append(env, repository.Password)
+	envResticPass := fmt.Sprintf("RESTIC_PASSWORD=%v", repository.Password)
+	env = append(env, envResticPass)
 	switch repository.Provider {
 	case "localProvider":
 		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
