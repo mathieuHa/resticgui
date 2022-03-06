@@ -18,7 +18,6 @@ import (
 const entity = "repository "
 const errNotFound = entity + "not found"
 const errIDNotValid = "id not valid"
-const errNotDeleted = entity + "not deleted"
 const errNotBind = entity + "bind error"
 const errUpdate = entity + "update error"
 const errCreate = entity + "creation failed"
