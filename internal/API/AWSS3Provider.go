@@ -40,3 +40,18 @@ func createAWSS3Provider(db *ent.Client, awsS3Provider *ent.AWSS3Provider, repoI
 	}
 	return err
 }
+
+func validAWSS3Provider(provider ent.AWSS3Provider) (valid bool, err error) {
+	// accessKeyID := provider.AccessKeyID
+	// secretAccessKey := provider.SecretAccessKey
+	// region := provider.DefaultRegion
+	// bucketName := provider.BucketName
+	// useSSL := true
+
+	// client := s3.New(s3.Options{
+	// 	Region:      region,
+	// 	Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentials(accessKeyID, secretAccessKey)),
+	// })
+
+	return true, nil
+}

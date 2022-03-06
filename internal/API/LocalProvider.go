@@ -37,18 +37,18 @@ func createLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, repoI
 	return err
 }
 
-func validLocalProvider(localprovider ent.LocalProvider) (valid bool, err error) {
-	fileinfo, err := os.Stat(localprovider.RepoPath)
+func validLocalProvider(provider ent.LocalProvider) (valid bool, err error) {
+	fileinfo, err := os.Stat(provider.RepoPath)
 	if os.IsNotExist(err) {
-		log.Err(err).Msgf("Repository Path %v does not exist", localprovider.RepoPath)
+		log.Err(err).Msgf("Repository Path %v does not exist", provider.RepoPath)
 		return false, err
 	}
 	if !fileinfo.IsDir() {
-		log.Err(err).Msgf("Repository Path %v is not a directory", localprovider.RepoPath)
+		log.Err(err).Msgf("Repository Path %v is not a directory", provider.RepoPath)
 		return false, err
 	}
 	if fileinfo.Mode().Perm()&(1<<(uint(7))) == 0 {
-		log.Err(err).Msgf("Repository Path %v is not writable by user", localprovider.RepoPath)
+		log.Err(err).Msgf("Repository Path %v is not writable by user", provider.RepoPath)
 		return false, err
 	}
 

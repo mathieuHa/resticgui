@@ -2,7 +2,10 @@ package API
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 )
@@ -46,4 +49,31 @@ func createMinioS3Provider(db *ent.Client, minioS3Provider *ent.MinioS3Provider,
 		// return
 	}
 	return err
+}
+
+func validMinioProvider(provider ent.MinioS3Provider) (valid bool, err error) {
+	endpoint := fmt.Sprintf("%v://%v:%v", provider.Scheme, provider.IP, provider.Port)
+	accessKeyID := provider.AccessKeyID
+	secretAccessKey := provider.SecretAccessKey
+	bucketName := provider.BucketName
+	useSSL := true
+
+	// Initialize minio client object.
+	minioClient, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		log.Err(err)
+		return false, err
+	}
+	bucketExist, err := minioClient.BucketExists(context.Background(), bucketName)
+	if err != nil {
+		log.Err(err)
+		return false, err
+	}
+	if !bucketExist {
+		return false, nil
+	}
+	return true, nil
 }
