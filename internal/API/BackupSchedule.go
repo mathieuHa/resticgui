@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -82,17 +83,30 @@ import (
 // 	c.IndentedJSON(http.StatusOK, repository.BackupSchedule)
 // }
 
-func validSchedule(schedule ent.BackupSchedule) bool {
-	if schedule.Choice == "cron" {
-		// check cron
-	} else if schedule.Choice == "interval" {
-		// check interval
-	} else if schedule.Choice == "regular" {
-		// check regular
-	} else if schedule.Choice == "weekly" {
-		// check weekly
+func validSchedule(schedule *ent.BackupSchedule) (valid bool, err error) {
+	if schedule == nil {
+		valid = false
+		err = errors.New("schedule is nil")
+		return valid, err
 	}
-	return true
+	switch schedule.Choice {
+	// check cron
+	case "cron":
+		return true, nil
+		// check interval
+	case "interval":
+		return true, nil
+		// check regular
+	case "regular":
+		return true, nil
+		// check weekly
+	case "weekly":
+		return true, nil
+	default:
+		valid = false
+		err = errors.New("provider does not exist")
+	}
+	return valid, err
 }
 
 // This returns the schedule in string format that can be used by cron
@@ -198,7 +212,7 @@ func CreateAllScheduledBackup() {
 	}
 }
 
-func removeScheduledBackup(repository ent.Repository) {
+func removeScheduledBackup(repository *ent.Repository) {
 	// Here we need to
 	if cr != nil {
 		log.Debug().Msg("Removing backups")

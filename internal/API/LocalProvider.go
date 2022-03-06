@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"errors"
 	"os"
 
 	"github.com/rs/zerolog/log"
@@ -37,7 +38,13 @@ func createLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, repoI
 	return err
 }
 
-func validLocalProvider(provider ent.LocalProvider) (valid bool, err error) {
+func validLocalProvider(provider *ent.LocalProvider) (valid bool, err error) {
+	if provider == nil {
+		valid = false
+		err = errors.New("localProvider is nil")
+		return valid, err
+	}
+
 	fileinfo, err := os.Stat(provider.RepoPath)
 	if os.IsNotExist(err) {
 		log.Err(err).Msgf("Repository Path %v does not exist", provider.RepoPath)

@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"errors"
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
@@ -41,7 +42,12 @@ func createAWSS3Provider(db *ent.Client, awsS3Provider *ent.AWSS3Provider, repoI
 	return err
 }
 
-func validAWSS3Provider(provider ent.AWSS3Provider) (valid bool, err error) {
+func validAWSS3Provider(provider *ent.AWSS3Provider) (valid bool, err error) {
+	if provider == nil {
+		valid = false
+		err = errors.New("AWSS3Provider is nil")
+		return valid, err
+	}
 	// accessKeyID := provider.AccessKeyID
 	// secretAccessKey := provider.SecretAccessKey
 	// region := provider.DefaultRegion

@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -410,6 +411,15 @@ func RemoveRepository(c *gin.Context) {
 	db := Database.Connect()
 	defer db.Close()
 
+	// Query repository to remove backup Schedule
+	repository := db.Repository.
+		Query().
+		WithBackupSchedule().
+		FirstX(ctx)
+
+	// Remove backup scheduled
+	removeScheduledBackup(repository)
+
 	// Delete repository
 	err := db.Repository.
 		DeleteOneID(newId).
@@ -421,4 +431,41 @@ func RemoveRepository(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func validRepository(repository ent.Repository) (valid bool, err error) {
+	valid, err = validProvider(repository)
+	if err != nil {
+		log.Err(err).Msg("Valid repository has failed on provider check")
+		return false, err
+	}
+	if !valid { // If provider is not valid, repository cannot be valid
+		return false, nil
+	}
+	valid, err = validSchedule(repository.Edges.BackupSchedule)
+	if err != nil {
+		log.Err(err).Msg("Valid repository has failed on schedule check")
+		return false, err
+	}
+	if !valid { // If schedule is not valid, repository cannot be valid
+		return false, nil
+	}
+	return valid, err
+}
+
+func validProvider(repository ent.Repository) (valid bool, err error) {
+	switch repository.Provider {
+	case "localProvider":
+		valid, err = validLocalProvider(repository.Edges.LocalProvider)
+	case "minioS3Provider":
+		valid, err = validMinioS3Provider(repository.Edges.MinioS3Provider)
+	case "AWSS3Provider":
+		valid, err = validAWSS3Provider(repository.Edges.AWSS3Provider)
+	case "B2Provider":
+		valid, err = validB2Provider(repository.Edges.B2Provider)
+	default:
+		valid = false
+		err = errors.New("provider does not exist")
+	}
+	return valid, err
 }

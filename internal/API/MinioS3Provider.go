@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/minio/minio-go/v7"
@@ -51,7 +52,12 @@ func createMinioS3Provider(db *ent.Client, minioS3Provider *ent.MinioS3Provider,
 	return err
 }
 
-func validMinioProvider(provider ent.MinioS3Provider) (valid bool, err error) {
+func validMinioS3Provider(provider *ent.MinioS3Provider) (valid bool, err error) {
+	if provider == nil {
+		valid = false
+		err = errors.New("MinioS3Provider is nil")
+		return valid, err
+	}
 	endpoint := fmt.Sprintf("%v://%v:%v", provider.Scheme, provider.IP, provider.Port)
 	accessKeyID := provider.AccessKeyID
 	secretAccessKey := provider.SecretAccessKey
