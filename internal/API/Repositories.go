@@ -556,6 +556,9 @@ func ValidProvider(c *gin.Context) {
 		valid, err := validProvider(*repository)
 		if err != nil {
 			log.Err(err).Msgf("Failed to validate provider")
+		} else {
+			err = updateValidProvider(db, *repository, valid)
+			log.Err(err)
 		}
 		c.IndentedJSON(http.StatusOK, gin.H{"valid": valid})
 	} else {
