@@ -17,6 +17,13 @@
   bind:value={values.name}
 />
 <Input
+  id="password"
+  label="Password (cannot be change latter)"
+  type="password"
+  bind:value={values.password}
+  disabled={!!initialValues.id}
+/>
+<Input
   id="active"
   label="Enable backup"
   type="checkbox"
