@@ -66,6 +66,20 @@ func (au *AWSS3ProviderUpdate) ClearDefaultRegion() *AWSS3ProviderUpdate {
 	return au
 }
 
+// SetValid sets the "valid" field.
+func (au *AWSS3ProviderUpdate) SetValid(b bool) *AWSS3ProviderUpdate {
+	au.mutation.SetValid(b)
+	return au
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (au *AWSS3ProviderUpdate) SetNillableValid(b *bool) *AWSS3ProviderUpdate {
+	if b != nil {
+		au.SetValid(*b)
+	}
+	return au
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (au *AWSS3ProviderUpdate) SetRepositoryID(id int) *AWSS3ProviderUpdate {
 	au.mutation.SetRepositoryID(id)
@@ -223,6 +237,13 @@ func (au *AWSS3ProviderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: awss3provider.FieldDefaultRegion,
 		})
 	}
+	if value, ok := au.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: awss3provider.FieldValid,
+		})
+	}
 	if au.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -312,6 +333,20 @@ func (auo *AWSS3ProviderUpdateOne) SetNillableDefaultRegion(s *string) *AWSS3Pro
 // ClearDefaultRegion clears the value of the "defaultRegion" field.
 func (auo *AWSS3ProviderUpdateOne) ClearDefaultRegion() *AWSS3ProviderUpdateOne {
 	auo.mutation.ClearDefaultRegion()
+	return auo
+}
+
+// SetValid sets the "valid" field.
+func (auo *AWSS3ProviderUpdateOne) SetValid(b bool) *AWSS3ProviderUpdateOne {
+	auo.mutation.SetValid(b)
+	return auo
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (auo *AWSS3ProviderUpdateOne) SetNillableValid(b *bool) *AWSS3ProviderUpdateOne {
+	if b != nil {
+		auo.SetValid(*b)
+	}
 	return auo
 }
 
@@ -494,6 +529,13 @@ func (auo *AWSS3ProviderUpdateOne) sqlSave(ctx context.Context) (_node *AWSS3Pro
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: awss3provider.FieldDefaultRegion,
+		})
+	}
+	if value, ok := auo.mutation.Valid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: awss3provider.FieldValid,
 		})
 	}
 	if auo.mutation.RepositoryCleared() {

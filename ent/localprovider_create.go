@@ -26,6 +26,20 @@ func (lpc *LocalProviderCreate) SetRepoPath(s string) *LocalProviderCreate {
 	return lpc
 }
 
+// SetValid sets the "valid" field.
+func (lpc *LocalProviderCreate) SetValid(b bool) *LocalProviderCreate {
+	lpc.mutation.SetValid(b)
+	return lpc
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (lpc *LocalProviderCreate) SetNillableValid(b *bool) *LocalProviderCreate {
+	if b != nil {
+		lpc.SetValid(*b)
+	}
+	return lpc
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (lpc *LocalProviderCreate) SetRepositoryID(id int) *LocalProviderCreate {
 	lpc.mutation.SetRepositoryID(id)
@@ -48,6 +62,7 @@ func (lpc *LocalProviderCreate) Save(ctx context.Context) (*LocalProvider, error
 		err  error
 		node *LocalProvider
 	)
+	lpc.defaults()
 	if len(lpc.hooks) == 0 {
 		if err = lpc.check(); err != nil {
 			return nil, err
@@ -105,10 +120,21 @@ func (lpc *LocalProviderCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (lpc *LocalProviderCreate) defaults() {
+	if _, ok := lpc.mutation.Valid(); !ok {
+		v := localprovider.DefaultValid
+		lpc.mutation.SetValid(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (lpc *LocalProviderCreate) check() error {
 	if _, ok := lpc.mutation.RepoPath(); !ok {
 		return &ValidationError{Name: "repoPath", err: errors.New(`ent: missing required field "LocalProvider.repoPath"`)}
+	}
+	if _, ok := lpc.mutation.Valid(); !ok {
+		return &ValidationError{Name: "valid", err: errors.New(`ent: missing required field "LocalProvider.valid"`)}
 	}
 	if _, ok := lpc.mutation.RepositoryID(); !ok {
 		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required edge "LocalProvider.repository"`)}
@@ -148,6 +174,14 @@ func (lpc *LocalProviderCreate) createSpec() (*LocalProvider, *sqlgraph.CreateSp
 		})
 		_node.RepoPath = value
 	}
+	if value, ok := lpc.mutation.Valid(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: localprovider.FieldValid,
+		})
+		_node.Valid = value
+	}
 	if nodes := lpc.mutation.RepositoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -185,6 +219,7 @@ func (lpcb *LocalProviderCreateBulk) Save(ctx context.Context) ([]*LocalProvider
 	for i := range lpcb.builders {
 		func(i int, root context.Context) {
 			builder := lpcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LocalProviderMutation)
 				if !ok {

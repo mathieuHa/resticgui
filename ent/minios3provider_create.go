@@ -56,6 +56,20 @@ func (msc *MinioS3ProviderCreate) SetSecretAccessKey(s string) *MinioS3ProviderC
 	return msc
 }
 
+// SetValid sets the "valid" field.
+func (msc *MinioS3ProviderCreate) SetValid(b bool) *MinioS3ProviderCreate {
+	msc.mutation.SetValid(b)
+	return msc
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (msc *MinioS3ProviderCreate) SetNillableValid(b *bool) *MinioS3ProviderCreate {
+	if b != nil {
+		msc.SetValid(*b)
+	}
+	return msc
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (msc *MinioS3ProviderCreate) SetRepositoryID(id int) *MinioS3ProviderCreate {
 	msc.mutation.SetRepositoryID(id)
@@ -78,6 +92,7 @@ func (msc *MinioS3ProviderCreate) Save(ctx context.Context) (*MinioS3Provider, e
 		err  error
 		node *MinioS3Provider
 	)
+	msc.defaults()
 	if len(msc.hooks) == 0 {
 		if err = msc.check(); err != nil {
 			return nil, err
@@ -135,6 +150,14 @@ func (msc *MinioS3ProviderCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (msc *MinioS3ProviderCreate) defaults() {
+	if _, ok := msc.mutation.Valid(); !ok {
+		v := minios3provider.DefaultValid
+		msc.mutation.SetValid(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (msc *MinioS3ProviderCreate) check() error {
 	if _, ok := msc.mutation.BucketName(); !ok {
@@ -154,6 +177,9 @@ func (msc *MinioS3ProviderCreate) check() error {
 	}
 	if _, ok := msc.mutation.SecretAccessKey(); !ok {
 		return &ValidationError{Name: "secretAccessKey", err: errors.New(`ent: missing required field "MinioS3Provider.secretAccessKey"`)}
+	}
+	if _, ok := msc.mutation.Valid(); !ok {
+		return &ValidationError{Name: "valid", err: errors.New(`ent: missing required field "MinioS3Provider.valid"`)}
 	}
 	if _, ok := msc.mutation.RepositoryID(); !ok {
 		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required edge "MinioS3Provider.repository"`)}
@@ -233,6 +259,14 @@ func (msc *MinioS3ProviderCreate) createSpec() (*MinioS3Provider, *sqlgraph.Crea
 		})
 		_node.SecretAccessKey = value
 	}
+	if value, ok := msc.mutation.Valid(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: minios3provider.FieldValid,
+		})
+		_node.Valid = value
+	}
 	if nodes := msc.mutation.RepositoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -270,6 +304,7 @@ func (mscb *MinioS3ProviderCreateBulk) Save(ctx context.Context) ([]*MinioS3Prov
 	for i := range mscb.builders {
 		func(i int, root context.Context) {
 			builder := mscb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MinioS3ProviderMutation)
 				if !ok {

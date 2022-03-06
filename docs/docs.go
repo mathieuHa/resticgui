@@ -305,6 +305,10 @@ const docTemplate = `{
                 "secretAccessKey": {
                     "description": "SecretAccessKey holds the value of the \"secretAccessKey\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
@@ -343,6 +347,10 @@ const docTemplate = `{
                 "repoName": {
                     "description": "RepoName holds the value of the \"repoName\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
@@ -501,6 +509,10 @@ const docTemplate = `{
                 "repoPath": {
                     "description": "RepoPath holds the value of the \"repoPath\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },
@@ -547,6 +559,10 @@ const docTemplate = `{
                 "secretAccessKey": {
                     "description": "SecretAccessKey holds the value of the \"secretAccessKey\" field.",
                     "type": "string"
+                },
+                "valid": {
+                    "description": "Valid holds the value of the \"valid\" field.",
+                    "type": "boolean"
                 }
             }
         },

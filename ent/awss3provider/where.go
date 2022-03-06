@@ -119,6 +119,13 @@ func DefaultRegion(v string) predicate.AWSS3Provider {
 	})
 }
 
+// Valid applies equality check predicate on the "valid" field. It's identical to ValidEQ.
+func Valid(v bool) predicate.AWSS3Provider {
+	return predicate.AWSS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
 // BucketNameEQ applies the EQ predicate on the "bucketName" field.
 func BucketNameEQ(v string) predicate.AWSS3Provider {
 	return predicate.AWSS3Provider(func(s *sql.Selector) {
@@ -574,6 +581,20 @@ func DefaultRegionEqualFold(v string) predicate.AWSS3Provider {
 func DefaultRegionContainsFold(v string) predicate.AWSS3Provider {
 	return predicate.AWSS3Provider(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDefaultRegion), v))
+	})
+}
+
+// ValidEQ applies the EQ predicate on the "valid" field.
+func ValidEQ(v bool) predicate.AWSS3Provider {
+	return predicate.AWSS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
+// ValidNEQ applies the NEQ predicate on the "valid" field.
+func ValidNEQ(v bool) predicate.AWSS3Provider {
+	return predicate.AWSS3Provider(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldValid), v))
 	})
 }
 

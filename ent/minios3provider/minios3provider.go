@@ -19,6 +19,8 @@ const (
 	FieldAccessKeyID = "access_key_id"
 	// FieldSecretAccessKey holds the string denoting the secretaccesskey field in the database.
 	FieldSecretAccessKey = "secret_access_key"
+	// FieldValid holds the string denoting the valid field in the database.
+	FieldValid = "valid"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the minios3provider in the database.
@@ -41,6 +43,7 @@ var Columns = []string{
 	FieldScheme,
 	FieldAccessKeyID,
 	FieldSecretAccessKey,
+	FieldValid,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "MinioS3Provider"
@@ -63,3 +66,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultValid holds the default value on creation for the "valid" field.
+	DefaultValid bool
+)

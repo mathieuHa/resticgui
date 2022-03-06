@@ -52,6 +52,20 @@ func (ac *AWSS3ProviderCreate) SetNillableDefaultRegion(s *string) *AWSS3Provide
 	return ac
 }
 
+// SetValid sets the "valid" field.
+func (ac *AWSS3ProviderCreate) SetValid(b bool) *AWSS3ProviderCreate {
+	ac.mutation.SetValid(b)
+	return ac
+}
+
+// SetNillableValid sets the "valid" field if the given value is not nil.
+func (ac *AWSS3ProviderCreate) SetNillableValid(b *bool) *AWSS3ProviderCreate {
+	if b != nil {
+		ac.SetValid(*b)
+	}
+	return ac
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (ac *AWSS3ProviderCreate) SetRepositoryID(id int) *AWSS3ProviderCreate {
 	ac.mutation.SetRepositoryID(id)
@@ -74,6 +88,7 @@ func (ac *AWSS3ProviderCreate) Save(ctx context.Context) (*AWSS3Provider, error)
 		err  error
 		node *AWSS3Provider
 	)
+	ac.defaults()
 	if len(ac.hooks) == 0 {
 		if err = ac.check(); err != nil {
 			return nil, err
@@ -131,6 +146,14 @@ func (ac *AWSS3ProviderCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ac *AWSS3ProviderCreate) defaults() {
+	if _, ok := ac.mutation.Valid(); !ok {
+		v := awss3provider.DefaultValid
+		ac.mutation.SetValid(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ac *AWSS3ProviderCreate) check() error {
 	if _, ok := ac.mutation.BucketName(); !ok {
@@ -156,6 +179,9 @@ func (ac *AWSS3ProviderCreate) check() error {
 		if err := awss3provider.AccessKeyIDValidator(v); err != nil {
 			return &ValidationError{Name: "accessKeyID", err: fmt.Errorf(`ent: validator failed for field "AWSS3Provider.accessKeyID": %w`, err)}
 		}
+	}
+	if _, ok := ac.mutation.Valid(); !ok {
+		return &ValidationError{Name: "valid", err: errors.New(`ent: missing required field "AWSS3Provider.valid"`)}
 	}
 	if _, ok := ac.mutation.RepositoryID(); !ok {
 		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required edge "AWSS3Provider.repository"`)}
@@ -219,6 +245,14 @@ func (ac *AWSS3ProviderCreate) createSpec() (*AWSS3Provider, *sqlgraph.CreateSpe
 		})
 		_node.DefaultRegion = value
 	}
+	if value, ok := ac.mutation.Valid(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: awss3provider.FieldValid,
+		})
+		_node.Valid = value
+	}
 	if nodes := ac.mutation.RepositoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -256,6 +290,7 @@ func (acb *AWSS3ProviderCreateBulk) Save(ctx context.Context) ([]*AWSS3Provider,
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AWSS3ProviderMutation)
 				if !ok {

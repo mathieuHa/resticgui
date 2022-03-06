@@ -24,6 +24,8 @@ type B2Provider struct {
 	AccountID string `json:"accountID,omitempty"`
 	// RepoName holds the value of the "repoName" field.
 	RepoName string `json:"repoName,omitempty"`
+	// Valid holds the value of the "valid" field.
+	Valid bool `json:"valid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the B2ProviderQuery when eager-loading is set.
 	Edges                 B2ProviderEdges `json:"edges"`
@@ -58,6 +60,8 @@ func (*B2Provider) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case b2provider.FieldValid:
+			values[i] = new(sql.NullBool)
 		case b2provider.FieldID:
 			values[i] = new(sql.NullInt64)
 		case b2provider.FieldBucketName, b2provider.FieldAccountKey, b2provider.FieldAccountID, b2provider.FieldRepoName:
@@ -109,6 +113,12 @@ func (b *B2Provider) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				b.RepoName = value.String
 			}
+		case b2provider.FieldValid:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field valid", values[i])
+			} else if value.Valid {
+				b.Valid = value.Bool
+			}
 		case b2provider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field repository_b2provider", value)
@@ -157,6 +167,8 @@ func (b *B2Provider) String() string {
 	builder.WriteString(b.AccountID)
 	builder.WriteString(", repoName=")
 	builder.WriteString(b.RepoName)
+	builder.WriteString(", valid=")
+	builder.WriteString(fmt.Sprintf("%v", b.Valid))
 	builder.WriteByte(')')
 	return builder.String()
 }

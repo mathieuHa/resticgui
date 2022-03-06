@@ -98,6 +98,13 @@ func RepoPath(v string) predicate.LocalProvider {
 	})
 }
 
+// Valid applies equality check predicate on the "valid" field. It's identical to ValidEQ.
+func Valid(v bool) predicate.LocalProvider {
+	return predicate.LocalProvider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
 // RepoPathEQ applies the EQ predicate on the "repoPath" field.
 func RepoPathEQ(v string) predicate.LocalProvider {
 	return predicate.LocalProvider(func(s *sql.Selector) {
@@ -206,6 +213,20 @@ func RepoPathEqualFold(v string) predicate.LocalProvider {
 func RepoPathContainsFold(v string) predicate.LocalProvider {
 	return predicate.LocalProvider(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldRepoPath), v))
+	})
+}
+
+// ValidEQ applies the EQ predicate on the "valid" field.
+func ValidEQ(v bool) predicate.LocalProvider {
+	return predicate.LocalProvider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValid), v))
+	})
+}
+
+// ValidNEQ applies the NEQ predicate on the "valid" field.
+func ValidNEQ(v bool) predicate.LocalProvider {
+	return predicate.LocalProvider(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldValid), v))
 	})
 }
 

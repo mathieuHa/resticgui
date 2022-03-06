@@ -27,6 +27,7 @@ func (AWSS3Provider) Fields() []ent.Field {
 		field.String("secretAccessKey").NotEmpty(),
 		field.String("accessKeyID").NotEmpty(),
 		field.String("defaultRegion").Optional(),
+		field.Bool("valid").Default(false),
 	}
 }
 

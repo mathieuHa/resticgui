@@ -24,6 +24,7 @@ func (LocalProvider) Annotations() []schema.Annotation {
 func (LocalProvider) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("repoPath"),
+		field.Bool("valid").Default(false),
 	}
 }
 

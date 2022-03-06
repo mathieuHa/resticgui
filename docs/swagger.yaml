@@ -21,6 +21,9 @@ definitions:
       secretAccessKey:
         description: SecretAccessKey holds the value of the "secretAccessKey" field.
         type: string
+      valid:
+        description: Valid holds the value of the "valid" field.
+        type: boolean
     type: object
   ent.AWSS3ProviderEdges:
     properties:
@@ -50,6 +53,9 @@ definitions:
       repoName:
         description: RepoName holds the value of the "repoName" field.
         type: string
+      valid:
+        description: Valid holds the value of the "valid" field.
+        type: boolean
     type: object
   ent.B2ProviderEdges:
     properties:
@@ -170,6 +176,9 @@ definitions:
       repoPath:
         description: RepoPath holds the value of the "repoPath" field.
         type: string
+      valid:
+        description: Valid holds the value of the "valid" field.
+        type: boolean
     type: object
   ent.LocalProviderEdges:
     properties:
@@ -205,6 +214,9 @@ definitions:
       secretAccessKey:
         description: SecretAccessKey holds the value of the "secretAccessKey" field.
         type: string
+      valid:
+        description: Valid holds the value of the "valid" field.
+        type: boolean
     type: object
   ent.MinioS3ProviderEdges:
     properties:

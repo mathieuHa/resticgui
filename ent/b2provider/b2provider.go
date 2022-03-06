@@ -15,6 +15,8 @@ const (
 	FieldAccountID = "account_id"
 	// FieldRepoName holds the string denoting the reponame field in the database.
 	FieldRepoName = "repo_name"
+	// FieldValid holds the string denoting the valid field in the database.
+	FieldValid = "valid"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the b2provider in the database.
@@ -35,6 +37,7 @@ var Columns = []string{
 	FieldAccountKey,
 	FieldAccountID,
 	FieldRepoName,
+	FieldValid,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "B2Provider"
@@ -67,4 +70,6 @@ var (
 	AccountIDValidator func(string) error
 	// RepoNameValidator is a validator for the "repoName" field. It is called by the builders before save.
 	RepoNameValidator func(string) error
+	// DefaultValid holds the default value on creation for the "valid" field.
+	DefaultValid bool
 )

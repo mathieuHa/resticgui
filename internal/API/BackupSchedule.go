@@ -213,11 +213,17 @@ func CreateAllScheduledBackup() {
 }
 
 func removeScheduledBackup(repository *ent.Repository) {
+	if repository == nil {
+		return
+	}
+	log.Debug().Msg("removeScheduledBackup()")
 	// Here we need to
 	if cr != nil {
 		log.Debug().Msg("Removing backups")
 		// First we remove the previous job launched for this repository
-		if repository.Edges.BackupSchedule != nil && *repository.Edges.BackupSchedule.CronID > 0 {
+		if repository.Edges.BackupSchedule != nil && repository.Edges.BackupSchedule.CronID != nil {
+			log.Debug().Msg("repository.Edges.BackupSchedule != nil && *repository.Edges.BackupSchedule.CronID > 0")
+
 			id := cron.EntryID(*repository.Edges.BackupSchedule.CronID)
 			cr.Remove(id)
 		}

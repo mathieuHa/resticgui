@@ -16,6 +16,7 @@ var (
 		{Name: "secret_access_key", Type: field.TypeString},
 		{Name: "access_key_id", Type: field.TypeString},
 		{Name: "default_region", Type: field.TypeString, Nullable: true},
+		{Name: "valid", Type: field.TypeBool, Default: false},
 		{Name: "repository_awss3provider", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// AWSS3ProviderTable holds the schema information for the "AWSS3Provider" table.
@@ -26,7 +27,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "AWSS3Provider_repositories_AWSS3Provider",
-				Columns:    []*schema.Column{AWSS3ProviderColumns[5]},
+				Columns:    []*schema.Column{AWSS3ProviderColumns[6]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -39,6 +40,7 @@ var (
 		{Name: "account_key", Type: field.TypeString},
 		{Name: "account_id", Type: field.TypeString},
 		{Name: "repo_name", Type: field.TypeString},
+		{Name: "valid", Type: field.TypeBool, Default: false},
 		{Name: "repository_b2provider", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// B2ProviderTable holds the schema information for the "B2Provider" table.
@@ -49,7 +51,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "B2Provider_repositories_B2Provider",
-				Columns:    []*schema.Column{B2ProviderColumns[5]},
+				Columns:    []*schema.Column{B2ProviderColumns[6]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -119,6 +121,7 @@ var (
 	LocalProviderColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "repo_path", Type: field.TypeString},
+		{Name: "valid", Type: field.TypeBool, Default: false},
 		{Name: "repository_local_provider", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// LocalProviderTable holds the schema information for the "LocalProvider" table.
@@ -129,7 +132,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "LocalProvider_repositories_localProvider",
-				Columns:    []*schema.Column{LocalProviderColumns[2]},
+				Columns:    []*schema.Column{LocalProviderColumns[3]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -144,6 +147,7 @@ var (
 		{Name: "scheme", Type: field.TypeString},
 		{Name: "access_key_id", Type: field.TypeString},
 		{Name: "secret_access_key", Type: field.TypeString},
+		{Name: "valid", Type: field.TypeBool, Default: false},
 		{Name: "repository_minio_s3provider", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// MinioS3ProviderTable holds the schema information for the "MinioS3Provider" table.
@@ -154,7 +158,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "MinioS3Provider_repositories_MinioS3Provider",
-				Columns:    []*schema.Column{MinioS3ProviderColumns[7]},
+				Columns:    []*schema.Column{MinioS3ProviderColumns[8]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

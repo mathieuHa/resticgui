@@ -219,7 +219,12 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	if repository.Active {
+	repository.Valid, err = validRepository(*repository)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+	}
+
+	if repository.Active && repository.Valid {
 		addScheduledBackup(repository)
 	}
 
@@ -316,7 +321,7 @@ func EditRepository(c *gin.Context) {
 
 	// Update B2Provider
 	if repo.Edges.B2Provider != nil {
-		if repo.Edges.B2Provider != nil {
+		if repo.Edges.B2Provider.ID == 0 {
 			err = createB2Provider(db, repo.Edges.B2Provider, newId, ctx)
 		} else {
 			err = updateB2Provider(db, repo.Edges.B2Provider, ctx)
@@ -329,7 +334,7 @@ func EditRepository(c *gin.Context) {
 
 	// update LocalProvider
 	if repo.Edges.LocalProvider != nil {
-		if repo.Edges.LocalProvider != nil {
+		if repo.Edges.LocalProvider.ID == 0 {
 			err = createLocalProvider(db, repo.Edges.LocalProvider, newId, ctx)
 		} else {
 			err = updateLocalProvider(db, repo.Edges.LocalProvider, ctx)
@@ -342,7 +347,7 @@ func EditRepository(c *gin.Context) {
 
 	// update MinioS3Provider
 	if repo.Edges.MinioS3Provider != nil {
-		if repo.Edges.MinioS3Provider != nil {
+		if repo.Edges.MinioS3Provider.ID == 0 {
 			err = createMinioS3Provider(db, repo.Edges.MinioS3Provider, newId, ctx)
 		} else {
 			err = updateMinioS3Provider(db, repo.Edges.MinioS3Provider, ctx)
@@ -378,7 +383,12 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	if repository.Active {
+	repository.Valid, err = validRepository(*repository)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+	}
+
+	if repository.Active && repository.Valid {
 		addScheduledBackup(repository)
 	}
 
@@ -412,22 +422,25 @@ func RemoveRepository(c *gin.Context) {
 	defer db.Close()
 
 	// Query repository to remove backup Schedule
+	log.Debug().Msg("Query repository to remove backup Schedule")
 	repository := db.Repository.
 		Query().
 		WithBackupSchedule().
 		FirstX(ctx)
 
-	// Remove backup scheduled
-	removeScheduledBackup(repository)
+	if repository != nil {
+		// Remove backup scheduled
+		removeScheduledBackup(repository)
 
-	// Delete repository
-	err := db.Repository.
-		DeleteOneID(newId).
-		Exec(ctx)
-	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
-		return
+		// Delete repository
+		log.Debug().Msg("Delete repository")
+		err := db.Repository.
+			DeleteOneID(newId).
+			Exec(ctx)
+		if err != nil {
+			log.Err(err).Msgf("error: %v", errQuery)
+			// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
+		}
 	}
 
 	c.Status(http.StatusNoContent)
