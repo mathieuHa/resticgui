@@ -10,6 +10,8 @@ import (
 )
 
 func updateLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, ctx context.Context) (err error) {
+	log.Debug().Msg("updateLocalProvider()")
+
 	_, err = db.LocalProvider.
 		UpdateOneID(localProvider.ID).
 		SetRepoPath(localProvider.RepoPath).
@@ -24,6 +26,8 @@ func updateLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, ctx c
 }
 
 func createLocalProvider(db *ent.Client, localProvider *ent.LocalProvider, repoID int, ctx context.Context) (err error) {
+	log.Debug().Msg("createLocalProvider()")
+
 	_, err = db.LocalProvider.
 		Create().
 		SetRepoPath(localProvider.RepoPath).

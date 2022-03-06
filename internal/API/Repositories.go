@@ -316,7 +316,7 @@ func EditRepository(c *gin.Context) {
 
 	// Update B2Provider
 	if repo.Edges.B2Provider != nil {
-		if repo.Edges.B2Provider != nil {
+		if repo.Edges.B2Provider.ID == 0 {
 			err = createB2Provider(db, repo.Edges.B2Provider, newId, ctx)
 		} else {
 			err = updateB2Provider(db, repo.Edges.B2Provider, ctx)
@@ -329,7 +329,7 @@ func EditRepository(c *gin.Context) {
 
 	// update LocalProvider
 	if repo.Edges.LocalProvider != nil {
-		if repo.Edges.LocalProvider != nil {
+		if repo.Edges.LocalProvider.ID == 0 {
 			err = createLocalProvider(db, repo.Edges.LocalProvider, newId, ctx)
 		} else {
 			err = updateLocalProvider(db, repo.Edges.LocalProvider, ctx)
@@ -342,7 +342,7 @@ func EditRepository(c *gin.Context) {
 
 	// update MinioS3Provider
 	if repo.Edges.MinioS3Provider != nil {
-		if repo.Edges.MinioS3Provider != nil {
+		if repo.Edges.MinioS3Provider.ID == 0 {
 			err = createMinioS3Provider(db, repo.Edges.MinioS3Provider, newId, ctx)
 		} else {
 			err = updateMinioS3Provider(db, repo.Edges.MinioS3Provider, ctx)
