@@ -499,14 +499,14 @@ func ValidRepository(c *gin.Context) {
 	}
 
 	if repository != nil {
-		valid, _ := validRepository(*repository)
+		valid, errValid := validRepository(*repository)
 		_, err = db.Repository.UpdateOneID(newId).SetValid(valid).Save(ctx)
 		if err != nil {
 			log.Err(err).Msg("Could not update valid for repository")
 		}
-		c.IndentedJSON(http.StatusOK, gin.H{"valid": valid})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": valid, "error": errValid.Error()})
 	} else {
-		c.IndentedJSON(http.StatusOK, gin.H{"valid": false})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": false})
 	}
 
 	c.Status(http.StatusOK)
