@@ -23,7 +23,7 @@ func ResticInit() {
 	}
 }
 
-func runRestic(args []string, env []string) string {
+func runRestic(args []string, env []string) (string, string, error) {
 	log.Debug().Msgf("args %v", args)
 	log.Debug().Msgf("env %v", env)
 
@@ -37,9 +37,9 @@ func runRestic(args []string, env []string) string {
 	err := cmd.Run()
 
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("Error in cmd run")
 	}
 	log.Info().Msgf("output: %v", cmdOutput.String())
 	log.Info().Msgf("error: %v", cmdStderr.String())
-	return cmdOutput.String()
+	return cmdOutput.String(), cmdStderr.String(), err
 }

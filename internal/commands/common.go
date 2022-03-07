@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
@@ -19,21 +20,21 @@ func getDefaultEnv() []string {
 	return []string{}
 }
 
-func GetResticVersion() string {
+func GetResticVersion() (string, string, error) {
 	var args []string
 
 	args = append(args, "version")
 	return runRestic(args, getDefaultEnv())
 }
 
-func GetResticHelp() string {
+func GetResticHelp() (string, string, error) {
 	var args []string
 
 	args = append(args, "--help")
 	return runRestic(args, getDefaultEnv())
 }
 
-func GetSnapshots(repository ent.Repository) string {
+func GetSnapshots(repository ent.Repository) (string, string, error) {
 	var args []string
 	var env []string
 
@@ -43,7 +44,7 @@ func GetSnapshots(repository ent.Repository) string {
 	return runRestic(args, env)
 }
 
-func InitRepository(repository ent.Repository) string {
+func InitRepository(repository ent.Repository) (string, string, error) {
 	var args []string
 	var env []string
 
@@ -53,7 +54,7 @@ func InitRepository(repository ent.Repository) string {
 	return runRestic(args, env)
 }
 
-func RestoreRepository(repository ent.Repository, path string, version string) string {
+func RestoreRepository(repository ent.Repository, path string, version string) (string, string, error) {
 	var args []string
 	var env []string
 
@@ -74,7 +75,7 @@ func getRestoreCommonArgs(path string, version string) []string {
 	return args
 }
 
-func ForgetSnaphots(repository ent.Repository, version string) string {
+func ForgetSnaphots(repository ent.Repository, version string) (string, string, error) {
 	var args []string
 	var env []string
 
@@ -85,7 +86,7 @@ func ForgetSnaphots(repository ent.Repository, version string) string {
 	return runRestic(args, env)
 }
 
-func PruneSnaphots(repository ent.Repository, version string) string {
+func PruneSnaphots(repository ent.Repository, version string) (string, string, error) {
 	var args []string
 	var env []string
 
@@ -96,19 +97,23 @@ func PruneSnaphots(repository ent.Repository, version string) string {
 	return runRestic(args, env)
 }
 
-func BackupRepository(repository ent.Repository, dryRun bool) string {
+func BackupRepository(repository ent.Repository, dryRun bool) (string, string, error) {
 	var args []string
 	var env []string
 
 	repoFormat, env := getProviderData(repository)
-	commonArgs := getBackupCommonArgs(repository, dryRun)
+	commonArgs := getBackupCommonArgs(repository)
+	dryRunParameter := getDryRunParameter(dryRun)
+
 	args = append(args, repoFormat...)
 	args = append(args, commonArgs...)
 	args = append(args, backupCmd)
+	args = append(args, dryRunParameter)
+
 	return runRestic(args, env)
 }
 
-func StatsRepository(repository ent.Repository, dryRun bool) string {
+func StatsRepository(repository ent.Repository, dryRun bool) (string, string, error) {
 	var args []string
 	var env []string
 
@@ -118,15 +123,13 @@ func StatsRepository(repository ent.Repository, dryRun bool) string {
 	return runRestic(args, env)
 }
 
-func getBackupCommonArgs(repository ent.Repository, dryRun bool) []string {
+func getBackupCommonArgs(repository ent.Repository) []string {
 	var args []string
 
-	dryRunParameter := getDryRunParameter(dryRun)
 	filesParameter := getIncludedAndExludedFiles(repository)
 	maxSizeParameter := getMaxSizeParameter(repository)
 	args = append(args, filesParameter...)
 	args = append(args, maxSizeParameter...)
-	args = append(args, dryRunParameter)
 	return args
 }
 
@@ -151,14 +154,17 @@ func getMaxSizeParameter(repository ent.Repository) []string {
 }
 
 func getIncludedAndExludedFiles(repository ent.Repository) []string {
+	log.Debug().Msg("getIncludedAndExludedFiles()")
 	var files []string
 	var included []string
 	var excluded []string
+	log.Debug().Msgf("len(path): %v", repository.Edges.Paths)
 	for _, path := range repository.Edges.Paths {
-		if path.Included {
-			included = append(included, path.AbsPath)
+		log.Debug().Msgf("path.included: %v", path.Included)
+		if path.Included { // change to abspath when front is fixed
+			included = append(included, path.RelPath)
 		} else {
-			excluded = append(excluded, path.AbsPath)
+			excluded = append(excluded, path.RelPath)
 		}
 	}
 	files = append(files, included...)
@@ -169,7 +175,7 @@ func getIncludedAndExludedFiles(repository ent.Repository) []string {
 	return files
 }
 
-func CheckIntegrity(repository ent.Repository, full bool, pourcentage float64) string {
+func CheckIntegrity(repository ent.Repository, full bool, pourcentage float64) (string, string, error) {
 	// todo check repository string and pourcentage
 	var args []string
 	var env []string

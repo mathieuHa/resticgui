@@ -188,9 +188,7 @@ func addScheduledBackup(repo *ent.Repository) bool {
 			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
 			log.Debug().Msgf("timing = %v", timing)
 			cronID, err := cr.AddFunc(timing, func() {
-				log.Info().Msgf("JOB HAS RUN %v", repo.ID)
-				log.Info().Msgf("JOB HAS RUN %v", repo.Name)
-				commands.GetResticVersion()
+				log.Info().Msgf("JOB HAS STARTED %v", repo.ID)
 				db := Database.Connect()
 				defer db.Close()
 				// Check the validity of the provider and repository in general
@@ -206,7 +204,23 @@ func addScheduledBackup(repo *ent.Repository) bool {
 					Where(repository.ID(repo.ID)).
 					First(context.Background())
 
-				commands.InitRepository(*r)
+				_, _, errCmd := commands.GetSnapshots(*r)
+				log.Err(errCmd)
+				if errCmd == nil {
+					log.Debug().Msg("Repository is already init success")
+				} else {
+					_, _, errCmd = commands.InitRepository(*r)
+					if errCmd != nil {
+						log.Err(errCmd).Msg("Error in init repository")
+					}
+				}
+				_, _, errCmd = commands.BackupRepository(*r, false)
+
+				if errCmd != nil {
+					log.Err(errCmd).Msg("Error in Backup")
+				}
+
+				log.Info().Msgf("JOB HAS ENDED %v", repo.ID)
 			})
 			if err != nil {
 				log.Error().Err(err)

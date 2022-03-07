@@ -500,13 +500,34 @@ func ValidRepository(c *gin.Context) {
 
 	if repository != nil {
 		valid, errValid := validRepository(*repository)
-		_, err = db.Repository.UpdateOneID(newId).SetValid(valid).Save(ctx)
-		if err != nil {
-			log.Err(err).Msg("Could not update valid for repository")
+		if !valid {
+			log.Debug().Msg("r not valid")
+			_, err := db.Repository.
+				UpdateOneID(newId).
+				SetValid(valid).
+				SetActive(false).
+				Save(ctx)
+			if err != nil {
+				log.Err(err).Msg("Could not update valid and active for repository")
+			}
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": valid, "error": errValid})
+			return
+		} else {
+			log.Debug().Msg("r valid")
+			_, err := db.Repository.
+				UpdateOneID(newId).
+				SetValid(valid).
+				Save(ctx)
+			if err != nil {
+				log.Err(err).Msg("Could not update valid for repository")
+			}
+			c.IndentedJSON(http.StatusOK, gin.H{"valid": valid, "error": errValid})
+			return
 		}
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": valid, "error": errValid.Error()})
+
 	} else {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": false})
+		log.Err(errors.New("repository is nil"))
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": false, "error": errors.New("repository is nil")})
 	}
 
 	c.Status(http.StatusOK)
@@ -576,7 +597,8 @@ func validRepository(repository ent.Repository) (valid bool, err error) {
 
 	valid = (repository.Password != "")
 	if !valid { // If password is empty, repository cannot be valid
-		return false, nil
+		log.Debug().Msg("Password empty, repository cannot be valid")
+		return false, errors.New("Password empty, repository cannot be valid")
 	}
 	valid, err = validProvider(repository)
 	if err != nil {

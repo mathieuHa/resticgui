@@ -26,11 +26,11 @@ func ExecuteCmd(c *gin.Context) {
 
 	switch cmd {
 	case "version":
-		output = commands.GetResticHelp()
+		output, _, _ = commands.GetResticHelp()
 	case "help":
-		output = commands.GetResticHelp()
+		output, _, _ = commands.GetResticHelp()
 	default:
-		output = commands.GetResticHelp()
+		output, _, _ = commands.GetResticHelp()
 	}
 
 	c.IndentedJSON(http.StatusOK, output)
