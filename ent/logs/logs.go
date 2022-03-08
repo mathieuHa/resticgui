@@ -11,8 +11,10 @@ const (
 	Label = "logs"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreatedAt holds the string denoting the createdat field in the database.
-	FieldCreatedAt = "created_at"
+	// FieldStartTime holds the string denoting the starttime field in the database.
+	FieldStartTime = "start_time"
+	// FieldEndTime holds the string denoting the endtime field in the database.
+	FieldEndTime = "end_time"
 	// FieldOperation holds the string denoting the operation field in the database.
 	FieldOperation = "operation"
 	// FieldError holds the string denoting the error field in the database.
@@ -39,7 +41,8 @@ const (
 // Columns holds all SQL columns for logs fields.
 var Columns = []string{
 	FieldID,
-	FieldCreatedAt,
+	FieldStartTime,
+	FieldEndTime,
 	FieldOperation,
 	FieldError,
 	FieldStderr,
@@ -69,8 +72,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "createdAt" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultStartTime holds the default value on creation for the "startTime" field.
+	DefaultStartTime func() time.Time
+	// DefaultEndTime holds the default value on creation for the "endTime" field.
+	DefaultEndTime func() time.Time
 	// DefaultSuccess holds the default value on creation for the "success" field.
 	DefaultSuccess bool
 )

@@ -17,8 +17,10 @@ type Logs struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "createdAt" field.
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// StartTime holds the value of the "startTime" field.
+	StartTime time.Time `json:"startTime,omitempty"`
+	// EndTime holds the value of the "endTime" field.
+	EndTime time.Time `json:"endTime,omitempty"`
 	// Operation holds the value of the "operation" field.
 	Operation string `json:"operation,omitempty"`
 	// Error holds the value of the "error" field.
@@ -69,7 +71,7 @@ func (*Logs) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case logs.FieldOperation, logs.FieldError, logs.FieldStderr, logs.FieldStdout:
 			values[i] = new(sql.NullString)
-		case logs.FieldCreatedAt:
+		case logs.FieldStartTime, logs.FieldEndTime:
 			values[i] = new(sql.NullTime)
 		case logs.ForeignKeys[0]: // repository_logs
 			values[i] = new(sql.NullInt64)
@@ -94,11 +96,17 @@ func (l *Logs) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			l.ID = int(value.Int64)
-		case logs.FieldCreatedAt:
+		case logs.FieldStartTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+				return fmt.Errorf("unexpected type %T for field startTime", values[i])
 			} else if value.Valid {
-				l.CreatedAt = value.Time
+				l.StartTime = value.Time
+			}
+		case logs.FieldEndTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field endTime", values[i])
+			} else if value.Valid {
+				l.EndTime = value.Time
 			}
 		case logs.FieldOperation:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -170,8 +178,10 @@ func (l *Logs) String() string {
 	var builder strings.Builder
 	builder.WriteString("Logs(")
 	builder.WriteString(fmt.Sprintf("id=%v", l.ID))
-	builder.WriteString(", createdAt=")
-	builder.WriteString(l.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", startTime=")
+	builder.WriteString(l.StartTime.Format(time.ANSIC))
+	builder.WriteString(", endTime=")
+	builder.WriteString(l.EndTime.Format(time.ANSIC))
 	builder.WriteString(", operation=")
 	builder.WriteString(l.Operation)
 	builder.WriteString(", error=")

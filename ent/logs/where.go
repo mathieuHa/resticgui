@@ -93,10 +93,17 @@ func IDLTE(id int) predicate.Logs {
 	})
 }
 
-// CreatedAt applies equality check predicate on the "createdAt" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Logs {
+// StartTime applies equality check predicate on the "startTime" field. It's identical to StartTimeEQ.
+func StartTime(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+		s.Where(sql.EQ(s.C(FieldStartTime), v))
+	})
+}
+
+// EndTime applies equality check predicate on the "endTime" field. It's identical to EndTimeEQ.
+func EndTime(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEndTime), v))
 	})
 }
 
@@ -135,22 +142,22 @@ func Success(v bool) predicate.Logs {
 	})
 }
 
-// CreatedAtEQ applies the EQ predicate on the "createdAt" field.
-func CreatedAtEQ(v time.Time) predicate.Logs {
+// StartTimeEQ applies the EQ predicate on the "startTime" field.
+func StartTimeEQ(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+		s.Where(sql.EQ(s.C(FieldStartTime), v))
 	})
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "createdAt" field.
-func CreatedAtNEQ(v time.Time) predicate.Logs {
+// StartTimeNEQ applies the NEQ predicate on the "startTime" field.
+func StartTimeNEQ(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+		s.Where(sql.NEQ(s.C(FieldStartTime), v))
 	})
 }
 
-// CreatedAtIn applies the In predicate on the "createdAt" field.
-func CreatedAtIn(vs ...time.Time) predicate.Logs {
+// StartTimeIn applies the In predicate on the "startTime" field.
+func StartTimeIn(vs ...time.Time) predicate.Logs {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -162,12 +169,12 @@ func CreatedAtIn(vs ...time.Time) predicate.Logs {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+		s.Where(sql.In(s.C(FieldStartTime), v...))
 	})
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "createdAt" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Logs {
+// StartTimeNotIn applies the NotIn predicate on the "startTime" field.
+func StartTimeNotIn(vs ...time.Time) predicate.Logs {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -179,35 +186,111 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Logs {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+		s.Where(sql.NotIn(s.C(FieldStartTime), v...))
 	})
 }
 
-// CreatedAtGT applies the GT predicate on the "createdAt" field.
-func CreatedAtGT(v time.Time) predicate.Logs {
+// StartTimeGT applies the GT predicate on the "startTime" field.
+func StartTimeGT(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+		s.Where(sql.GT(s.C(FieldStartTime), v))
 	})
 }
 
-// CreatedAtGTE applies the GTE predicate on the "createdAt" field.
-func CreatedAtGTE(v time.Time) predicate.Logs {
+// StartTimeGTE applies the GTE predicate on the "startTime" field.
+func StartTimeGTE(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+		s.Where(sql.GTE(s.C(FieldStartTime), v))
 	})
 }
 
-// CreatedAtLT applies the LT predicate on the "createdAt" field.
-func CreatedAtLT(v time.Time) predicate.Logs {
+// StartTimeLT applies the LT predicate on the "startTime" field.
+func StartTimeLT(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+		s.Where(sql.LT(s.C(FieldStartTime), v))
 	})
 }
 
-// CreatedAtLTE applies the LTE predicate on the "createdAt" field.
-func CreatedAtLTE(v time.Time) predicate.Logs {
+// StartTimeLTE applies the LTE predicate on the "startTime" field.
+func StartTimeLTE(v time.Time) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+		s.Where(sql.LTE(s.C(FieldStartTime), v))
+	})
+}
+
+// EndTimeEQ applies the EQ predicate on the "endTime" field.
+func EndTimeEQ(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEndTime), v))
+	})
+}
+
+// EndTimeNEQ applies the NEQ predicate on the "endTime" field.
+func EndTimeNEQ(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEndTime), v))
+	})
+}
+
+// EndTimeIn applies the In predicate on the "endTime" field.
+func EndTimeIn(vs ...time.Time) predicate.Logs {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Logs(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldEndTime), v...))
+	})
+}
+
+// EndTimeNotIn applies the NotIn predicate on the "endTime" field.
+func EndTimeNotIn(vs ...time.Time) predicate.Logs {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Logs(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldEndTime), v...))
+	})
+}
+
+// EndTimeGT applies the GT predicate on the "endTime" field.
+func EndTimeGT(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldEndTime), v))
+	})
+}
+
+// EndTimeGTE applies the GTE predicate on the "endTime" field.
+func EndTimeGTE(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldEndTime), v))
+	})
+}
+
+// EndTimeLT applies the LT predicate on the "endTime" field.
+func EndTimeLT(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldEndTime), v))
+	})
+}
+
+// EndTimeLTE applies the LTE predicate on the "endTime" field.
+func EndTimeLTE(v time.Time) predicate.Logs {
+	return predicate.Logs(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldEndTime), v))
 	})
 }
 

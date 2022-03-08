@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
@@ -450,6 +451,45 @@ func RemoveRepository(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// LogsRepository godoc
+// @Summary logs repository
+// @Schemes
+// @Description return the logs of the repository
+// @Param id path int true "Repository ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/logs [get]
+func LogsRepository(c *gin.Context) {
+	log.Debug().Msg("LogsRepository()")
+
+	ctx := context.Background()
+	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+		return
+	}
+
+	newId, _ := strconv.Atoi(id)
+
+	db := Database.Connect()
+	defer db.Close()
+
+	logsR, err := db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(newId))).All(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, logsR)
 }
 
 // ValidRepository godoc

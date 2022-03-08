@@ -291,12 +291,12 @@ func (lq *LogsQuery) WithRepository(opts ...func(*RepositoryQuery)) *LogsQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		StartTime time.Time `json:"startTime,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Logs.Query().
-//		GroupBy(logs.FieldCreatedAt).
+//		GroupBy(logs.FieldStartTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +318,11 @@ func (lq *LogsQuery) GroupBy(field string, fields ...string) *LogsGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		StartTime time.Time `json:"startTime,omitempty"`
 //	}
 //
 //	client.Logs.Query().
-//		Select(logs.FieldCreatedAt).
+//		Select(logs.FieldStartTime).
 //		Scan(ctx, &v)
 //
 func (lq *LogsQuery) Select(fields ...string) *LogsSelect {

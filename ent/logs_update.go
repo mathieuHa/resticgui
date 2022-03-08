@@ -29,16 +29,30 @@ func (lu *LogsUpdate) Where(ps ...predicate.Logs) *LogsUpdate {
 	return lu
 }
 
-// SetCreatedAt sets the "createdAt" field.
-func (lu *LogsUpdate) SetCreatedAt(t time.Time) *LogsUpdate {
-	lu.mutation.SetCreatedAt(t)
+// SetStartTime sets the "startTime" field.
+func (lu *LogsUpdate) SetStartTime(t time.Time) *LogsUpdate {
+	lu.mutation.SetStartTime(t)
 	return lu
 }
 
-// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (lu *LogsUpdate) SetNillableCreatedAt(t *time.Time) *LogsUpdate {
+// SetNillableStartTime sets the "startTime" field if the given value is not nil.
+func (lu *LogsUpdate) SetNillableStartTime(t *time.Time) *LogsUpdate {
 	if t != nil {
-		lu.SetCreatedAt(*t)
+		lu.SetStartTime(*t)
+	}
+	return lu
+}
+
+// SetEndTime sets the "endTime" field.
+func (lu *LogsUpdate) SetEndTime(t time.Time) *LogsUpdate {
+	lu.mutation.SetEndTime(t)
+	return lu
+}
+
+// SetNillableEndTime sets the "endTime" field if the given value is not nil.
+func (lu *LogsUpdate) SetNillableEndTime(t *time.Time) *LogsUpdate {
+	if t != nil {
+		lu.SetEndTime(*t)
 	}
 	return lu
 }
@@ -183,11 +197,18 @@ func (lu *LogsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := lu.mutation.CreatedAt(); ok {
+	if value, ok := lu.mutation.StartTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: logs.FieldCreatedAt,
+			Column: logs.FieldStartTime,
+		})
+	}
+	if value, ok := lu.mutation.EndTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: logs.FieldEndTime,
 		})
 	}
 	if value, ok := lu.mutation.Operation(); ok {
@@ -279,16 +300,30 @@ type LogsUpdateOne struct {
 	mutation *LogsMutation
 }
 
-// SetCreatedAt sets the "createdAt" field.
-func (luo *LogsUpdateOne) SetCreatedAt(t time.Time) *LogsUpdateOne {
-	luo.mutation.SetCreatedAt(t)
+// SetStartTime sets the "startTime" field.
+func (luo *LogsUpdateOne) SetStartTime(t time.Time) *LogsUpdateOne {
+	luo.mutation.SetStartTime(t)
 	return luo
 }
 
-// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (luo *LogsUpdateOne) SetNillableCreatedAt(t *time.Time) *LogsUpdateOne {
+// SetNillableStartTime sets the "startTime" field if the given value is not nil.
+func (luo *LogsUpdateOne) SetNillableStartTime(t *time.Time) *LogsUpdateOne {
 	if t != nil {
-		luo.SetCreatedAt(*t)
+		luo.SetStartTime(*t)
+	}
+	return luo
+}
+
+// SetEndTime sets the "endTime" field.
+func (luo *LogsUpdateOne) SetEndTime(t time.Time) *LogsUpdateOne {
+	luo.mutation.SetEndTime(t)
+	return luo
+}
+
+// SetNillableEndTime sets the "endTime" field if the given value is not nil.
+func (luo *LogsUpdateOne) SetNillableEndTime(t *time.Time) *LogsUpdateOne {
+	if t != nil {
+		luo.SetEndTime(*t)
 	}
 	return luo
 }
@@ -457,11 +492,18 @@ func (luo *LogsUpdateOne) sqlSave(ctx context.Context) (_node *Logs, err error) 
 			}
 		}
 	}
-	if value, ok := luo.mutation.CreatedAt(); ok {
+	if value, ok := luo.mutation.StartTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: logs.FieldCreatedAt,
+			Column: logs.FieldStartTime,
+		})
+	}
+	if value, ok := luo.mutation.EndTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: logs.FieldEndTime,
 		})
 	}
 	if value, ok := luo.mutation.Operation(); ok {

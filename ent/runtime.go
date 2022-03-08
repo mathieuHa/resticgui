@@ -140,12 +140,16 @@ func init() {
 	localprovider.DefaultValid = localproviderDescValid.Default.(bool)
 	logsFields := schema.Logs{}.Fields()
 	_ = logsFields
-	// logsDescCreatedAt is the schema descriptor for createdAt field.
-	logsDescCreatedAt := logsFields[0].Descriptor()
-	// logs.DefaultCreatedAt holds the default value on creation for the createdAt field.
-	logs.DefaultCreatedAt = logsDescCreatedAt.Default.(func() time.Time)
+	// logsDescStartTime is the schema descriptor for startTime field.
+	logsDescStartTime := logsFields[0].Descriptor()
+	// logs.DefaultStartTime holds the default value on creation for the startTime field.
+	logs.DefaultStartTime = logsDescStartTime.Default.(func() time.Time)
+	// logsDescEndTime is the schema descriptor for endTime field.
+	logsDescEndTime := logsFields[1].Descriptor()
+	// logs.DefaultEndTime holds the default value on creation for the endTime field.
+	logs.DefaultEndTime = logsDescEndTime.Default.(func() time.Time)
 	// logsDescSuccess is the schema descriptor for success field.
-	logsDescSuccess := logsFields[5].Descriptor()
+	logsDescSuccess := logsFields[6].Descriptor()
 	// logs.DefaultSuccess holds the default value on creation for the success field.
 	logs.DefaultSuccess = logsDescSuccess.Default.(bool)
 	minios3providerFields := schema.MinioS3Provider{}.Fields()

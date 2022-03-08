@@ -141,7 +141,8 @@ var (
 	// LogsColumns holds the columns for the "Logs" table.
 	LogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "start_time", Type: field.TypeTime},
+		{Name: "end_time", Type: field.TypeTime},
 		{Name: "operation", Type: field.TypeString},
 		{Name: "error", Type: field.TypeString},
 		{Name: "stderr", Type: field.TypeString},
@@ -157,7 +158,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "Logs_repositories_logs",
-				Columns:    []*schema.Column{LogsColumns[7]},
+				Columns:    []*schema.Column{LogsColumns[8]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

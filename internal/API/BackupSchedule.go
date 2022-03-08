@@ -178,17 +178,15 @@ func addScheduledBackup(repo *ent.Repository) bool {
 		log.Debug().Msg("remove previous job for the repository")
 		if repo.Edges.BackupSchedule != nil {
 			if repo.Edges.BackupSchedule.CronID != nil {
-				log.Debug().Msg("in if")
 				log.Debug().Msgf("cron id: %v", *repo.Edges.BackupSchedule.CronID)
 				cr.Remove(cron.EntryID(*repo.Edges.BackupSchedule.CronID))
-			} else {
-				log.Debug().Msg("in else")
 			}
 			// Then we had the new job to be run and register it
 			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
 			log.Debug().Msgf("timing = %v", timing)
 			cronID, err := cr.AddFunc(timing, func() {
 				log.Info().Msgf("JOB HAS STARTED %v", repo.ID)
+				ctx := context.Background()
 				db := Database.Connect()
 				defer db.Close()
 				// Check the validity of the provider and repository in general
@@ -203,21 +201,72 @@ func addScheduledBackup(repo *ent.Repository) bool {
 					WithPaths().
 					Where(repository.ID(repo.ID)).
 					First(context.Background())
-				log.Debug().Msgf("nb path: %d", len(r.Edges.Paths))
-				_, _, errCmd := commands.GetSnapshots(*r)
-				log.Err(errCmd)
+				stdout, stderr, errCmd := commands.GetSnapshots(*r)
+
 				if errCmd == nil {
+					db.Logs.
+						Create().
+						SetOperation("GetSnapshots").
+						SetStdout(stdout).
+						SetStderr(stderr).
+						SetError("").
+						SetRepositoryID(r.ID).
+						Save(ctx)
 					log.Debug().Msg("Repository is already init success")
 				} else {
-					_, _, errCmd = commands.InitRepository(*r)
+					log.Err(errCmd)
+					db.Logs.
+						Create().
+						SetOperation("GetSnapshots").
+						SetStdout(stdout).
+						SetStderr(stderr).
+						SetError(errCmd.Error()).
+						SetRepositoryID(r.ID).
+						Save(ctx)
+					stdout, stderr, errCmd = commands.InitRepository(*r)
 					if errCmd != nil {
 						log.Err(errCmd).Msg("Error in init repository")
+						db.Logs.
+							Create().
+							SetOperation("InitRepository").
+							SetStdout(stdout).
+							SetStderr(stderr).
+							SetError(errCmd.Error()).
+							SetRepositoryID(r.ID).
+							Save(ctx)
+					} else {
+						db.Logs.
+							Create().
+							SetOperation("InitRepository").
+							SetStdout(stdout).
+							SetStderr(stderr).
+							SetError("").
+							SetRepositoryID(r.ID).
+							Save(ctx)
 					}
+
 				}
-				_, _, errCmd = commands.BackupRepository(*r, false)
+				stdout, stderr, errCmd = commands.BackupRepository(*r, false)
 
 				if errCmd != nil {
+					db.Logs.
+						Create().
+						SetOperation("BackupRepository").
+						SetStdout(stdout).
+						SetStderr(stderr).
+						SetError(errCmd.Error()).
+						SetRepositoryID(r.ID).
+						Save(ctx)
 					log.Err(errCmd).Msg("Error in Backup")
+				} else {
+					db.Logs.
+						Create().
+						SetOperation("BackupRepository").
+						SetStdout(stdout).
+						SetStderr(stderr).
+						SetError("").
+						SetRepositoryID(r.ID).
+						Save(ctx)
 				}
 
 				log.Info().Msgf("JOB HAS ENDED %v", repo.ID)

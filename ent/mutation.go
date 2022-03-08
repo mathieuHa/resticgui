@@ -3714,7 +3714,8 @@ type LogsMutation struct {
 	op                Op
 	typ               string
 	id                *int
-	createdAt         *time.Time
+	startTime         *time.Time
+	endTime           *time.Time
 	operation         *string
 	error             *string
 	stderr            *string
@@ -3826,40 +3827,76 @@ func (m *LogsMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetCreatedAt sets the "createdAt" field.
-func (m *LogsMutation) SetCreatedAt(t time.Time) {
-	m.createdAt = &t
+// SetStartTime sets the "startTime" field.
+func (m *LogsMutation) SetStartTime(t time.Time) {
+	m.startTime = &t
 }
 
-// CreatedAt returns the value of the "createdAt" field in the mutation.
-func (m *LogsMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.createdAt
+// StartTime returns the value of the "startTime" field in the mutation.
+func (m *LogsMutation) StartTime() (r time.Time, exists bool) {
+	v := m.startTime
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCreatedAt returns the old "createdAt" field's value of the Logs entity.
+// OldStartTime returns the old "startTime" field's value of the Logs entity.
 // If the Logs object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LogsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *LogsMutation) OldStartTime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+		return v, errors.New("OldStartTime is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+		return v, errors.New("OldStartTime requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+		return v, fmt.Errorf("querying old value for OldStartTime: %w", err)
 	}
-	return oldValue.CreatedAt, nil
+	return oldValue.StartTime, nil
 }
 
-// ResetCreatedAt resets all changes to the "createdAt" field.
-func (m *LogsMutation) ResetCreatedAt() {
-	m.createdAt = nil
+// ResetStartTime resets all changes to the "startTime" field.
+func (m *LogsMutation) ResetStartTime() {
+	m.startTime = nil
+}
+
+// SetEndTime sets the "endTime" field.
+func (m *LogsMutation) SetEndTime(t time.Time) {
+	m.endTime = &t
+}
+
+// EndTime returns the value of the "endTime" field in the mutation.
+func (m *LogsMutation) EndTime() (r time.Time, exists bool) {
+	v := m.endTime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndTime returns the old "endTime" field's value of the Logs entity.
+// If the Logs object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogsMutation) OldEndTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndTime: %w", err)
+	}
+	return oldValue.EndTime, nil
+}
+
+// ResetEndTime resets all changes to the "endTime" field.
+func (m *LogsMutation) ResetEndTime() {
+	m.endTime = nil
 }
 
 // SetOperation sets the "operation" field.
@@ -4100,9 +4137,12 @@ func (m *LogsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LogsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.createdAt != nil {
-		fields = append(fields, logs.FieldCreatedAt)
+	fields := make([]string, 0, 7)
+	if m.startTime != nil {
+		fields = append(fields, logs.FieldStartTime)
+	}
+	if m.endTime != nil {
+		fields = append(fields, logs.FieldEndTime)
 	}
 	if m.operation != nil {
 		fields = append(fields, logs.FieldOperation)
@@ -4127,8 +4167,10 @@ func (m *LogsMutation) Fields() []string {
 // schema.
 func (m *LogsMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case logs.FieldCreatedAt:
-		return m.CreatedAt()
+	case logs.FieldStartTime:
+		return m.StartTime()
+	case logs.FieldEndTime:
+		return m.EndTime()
 	case logs.FieldOperation:
 		return m.Operation()
 	case logs.FieldError:
@@ -4148,8 +4190,10 @@ func (m *LogsMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *LogsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case logs.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
+	case logs.FieldStartTime:
+		return m.OldStartTime(ctx)
+	case logs.FieldEndTime:
+		return m.OldEndTime(ctx)
 	case logs.FieldOperation:
 		return m.OldOperation(ctx)
 	case logs.FieldError:
@@ -4169,12 +4213,19 @@ func (m *LogsMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *LogsMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case logs.FieldCreatedAt:
+	case logs.FieldStartTime:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCreatedAt(v)
+		m.SetStartTime(v)
+		return nil
+	case logs.FieldEndTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndTime(v)
 		return nil
 	case logs.FieldOperation:
 		v, ok := value.(string)
@@ -4260,8 +4311,11 @@ func (m *LogsMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *LogsMutation) ResetField(name string) error {
 	switch name {
-	case logs.FieldCreatedAt:
-		m.ResetCreatedAt()
+	case logs.FieldStartTime:
+		m.ResetStartTime()
+		return nil
+	case logs.FieldEndTime:
+		m.ResetEndTime()
 		return nil
 	case logs.FieldOperation:
 		m.ResetOperation()

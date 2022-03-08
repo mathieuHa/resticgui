@@ -21,16 +21,30 @@ type LogsCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "createdAt" field.
-func (lc *LogsCreate) SetCreatedAt(t time.Time) *LogsCreate {
-	lc.mutation.SetCreatedAt(t)
+// SetStartTime sets the "startTime" field.
+func (lc *LogsCreate) SetStartTime(t time.Time) *LogsCreate {
+	lc.mutation.SetStartTime(t)
 	return lc
 }
 
-// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (lc *LogsCreate) SetNillableCreatedAt(t *time.Time) *LogsCreate {
+// SetNillableStartTime sets the "startTime" field if the given value is not nil.
+func (lc *LogsCreate) SetNillableStartTime(t *time.Time) *LogsCreate {
 	if t != nil {
-		lc.SetCreatedAt(*t)
+		lc.SetStartTime(*t)
+	}
+	return lc
+}
+
+// SetEndTime sets the "endTime" field.
+func (lc *LogsCreate) SetEndTime(t time.Time) *LogsCreate {
+	lc.mutation.SetEndTime(t)
+	return lc
+}
+
+// SetNillableEndTime sets the "endTime" field if the given value is not nil.
+func (lc *LogsCreate) SetNillableEndTime(t *time.Time) *LogsCreate {
+	if t != nil {
+		lc.SetEndTime(*t)
 	}
 	return lc
 }
@@ -163,9 +177,13 @@ func (lc *LogsCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (lc *LogsCreate) defaults() {
-	if _, ok := lc.mutation.CreatedAt(); !ok {
-		v := logs.DefaultCreatedAt()
-		lc.mutation.SetCreatedAt(v)
+	if _, ok := lc.mutation.StartTime(); !ok {
+		v := logs.DefaultStartTime()
+		lc.mutation.SetStartTime(v)
+	}
+	if _, ok := lc.mutation.EndTime(); !ok {
+		v := logs.DefaultEndTime()
+		lc.mutation.SetEndTime(v)
 	}
 	if _, ok := lc.mutation.Success(); !ok {
 		v := logs.DefaultSuccess
@@ -175,8 +193,11 @@ func (lc *LogsCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (lc *LogsCreate) check() error {
-	if _, ok := lc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Logs.createdAt"`)}
+	if _, ok := lc.mutation.StartTime(); !ok {
+		return &ValidationError{Name: "startTime", err: errors.New(`ent: missing required field "Logs.startTime"`)}
+	}
+	if _, ok := lc.mutation.EndTime(); !ok {
+		return &ValidationError{Name: "endTime", err: errors.New(`ent: missing required field "Logs.endTime"`)}
 	}
 	if _, ok := lc.mutation.Operation(); !ok {
 		return &ValidationError{Name: "operation", err: errors.New(`ent: missing required field "Logs.operation"`)}
@@ -220,13 +241,21 @@ func (lc *LogsCreate) createSpec() (*Logs, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := lc.mutation.CreatedAt(); ok {
+	if value, ok := lc.mutation.StartTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: logs.FieldCreatedAt,
+			Column: logs.FieldStartTime,
 		})
-		_node.CreatedAt = value
+		_node.StartTime = value
+	}
+	if value, ok := lc.mutation.EndTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: logs.FieldEndTime,
+		})
+		_node.EndTime = value
 	}
 	if value, ok := lc.mutation.Operation(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
