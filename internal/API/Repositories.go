@@ -2,6 +2,7 @@ package API
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/internal/Database"
+	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
 	"gitlab.com/resticgui/resticgui/internal/commands"
 )
@@ -706,7 +708,17 @@ func GetSnapshotsRepository(c *gin.Context) {
 			Save(ctx)
 	}
 
-	c.IndentedJSON(http.StatusOK, stdout)
+	var snapshots []Models.Snapshot
+
+	err = json.Unmarshal([]byte(stdout), &snapshots)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusOK, snapshots)
+		return
+	} else {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error converting snapshots to json", "message": err.Error()})
+	}
+
 }
 
 // ValidRepository godoc
