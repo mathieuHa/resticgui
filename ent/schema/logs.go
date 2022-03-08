@@ -26,7 +26,7 @@ func (Logs) Annotations() []schema.Annotation {
 func (Logs) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("createdAt").Default(time.Now),
-		field.String("bucketName"),
+		field.String("operation"),
 		field.String("error"),
 		field.String("stderr"),
 		field.String("stdout"),

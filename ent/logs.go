@@ -19,8 +19,8 @@ type Logs struct {
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "createdAt" field.
 	CreatedAt time.Time `json:"createdAt,omitempty"`
-	// BucketName holds the value of the "bucketName" field.
-	BucketName string `json:"bucketName,omitempty"`
+	// Operation holds the value of the "operation" field.
+	Operation string `json:"operation,omitempty"`
 	// Error holds the value of the "error" field.
 	Error string `json:"error,omitempty"`
 	// Stderr holds the value of the "stderr" field.
@@ -67,7 +67,7 @@ func (*Logs) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case logs.FieldID:
 			values[i] = new(sql.NullInt64)
-		case logs.FieldBucketName, logs.FieldError, logs.FieldStderr, logs.FieldStdout:
+		case logs.FieldOperation, logs.FieldError, logs.FieldStderr, logs.FieldStdout:
 			values[i] = new(sql.NullString)
 		case logs.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -100,11 +100,11 @@ func (l *Logs) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				l.CreatedAt = value.Time
 			}
-		case logs.FieldBucketName:
+		case logs.FieldOperation:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field bucketName", values[i])
+				return fmt.Errorf("unexpected type %T for field operation", values[i])
 			} else if value.Valid {
-				l.BucketName = value.String
+				l.Operation = value.String
 			}
 		case logs.FieldError:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -172,8 +172,8 @@ func (l *Logs) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", l.ID))
 	builder.WriteString(", createdAt=")
 	builder.WriteString(l.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", bucketName=")
-	builder.WriteString(l.BucketName)
+	builder.WriteString(", operation=")
+	builder.WriteString(l.Operation)
 	builder.WriteString(", error=")
 	builder.WriteString(l.Error)
 	builder.WriteString(", stderr=")

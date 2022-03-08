@@ -13,8 +13,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the createdat field in the database.
 	FieldCreatedAt = "created_at"
-	// FieldBucketName holds the string denoting the bucketname field in the database.
-	FieldBucketName = "bucket_name"
+	// FieldOperation holds the string denoting the operation field in the database.
+	FieldOperation = "operation"
 	// FieldError holds the string denoting the error field in the database.
 	FieldError = "error"
 	// FieldStderr holds the string denoting the stderr field in the database.
@@ -40,7 +40,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
-	FieldBucketName,
+	FieldOperation,
 	FieldError,
 	FieldStderr,
 	FieldStdout,

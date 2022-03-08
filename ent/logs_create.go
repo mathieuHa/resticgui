@@ -35,9 +35,9 @@ func (lc *LogsCreate) SetNillableCreatedAt(t *time.Time) *LogsCreate {
 	return lc
 }
 
-// SetBucketName sets the "bucketName" field.
-func (lc *LogsCreate) SetBucketName(s string) *LogsCreate {
-	lc.mutation.SetBucketName(s)
+// SetOperation sets the "operation" field.
+func (lc *LogsCreate) SetOperation(s string) *LogsCreate {
+	lc.mutation.SetOperation(s)
 	return lc
 }
 
@@ -178,8 +178,8 @@ func (lc *LogsCreate) check() error {
 	if _, ok := lc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Logs.createdAt"`)}
 	}
-	if _, ok := lc.mutation.BucketName(); !ok {
-		return &ValidationError{Name: "bucketName", err: errors.New(`ent: missing required field "Logs.bucketName"`)}
+	if _, ok := lc.mutation.Operation(); !ok {
+		return &ValidationError{Name: "operation", err: errors.New(`ent: missing required field "Logs.operation"`)}
 	}
 	if _, ok := lc.mutation.Error(); !ok {
 		return &ValidationError{Name: "error", err: errors.New(`ent: missing required field "Logs.error"`)}
@@ -228,13 +228,13 @@ func (lc *LogsCreate) createSpec() (*Logs, *sqlgraph.CreateSpec) {
 		})
 		_node.CreatedAt = value
 	}
-	if value, ok := lc.mutation.BucketName(); ok {
+	if value, ok := lc.mutation.Operation(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: logs.FieldBucketName,
+			Column: logs.FieldOperation,
 		})
-		_node.BucketName = value
+		_node.Operation = value
 	}
 	if value, ok := lc.mutation.Error(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

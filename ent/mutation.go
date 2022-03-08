@@ -3715,7 +3715,7 @@ type LogsMutation struct {
 	typ               string
 	id                *int
 	createdAt         *time.Time
-	bucketName        *string
+	operation         *string
 	error             *string
 	stderr            *string
 	stdout            *string
@@ -3862,40 +3862,40 @@ func (m *LogsMutation) ResetCreatedAt() {
 	m.createdAt = nil
 }
 
-// SetBucketName sets the "bucketName" field.
-func (m *LogsMutation) SetBucketName(s string) {
-	m.bucketName = &s
+// SetOperation sets the "operation" field.
+func (m *LogsMutation) SetOperation(s string) {
+	m.operation = &s
 }
 
-// BucketName returns the value of the "bucketName" field in the mutation.
-func (m *LogsMutation) BucketName() (r string, exists bool) {
-	v := m.bucketName
+// Operation returns the value of the "operation" field in the mutation.
+func (m *LogsMutation) Operation() (r string, exists bool) {
+	v := m.operation
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldBucketName returns the old "bucketName" field's value of the Logs entity.
+// OldOperation returns the old "operation" field's value of the Logs entity.
 // If the Logs object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LogsMutation) OldBucketName(ctx context.Context) (v string, err error) {
+func (m *LogsMutation) OldOperation(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldBucketName is only allowed on UpdateOne operations")
+		return v, errors.New("OldOperation is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldBucketName requires an ID field in the mutation")
+		return v, errors.New("OldOperation requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldBucketName: %w", err)
+		return v, fmt.Errorf("querying old value for OldOperation: %w", err)
 	}
-	return oldValue.BucketName, nil
+	return oldValue.Operation, nil
 }
 
-// ResetBucketName resets all changes to the "bucketName" field.
-func (m *LogsMutation) ResetBucketName() {
-	m.bucketName = nil
+// ResetOperation resets all changes to the "operation" field.
+func (m *LogsMutation) ResetOperation() {
+	m.operation = nil
 }
 
 // SetError sets the "error" field.
@@ -4104,8 +4104,8 @@ func (m *LogsMutation) Fields() []string {
 	if m.createdAt != nil {
 		fields = append(fields, logs.FieldCreatedAt)
 	}
-	if m.bucketName != nil {
-		fields = append(fields, logs.FieldBucketName)
+	if m.operation != nil {
+		fields = append(fields, logs.FieldOperation)
 	}
 	if m.error != nil {
 		fields = append(fields, logs.FieldError)
@@ -4129,8 +4129,8 @@ func (m *LogsMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case logs.FieldCreatedAt:
 		return m.CreatedAt()
-	case logs.FieldBucketName:
-		return m.BucketName()
+	case logs.FieldOperation:
+		return m.Operation()
 	case logs.FieldError:
 		return m.Error()
 	case logs.FieldStderr:
@@ -4150,8 +4150,8 @@ func (m *LogsMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case logs.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case logs.FieldBucketName:
-		return m.OldBucketName(ctx)
+	case logs.FieldOperation:
+		return m.OldOperation(ctx)
 	case logs.FieldError:
 		return m.OldError(ctx)
 	case logs.FieldStderr:
@@ -4176,12 +4176,12 @@ func (m *LogsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case logs.FieldBucketName:
+	case logs.FieldOperation:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetBucketName(v)
+		m.SetOperation(v)
 		return nil
 	case logs.FieldError:
 		v, ok := value.(string)
@@ -4263,8 +4263,8 @@ func (m *LogsMutation) ResetField(name string) error {
 	case logs.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case logs.FieldBucketName:
-		m.ResetBucketName()
+	case logs.FieldOperation:
+		m.ResetOperation()
 		return nil
 	case logs.FieldError:
 		m.ResetError()

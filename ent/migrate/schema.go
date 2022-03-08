@@ -142,7 +142,7 @@ var (
 	LogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "bucket_name", Type: field.TypeString},
+		{Name: "operation", Type: field.TypeString},
 		{Name: "error", Type: field.TypeString},
 		{Name: "stderr", Type: field.TypeString},
 		{Name: "stdout", Type: field.TypeString},

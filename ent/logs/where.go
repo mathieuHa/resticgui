@@ -100,10 +100,10 @@ func CreatedAt(v time.Time) predicate.Logs {
 	})
 }
 
-// BucketName applies equality check predicate on the "bucketName" field. It's identical to BucketNameEQ.
-func BucketName(v string) predicate.Logs {
+// Operation applies equality check predicate on the "operation" field. It's identical to OperationEQ.
+func Operation(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBucketName), v))
+		s.Where(sql.EQ(s.C(FieldOperation), v))
 	})
 }
 
@@ -211,22 +211,22 @@ func CreatedAtLTE(v time.Time) predicate.Logs {
 	})
 }
 
-// BucketNameEQ applies the EQ predicate on the "bucketName" field.
-func BucketNameEQ(v string) predicate.Logs {
+// OperationEQ applies the EQ predicate on the "operation" field.
+func OperationEQ(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBucketName), v))
+		s.Where(sql.EQ(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameNEQ applies the NEQ predicate on the "bucketName" field.
-func BucketNameNEQ(v string) predicate.Logs {
+// OperationNEQ applies the NEQ predicate on the "operation" field.
+func OperationNEQ(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBucketName), v))
+		s.Where(sql.NEQ(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameIn applies the In predicate on the "bucketName" field.
-func BucketNameIn(vs ...string) predicate.Logs {
+// OperationIn applies the In predicate on the "operation" field.
+func OperationIn(vs ...string) predicate.Logs {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -238,12 +238,12 @@ func BucketNameIn(vs ...string) predicate.Logs {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldBucketName), v...))
+		s.Where(sql.In(s.C(FieldOperation), v...))
 	})
 }
 
-// BucketNameNotIn applies the NotIn predicate on the "bucketName" field.
-func BucketNameNotIn(vs ...string) predicate.Logs {
+// OperationNotIn applies the NotIn predicate on the "operation" field.
+func OperationNotIn(vs ...string) predicate.Logs {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -255,70 +255,70 @@ func BucketNameNotIn(vs ...string) predicate.Logs {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldBucketName), v...))
+		s.Where(sql.NotIn(s.C(FieldOperation), v...))
 	})
 }
 
-// BucketNameGT applies the GT predicate on the "bucketName" field.
-func BucketNameGT(v string) predicate.Logs {
+// OperationGT applies the GT predicate on the "operation" field.
+func OperationGT(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBucketName), v))
+		s.Where(sql.GT(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameGTE applies the GTE predicate on the "bucketName" field.
-func BucketNameGTE(v string) predicate.Logs {
+// OperationGTE applies the GTE predicate on the "operation" field.
+func OperationGTE(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBucketName), v))
+		s.Where(sql.GTE(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameLT applies the LT predicate on the "bucketName" field.
-func BucketNameLT(v string) predicate.Logs {
+// OperationLT applies the LT predicate on the "operation" field.
+func OperationLT(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBucketName), v))
+		s.Where(sql.LT(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameLTE applies the LTE predicate on the "bucketName" field.
-func BucketNameLTE(v string) predicate.Logs {
+// OperationLTE applies the LTE predicate on the "operation" field.
+func OperationLTE(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBucketName), v))
+		s.Where(sql.LTE(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameContains applies the Contains predicate on the "bucketName" field.
-func BucketNameContains(v string) predicate.Logs {
+// OperationContains applies the Contains predicate on the "operation" field.
+func OperationContains(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldBucketName), v))
+		s.Where(sql.Contains(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameHasPrefix applies the HasPrefix predicate on the "bucketName" field.
-func BucketNameHasPrefix(v string) predicate.Logs {
+// OperationHasPrefix applies the HasPrefix predicate on the "operation" field.
+func OperationHasPrefix(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldBucketName), v))
+		s.Where(sql.HasPrefix(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameHasSuffix applies the HasSuffix predicate on the "bucketName" field.
-func BucketNameHasSuffix(v string) predicate.Logs {
+// OperationHasSuffix applies the HasSuffix predicate on the "operation" field.
+func OperationHasSuffix(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldBucketName), v))
+		s.Where(sql.HasSuffix(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameEqualFold applies the EqualFold predicate on the "bucketName" field.
-func BucketNameEqualFold(v string) predicate.Logs {
+// OperationEqualFold applies the EqualFold predicate on the "operation" field.
+func OperationEqualFold(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldBucketName), v))
+		s.Where(sql.EqualFold(s.C(FieldOperation), v))
 	})
 }
 
-// BucketNameContainsFold applies the ContainsFold predicate on the "bucketName" field.
-func BucketNameContainsFold(v string) predicate.Logs {
+// OperationContainsFold applies the ContainsFold predicate on the "operation" field.
+func OperationContainsFold(v string) predicate.Logs {
 	return predicate.Logs(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldBucketName), v))
+		s.Where(sql.ContainsFold(s.C(FieldOperation), v))
 	})
 }
 

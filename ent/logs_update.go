@@ -43,9 +43,9 @@ func (lu *LogsUpdate) SetNillableCreatedAt(t *time.Time) *LogsUpdate {
 	return lu
 }
 
-// SetBucketName sets the "bucketName" field.
-func (lu *LogsUpdate) SetBucketName(s string) *LogsUpdate {
-	lu.mutation.SetBucketName(s)
+// SetOperation sets the "operation" field.
+func (lu *LogsUpdate) SetOperation(s string) *LogsUpdate {
+	lu.mutation.SetOperation(s)
 	return lu
 }
 
@@ -190,11 +190,11 @@ func (lu *LogsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: logs.FieldCreatedAt,
 		})
 	}
-	if value, ok := lu.mutation.BucketName(); ok {
+	if value, ok := lu.mutation.Operation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: logs.FieldBucketName,
+			Column: logs.FieldOperation,
 		})
 	}
 	if value, ok := lu.mutation.Error(); ok {
@@ -293,9 +293,9 @@ func (luo *LogsUpdateOne) SetNillableCreatedAt(t *time.Time) *LogsUpdateOne {
 	return luo
 }
 
-// SetBucketName sets the "bucketName" field.
-func (luo *LogsUpdateOne) SetBucketName(s string) *LogsUpdateOne {
-	luo.mutation.SetBucketName(s)
+// SetOperation sets the "operation" field.
+func (luo *LogsUpdateOne) SetOperation(s string) *LogsUpdateOne {
+	luo.mutation.SetOperation(s)
 	return luo
 }
 
@@ -464,11 +464,11 @@ func (luo *LogsUpdateOne) sqlSave(ctx context.Context) (_node *Logs, err error) 
 			Column: logs.FieldCreatedAt,
 		})
 	}
-	if value, ok := luo.mutation.BucketName(); ok {
+	if value, ok := luo.mutation.Operation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: logs.FieldBucketName,
+			Column: logs.FieldOperation,
 		})
 	}
 	if value, ok := luo.mutation.Error(); ok {
