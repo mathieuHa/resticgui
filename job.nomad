@@ -98,16 +98,16 @@ job "resticgui_job" {
       //   destination = "/opt/test"
       //   read_only   = false
       // }
-      volume_mount {
-        volume      = "resticgui-data"
-        destination = "/data"
-        read_only   = false
-      }
-      volume_mount {
-        volume      = "resticgui-backup"
-        destination = "/backup"
-        read_only   = false
-      }
+      // volume_mount {
+      //   volume      = "resticgui-data"
+      //   destination = "/data"
+      //   read_only   = false
+      // }
+      // volume_mount {
+      //   volume      = "resticgui-backup"
+      //   destination = "/backup"
+      //   read_only   = false
+      // }
     }
 
   }
