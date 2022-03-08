@@ -41,6 +41,7 @@ func GetSnapshots(repository ent.Repository) (string, string, error) {
 	repoFormat, env := getProviderData(repository)
 	args = append(args, repoFormat...)
 	args = append(args, snapshotsCmd)
+	args = append(args, "--json")
 	return runRestic(args, env)
 }
 
@@ -75,7 +76,7 @@ func getRestoreCommonArgs(path string, version string) []string {
 	return args
 }
 
-func ForgetSnaphots(repository ent.Repository, version string) (string, string, error) {
+func ForgetSnapshots(repository ent.Repository, version string) (string, string, error) {
 	var args []string
 	var env []string
 

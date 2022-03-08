@@ -637,6 +637,78 @@ func CheckRepository(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, stdout)
 }
 
+// GetSnapshotsRepository godoc
+// @Summary get snapshots repository
+// @Schemes
+// @Description return the snapshots command output for the repository
+// @Param id path int true "Repository ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/snapshots [get]
+func GetSnapshotsRepository(c *gin.Context) {
+	log.Debug().Msg("GetSnapshotsRepository()")
+
+	ctx := context.Background()
+	id := c.Param("id")
+
+	if !Utils.IsValidInt(id) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+		return
+	}
+
+	newId, _ := strconv.Atoi(id)
+
+	db := Database.Connect()
+	defer db.Close()
+
+	r, err := db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPaths().
+		Where(repository.ID(newId)).
+		First(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errQuery)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+		return
+	}
+
+	stdout, stderr, errCmd := commands.GetSnapshots(*r)
+
+	if errCmd == nil {
+		db.Logs.
+			Create().
+			SetOperation("GetSnapshots").
+			SetStdout(stdout).
+			SetStderr(stderr).
+			SetError("").
+			SetRepositoryID(r.ID).
+			Save(ctx)
+	} else {
+		log.Err(errCmd)
+		db.Logs.
+			Create().
+			SetOperation("GetSnapshots").
+			SetStdout(stdout).
+			SetStderr(stderr).
+			SetError(errCmd.Error()).
+			SetRepositoryID(r.ID).
+			Save(ctx)
+	}
+
+	c.IndentedJSON(http.StatusOK, stdout)
+}
+
 // ValidRepository godoc
 // @Summary valid repository
 // @Schemes
