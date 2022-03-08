@@ -203,7 +203,7 @@ func addScheduledBackup(repo *ent.Repository) bool {
 					WithPaths().
 					Where(repository.ID(repo.ID)).
 					First(context.Background())
-
+				log.Debug().Msgf("nb path: %d", len(r.Edges.Paths))
 				_, _, errCmd := commands.GetSnapshots(*r)
 				log.Err(errCmd)
 				if errCmd == nil {

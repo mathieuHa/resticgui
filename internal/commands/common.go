@@ -106,8 +106,8 @@ func BackupRepository(repository ent.Repository, dryRun bool) (string, string, e
 	dryRunParameter := getDryRunParameter(dryRun)
 
 	args = append(args, repoFormat...)
-	args = append(args, commonArgs...)
 	args = append(args, backupCmd)
+	args = append(args, commonArgs...)
 	args = append(args, dryRunParameter)
 
 	return runRestic(args, env)

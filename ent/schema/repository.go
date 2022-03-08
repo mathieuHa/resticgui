@@ -55,5 +55,8 @@ func (Repository) Edges() []ent.Edge {
 		edge.To("paths", Path.Type).Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
+		edge.To("logs", Logs.Type).Annotations(entsql.Annotation{
+			OnDelete: entsql.Cascade,
+		}),
 	}
 }
