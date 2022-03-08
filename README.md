@@ -16,7 +16,7 @@ This resticGUI version works with restic version 0.12.0 or more
 ```
 make run
 ```
-> Listen on http://localhost:8080
+> Listen on http://localhost:3001
 
 #### Start dev web server 
 
@@ -30,13 +30,13 @@ make rundevweb
 ```
 make rundocker
 ```
-> Listen on http://localhost:8000
+> Listen on http://localhost:3030
 
 ## Dependancies
 
 ### Frontend
 
-#### Install node 14
+#### Install node 16
 
 ```
 curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
