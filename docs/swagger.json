@@ -265,6 +265,50 @@
                 }
             }
         },
+        "/repositories/{id}/logs": {
+            "get": {
+                "description": "return the check command output for the repository",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Check repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/repositories/{id}/provider/valid": {
             "get": {
                 "description": "valid the repository by ID",
@@ -275,6 +319,50 @@
                     "application/json"
                 ],
                 "summary": "valid provider of the repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/repositories/{id}/snapshots": {
+            "get": {
+                "description": "return the snapshots command output for the repository",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get snapshots repository",
                 "parameters": [
                     {
                         "type": "integer",
@@ -601,6 +689,56 @@
                 }
             }
         },
+        "ent.Logs": {
+            "type": "object",
+            "properties": {
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the LogsQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.LogsEdges"
+                },
+                "endTime": {
+                    "description": "EndTime holds the value of the \"endTime\" field.",
+                    "type": "string"
+                },
+                "error": {
+                    "description": "Error holds the value of the \"error\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "operation": {
+                    "description": "Operation holds the value of the \"operation\" field.",
+                    "type": "string"
+                },
+                "startTime": {
+                    "description": "StartTime holds the value of the \"startTime\" field.",
+                    "type": "string"
+                },
+                "stderr": {
+                    "description": "Stderr holds the value of the \"stderr\" field.",
+                    "type": "string"
+                },
+                "stdout": {
+                    "description": "Stdout holds the value of the \"stdout\" field.",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Success holds the value of the \"success\" field.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "ent.LogsEdges": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "description": "Repository holds the value of the repository edge.",
+                    "$ref": "#/definitions/ent.Repository"
+                }
+            }
+        },
         "ent.MinioS3Provider": {
             "type": "object",
             "properties": {
@@ -724,6 +862,10 @@
                     "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 },
+                "password": {
+                    "description": "Password holds the value of the \"password\" field.",
+                    "type": "string"
+                },
                 "provider": {
                     "description": "Provider holds the value of the \"provider\" field.",
                     "type": "string"
@@ -764,6 +906,13 @@
                 "localProvider": {
                     "description": "LocalProvider holds the value of the localProvider edge.",
                     "$ref": "#/definitions/ent.LocalProvider"
+                },
+                "logs": {
+                    "description": "Logs holds the value of the logs edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Logs"
+                    }
                 },
                 "paths": {
                     "description": "Paths holds the value of the paths edge.",

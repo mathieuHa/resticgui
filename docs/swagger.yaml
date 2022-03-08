@@ -186,6 +186,44 @@ definitions:
         $ref: '#/definitions/ent.Repository'
         description: Repository holds the value of the repository edge.
     type: object
+  ent.Logs:
+    properties:
+      edges:
+        $ref: '#/definitions/ent.LogsEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the LogsQuery when eager-loading is set.
+      endTime:
+        description: EndTime holds the value of the "endTime" field.
+        type: string
+      error:
+        description: Error holds the value of the "error" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      operation:
+        description: Operation holds the value of the "operation" field.
+        type: string
+      startTime:
+        description: StartTime holds the value of the "startTime" field.
+        type: string
+      stderr:
+        description: Stderr holds the value of the "stderr" field.
+        type: string
+      stdout:
+        description: Stdout holds the value of the "stdout" field.
+        type: string
+      success:
+        description: Success holds the value of the "success" field.
+        type: boolean
+    type: object
+  ent.LogsEdges:
+    properties:
+      repository:
+        $ref: '#/definitions/ent.Repository'
+        description: Repository holds the value of the repository edge.
+    type: object
   ent.MinioS3Provider:
     properties:
       IP:
@@ -281,6 +319,9 @@ definitions:
       name:
         description: Name holds the value of the "name" field.
         type: string
+      password:
+        description: Password holds the value of the "password" field.
+        type: string
       provider:
         description: Provider holds the value of the "provider" field.
         type: string
@@ -311,6 +352,11 @@ definitions:
       localProvider:
         $ref: '#/definitions/ent.LocalProvider'
         description: LocalProvider holds the value of the localProvider edge.
+      logs:
+        description: Logs holds the value of the logs edge.
+        items:
+          $ref: '#/definitions/ent.Logs'
+        type: array
       paths:
         description: Paths holds the value of the paths edge.
         items:
@@ -493,6 +539,35 @@ paths:
           schema:
             type: string
       summary: edit repository
+  /repositories/{id}/logs:
+    get:
+      consumes:
+      - application/json
+      description: return the check command output for the repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Check repository
   /repositories/{id}/provider/valid:
     get:
       consumes:
@@ -522,6 +597,35 @@ paths:
           schema:
             type: string
       summary: valid provider of the repository
+  /repositories/{id}/snapshots:
+    get:
+      consumes:
+      - application/json
+      description: return the snapshots command output for the repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get snapshots repository
   /repositories/{id}/valid:
     get:
       consumes:
