@@ -29,9 +29,6 @@ job "resticgui_job" {
     count = 1
     network {
       mode = "bridge"
-      port "ftpc" {
-        to = 20
-      }
     }
     service {
       port = "3030"
