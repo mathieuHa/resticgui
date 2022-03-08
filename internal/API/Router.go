@@ -60,6 +60,8 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.PATCH(":id", EditRepository)
 		grpRepositories.DELETE(":id", RemoveRepository)
 		grpRepositories.GET(":id/logs", LogsRepository)
+		grpRepositories.GET(":id/stats", StatsRepository)
+		grpRepositories.GET(":id/check", CheckRepository)
 		grpRepositories.GET(":id/valid", ValidRepository)
 		grpRepositories.GET(":id/provider/valid", ValidProvider)
 	}
