@@ -22,6 +22,8 @@ type Tx struct {
 	BackupSchedule *BackupScheduleClient
 	// LocalProvider is the client for interacting with the LocalProvider builders.
 	LocalProvider *LocalProviderClient
+	// Logs is the client for interacting with the Logs builders.
+	Logs *LogsClient
 	// MinioS3Provider is the client for interacting with the MinioS3Provider builders.
 	MinioS3Provider *MinioS3ProviderClient
 	// Path is the client for interacting with the Path builders.
@@ -174,6 +176,7 @@ func (tx *Tx) init() {
 	tx.BackupPolicy = NewBackupPolicyClient(tx.config)
 	tx.BackupSchedule = NewBackupScheduleClient(tx.config)
 	tx.LocalProvider = NewLocalProviderClient(tx.config)
+	tx.Logs = NewLogsClient(tx.config)
 	tx.MinioS3Provider = NewMinioS3ProviderClient(tx.config)
 	tx.Path = NewPathClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)

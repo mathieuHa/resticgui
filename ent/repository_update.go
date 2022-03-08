@@ -15,6 +15,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
@@ -271,6 +272,21 @@ func (ru *RepositoryUpdate) AddPaths(p ...*Path) *RepositoryUpdate {
 	return ru.AddPathIDs(ids...)
 }
 
+// AddLogIDs adds the "logs" edge to the Logs entity by IDs.
+func (ru *RepositoryUpdate) AddLogIDs(ids ...int) *RepositoryUpdate {
+	ru.mutation.AddLogIDs(ids...)
+	return ru
+}
+
+// AddLogs adds the "logs" edges to the Logs entity.
+func (ru *RepositoryUpdate) AddLogs(l ...*Logs) *RepositoryUpdate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return ru.AddLogIDs(ids...)
+}
+
 // Mutation returns the RepositoryMutation object of the builder.
 func (ru *RepositoryUpdate) Mutation() *RepositoryMutation {
 	return ru.mutation
@@ -331,6 +347,27 @@ func (ru *RepositoryUpdate) RemovePaths(p ...*Path) *RepositoryUpdate {
 		ids[i] = p[i].ID
 	}
 	return ru.RemovePathIDs(ids...)
+}
+
+// ClearLogs clears all "logs" edges to the Logs entity.
+func (ru *RepositoryUpdate) ClearLogs() *RepositoryUpdate {
+	ru.mutation.ClearLogs()
+	return ru
+}
+
+// RemoveLogIDs removes the "logs" edge to Logs entities by IDs.
+func (ru *RepositoryUpdate) RemoveLogIDs(ids ...int) *RepositoryUpdate {
+	ru.mutation.RemoveLogIDs(ids...)
+	return ru
+}
+
+// RemoveLogs removes "logs" edges to Logs entities.
+func (ru *RepositoryUpdate) RemoveLogs(l ...*Logs) *RepositoryUpdate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return ru.RemoveLogIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -757,6 +794,60 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ru.mutation.LogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.RemovedLogsIDs(); len(nodes) > 0 && !ru.mutation.LogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.LogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{repository.Label}
@@ -1013,6 +1104,21 @@ func (ruo *RepositoryUpdateOne) AddPaths(p ...*Path) *RepositoryUpdateOne {
 	return ruo.AddPathIDs(ids...)
 }
 
+// AddLogIDs adds the "logs" edge to the Logs entity by IDs.
+func (ruo *RepositoryUpdateOne) AddLogIDs(ids ...int) *RepositoryUpdateOne {
+	ruo.mutation.AddLogIDs(ids...)
+	return ruo
+}
+
+// AddLogs adds the "logs" edges to the Logs entity.
+func (ruo *RepositoryUpdateOne) AddLogs(l ...*Logs) *RepositoryUpdateOne {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return ruo.AddLogIDs(ids...)
+}
+
 // Mutation returns the RepositoryMutation object of the builder.
 func (ruo *RepositoryUpdateOne) Mutation() *RepositoryMutation {
 	return ruo.mutation
@@ -1073,6 +1179,27 @@ func (ruo *RepositoryUpdateOne) RemovePaths(p ...*Path) *RepositoryUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return ruo.RemovePathIDs(ids...)
+}
+
+// ClearLogs clears all "logs" edges to the Logs entity.
+func (ruo *RepositoryUpdateOne) ClearLogs() *RepositoryUpdateOne {
+	ruo.mutation.ClearLogs()
+	return ruo
+}
+
+// RemoveLogIDs removes the "logs" edge to Logs entities by IDs.
+func (ruo *RepositoryUpdateOne) RemoveLogIDs(ids ...int) *RepositoryUpdateOne {
+	ruo.mutation.RemoveLogIDs(ids...)
+	return ruo
+}
+
+// RemoveLogs removes "logs" edges to Logs entities.
+func (ruo *RepositoryUpdateOne) RemoveLogs(l ...*Logs) *RepositoryUpdateOne {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return ruo.RemoveLogIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1515,6 +1642,60 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.LogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.RemovedLogsIDs(); len(nodes) > 0 && !ruo.mutation.LogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.LogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
 				},
 			},
 		}

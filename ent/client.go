@@ -14,6 +14,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
@@ -41,6 +42,8 @@ type Client struct {
 	BackupSchedule *BackupScheduleClient
 	// LocalProvider is the client for interacting with the LocalProvider builders.
 	LocalProvider *LocalProviderClient
+	// Logs is the client for interacting with the Logs builders.
+	Logs *LogsClient
 	// MinioS3Provider is the client for interacting with the MinioS3Provider builders.
 	MinioS3Provider *MinioS3ProviderClient
 	// Path is the client for interacting with the Path builders.
@@ -71,6 +74,7 @@ func (c *Client) init() {
 	c.BackupPolicy = NewBackupPolicyClient(c.config)
 	c.BackupSchedule = NewBackupScheduleClient(c.config)
 	c.LocalProvider = NewLocalProviderClient(c.config)
+	c.Logs = NewLogsClient(c.config)
 	c.MinioS3Provider = NewMinioS3ProviderClient(c.config)
 	c.Path = NewPathClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
@@ -115,6 +119,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BackupPolicy:    NewBackupPolicyClient(cfg),
 		BackupSchedule:  NewBackupScheduleClient(cfg),
 		LocalProvider:   NewLocalProviderClient(cfg),
+		Logs:            NewLogsClient(cfg),
 		MinioS3Provider: NewMinioS3ProviderClient(cfg),
 		Path:            NewPathClient(cfg),
 		Permission:      NewPermissionClient(cfg),
@@ -145,6 +150,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BackupPolicy:    NewBackupPolicyClient(cfg),
 		BackupSchedule:  NewBackupScheduleClient(cfg),
 		LocalProvider:   NewLocalProviderClient(cfg),
+		Logs:            NewLogsClient(cfg),
 		MinioS3Provider: NewMinioS3ProviderClient(cfg),
 		Path:            NewPathClient(cfg),
 		Permission:      NewPermissionClient(cfg),
@@ -185,6 +191,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.BackupPolicy.Use(hooks...)
 	c.BackupSchedule.Use(hooks...)
 	c.LocalProvider.Use(hooks...)
+	c.Logs.Use(hooks...)
 	c.MinioS3Provider.Use(hooks...)
 	c.Path.Use(hooks...)
 	c.Permission.Use(hooks...)
@@ -723,6 +730,112 @@ func (c *LocalProviderClient) Hooks() []Hook {
 	return c.hooks.LocalProvider
 }
 
+// LogsClient is a client for the Logs schema.
+type LogsClient struct {
+	config
+}
+
+// NewLogsClient returns a client for the Logs from the given config.
+func NewLogsClient(c config) *LogsClient {
+	return &LogsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `logs.Hooks(f(g(h())))`.
+func (c *LogsClient) Use(hooks ...Hook) {
+	c.hooks.Logs = append(c.hooks.Logs, hooks...)
+}
+
+// Create returns a create builder for Logs.
+func (c *LogsClient) Create() *LogsCreate {
+	mutation := newLogsMutation(c.config, OpCreate)
+	return &LogsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Logs entities.
+func (c *LogsClient) CreateBulk(builders ...*LogsCreate) *LogsCreateBulk {
+	return &LogsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Logs.
+func (c *LogsClient) Update() *LogsUpdate {
+	mutation := newLogsMutation(c.config, OpUpdate)
+	return &LogsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LogsClient) UpdateOne(l *Logs) *LogsUpdateOne {
+	mutation := newLogsMutation(c.config, OpUpdateOne, withLogs(l))
+	return &LogsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LogsClient) UpdateOneID(id int) *LogsUpdateOne {
+	mutation := newLogsMutation(c.config, OpUpdateOne, withLogsID(id))
+	return &LogsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Logs.
+func (c *LogsClient) Delete() *LogsDelete {
+	mutation := newLogsMutation(c.config, OpDelete)
+	return &LogsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *LogsClient) DeleteOne(l *Logs) *LogsDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *LogsClient) DeleteOneID(id int) *LogsDeleteOne {
+	builder := c.Delete().Where(logs.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LogsDeleteOne{builder}
+}
+
+// Query returns a query builder for Logs.
+func (c *LogsClient) Query() *LogsQuery {
+	return &LogsQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Logs entity by its id.
+func (c *LogsClient) Get(ctx context.Context, id int) (*Logs, error) {
+	return c.Query().Where(logs.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LogsClient) GetX(ctx context.Context, id int) *Logs {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a Logs.
+func (c *LogsClient) QueryRepository(l *Logs) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(logs.Table, logs.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, logs.RepositoryTable, logs.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LogsClient) Hooks() []Hook {
+	return c.hooks.Logs
+}
+
 // MinioS3ProviderClient is a client for the MinioS3Provider schema.
 type MinioS3ProviderClient struct {
 	config
@@ -1215,6 +1328,22 @@ func (c *RepositoryClient) QueryPaths(r *Repository) *PathQuery {
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(path.Table, path.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathsTable, repository.PathsColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLogs queries the logs edge of a Repository.
+func (c *RepositoryClient) QueryLogs(r *Repository) *LogsQuery {
+	query := &LogsQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(logs.Table, logs.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, repository.LogsTable, repository.LogsColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil

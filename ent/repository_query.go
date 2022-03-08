@@ -17,6 +17,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
@@ -40,6 +41,7 @@ type RepositoryQuery struct {
 	withAWSS3Provider   *AWSS3ProviderQuery
 	withMinioS3Provider *MinioS3ProviderQuery
 	withPaths           *PathQuery
+	withLogs            *LogsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -223,6 +225,28 @@ func (rq *RepositoryQuery) QueryPaths() *PathQuery {
 			sqlgraph.From(repository.Table, repository.FieldID, selector),
 			sqlgraph.To(path.Table, path.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, repository.PathsTable, repository.PathsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLogs chains the current query on the "logs" edge.
+func (rq *RepositoryQuery) QueryLogs() *LogsQuery {
+	query := &LogsQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(logs.Table, logs.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, repository.LogsTable, repository.LogsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -418,6 +442,7 @@ func (rq *RepositoryQuery) Clone() *RepositoryQuery {
 		withAWSS3Provider:   rq.withAWSS3Provider.Clone(),
 		withMinioS3Provider: rq.withMinioS3Provider.Clone(),
 		withPaths:           rq.withPaths.Clone(),
+		withLogs:            rq.withLogs.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -501,6 +526,17 @@ func (rq *RepositoryQuery) WithPaths(opts ...func(*PathQuery)) *RepositoryQuery 
 	return rq
 }
 
+// WithLogs tells the query-builder to eager-load the nodes that are connected to
+// the "logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithLogs(opts ...func(*LogsQuery)) *RepositoryQuery {
+	query := &LogsQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withLogs = query
+	return rq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -566,7 +602,7 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 	var (
 		nodes       = []*Repository{}
 		_spec       = rq.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [8]bool{
 			rq.withBackupSchedule != nil,
 			rq.withBackupPolicy != nil,
 			rq.withLocalProvider != nil,
@@ -574,6 +610,7 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 			rq.withAWSS3Provider != nil,
 			rq.withMinioS3Provider != nil,
 			rq.withPaths != nil,
+			rq.withLogs != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -790,6 +827,35 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context) ([]*Repository, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "repository_paths" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Paths = append(node.Edges.Paths, n)
+		}
+	}
+
+	if query := rq.withLogs; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Repository)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Logs = []*Logs{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Logs(func(s *sql.Selector) {
+			s.Where(sql.InValues(repository.LogsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.repository_logs
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "repository_logs" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "repository_logs" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Logs = append(node.Edges.Logs, n)
 		}
 	}
 

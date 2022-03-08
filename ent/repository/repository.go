@@ -42,6 +42,8 @@ const (
 	EdgeMinioS3Provider = "MinioS3Provider"
 	// EdgePaths holds the string denoting the paths edge name in mutations.
 	EdgePaths = "paths"
+	// EdgeLogs holds the string denoting the logs edge name in mutations.
+	EdgeLogs = "logs"
 	// Table holds the table name of the repository in the database.
 	Table = "repositories"
 	// BackupScheduleTable is the table that holds the backupSchedule relation/edge.
@@ -93,6 +95,13 @@ const (
 	PathsInverseTable = "paths"
 	// PathsColumn is the table column denoting the paths relation/edge.
 	PathsColumn = "repository_paths"
+	// LogsTable is the table that holds the logs relation/edge.
+	LogsTable = "Logs"
+	// LogsInverseTable is the table name for the Logs entity.
+	// It exists in this package in order to avoid circular dependency with the "logs" package.
+	LogsInverseTable = "Logs"
+	// LogsColumn is the table column denoting the logs relation/edge.
+	LogsColumn = "repository_logs"
 )
 
 // Columns holds all SQL columns for repository fields.

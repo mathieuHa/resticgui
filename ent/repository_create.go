@@ -15,6 +15,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/repository"
@@ -258,6 +259,21 @@ func (rc *RepositoryCreate) AddPaths(p ...*Path) *RepositoryCreate {
 		ids[i] = p[i].ID
 	}
 	return rc.AddPathIDs(ids...)
+}
+
+// AddLogIDs adds the "logs" edge to the Logs entity by IDs.
+func (rc *RepositoryCreate) AddLogIDs(ids ...int) *RepositoryCreate {
+	rc.mutation.AddLogIDs(ids...)
+	return rc
+}
+
+// AddLogs adds the "logs" edges to the Logs entity.
+func (rc *RepositoryCreate) AddLogs(l ...*Logs) *RepositoryCreate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return rc.AddLogIDs(ids...)
 }
 
 // Mutation returns the RepositoryMutation object of the builder.
@@ -596,6 +612,25 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: path.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.LogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   repository.LogsTable,
+			Columns: []string{repository.LogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: logs.FieldID,
 				},
 			},
 		}

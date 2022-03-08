@@ -29,6 +29,7 @@ type hooks struct {
 	BackupPolicy    []ent.Hook
 	BackupSchedule  []ent.Hook
 	LocalProvider   []ent.Hook
+	Logs            []ent.Hook
 	MinioS3Provider []ent.Hook
 	Path            []ent.Hook
 	Permission      []ent.Hook

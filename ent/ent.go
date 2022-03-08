@@ -13,6 +13,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
@@ -44,6 +45,7 @@ func columnChecker(table string) func(string) error {
 		backuppolicy.Table:    backuppolicy.ValidColumn,
 		backupschedule.Table:  backupschedule.ValidColumn,
 		localprovider.Table:   localprovider.ValidColumn,
+		logs.Table:            logs.ValidColumn,
 		minios3provider.Table: minios3provider.ValidColumn,
 		path.Table:            path.ValidColumn,
 		permission.Table:      permission.ValidColumn,

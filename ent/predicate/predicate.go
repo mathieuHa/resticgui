@@ -21,6 +21,9 @@ type BackupSchedule func(*sql.Selector)
 // LocalProvider is the predicate function for localprovider builders.
 type LocalProvider func(*sql.Selector)
 
+// Logs is the predicate function for logs builders.
+type Logs func(*sql.Selector)
+
 // MinioS3Provider is the predicate function for minios3provider builders.
 type MinioS3Provider func(*sql.Selector)
 

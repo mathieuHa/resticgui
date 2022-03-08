@@ -138,6 +138,31 @@ var (
 			},
 		},
 	}
+	// LogsColumns holds the columns for the "Logs" table.
+	LogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "bucket_name", Type: field.TypeString},
+		{Name: "error", Type: field.TypeString},
+		{Name: "stderr", Type: field.TypeString},
+		{Name: "stdout", Type: field.TypeString},
+		{Name: "success", Type: field.TypeBool, Default: false},
+		{Name: "repository_logs", Type: field.TypeInt, Nullable: true},
+	}
+	// LogsTable holds the schema information for the "Logs" table.
+	LogsTable = &schema.Table{
+		Name:       "Logs",
+		Columns:    LogsColumns,
+		PrimaryKey: []*schema.Column{LogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "Logs_repositories_logs",
+				Columns:    []*schema.Column{LogsColumns[7]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// MinioS3ProviderColumns holds the columns for the "MinioS3Provider" table.
 	MinioS3ProviderColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -255,6 +280,7 @@ var (
 		BackupPolicyTable,
 		BackupScheduleTable,
 		LocalProviderTable,
+		LogsTable,
 		MinioS3ProviderTable,
 		PathsTable,
 		PermissionsTable,
@@ -284,6 +310,10 @@ func init() {
 	LocalProviderTable.ForeignKeys[0].RefTable = RepositoriesTable
 	LocalProviderTable.Annotation = &entsql.Annotation{
 		Table: "LocalProvider",
+	}
+	LogsTable.ForeignKeys[0].RefTable = RepositoriesTable
+	LogsTable.Annotation = &entsql.Annotation{
+		Table: "Logs",
 	}
 	MinioS3ProviderTable.ForeignKeys[0].RefTable = RepositoriesTable
 	MinioS3ProviderTable.Annotation = &entsql.Annotation{

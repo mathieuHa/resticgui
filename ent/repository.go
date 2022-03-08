@@ -59,9 +59,11 @@ type RepositoryEdges struct {
 	MinioS3Provider *MinioS3Provider `json:"MinioS3Provider,omitempty"`
 	// Paths holds the value of the paths edge.
 	Paths []*Path `json:"paths,omitempty"`
+	// Logs holds the value of the logs edge.
+	Logs []*Logs `json:"logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [8]bool
 }
 
 // BackupScheduleOrErr returns the BackupSchedule value or an error if the edge
@@ -155,6 +157,15 @@ func (e RepositoryEdges) PathsOrErr() ([]*Path, error) {
 		return e.Paths, nil
 	}
 	return nil, &NotLoadedError{edge: "paths"}
+}
+
+// LogsOrErr returns the Logs value or an error if the edge
+// was not loaded in eager-loading.
+func (e RepositoryEdges) LogsOrErr() ([]*Logs, error) {
+	if e.loadedTypes[7] {
+		return e.Logs, nil
+	}
+	return nil, &NotLoadedError{edge: "logs"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -277,6 +288,11 @@ func (r *Repository) QueryMinioS3Provider() *MinioS3ProviderQuery {
 // QueryPaths queries the "paths" edge of the Repository entity.
 func (r *Repository) QueryPaths() *PathQuery {
 	return (&RepositoryClient{config: r.config}).QueryPaths(r)
+}
+
+// QueryLogs queries the "logs" edge of the Repository entity.
+func (r *Repository) QueryLogs() *LogsQuery {
+	return (&RepositoryClient{config: r.config}).QueryLogs(r)
 }
 
 // Update returns a builder for updating this Repository.

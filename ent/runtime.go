@@ -10,6 +10,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
+	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
@@ -137,6 +138,16 @@ func init() {
 	localproviderDescValid := localproviderFields[1].Descriptor()
 	// localprovider.DefaultValid holds the default value on creation for the valid field.
 	localprovider.DefaultValid = localproviderDescValid.Default.(bool)
+	logsFields := schema.Logs{}.Fields()
+	_ = logsFields
+	// logsDescCreatedAt is the schema descriptor for createdAt field.
+	logsDescCreatedAt := logsFields[0].Descriptor()
+	// logs.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	logs.DefaultCreatedAt = logsDescCreatedAt.Default.(func() time.Time)
+	// logsDescSuccess is the schema descriptor for success field.
+	logsDescSuccess := logsFields[5].Descriptor()
+	// logs.DefaultSuccess holds the default value on creation for the success field.
+	logs.DefaultSuccess = logsDescSuccess.Default.(bool)
 	minios3providerFields := schema.MinioS3Provider{}.Fields()
 	_ = minios3providerFields
 	// minios3providerDescValid is the schema descriptor for valid field.

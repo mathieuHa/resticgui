@@ -74,6 +74,19 @@ func (f LocalProviderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return f(ctx, mv)
 }
 
+// The LogsFunc type is an adapter to allow the use of ordinary
+// function as Logs mutator.
+type LogsFunc func(context.Context, *ent.LogsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LogsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.LogsMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LogsMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The MinioS3ProviderFunc type is an adapter to allow the use of ordinary
 // function as MinioS3Provider mutator.
 type MinioS3ProviderFunc func(context.Context, *ent.MinioS3ProviderMutation) (ent.Value, error)

@@ -879,6 +879,34 @@ func HasPathsWith(preds ...predicate.Path) predicate.Repository {
 	})
 }
 
+// HasLogs applies the HasEdge predicate on the "logs" edge.
+func HasLogs() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(LogsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LogsTable, LogsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLogsWith applies the HasEdge predicate on the "logs" edge with a given conditions (other predicates).
+func HasLogsWith(preds ...predicate.Logs) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(LogsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LogsTable, LogsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Repository) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
