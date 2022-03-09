@@ -37,9 +37,9 @@
 		<p class="text-gray-600 dark:text-gray-400 mb-5">
 			Simplify usage of
 			<a href="https://restic.net/" target="_blank">Restic</a>
-			with an
+			with a
 			<a href="https://go.dev/" target="_blank">Go</a>
-			executable to run it everywhere you want, the repository is open source.
+			executable to run anywhere you want, the project is open source.
 			<br />
 			The website is made with
 			<a href="https://kit.svelte.dev/" target="_blank">Svelte-Kit</a>
@@ -49,7 +49,7 @@
 			<br />
 			Enjoy to use this product where you want.
 		</p>
-		<h2 class="text-gray-700 dark:text-gray-200">How it worked ?</h2>
+		<h2 class="text-gray-700 dark:text-gray-200">See how restic works ?</h2>
 		<script src="https://asciinema.org/a/23554.js" id="asciicast-23554" async data-autoplay="true" data-size="big"></script>
 	</div>
 </div>
