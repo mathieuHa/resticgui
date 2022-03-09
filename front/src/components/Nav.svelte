@@ -1,7 +1,21 @@
 <script>
-	import MobileMenu from './MobileMenu.svelte';
-	import { REPO_URL } from '../utils/siteConfig';
 	import NavLink from './NavLink.svelte';
+	import Cross from './Icon/Cross.svelte';
+
+	let isOpen = false;
+	let isMenuRendered;
+	$: {
+		if (isOpen) {
+			setTimeout(() => {
+				isMenuRendered = true;
+			}, 20);
+		} else {
+			setTimeout(() => {
+				isMenuRendered = false;
+			}, 300);
+		}
+	}
+
 	let isDark = false;
 	if (typeof localStorage !== 'undefined') {
 		if (
@@ -25,12 +39,36 @@
 </script>
 
 <nav
-	class="relative mx-auto flex w-full max-w-2xl items-center justify-between border-gray-200
+	class="relative mx-auto flex flex-wrap w-full max-w-2xl items-center justify-between border-gray-200
 	bg-gray-50 bg-opacity-60 py-8 text-gray-900 dark:border-gray-700 dark:bg-gray-900
 	dark:text-gray-100 sm:pb-16"
 >
-	<MobileMenu />
-	<ul class="ml-[-0.60rem] flex">
+	<button
+		class="md:hidden burger relative visible h-5 w-5 "
+		aria-label="Toggle menu"
+		type="button"
+		on:click={() => (isOpen = !isOpen)}
+	>
+		{#if !isOpen}
+			<svg
+				class="text-gray-900 dark:text-gray-100"
+				width="20"
+				height="20"
+				viewBox="0 0 20 20"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path d="M2.5 7.5H17.5"/>
+				<path d="M2.5 12.5H17.5"/>
+			</svg>
+		{:else}
+			<Cross />
+		{/if}
+	</button>
+	<ul class="{isOpen ? 'order-3 w-full' : 'hidden'} md:flex md:order-unset md:w-auto">
 		<li>
 			<NavLink href="/">Home</NavLink>
 		</li>

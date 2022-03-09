@@ -55,6 +55,7 @@
       await onRefresh();
       initialValues = data;
     } catch (err) {
+      console.log(err);
       toasts.addToast(err, 'failure');
       console.log(err);
     }

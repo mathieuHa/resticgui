@@ -11,12 +11,18 @@ async function call(method, url, options, data?) {
   } catch (err) {
     throw err;
   }
-  if (response.status >= 400) throw Error(response.status.toString());
+
+  let body;
   try {
-    return await response.json();
+    body = await response.json();
   } catch (err) {
-    return true;
+    body = {};
   }
+  if (response.status >= 400) {
+    console.log(body);
+    throw Error(body.error);
+  }
+  return body;
 }
 
 const agent = {

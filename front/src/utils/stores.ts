@@ -7,6 +7,7 @@ const toasts = (() => {
     subscribe,
     addToast: (value, type = 'success') => update((array) => {
       array.push({
+        id: Math.round(Math.random() * 1000),
         type,
         value,
         timeout: setTimeout(() => update((array) => {

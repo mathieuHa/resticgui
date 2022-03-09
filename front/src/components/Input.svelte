@@ -57,7 +57,7 @@
   </div>
 {:else if type === 'checkbox'}
   <label class="inline-flex mr-auto items-center cursor-pointer" for={id}>
-    <div class="relative w-[30px] h-[15px] mt-1">
+    <span class="relative block w-[30px] h-[15px] mt-1">
       <input
         class="hidden opacity-0"
         id={idCheckbox}
@@ -67,7 +67,7 @@
         on:change={() => { checked = check; dispatch('change'); }}
       />
       <span class="slider absolute top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-lg transition-all"></span>
-    </div>
+    </span>
     <span class="ml-2 leading-8">{label}</span>
   </label>
 {/if}

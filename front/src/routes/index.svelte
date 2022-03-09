@@ -31,11 +31,23 @@
 			!
 		</h1>
 		<h2 class="mb-4 text-gray-700 dark:text-gray-200">
-			A GUI for make backup easily with
+			A GUI to make backup easily with
 			<span class="font-semibold">Restic.</span>
 		</h2>
-		<p class="mb-16 text-gray-600 dark:text-gray-400">
-			<a href="https://restic.net/" target="_blank">View Restic here!</a>
+		<p class="text-gray-600 dark:text-gray-400 mb-5">
+			Simplify usage of
+			<a href="https://restic.net/" target="_blank">Restic</a>
+			with an
+			<a href="https://go.dev/" target="_blank">Go</a>
+			executable to run it everywhere you want, the repository is open source.
+			<br />
+			The website is made with
+			<a href="https://kit.svelte.dev/" target="_blank">Svelte-Kit</a>
+			based on
+			<a href="https://swyxkit.netlify.app/" target="_blank">Swix template</a>
+			.
+			<br />
+			Enjoy to use this product where you want.
 		</p>
 		<h2 class="text-gray-700 dark:text-gray-200">How it worked ?</h2>
 		<script src="https://asciinema.org/a/23554.js" id="asciicast-23554" async data-autoplay="true" data-size="big"></script>
