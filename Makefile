@@ -128,8 +128,8 @@ ifeq ($(CI), true)
 	docker push $(CI_REGISTRY_IMAGE):$(TAG)
 endif
 
-rundocker: builddocker ## Run the docker container locally
-	docker run --rm -d --name resticgui -p "8000:8080" $(CI_REGISTRY_IMAGE):$(TAG)
+rundocker: ## Run the docker container locally
+	docker run --rm -d --name resticgui -p "8000:3030" $(CI_REGISTRY_IMAGE):$(TAG)
 
 run: ## Run resticgui binary listening on localhost:8080
 	cd ${DISTDIR}/ && ./resticgui${EXT}
