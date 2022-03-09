@@ -54,28 +54,7 @@ job "resticgui_job" {
         "traefik.http.routers.to-resticgui-https.tls=true",
       ]
     }
-    volume "resticgui-db" {
-      type      = "csi"
-      read_only = false
-      attachment_mode = "file-system"
-      access_mode     = "single-node-writer"
-      source    = "ceph-resticgui-db"
-    }
-    volume "resticgui-data" {
-      type      = "csi"
-      read_only = false
-      attachment_mode = "file-system"
-      access_mode     = "single-node-writer"
-      source    = "ceph-resticgui-data"
-    }
-    volume "resticgui-backup" {
-      type      = "csi"
-      read_only = false
-      attachment_mode = "file-system"
-      access_mode     = "single-node-writer"
-      source    = "ceph-resticgui-backup"
-    }
-
+    
     task "resticgui" {
       driver = "docker"
       config {
@@ -90,21 +69,6 @@ job "resticgui_job" {
         cpu    = 200 # MHz
         memory = 256 # MB
       }
-      // volume_mount {
-      //   volume      = "resticgui-db"
-      //   destination = "/opt/test"
-      //   read_only   = false
-      // }
-      // volume_mount {
-      //   volume      = "resticgui-data"
-      //   destination = "/data"
-      //   read_only   = false
-      // }
-      // volume_mount {
-      //   volume      = "resticgui-backup"
-      //   destination = "/backup"
-      //   read_only   = false
-      // }
     }
 
   }
