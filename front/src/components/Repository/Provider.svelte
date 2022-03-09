@@ -28,6 +28,7 @@
     <img
       class="h-10 w-10 mr-2 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-all"
       src="/{backupProvider}.svg"
+      alt={backupProvider}
       on:click={() => { provider = backupProvider }}
     />
   {/each}

@@ -30,7 +30,6 @@
       <div class="flex items-center leading-4 {(paths.includes(`!${path}/${key}`) && 'text-orange-500') || ((included || paths.includes(`${path}/${key}`)) && 'text-green-500') || ''}">
         <span title={value} class="cursor-pointer h-5 truncate overflow-hidden" on:click={() => onTogglePaths(`${path}/${key}`, !included)}>{key}</span>
       </div>
-    {:else if typeof value === 'boolean'}
     {:else if typeof value === 'object'}
       <div class="flex items-center">
         <div class="w-3 h-3 mr-2 cursor-pointer {tree[key].__visible ? 'rotate-180' : 'rotate-90'} transition" on:click={async () => onDirClick(`${path}/${key}/`, tree[key].__fetched, tree[key].__visible)}>

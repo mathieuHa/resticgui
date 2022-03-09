@@ -63,7 +63,7 @@
   $:console.log(paths, leaves);
 </script>
 
-<label>Paths</label>
+<p>Paths</p>
 <p class="my-2">
   [
   {#each paths as path, i}

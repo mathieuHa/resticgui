@@ -27,9 +27,8 @@ const config = {
 			postcss: true
 		})
 	],
-
 	kit: {
-		adapter: adapter({ out: 'build' }),
+		adapter: adapter({ pages: 'build' }),
 		vite: () => ({
 			server: {
 				proxy: {

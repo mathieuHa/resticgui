@@ -1,3 +1,7 @@
+<script context="module">
+  export const prerender = true;
+</script>
+
 <script>
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
