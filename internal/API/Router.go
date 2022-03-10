@@ -11,6 +11,10 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gitlab.com/resticgui/resticgui/docs"
+	"gitlab.com/resticgui/resticgui/internal/b2provider"
+	"gitlab.com/resticgui/resticgui/internal/backuppolicy"
+	"gitlab.com/resticgui/resticgui/internal/backupschedule"
+	"gitlab.com/resticgui/resticgui/internal/repository"
 )
 
 var cr *cron.Cron
@@ -42,21 +46,18 @@ func SetupRouter() *gin.Engine {
 		CreateAllScheduledBackup()
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
-	// API routes
-	// grpUsers := router.Group(APIBasePath + "/users")
-	// {
-	// 	grpUsers.GET("", QueryUsers)
-	// 	grpUsers.GET(":id", GetUsers)
-	// 	grpUsers.POST("", CreateUser)
-	// 	grpUsers.PATCH(":id", EditUser)
-	// 	grpUsers.DELETE(":id", RemoveUser)
-	// }
 
 	grpRepositories := router.Group(APIBasePath + "repositories")
 	{
-		grpRepositories.GET("", QueryRepositories)
-		grpRepositories.GET(":id", GetRepository)
-		grpRepositories.POST("", CreateRepository)
+		grpRepositories.GET("", repository.QueryRepositories)
+		grpRepositories.GET(":id", repository.GetRepository)
+		grpRepositories.POST("", repository.CreateRepository)
+		grpRepositories.POST(":id/backupschedule", backupschedule.CreateBackupSchedule)
+		grpRepositories.PATCH(":id/backupschedule", backupschedule.UpdateBackupSchedule)
+		grpRepositories.POST(":id/backuppolicy", backuppolicy.CreateBackupPolicy)
+		grpRepositories.PATCH(":id/backuppolicy", backuppolicy.UpdateBackupPolicy)
+		grpRepositories.POST(":id/b2provider", b2provider.CreateB2Provider)
+		grpRepositories.PATCH(":id/b2provider", b2provider.UpdateB2Provider)
 		grpRepositories.PATCH(":id", EditRepository)
 		grpRepositories.DELETE(":id", RemoveRepository)
 		grpRepositories.GET(":id/logs", LogsRepository)
