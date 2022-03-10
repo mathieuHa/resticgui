@@ -434,7 +434,7 @@ paths:
       - application/json
       description: create a repository
       parameters:
-      - description: Add account
+      - description: Create repository
         in: body
         name: repository
         required: true
@@ -539,6 +539,201 @@ paths:
           schema:
             type: string
       summary: edit repository
+  /repositories/{id}/b2provider:
+    patch:
+      consumes:
+      - application/json
+      description: update a b2provider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update b2provider
+        in: body
+        name: b2provider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.B2Provider'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.B2Provider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update B2 Provider
+    post:
+      consumes:
+      - application/json
+      description: create a B2Provider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create B2Provider
+        in: body
+        name: b2provider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.B2Provider'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.B2Provider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create B2 provider
+  /repositories/{id}/backuppolicy:
+    patch:
+      consumes:
+      - application/json
+      description: update a backuppolicy
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update backuppolicy
+        in: body
+        name: backuppolicy
+        required: true
+        schema:
+          $ref: '#/definitions/ent.BackupPolicy'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.BackupPolicy'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update backup policy
+    post:
+      consumes:
+      - application/json
+      description: create a backuppolicy
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create backuppolicy
+        in: body
+        name: backupschedule
+        required: true
+        schema:
+          $ref: '#/definitions/ent.BackupSchedule'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.BackupSchedule'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create backup schedule
+  /repositories/{id}/backupschedule:
+    patch:
+      consumes:
+      - application/json
+      description: update a backupschedule
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update backupschedule
+        in: body
+        name: backupschedule
+        required: true
+        schema:
+          $ref: '#/definitions/ent.BackupSchedule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.BackupSchedule'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update backup schedule
+    post:
+      consumes:
+      - application/json
+      description: create a backupschedule
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create backupschedule
+        in: body
+        name: backupschedule
+        required: true
+        schema:
+          $ref: '#/definitions/ent.BackupSchedule'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.BackupSchedule'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create backup schedule
   /repositories/{id}/logs:
     get:
       consumes:
