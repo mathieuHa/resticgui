@@ -734,7 +734,7 @@ paths:
           schema:
             type: string
       summary: create backup schedule
-  /repositories/{id}/logs:
+  /repositories/{id}/check:
     get:
       consumes:
       - application/json
@@ -763,6 +763,35 @@ paths:
           schema:
             type: string
       summary: Check repository
+  /repositories/{id}/logs:
+    get:
+      consumes:
+      - application/json
+      description: return the logs of the repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: logs repository
   /repositories/{id}/provider/valid:
     get:
       consumes:
@@ -821,6 +850,35 @@ paths:
           schema:
             type: string
       summary: get snapshots repository
+  /repositories/{id}/stats:
+    get:
+      consumes:
+      - application/json
+      description: return the stats command output for the repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Stats repository
   /repositories/{id}/valid:
     get:
       consumes:

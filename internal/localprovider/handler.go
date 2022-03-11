@@ -2,9 +2,7 @@ package localprovider
 
 import (
 	"context"
-	"errors"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +18,7 @@ import (
 // @Description create a localprovider
 // @Accept json
 // @Param id path int true "Repository ID"
-// @Param backupschedule body ent.BackupSchedule true "Create localprovider"
+// @Param localprovider body ent.LocalProvider true "Create localprovider"
 // @Produce json
 // @Success 201 {object} ent.LocalProvider
 // @Failure 400 {string} errNameUsed
@@ -114,31 +112,4 @@ func UpdateLocalProvider(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, lp)
-}
-
-func ValidLocalProvider(provider *ent.LocalProvider) (valid bool, err error) {
-	log.Debug().Msg("validLocalProvider()")
-
-	if provider == nil {
-		valid = false
-		err = errors.New("localProvider is nil")
-		return valid, err
-	}
-
-	log.Info().Msgf("repoPath: %v", provider.RepoPath)
-	fileinfo, err := os.Stat(provider.RepoPath)
-	if os.IsNotExist(err) {
-		log.Err(err).Msgf("Repository Path %v does not exist", provider.RepoPath)
-		return false, err
-	}
-	if !fileinfo.IsDir() {
-		log.Err(err).Msgf("Repository Path %v is not a directory", provider.RepoPath)
-		return false, err
-	}
-	if fileinfo.Mode().Perm()&(1<<(uint(7))) == 0 {
-		log.Err(err).Msgf("Repository Path %v is not writable by user", provider.RepoPath)
-		return false, err
-	}
-
-	return true, nil
 }

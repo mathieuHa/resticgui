@@ -571,7 +571,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repositories/{id}/logs": {
+        "/repositories/{id}/check": {
             "get": {
                 "description": "return the check command output for the repository",
                 "consumes": [
@@ -581,6 +581,50 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "Check repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/repositories/{id}/logs": {
+            "get": {
+                "description": "return the logs of the repository",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "logs repository",
                 "parameters": [
                     {
                         "type": "integer",
@@ -669,6 +713,50 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "get snapshots repository",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Repository ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/repositories/{id}/stats": {
+            "get": {
+                "description": "return the stats command output for the repository",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Stats repository",
                 "parameters": [
                     {
                         "type": "integer",

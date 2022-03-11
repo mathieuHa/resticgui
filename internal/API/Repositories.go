@@ -283,7 +283,7 @@ func LogsRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/logs [get]
+// @Router /repositories/{id}/stats [get]
 func StatsRepository(c *gin.Context) {
 	log.Debug().Msg("StatsRepository()")
 
@@ -355,7 +355,7 @@ func StatsRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/logs [get]
+// @Router /repositories/{id}/check [get]
 func CheckRepository(c *gin.Context) {
 	log.Debug().Msg("CheckRepository()")
 
