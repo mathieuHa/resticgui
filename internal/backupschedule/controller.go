@@ -142,31 +142,6 @@ func addScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 
 }
 
-func logCommand(id int, operation string, stdout string, stderr string, err error, ctx context.Context) {
-	db := Database.Connect()
-	defer db.Close()
-
-	var errStr string
-	if err == nil {
-		errStr = ""
-	} else {
-		errStr = err.Error()
-		log.Err(err).Msg(operation)
-	}
-	_, errDB := db.Logs.
-		Create().
-		SetOperation(operation).
-		SetStdout(stdout).
-		SetStderr(stderr).
-		SetError(errStr).
-		SetRepositoryID(id).
-		Save(ctx)
-
-	if errDB != nil {
-		log.Err(errDB)
-	}
-}
-
 func backupJob(id int) {
 	log.Info().Msgf("JOB HAS STARTED %v", id)
 
@@ -220,21 +195,6 @@ func RemoveAllScheduledBackup(cr *cron.Cron) {
 		}
 	}
 
-}
-
-func updateCronID(backupSchedule ent.BackupSchedule, newCronID int) (err error) {
-	log.Debug().Msg("updateCronID()")
-
-	ctx := context.Background()
-	db := Database.Connect()
-	defer db.Close()
-
-	_, err = db.BackupSchedule.UpdateOneID(backupSchedule.ID).SetCronID(newCronID).Save(ctx)
-	if err != nil {
-		log.Err(err).Msg("Error updating cronID")
-	}
-
-	return err
 }
 
 func removeScheduledBackup(repository *ent.Repository, cr *cron.Cron) {
