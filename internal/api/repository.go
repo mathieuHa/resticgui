@@ -141,9 +141,6 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	db := Database.Connect()
-	defer db.Close()
-
 	// Update repository
 	r, err := database.UpdateRepositoryDB(repo, newId, ctx)
 	if err != nil {
