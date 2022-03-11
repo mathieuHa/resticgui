@@ -11,9 +11,9 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gitlab.com/resticgui/resticgui/docs"
+	"gitlab.com/resticgui/resticgui/internal/api"
 	"gitlab.com/resticgui/resticgui/internal/b2provider"
-	"gitlab.com/resticgui/resticgui/internal/backuppolicy"
-	"gitlab.com/resticgui/resticgui/internal/backupschedule"
+	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/repository"
 )
 
@@ -43,7 +43,7 @@ func SetupRouter() *gin.Engine {
 		for _, value := range cr.Entries() {
 			log.Info().Msgf("%v", value.ID)
 		}
-		CreateAllScheduledBackup()
+		backup.CreateAllScheduledBackup(cr)
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
 
@@ -52,14 +52,14 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.GET("", repository.QueryRepositories)
 		grpRepositories.GET(":id", repository.GetRepository)
 		grpRepositories.POST("", repository.CreateRepository)
-		grpRepositories.POST(":id/backupschedule", backupschedule.CreateBackupSchedule)
-		grpRepositories.PATCH(":id/backupschedule", backupschedule.UpdateBackupSchedule)
-		grpRepositories.POST(":id/backuppolicy", backuppolicy.CreateBackupPolicy)
-		grpRepositories.PATCH(":id/backuppolicy", backuppolicy.UpdateBackupPolicy)
-		grpRepositories.POST(":id/b2provider", b2provider.CreateB2Provider)
+		grpRepositories.POST(":id/backupschedule", api.CreateBackupSchedule)
+		grpRepositories.PATCH(":id/backupschedule", api.UpdateBackupSchedule)
+		grpRepositories.POST(":id/backuppolicy", api.CreateBackupPolicy)
+		grpRepositories.PATCH(":id/backuppolicy", api.UpdateBackupPolicy)
+		grpRepositories.POST(":id/b2provider", api.CreateB2Provider)
 		grpRepositories.PATCH(":id/b2provider", b2provider.UpdateB2Provider)
-		grpRepositories.PATCH(":id", EditRepository)
-		grpRepositories.DELETE(":id", RemoveRepository)
+		grpRepositories.PATCH(":id", api.EditRepository)
+		grpRepositories.DELETE(":id", api.RemoveRepository)
 		grpRepositories.GET(":id/logs", LogsRepository)
 		grpRepositories.GET(":id/stats", StatsRepository)
 		grpRepositories.GET(":id/check", CheckRepository)

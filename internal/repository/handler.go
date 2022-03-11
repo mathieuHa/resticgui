@@ -90,66 +90,13 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	// // create backupSchedule
-	// if repo.Edges.BackupSchedule != nil {
-	// 	log.Debug().Msg("create backupSchedule")
-	// 	err = createBackupSchedule(db, repo.Edges.BackupSchedule, newRepository.ID, ctx)
-	// 	if err != nil {
-	// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-	// 		return
-	// 	}
-	// }
-
-	// // create backupPolicy
-	// if repo.Edges.BackupPolicy != nil {
-	// 	log.Debug().Msg("create backupPolicy")
-	// 	err = createBackupPolicy(db, repo.Edges.BackupPolicy, newRepository.ID, ctx)
-	// 	if err != nil {
-	// 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-	// 		return
-	// 	}
-	// }
-
-	// // create AWSS3Provider
-	// log.Debug().Msg("create AWSS3Provider")
-	// if repo.Edges.AWSS3Provider != nil {
-	// 	err = createAWSS3Provider(db, repo.Edges.AWSS3Provider, newRepository.ID, ctx)
-	// 	if err != nil {
-	// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-	// 		return
-	// 	}
-	// }
-
-	// // create B2Provider
-	// log.Debug().Msg("create B2Provider")
-	// if repo.Edges.B2Provider != nil {
-	// 	err = createB2Provider(db, repo.Edges.B2Provider, newRepository.ID, ctx)
-	// 	if err != nil {
-	// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errCreate, "message": err.Error()})
-	// 		return
-	// 	}
-	// }
-
-	// // create LocalProvider
-	// if repo.Edges.LocalProvider != nil {
-	// 	createLocalProvider(db, repo.Edges.LocalProvider, newRepository.ID, ctx)
-	// }
-
-	// // create MinioS3Provider
-	// if repo.Edges.MinioS3Provider != nil {
-	// 	createMinioS3Provider(db, repo.Edges.MinioS3Provider, newRepository.ID, ctx)
-	// }
-
-	// // Creates paths
-	// createPaths(db, repo.Edges.Paths, newRepository.ID, ctx)
-
 	r.Valid, err = validRepository(*r)
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 	}
 
 	// if r.Active && r.Valid {
-	// 	addScheduledBackup(r)
+	// 	bs.AddScheduledBackup(r)
 	// }
 
 	c.IndentedJSON(http.StatusCreated, r)

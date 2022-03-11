@@ -1,4 +1,4 @@
-package backuppolicy
+package api
 
 const entity = "backupPolicy "
 const errNotFound = entity + "not found"

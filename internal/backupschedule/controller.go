@@ -98,7 +98,7 @@ func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 	return ""
 }
 
-func addScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
+func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 	log.Debug().Msg("addScheduledBackup()")
 
 	// we check if the cron has been initialized
@@ -175,7 +175,7 @@ func CreateAllScheduledBackup(cr *cron.Cron) {
 	}
 	for _, repo := range repositories {
 		log.Debug().Msgf("start repos %v", repo.ID)
-		addScheduledBackup(repo, cr)
+		AddScheduledBackup(repo, cr)
 	}
 }
 

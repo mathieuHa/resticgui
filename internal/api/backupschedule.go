@@ -1,4 +1,4 @@
-package backuppolicy
+package api
 
 import (
 	"context"
@@ -9,26 +9,26 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
+	"gitlab.com/resticgui/resticgui/internal/database"
 	"gitlab.com/resticgui/resticgui/internal/repository"
 )
 
-// CreateBackupPolicy godoc
+// CreateBackupSchedule godoc
 // @Summary create backup schedule
 // @Schemes
-// @Description create a backuppolicy
+// @Description create a backupschedule
 // @Accept json
 // @Param id path int true "Repository ID"
-// @Param backupschedule body ent.BackupSchedule true "Create backuppolicy"
+// @Param backupschedule body ent.BackupSchedule true "Create backupschedule"
 // @Produce json
 // @Success 201 {object} ent.BackupSchedule
 // @Failure 400 {string} errNameUsed
 // @Failure 500 {string} errCreate
-// @Router /repositories/{id}/backuppolicy [post]
-func CreateBackupPolicy(c *gin.Context) {
-	log.Debug().Msg("CreateBackupPolicy()")
-
+// @Router /repositories/{id}/backupschedule [post]
+func CreateBackupSchedule(c *gin.Context) {
+	log.Debug().Msg("CreateBackupSchedule()")
 	ctx := context.Background()
-	var b ent.BackupPolicy
+	var b ent.BackupSchedule
 
 	if err := c.BindJSON(&b); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -51,34 +51,34 @@ func CreateBackupPolicy(c *gin.Context) {
 	}
 
 	// create backupSchedule
-	log.Debug().Msg("create backupPolicy")
-	backupPolicy, err := CreateBackupPolicyDB(b, newId, ctx)
+	log.Debug().Msg("create backupSchedule")
+	backupSchedule, err := database.CreateBackupScheduleDB(b, newId, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, backupPolicy)
+	c.IndentedJSON(http.StatusCreated, backupSchedule)
 }
 
-// UpdateBackupPolicy godoc
-// @Summary update backup policy
+// UpdateBackupSchedule godoc
+// @Summary update backup schedule
 // @Schemes
-// @Description update a backuppolicy
+// @Description update a backupschedule
 // @Accept json
 // @Param id path int true "Repository ID"
-// @Param backuppolicy body ent.BackupPolicy true "Update backuppolicy"
+// @Param backupschedule body ent.BackupSchedule true "Update backupschedule"
 // @Produce json
-// @Success 200 {object} ent.BackupPolicy
+// @Success 200 {object} ent.BackupSchedule
 // @Failure 400 {string} errNotBind
 // @Failure 500 {string} errCreate
-// @Router /repositories/{id}/backuppolicy [patch]
-func UpdateBackupPolicy(c *gin.Context) {
-	log.Debug().Msg("UpdateBackupPolicy()")
+// @Router /repositories/{id}/backupschedule [patch]
+func UpdateBackupSchedule(c *gin.Context) {
+	log.Debug().Msg("UpdateBackupSchedule()")
 
 	ctx := context.Background()
-	var b ent.BackupPolicy
-	var backupPolicy *ent.BackupPolicy
+	var b ent.BackupSchedule
+	var backupSchedule *ent.BackupSchedule
 
 	id := c.Param("id")
 
@@ -102,14 +102,14 @@ func UpdateBackupPolicy(c *gin.Context) {
 	}
 
 	if b.ID == 0 && err != nil {
-		backupPolicy, err = CreateBackupPolicyDB(b, newId, ctx)
+		backupSchedule, err = database.CreateBackupScheduleDB(b, newId, ctx)
 	} else {
-		backupPolicy, err = UpdateBackupPolicyDB(b, ctx)
+		backupSchedule, err = database.UpdateBackupScheduleDB(b, ctx)
 	}
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, backupPolicy)
+	c.IndentedJSON(http.StatusOK, backupSchedule)
 }
