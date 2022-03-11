@@ -146,8 +146,6 @@ func backupJob(id int) {
 	log.Info().Msgf("JOB HAS STARTED %v", id)
 
 	ctx := context.Background()
-	db := Database.Connect()
-	defer db.Close()
 	// Check the validity of the provider and repository in general
 	r, _ := database.GetRepositoryByIDDB(id, ctx)
 	stdout, stderr, errCmd := commands.GetSnapshots(*r)
