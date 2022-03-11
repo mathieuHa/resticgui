@@ -151,18 +151,8 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	// Fetch repository after update
-	r, err = database.GetRepositoryByIDDB(newId, ctx)
-
-	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
-		return
-	}
-
 	r.Valid, _ = backup.ValidRepository(*r)
 
-	_, err = db.Repository.UpdateOneID(newId).SetValid(r.Valid).Save(ctx)
 	// Update repository
 	r, err = database.UpdateRepositoryDB(*r, newId, ctx)
 	if err != nil {
