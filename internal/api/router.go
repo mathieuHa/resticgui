@@ -1,4 +1,4 @@
-package API
+package api
 
 import (
 	"fmt"
@@ -11,8 +11,6 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gitlab.com/resticgui/resticgui/docs"
-	"gitlab.com/resticgui/resticgui/internal/api"
-	"gitlab.com/resticgui/resticgui/internal/b2provider"
 	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/repository"
 )
@@ -52,32 +50,31 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.GET("", repository.QueryRepositories)
 		grpRepositories.GET(":id", repository.GetRepository)
 		grpRepositories.POST("", repository.CreateRepository)
-		grpRepositories.POST(":id/backupschedule", api.CreateBackupSchedule)
-		grpRepositories.PATCH(":id/backupschedule", api.UpdateBackupSchedule)
-		grpRepositories.POST(":id/backuppolicy", api.CreateBackupPolicy)
-		grpRepositories.PATCH(":id/backuppolicy", api.UpdateBackupPolicy)
-		grpRepositories.POST(":id/b2provider", api.CreateB2Provider)
-		grpRepositories.PATCH(":id/b2provider", b2provider.UpdateB2Provider)
-		grpRepositories.PATCH(":id", api.EditRepository)
-		grpRepositories.DELETE(":id", api.RemoveRepository)
+		grpRepositories.POST(":id/backupschedule", CreateBackupSchedule)
+		grpRepositories.PATCH(":id/backupschedule", UpdateBackupSchedule)
+		grpRepositories.POST(":id/backuppolicy", CreateBackupPolicy)
+		grpRepositories.PATCH(":id/backuppolicy", UpdateBackupPolicy)
+		grpRepositories.POST(":id/b2provider", CreateB2Provider)
+		grpRepositories.PATCH(":id/b2provider", UpdateB2Provider)
+		grpRepositories.PATCH(":id", EditRepository)
+		grpRepositories.DELETE(":id", RemoveRepository)
 		grpRepositories.GET(":id/logs", LogsRepository)
 		grpRepositories.GET(":id/stats", StatsRepository)
 		grpRepositories.GET(":id/check", CheckRepository)
 		grpRepositories.GET(":id/snapshots", GetSnapshotsRepository)
 		grpRepositories.GET(":id/valid", ValidRepository)
-		grpRepositories.GET(":id/provider/valid", ValidProvider)
 	}
 
-	grpPaths := router.Group(APIBasePath + "paths")
-	{
-		grpPaths.POST("", GetPath)
-		grpPaths.POST("all", GetAllPath)
-	}
+	// grpPaths := router.Group(APIBasePath + "paths")
+	// {
+	// 	grpPaths.POST("", GetPath)
+	// 	grpPaths.POST("all", GetAllPath)
+	// }
 
-	grpCmds := router.Group(APIBasePath + "cmd")
-	{
-		grpCmds.GET("", ExecuteCmd)
-	}
+	// grpCmds := router.Group(APIBasePath + "cmd")
+	// {
+	// 	grpCmds.GET("", ExecuteCmd)
+	// }
 
 	// grpBackupSchedules := router.Group(APIBasePath + "repositories/:id/schedules")
 	// {
