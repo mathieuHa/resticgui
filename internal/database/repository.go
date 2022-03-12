@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/ent/logs"
+	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -121,7 +122,7 @@ func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 	return err
 }
 
-func QuerylogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err error) {
+func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err error) {
 	db := Connect()
 	defer db.Close()
 
@@ -133,4 +134,18 @@ func QuerylogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err er
 	}
 
 	return l, err
+}
+
+func QueryPathsByRepositoryDB(id int, ctx context.Context) (p []*ent.Path, err error) {
+	db := Connect()
+	defer db.Close()
+
+	// create repository
+	p, err = db.Path.Query().Where(path.HasRepositoryWith(repository.ID(id))).All(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errCreate)
+	}
+
+	return p, err
 }

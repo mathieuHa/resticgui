@@ -229,7 +229,7 @@ func LogsRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	logsR, err := database.QuerylogsByRepositoryDB(newId, ctx)
+	logsR, err := database.QueryLogsByRepositoryDB(newId, ctx)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})

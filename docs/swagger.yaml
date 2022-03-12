@@ -366,27 +366,6 @@ definitions:
 info:
   contact: {}
 paths:
-  /cmd:
-    get:
-      consumes:
-      - application/json
-      description: execute a restic cmd passed by queryParam
-      parameters:
-      - description: cmd
-        enum:
-        - version
-        - help
-        in: query
-        name: cmd
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: execute restic cmd
   /paths:
     post:
       consumes:
@@ -604,6 +583,71 @@ paths:
           schema:
             type: string
       summary: create B2 provider
+  /repositories/{id}/backuppolicy:
+    patch:
+      consumes:
+      - application/json
+      description: update a backuppolicy
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update backuppolicy
+        in: body
+        name: backuppolicy
+        required: true
+        schema:
+          $ref: '#/definitions/ent.BackupPolicy'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.BackupPolicy'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update backup policy
+    post:
+      consumes:
+      - application/json
+      description: create a backuppolicy
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create backuppolicy
+        in: body
+        name: backupschedule
+        required: true
+        schema:
+          $ref: '#/definitions/ent.BackupSchedule'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.BackupSchedule'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create backup schedule
   /repositories/{id}/backupschedule:
     patch:
       consumes:
@@ -698,6 +742,71 @@ paths:
           schema:
             type: string
       summary: Check repository
+  /repositories/{id}/localprovider:
+    patch:
+      consumes:
+      - application/json
+      description: update a localprovider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update localprovider
+        in: body
+        name: localprovider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.LocalProvider'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.LocalProvider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update local provider
+    post:
+      consumes:
+      - application/json
+      description: create a localprovider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create localprovider
+        in: body
+        name: localprovider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.LocalProvider'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.LocalProvider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create backup local provider
   /repositories/{id}/logs:
     get:
       consumes:
@@ -727,35 +836,201 @@ paths:
           schema:
             type: string
       summary: logs repository
-  /repositories/{id}/provider/valid:
-    get:
+  /repositories/{id}/minios3provider:
+    patch:
       consumes:
       - application/json
-      description: valid the repository by ID
+      description: update a minios3provider
       parameters:
       - description: Repository ID
         in: path
         name: id
         required: true
         type: integer
+      - description: Update minios3provider
+        in: body
+        name: minios3provider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.MinioS3Provider'
       produces:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.MinioS3Provider'
         "400":
           description: Bad Request
-          schema:
-            type: string
-        "404":
-          description: Not Found
           schema:
             type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
-      summary: valid provider of the repository
+      summary: update local provider
+    post:
+      consumes:
+      - application/json
+      description: create a minios3provider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create minios3provider
+        in: body
+        name: minios3provider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.MinioS3Provider'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.MinioS3Provider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create backup local provider
+  /repositories/{id}/paths:
+    patch:
+      consumes:
+      - application/json
+      description: update paths of the repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update paths
+        in: body
+        name: paths
+        required: true
+        schema:
+          $ref: '#/definitions/ent.Path'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Path'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update paths
+    post:
+      consumes:
+      - application/json
+      description: create paths of the repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create paths
+        in: body
+        name: paths
+        required: true
+        schema:
+          $ref: '#/definitions/ent.Path'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Path'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create backup paths
+  /repositories/{id}/s3provider:
+    patch:
+      consumes:
+      - application/json
+      description: update a s3provider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update s3provider
+        in: body
+        name: s3provider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.AWSS3Provider'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.AWSS3Provider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update AWSS3 Provider
+    post:
+      consumes:
+      - application/json
+      description: create a AWSS3Provider
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create AWSS3Provider
+        in: body
+        name: s3provider
+        required: true
+        schema:
+          $ref: '#/definitions/ent.AWSS3Provider'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.AWSS3Provider'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: create AWSS3 provider
   /repositories/{id}/snapshots:
     get:
       consumes:

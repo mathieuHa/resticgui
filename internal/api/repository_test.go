@@ -1,4 +1,4 @@
-package API
+package api
 
 // func TestQueryRepositoriesRoute(t *testing.T) {
 // 	Utils.TestConfig()
