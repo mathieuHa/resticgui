@@ -121,7 +121,7 @@ func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err er
 	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).All(ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errCreate)
+		log.Err(err).Msgf("error: %v", errUpdate)
 	}
 
 	return l, err

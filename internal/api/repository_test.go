@@ -296,15 +296,15 @@ func TestRemoveRepository(t *testing.T) {
 func TestLogsRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
-	const apiURL = "/api/v1/repositories/%v"
+	const apiURL = "/api/v1/repositories/%v/logs"
 
-	t.Run("delete repository with invalid id format", func(t *testing.T) {
+	t.Run("get logs repository with invalid id format", func(t *testing.T) {
 		cleanDataBaseTest(t)
 		// Check invalid id
 		id := "aze"
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
-		req, err := http.NewRequest("DELETE", url, nil)
+		req, err := http.NewRequest("GET", url, nil)
 		assert.Nil(t, err)
 		router.ServeHTTP(w, req)
 
@@ -314,6 +314,24 @@ func TestLogsRepository(t *testing.T) {
 
 		assert.Nil(t, errBind)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
+	t.Run("get logs repository with valid id format non existing", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		// Check Unknown ID
+		id := "1280898"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		router.ServeHTTP(w, req)
+
+		var err HTTPError
+		err.Error = errRNotFound
+		errString, errBind := json.Marshal(err)
+
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusNotFound, w.Code)
 		assert.JSONEq(t, string(errString), w.Body.String())
 	})
 

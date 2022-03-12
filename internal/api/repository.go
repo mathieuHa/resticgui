@@ -245,6 +245,13 @@ func LogsRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
+	_, err := database.GetRepositoryByIDDB(newId, ctx)
+
+	if err != nil && ent.IsNotFound(err) {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		return
+	}
+
 	logsR, err := database.QueryLogsByRepositoryDB(newId, ctx)
 
 	if err != nil {
