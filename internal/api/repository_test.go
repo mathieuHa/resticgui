@@ -358,3 +358,87 @@ func TestStatsRepository(t *testing.T) {
 	})
 
 }
+
+func TestCheckRepository(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v/check"
+	const httpMethod = "GET"
+
+	testInvalidFormatID(t, router, httpMethod, apiURL, "check", nil)
+	testUnknownID(t, router, httpMethod, apiURL, "check", nil)
+
+	t.Run("get check repository with valid id", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(httpMethod, url, nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "", w.Body.String())
+	})
+
+}
+
+func TestGetSnapshotsRepository(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v/snapshots"
+	const httpMethod = "GET"
+
+	testInvalidFormatID(t, router, httpMethod, apiURL, "snapshots", nil)
+	testUnknownID(t, router, httpMethod, apiURL, "snapshots", nil)
+
+	t.Run("get snapshots repository with valid id", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(httpMethod, url, nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "", w.Body.String())
+	})
+
+}
+
+func TestValidRepository(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v/valid"
+	const httpMethod = "GET"
+
+	testInvalidFormatID(t, router, httpMethod, apiURL, "valid", nil)
+	testUnknownID(t, router, httpMethod, apiURL, "valid", nil)
+
+	t.Run("get valid repository with valid id", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(httpMethod, url, nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "", w.Body.String())
+	})
+
+}

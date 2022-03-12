@@ -368,11 +368,13 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+	if err != nil && ent.IsNotFound(err) {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		return
+	} else if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
 		return
 	}
-
 	stdout := backup.GetSnapshotsRepository(r)
 
 	var snapshots []Models.Snapshot
@@ -414,8 +416,11 @@ func ValidRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+	if err != nil && ent.IsNotFound(err) {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		return
+	} else if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
 		return
 	}
 
@@ -426,7 +431,7 @@ func ValidRepository(c *gin.Context) {
 			r.Active = false
 		}
 		// Update repository
-		r, err = database.UpdateRepositoryDB(*r, newId, ctx)
+		_, _ = database.UpdateRepositoryDB(*r, newId, ctx)
 	}
 
 	c.Status(http.StatusOK)
