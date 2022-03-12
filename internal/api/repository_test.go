@@ -14,7 +14,7 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
-func TestQueryRepositoriesRoute(t *testing.T) {
+func TestQueryRepositories(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories"
@@ -30,7 +30,7 @@ func TestQueryRepositoriesRoute(t *testing.T) {
 	})
 }
 
-func TestGetRepositoriesRoute(t *testing.T) {
+func TestGetRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories/%v"
@@ -95,7 +95,7 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	})
 }
 
-func TestCreateRepositoryRoute(t *testing.T) {
+func TestCreateRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories"
@@ -139,7 +139,7 @@ func TestCreateRepositoryRoute(t *testing.T) {
 
 }
 
-func TestUpdateRepositoryRoute(t *testing.T) {
+func TestUpdateRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories/%v"
@@ -236,7 +236,7 @@ func TestUpdateRepositoryRoute(t *testing.T) {
 
 }
 
-func TestRemoveRepositoriesRoute(t *testing.T) {
+func TestRemoveRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories/%v"
@@ -289,6 +289,32 @@ func TestRemoveRepositoriesRoute(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+}
+
+func TestLogsRepository(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v"
+
+	t.Run("delete repository with invalid id format", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		// Check invalid id
+		id := "aze"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest("DELETE", url, nil)
+		assert.Nil(t, err)
+		router.ServeHTTP(w, req)
+
+		var errHTTP HTTPError
+		errHTTP.Error = errIDNotValid
+		errString, errBind := json.Marshal(errHTTP)
+
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
 	})
 
 }

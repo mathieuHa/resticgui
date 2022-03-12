@@ -25,6 +25,7 @@ sonarqube-check:
     - master
     - dev
     - production
+  needs: [test:go]
 
 test:go:
   variables:
@@ -38,11 +39,25 @@ test:go:
   image: golang:1.17.7
   stage: test
   script:
-    - make testgo
+    - make testgoci
     #- go fmt $(go list ./... | grep -v /vendor/)
     #- go vet $(go list ./... | grep -v /vendor/)
     #- go test -race $(go list ./... | grep -v /vendor/)
+  artifacts:
+    paths:
+      - coverage.out
 
+test:go:coverage:
+  stage: test
+  image: golang:1.17
+  script:
+    - go install
+    - go test ./internal/... -coverprofile=coverage.txt -covermode count
+    - go run github.com/t-yuki/gocover-cobertura < coverage.txt > coverage.xml
+    - sed -i 's;filename=\"gitlab.com/resticgui/resticgui/;filename=\";g' coverage.xml
+  artifacts:
+    reports:
+      cobertura: coverage.xml
 
 # test:web:
 #   image: trion/ng-cli-karma
