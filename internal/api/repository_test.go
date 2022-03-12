@@ -10,6 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/database"
@@ -31,17 +33,22 @@ func TestQueryRepositories(t *testing.T) {
 	})
 }
 
-func TestGetRepository(t *testing.T) {
-	router := setupRouterTest(t)
+func testInvalidFormatID(t *testing.T, router *gin.Engine, httpMethod string, apiURL string, name string, body *bytes.Buffer) {
+	t.Helper()
+	testName := fmt.Sprintf("[%v] %v repository with invalid id format", httpMethod, name)
 
-	const apiURL = "/api/v1/repositories/%v"
-
-	t.Run("get repository with invalid id format", func(t *testing.T) {
+	t.Run(testName, func(t *testing.T) {
 		cleanDataBaseTest(t)
 		// Check invalid id
 		url := fmt.Sprintf(apiURL, IDNotValid)
+		log.Debug().Msgf("url: %v", url)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
+		var req *http.Request
+		if body == nil {
+			req, _ = http.NewRequest(httpMethod, url, nil)
+		} else {
+			req, _ = http.NewRequest(httpMethod, url, body)
+		}
 		router.ServeHTTP(w, req)
 
 		var err HTTPError
@@ -52,13 +59,23 @@ func TestGetRepository(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 		assert.JSONEq(t, string(errString), w.Body.String())
 	})
+}
 
-	t.Run("get repository with valid id format non existing", func(t *testing.T) {
+func testUnknownID(t *testing.T, router *gin.Engine, httpMethod string, apiURL string, name string, body *bytes.Buffer) {
+	t.Helper()
+	testName := fmt.Sprintf("[%v] %v repository with unknown id", httpMethod, name)
+
+	t.Run(testName, func(t *testing.T) {
 		cleanDataBaseTest(t)
-		// Check Unknown ID
+		// Check invalid id
 		url := fmt.Sprintf(apiURL, IDUnknown)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
+		var req *http.Request
+		if body == nil {
+			req, _ = http.NewRequest(httpMethod, url, nil)
+		} else {
+			req, _ = http.NewRequest(httpMethod, url, body)
+		}
 		router.ServeHTTP(w, req)
 
 		var err HTTPError
@@ -69,6 +86,16 @@ func TestGetRepository(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, w.Code)
 		assert.JSONEq(t, string(errString), w.Body.String())
 	})
+}
+
+func TestGetRepository(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v"
+	const httpMethod = "GET"
+
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil)
+	testUnknownID(t, router, httpMethod, apiURL, "", nil)
 
 	t.Run("get repository with existing id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -81,7 +108,7 @@ func TestGetRepository(t *testing.T) {
 
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
-		req, err := http.NewRequest("GET", url, nil)
+		req, err := http.NewRequest(httpMethod, url, nil)
 		assert.Nil(t, err)
 		router.ServeHTTP(w, req)
 
@@ -98,12 +125,13 @@ func TestCreateRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories"
+	const httpMethod = "POST"
 
 	t.Run("create repository with no post data", func(t *testing.T) {
 		cleanDataBaseTest(t)
 		url := apiURL
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("POST", url, nil)
+		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
 		var err HTTPError
@@ -124,7 +152,7 @@ func TestCreateRepository(t *testing.T) {
 		r, _ := json.Marshal(ent.Repository{Name: rName})
 		responseBody := bytes.NewBuffer(r)
 
-		req, _ := http.NewRequest("POST", url, responseBody)
+		req, _ := http.NewRequest(httpMethod, url, responseBody)
 
 		router.ServeHTTP(w, req)
 
@@ -142,43 +170,14 @@ func TestUpdateRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories/%v"
+	const httpMethod = "PATCH"
 
-	t.Run("update repository with invalid id format", func(t *testing.T) {
-		cleanDataBaseTest(t)
-		// Check invalid id
-		url := fmt.Sprintf(apiURL, IDNotValid)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("PATCH", url, nil)
-		router.ServeHTTP(w, req)
+	newRName := "newRepo"
+	newR, _ := json.Marshal(ent.Repository{Name: newRName})
+	responseBody := bytes.NewBuffer(newR)
 
-		var err HTTPError
-		err.Error = errIDNotValid
-		errString, errBind := json.Marshal(err)
-
-		assert.Nil(t, errBind)
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.JSONEq(t, string(errString), w.Body.String())
-	})
-
-	t.Run("update repository with not existing id", func(t *testing.T) {
-		cleanDataBaseTest(t)
-		url := fmt.Sprintf(apiURL, IDUnknown)
-		w := httptest.NewRecorder()
-		rName := "myRepo"
-		r, _ := json.Marshal(ent.Repository{Name: rName})
-		responseBody := bytes.NewBuffer(r)
-
-		req, _ := http.NewRequest("PATCH", url, responseBody)
-		router.ServeHTTP(w, req)
-
-		var err HTTPError
-		err.Error = errRNotFound
-		errString, errBind := json.Marshal(err)
-
-		assert.Nil(t, errBind)
-		assert.Equal(t, http.StatusNotFound, w.Code)
-		assert.JSONEq(t, string(errString), w.Body.String())
-	})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", responseBody)
+	testUnknownID(t, router, httpMethod, apiURL, "", responseBody)
 
 	t.Run("update repository with valid id but empty post data", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -191,7 +190,7 @@ func TestUpdateRepository(t *testing.T) {
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
 
-		req, _ := http.NewRequest("PATCH", url, nil)
+		req, _ := http.NewRequest(httpMethod, url, nil)
 
 		router.ServeHTTP(w, req)
 
@@ -219,7 +218,7 @@ func TestUpdateRepository(t *testing.T) {
 		newR, _ := json.Marshal(ent.Repository{Name: newRName})
 		responseBody := bytes.NewBuffer(newR)
 
-		req, _ := http.NewRequest("PATCH", url, responseBody)
+		req, _ := http.NewRequest(httpMethod, url, responseBody)
 
 		router.ServeHTTP(w, req)
 
@@ -237,31 +236,16 @@ func TestRemoveRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories/%v"
+	const httpMethod = "DELETE"
 
-	t.Run("delete repository with invalid id format", func(t *testing.T) {
-		cleanDataBaseTest(t)
-		// Check invalid id
-		url := fmt.Sprintf(apiURL, IDNotValid)
-		w := httptest.NewRecorder()
-		req, err := http.NewRequest("DELETE", url, nil)
-		assert.Nil(t, err)
-		router.ServeHTTP(w, req)
-
-		var errHTTP HTTPError
-		errHTTP.Error = errIDNotValid
-		errString, errBind := json.Marshal(errHTTP)
-
-		assert.Nil(t, errBind)
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.JSONEq(t, string(errString), w.Body.String())
-	})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil)
 
 	t.Run("delete repository with valid id format non existing", func(t *testing.T) {
 		cleanDataBaseTest(t)
 		// Check Unknown ID
 		url := fmt.Sprintf(apiURL, IDUnknown)
 		w := httptest.NewRecorder()
-		req, err := http.NewRequest("DELETE", url, nil)
+		req, err := http.NewRequest(httpMethod, url, nil)
 		assert.Nil(t, err)
 		router.ServeHTTP(w, req)
 
@@ -279,7 +263,7 @@ func TestRemoveRepository(t *testing.T) {
 
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
-		req, err := http.NewRequest("DELETE", url, nil)
+		req, err := http.NewRequest(httpMethod, url, nil)
 		assert.Nil(t, err)
 		router.ServeHTTP(w, req)
 
@@ -292,41 +276,10 @@ func TestLogsRepository(t *testing.T) {
 	router := setupRouterTest(t)
 
 	const apiURL = "/api/v1/repositories/%v/logs"
+	const httpMethod = "GET"
 
-	t.Run("get logs repository with invalid id format", func(t *testing.T) {
-		cleanDataBaseTest(t)
-		// Check invalid id
-		url := fmt.Sprintf(apiURL, IDNotValid)
-		w := httptest.NewRecorder()
-		req, err := http.NewRequest("GET", url, nil)
-		assert.Nil(t, err)
-		router.ServeHTTP(w, req)
-
-		var errHTTP HTTPError
-		errHTTP.Error = errIDNotValid
-		errString, errBind := json.Marshal(errHTTP)
-
-		assert.Nil(t, errBind)
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.JSONEq(t, string(errString), w.Body.String())
-	})
-
-	t.Run("get logs repository with valid id format non existing", func(t *testing.T) {
-		cleanDataBaseTest(t)
-		// Check Unknown ID
-		url := fmt.Sprintf(apiURL, IDUnknown)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
-		router.ServeHTTP(w, req)
-
-		var err HTTPError
-		err.Error = errRNotFound
-		errString, errBind := json.Marshal(err)
-
-		assert.Nil(t, errBind)
-		assert.Equal(t, http.StatusNotFound, w.Code)
-		assert.JSONEq(t, string(errString), w.Body.String())
-	})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "logs", nil)
+	testUnknownID(t, router, httpMethod, apiURL, "logs", nil)
 
 	t.Run("get logs repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -338,7 +291,7 @@ func TestLogsRepository(t *testing.T) {
 		id := r.ID
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
+		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
@@ -358,7 +311,7 @@ func TestLogsRepository(t *testing.T) {
 		id := r.ID
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
+		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
 		var logsReceived []ent.Logs
