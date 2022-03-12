@@ -1,14 +1,16 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-playground/assert/v2"
-	ta "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
+	"gitlab.com/resticgui/resticgui/ent"
+	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 func TestQueryRepositoriesRoute(t *testing.T) {
@@ -57,31 +59,31 @@ func TestGetRepositoriesRoute(t *testing.T) {
 		err.Error = errRNotFound
 		errString, errBind := json.Marshal(err)
 
-		ta.Nil(t, errBind)
-		ta.Equal(t, http.StatusNotFound, w.Code)
-		ta.JSONEq(t, string(errString), w.Body.String())
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
 	})
 
-	// t.Run("valid ID", func(t *testing.T) {
-	// 	// Check Valid ID get
-	// 	repositoryName := "myRepo"
-	// 	repository := Models.Repository{Name: repositoryName}
-	// 	result := db.Create(&repository)
-	// 	assert.Nil(t, result.Error)
-	// 	id := repository.ID
+	t.Run("get repository with existing id", func(t *testing.T) {
+		// Check Valid ID get
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+		id := r.ID
 
-	// 	url := fmt.Sprintf(apiURL, id)
-	// 	w := httptest.NewRecorder()
-	// 	req, _ := http.NewRequest("GET", url, nil)
-	// 	router.ServeHTTP(w, req)
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		router.ServeHTTP(w, req)
 
-	// 	var repositoryReceived Models.Repository
-	// 	err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
-	// 	assert.Nil(t, err)
-	// 	assert.Equal(t, repositoryReceived.ID, id)
-	// 	assert.Equal(t, repositoryReceived.Name, repositoryName)
-	// 	assert.Equal(t, http.StatusOK, w.Code)
-	// })
+		var repositoryReceived ent.Repository
+		err = json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
+		assert.Nil(t, err)
+		assert.Equal(t, repositoryReceived.ID, id)
+		assert.Equal(t, repositoryReceived.Name, rName)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
 }
 
 // func TestRemoveRepositoriesRoute(t *testing.T) {
