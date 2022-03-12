@@ -147,7 +147,7 @@ testgo: ## Run the go Tests
 	go test ./internal/... -cover 
 
 testgoci: ## Run the go Tests and export coverage
-	go test ./internal/... -cover -coverprofile=	
+	go test ./internal/... -cover -coverprofile=coverage.out
 
 clean: ## Clean build and temporary directory
 	$(RM) ${DISTDIR}
