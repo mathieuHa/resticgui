@@ -32,6 +32,7 @@ func Migrate() {
 }
 
 func Close() {
+	log.Debug().Msg("Close()")
 	db.Close()
 }
 

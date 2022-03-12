@@ -51,9 +51,10 @@ func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err er
 }
 
 func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("CreateRepositoryDB()")
 
-	if r.Provider == "" {
-		r.Provider = "localProvider"
+	if repo.Provider == "" {
+		repo.Provider = "localProvider"
 	}
 
 	// create repository
@@ -76,6 +77,7 @@ func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Reposi
 }
 
 func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("UpdateRepositoryDB()")
 
 	// update repository
 	r, err = db.Repository.
