@@ -26,6 +26,8 @@ sonarqube-check:
     - dev
     - production
   needs: [test:go]
+  dependencies: 
+    - test:go
 
 test:go:
   variables:
