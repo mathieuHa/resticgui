@@ -1,5 +1,7 @@
 package api
 
+const IDNotValid = "aze"
+const IDUnknown = "1280898"
 const errIDNotValid = "id not valid"
 const errInvalidRequest = "invalid request"
 const errNotFound = "not found"
