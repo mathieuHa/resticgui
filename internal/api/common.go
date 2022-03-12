@@ -21,6 +21,7 @@ const errBPNotFound = bp + errNotFound
 const errBPUpdate = bp + errUpdate
 const errBPCreate = bp + errCreate
 const errBPQuery = bp + errQuery
+const errBPConstraint = bp + errConstraint
 
 const bs = "backupSchedule "
 const errBSNotFound = bs + errNotFound
