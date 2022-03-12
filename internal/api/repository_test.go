@@ -330,3 +330,31 @@ func TestLogsRepository(t *testing.T) {
 	})
 
 }
+
+func TestStatsRepository(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v/stats"
+	const httpMethod = "GET"
+
+	testInvalidFormatID(t, router, httpMethod, apiURL, "stats", nil)
+	testUnknownID(t, router, httpMethod, apiURL, "stats", nil)
+
+	t.Run("get stats repository with valid id", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(httpMethod, url, nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "", w.Body.String())
+	})
+
+}

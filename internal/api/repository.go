@@ -272,7 +272,7 @@ func LogsRepository(c *gin.Context) {
 // @Success 200
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
-// @Failure 500 {string} error
+// @Failure 500 {string} errNotFound
 // @Router /repositories/{id}/stats [get]
 func StatsRepository(c *gin.Context) {
 	log.Debug().Msg("StatsRepository()")
@@ -288,8 +288,12 @@ func StatsRepository(c *gin.Context) {
 	newId, _ := strconv.Atoi(id)
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	if err != nil && ent.IsNotFound(err) {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		return
+	} else if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
 		return
 	}
 
@@ -324,8 +328,11 @@ func CheckRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
+	if err != nil && ent.IsNotFound(err) {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		return
+	} else if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
 		return
 	}
 
