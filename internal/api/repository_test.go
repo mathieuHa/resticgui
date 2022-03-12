@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -342,6 +343,37 @@ func TestLogsRepository(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Equal(t, "[]", w.Body.String())
+	})
+
+	t.Run("get logs repository with valid id and some logs", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		ctx := context.Background()
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, ctx)
+		assert.Nil(t, err)
+		database.LogCommand(r.ID, "operation1", "stdout1", "stderr1", nil, ctx)
+		database.LogCommand(r.ID, "operation2", "stdout2", "stderr2", errors.New("error2"), ctx)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		router.ServeHTTP(w, req)
+
+		var logsReceived []ent.Logs
+		err = json.Unmarshal(w.Body.Bytes(), &logsReceived)
+		assert.Nil(t, err)
+		assert.Len(t, logsReceived, 2)
+		assert.Equal(t, logsReceived[0].Operation, "operation1")
+		assert.Equal(t, logsReceived[1].Operation, "operation2")
+		assert.Equal(t, logsReceived[0].Stdout, "stdout1")
+		assert.Equal(t, logsReceived[1].Stdout, "stdout2")
+		assert.Equal(t, logsReceived[0].Stderr, "stderr1")
+		assert.Equal(t, logsReceived[1].Stderr, "stderr2")
+		assert.Equal(t, logsReceived[0].Error, "")
+		assert.Equal(t, logsReceived[1].Error, errors.New("error2").Error())
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
 }
