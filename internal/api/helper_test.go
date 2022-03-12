@@ -13,8 +13,11 @@ func setupRouterTest(t *testing.T) *gin.Engine {
 
 	Config.InitTestConfig()
 	database.Migrate()
-	database.CleanDatabaseTest(t)
 	router := SetupRouter()
 	gin.SetMode(gin.ReleaseMode)
 	return router
+}
+
+func cleanDataBaseTest(t *testing.T) {
+	database.CleanDatabaseTest(t)
 }

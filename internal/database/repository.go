@@ -79,6 +79,9 @@ func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Reposi
 func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *ent.Repository, err error) {
 	log.Debug().Msg("UpdateRepositoryDB()")
 
+	if repo.Provider == "" {
+		repo.Provider = "localProvider"
+	}
 	// update repository
 	r, err = db.Repository.
 		UpdateOneID(id).

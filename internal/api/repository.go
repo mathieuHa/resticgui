@@ -143,6 +143,14 @@ func EditRepository(c *gin.Context) {
 	// Update repository
 	r, err := database.UpdateRepositoryDB(repo, newId, ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+			return
+		}
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
@@ -152,7 +160,11 @@ func EditRepository(c *gin.Context) {
 	// Update repository
 	r, err = database.UpdateRepositoryDB(*r, newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 

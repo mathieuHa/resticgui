@@ -7,12 +7,14 @@ const errNotBind = "bind error"
 const errUpdate = "update error"
 const errCreate = "creation failed"
 const errQuery = "query failed"
+const errConstraint = "contraint failed"
 
 const r = "repository "
 const errRNotFound = r + errNotFound
 const errRUpdate = r + errUpdate
 const errRCreate = r + errCreate
 const errRQuery = r + errQuery
+const errRConstraint = r + errConstraint
 
 const bp = "backupPolicy "
 const errBPNotFound = bp + errNotFound
