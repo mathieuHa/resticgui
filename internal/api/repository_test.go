@@ -41,10 +41,13 @@ func TestGetRepositoriesRoute(t *testing.T) {
 		req, _ := http.NewRequest("GET", url, nil)
 		router.ServeHTTP(w, req)
 
-		b := "{\n    \"error\": \"id not valid\"\n}"
+		var err HTTPError
+		err.Error = errIDNotValid
+		errString, errBind := json.Marshal(err)
 
+		assert.Nil(t, errBind)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, b, w.Body.String())
+		assert.JSONEq(t, string(errString), w.Body.String())
 	})
 
 	t.Run("get repository with valid id format non existing", func(t *testing.T) {
@@ -86,38 +89,56 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	})
 }
 
-// func TestRemoveRepositoriesRoute(t *testing.T) {
-// 	Utils.TestConfig()
-// 	Database.Migrate()
-// 	db := Database.Connect()
-// 	router := SetupRouter()
-// 	Utils.CleanDatabaseTest(db, t, "repositories")
+func TestRemoveRepositoriesRoute(t *testing.T) {
+	router := setupRouterTest(t)
 
-// 	const apiURL = "/api/v1/repositories/%v"
+	const apiURL = "/api/v1/repositories/%v"
 
-// 	// Check invalid id
-// 	id := "aze"
-// 	url := fmt.Sprintf(apiURL, id)
-// 	w := httptest.NewRecorder()
-// 	req, _ := http.NewRequest("DELETE", url, nil)
-// 	router.ServeHTTP(w, req)
+	t.Run("delete repository with invalid id format", func(t *testing.T) {
+		// Check invalid id
+		id := "aze"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest("DELETE", url, nil)
+		assert.Nil(t, err)
+		router.ServeHTTP(w, req)
 
-// 	b := "{\n    \"error\": \"id not valid\"\n}"
+		var errHTTP HTTPError
+		errHTTP.Error = errIDNotValid
+		errString, errBind := json.Marshal(errHTTP)
 
-// 	assert.Equal(t, http.StatusBadRequest, w.Code)
-// 	assert.Equal(t, b, w.Body.String())
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
 
-// 	// Check Valid ID get
-// 	repositoryName := "myRepo"
-// 	repository := Models.Repository{Name: repositoryName}
-// 	result := db.Create(&repository)
-// 	assert.Nil(t, result.Error)
-// 	id2 := repository.ID
+	t.Run("delete repository with valid id format non existing", func(t *testing.T) {
+		// Check Unknown ID
+		id := "1280898"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest("DELETE", url, nil)
+		assert.Nil(t, err)
+		router.ServeHTTP(w, req)
 
-// 	url = fmt.Sprintf(apiURL, id2)
-// 	w = httptest.NewRecorder()
-// 	req, _ = http.NewRequest("DELETE", url, nil)
-// 	router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
 
-// 	assert.Equal(t, http.StatusNoContent, w.Code)
-// }
+	t.Run("delete repository with existing id", func(t *testing.T) {
+		// Check Valid ID get
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+		id := r.ID
+
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest("DELETE", url, nil)
+		assert.Nil(t, err)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+}

@@ -36,9 +36,14 @@ func Close() {
 	db.Close()
 }
 
-func CleanDatabaseTest(t assert.TestingT, table string) {
-	// db := Connect()
-	// request := fmt.Sprintf("DELETE FROM %s", table)
-	// result := db.
-	// assert.Nil(t, result.Error)
+func CleanDatabaseTest(t assert.TestingT) {
+	ctx := context.Background()
+	db.Repository.Delete().Exec(ctx)
+	db.BackupPolicy.Delete().Exec(ctx)
+	db.BackupSchedule.Delete().Exec(ctx)
+	db.Path.Delete().Exec(ctx)
+	db.AWSS3Provider.Delete().Exec(ctx)
+	db.MinioS3Provider.Delete().Exec(ctx)
+	db.B2Provider.Delete().Exec(ctx)
+	db.LocalProvider.Delete().Exec(ctx)
 }

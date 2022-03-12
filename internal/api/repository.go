@@ -15,7 +15,6 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
-const errRNotFound = "repository not found"
 
 // QueryRepositories godoc
 // @Summary get all repositories
