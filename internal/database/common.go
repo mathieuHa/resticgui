@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/spf13/viper"
 	"gitlab.com/resticgui/resticgui/ent"
 )
@@ -14,9 +16,7 @@ func Connect() (_db *ent.Client) {
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	// logg.Debug().Msg("CreateRepository()")
 	// defer client.Close()
-	// Run the auto migration tool.
 	return client
 }
 
