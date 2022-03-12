@@ -5,13 +5,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 func UpdateB2ProviderDB(b2Provider ent.B2Provider, ctx context.Context) (b2 *ent.B2Provider, err error) {
 	log.Debug().Msg("UpdateB2Provider()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b2, err = db.B2Provider.
@@ -30,7 +29,7 @@ func UpdateB2ProviderDB(b2Provider ent.B2Provider, ctx context.Context) (b2 *ent
 func CreateB2ProviderDB(b2Provider ent.B2Provider, repoID int, ctx context.Context) (b2 *ent.B2Provider, err error) {
 	log.Debug().Msg("CreateB2Provider()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b2, err = db.B2Provider.

@@ -9,8 +9,6 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/ent/repository"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
@@ -164,26 +162,23 @@ func backupJob(id int) {
 func CreateAllScheduledBackup(cr *cron.Cron) {
 	log.Debug().Msg("CreateAllScheduledBackup()")
 
-	db := Database.Connect()
-	defer db.Close()
 	// Check the validity of the provider and repository in general
-	repositories, err := db.Repository.Query().WithBackupSchedule().Where(repository.Active(true)).All(context.Background())
+	repositories, err := database.QueryActiveRWithBackupSchedule()
 	if err != nil {
 		log.Err(err).Msgf("error quering active backups")
-	}
-	for _, repo := range repositories {
-		log.Debug().Msgf("start repos %v", repo.ID)
-		AddScheduledBackup(repo, cr)
+	} else {
+		for _, repo := range repositories {
+			log.Debug().Msgf("start repos %v", repo.ID)
+			AddScheduledBackup(repo, cr)
+		}
 	}
 }
 
 func RemoveAllScheduledBackup(cr *cron.Cron) {
 	log.Debug().Msg("RemoveAllScheduledBackup()")
 
-	db := Database.Connect()
-	defer db.Close()
 	// Check the validity of the provider and repository in general
-	repositories, err := db.Repository.Query().WithBackupSchedule().All(context.Background())
+	repositories, err := database.QueryAllRWithBackupSchedule()
 	if err != nil {
 		log.Err(err).Msgf("error quering active backups")
 	} else {

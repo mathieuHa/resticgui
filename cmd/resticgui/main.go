@@ -8,18 +8,21 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"gitlab.com/resticgui/resticgui/internal/API"
 	"gitlab.com/resticgui/resticgui/internal/Config"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Logs"
+	"gitlab.com/resticgui/resticgui/internal/api"
+	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/commands"
+	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 var (
 	server *http.Server
 )
+var cr *cron.Cron
 
 func main() {
 	Config.InitConfig()
@@ -30,9 +33,9 @@ func main() {
 	//Run the cron scheduler
 	commands.ResticInit()
 
-	Database.Migrate()
+	database.Migrate()
 
-	router := API.SetupRouter()
+	router := api.SetupRouter()
 
 	// setting server information
 	serverIP := viper.GetString("server.ip")
@@ -64,7 +67,7 @@ func main() {
 	<-c
 
 	// Remove current running backups
-	API.RemoveAllScheduledBackup()
+	backup.RemoveAllScheduledBackup(cr)
 
 	// Create a deadline to wait for.
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

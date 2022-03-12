@@ -5,13 +5,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 func UpdateLocalProviderDB(localProvider ent.LocalProvider, ctx context.Context) (b2 *ent.LocalProvider, err error) {
 	log.Debug().Msg("UpdateLocalProvider()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b2, err = db.LocalProvider.
@@ -28,7 +27,7 @@ func UpdateLocalProviderDB(localProvider ent.LocalProvider, ctx context.Context)
 func CreateLocalProviderDB(localProvider ent.LocalProvider, repoID int, ctx context.Context) (b2 *ent.LocalProvider, err error) {
 	log.Debug().Msg("CreateLocalProvider()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b2, err = db.LocalProvider.

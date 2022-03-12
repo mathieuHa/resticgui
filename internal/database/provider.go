@@ -7,14 +7,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 func updateValidProvider(repository ent.Repository, valid bool) (err error) {
 	log.Debug().Msg("updateValidProvider()")
 	ctx := context.Background()
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	switch repository.Provider {

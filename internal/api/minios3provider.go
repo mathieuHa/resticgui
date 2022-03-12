@@ -10,7 +10,6 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
 	"gitlab.com/resticgui/resticgui/internal/database"
-	"gitlab.com/resticgui/resticgui/internal/repository"
 )
 
 // CreateMinioS3Provider godoc
@@ -45,7 +44,7 @@ func CreateMinioS3Provider(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := repository.GetRepositoryByIDDB(newId, ctx)
+	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -96,7 +95,7 @@ func UpdateMinioS3Provider(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := repository.GetRepositoryByIDDB(newId, ctx)
+	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

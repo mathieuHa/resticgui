@@ -5,13 +5,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {
 	log.Debug().Msg("UpdateMinioS3Provider()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	mS3p, err = db.MinioS3Provider.
@@ -33,7 +32,7 @@ func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, ctx context.Co
 func CreateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, repoID int, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {
 	log.Debug().Msg("CreateMinioS3Provider()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	mS3p, err = db.MinioS3Provider.

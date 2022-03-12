@@ -1,11 +1,9 @@
-package Database
+package database
 
 import (
 	"context"
-
 	"log"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 	"gitlab.com/resticgui/resticgui/ent"
 )

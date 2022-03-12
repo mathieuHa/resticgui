@@ -5,7 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Database"
+	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 const errCreate = "creation failed"
@@ -14,7 +14,7 @@ const errUpdate = "update failed"
 func CreateBackupScheduleDB(backupSchedule ent.BackupSchedule, repoID int, ctx context.Context) (b *ent.BackupSchedule, err error) {
 	log.Debug().Msg("CreateBackupScheduleDB()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b, err = db.BackupSchedule.
@@ -45,7 +45,7 @@ func CreateBackupScheduleDB(backupSchedule ent.BackupSchedule, repoID int, ctx c
 func UpdateBackupScheduleDB(backupSchedule ent.BackupSchedule, ctx context.Context) (b *ent.BackupSchedule, err error) {
 	log.Debug().Msg("updateBackupScheduleDB()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b, err = db.BackupSchedule.
@@ -76,7 +76,7 @@ func UpdateCronID(backupSchedule ent.BackupSchedule, newCronID int) (err error) 
 	log.Debug().Msg("updateCronID()")
 
 	ctx := context.Background()
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	_, err = db.BackupSchedule.UpdateOneID(backupSchedule.ID).SetCronID(newCronID).Save(ctx)
@@ -85,4 +85,30 @@ func UpdateCronID(backupSchedule ent.BackupSchedule, newCronID int) (err error) 
 	}
 
 	return err
+}
+
+func QueryActiveRWithBackupSchedule() (r []*ent.Repository, err error) {
+	ctx := context.Background()
+
+	db := Connect()
+	defer db.Close()
+	// Check the validity of the provider and repository in general
+	r, err = db.Repository.Query().WithBackupSchedule().Where(repository.Active(true)).All(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error quering active backups")
+	}
+	return r, err
+}
+
+func QueryAllRWithBackupSchedule() (r []*ent.Repository, err error) {
+	ctx := context.Background()
+
+	db := Connect()
+	defer db.Close()
+	// Check the validity of the provider and repository in general
+	r, err = db.Repository.Query().WithBackupSchedule().All(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error quering active backups")
+	}
+	return r, err
 }

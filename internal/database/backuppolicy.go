@@ -5,13 +5,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context.Context) (b *ent.BackupPolicy, err error) {
 	log.Debug().Msg("CreateBackupPolicyDB()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b, err = db.BackupPolicy.
@@ -34,7 +33,7 @@ func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context
 func UpdateBackupPolicyDB(backupPolicy ent.BackupPolicy, ctx context.Context) (b *ent.BackupPolicy, err error) {
 	log.Debug().Msg("updateBackupPolicyDB()")
 
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	b, err = db.BackupPolicy.

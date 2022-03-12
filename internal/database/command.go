@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 )
 
 func LogCommand(id int, operation string, stdout string, stderr string, err error, ctx context.Context) {
-	db := Database.Connect()
+	db := Connect()
 	defer db.Close()
 
 	var errStr string

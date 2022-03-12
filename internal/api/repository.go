@@ -3,20 +3,15 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/ent/logs"
-	"gitlab.com/resticgui/resticgui/ent/repository"
-	"gitlab.com/resticgui/resticgui/internal/Database"
 	"gitlab.com/resticgui/resticgui/internal/Models"
 	"gitlab.com/resticgui/resticgui/internal/Utils"
 	"gitlab.com/resticgui/resticgui/internal/backup"
-	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
@@ -189,28 +184,20 @@ func RemoveRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	db := Database.Connect()
-	defer db.Close()
-
 	// Query repository to remove backup Schedule
 	log.Debug().Msg("Query repository to remove backup Schedule")
-	repository := db.Repository.
-		Query().
-		WithBackupSchedule().
-		FirstX(ctx)
+	repository, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if repository != nil {
+	if repository != nil && err == nil {
 		// Remove backup scheduled
-		// backup.RemoveScheduledBackup(repository)
+		// todo
+		//backup.RemoveScheduledBackup(repository)
 
 		// Delete repository
 		log.Debug().Msg("Delete repository")
-		err := db.Repository.
-			DeleteOneID(newId).
-			Exec(ctx)
+		err := database.DeleteRepositoryDB(newId, ctx)
 		if err != nil {
 			log.Err(err).Msgf("error: %v", errQuery)
-			// c.IndentedJSON(http.StatusNotFound, gin.H{"error": errNotDeleted, "message": err.Error()})
 		}
 	}
 
@@ -242,13 +229,9 @@ func LogsRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	db := Database.Connect()
-	defer db.Close()
-
-	logsR, err := db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(newId))).All(ctx)
+	logsR, err := database.QuerylogsByRepositoryDB(newId, ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
@@ -316,49 +299,14 @@ func CheckRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	db := Database.Connect()
-	defer db.Close()
-
-	r, err := db.Repository.
-		Query().
-		WithBackupSchedule().
-		WithBackupPolicy().
-		WithAWSS3Provider().
-		WithB2Provider().
-		WithLocalProvider().
-		WithMinioS3Provider().
-		WithPaths().
-		Where(repository.ID(newId)).
-		First(ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
 
-	stdout, stderr, errCmd := commands.CheckIntegrity(*r, false, 0)
-
-	if errCmd == nil {
-		db.Logs.
-			Create().
-			SetOperation("CheckIntegrity").
-			SetStdout(stdout).
-			SetStderr(stderr).
-			SetError("").
-			SetRepositoryID(r.ID).
-			Save(ctx)
-	} else {
-		log.Err(errCmd)
-		db.Logs.
-			Create().
-			SetOperation("CheckIntegrity").
-			SetStdout(stdout).
-			SetStderr(stderr).
-			SetError(errCmd.Error()).
-			SetRepositoryID(r.ID).
-			Save(ctx)
-	}
+	stdout := backup.CheckRepository(r)
 
 	c.IndentedJSON(http.StatusOK, stdout)
 }
@@ -388,49 +336,14 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	db := Database.Connect()
-	defer db.Close()
-
-	r, err := db.Repository.
-		Query().
-		WithBackupSchedule().
-		WithBackupPolicy().
-		WithAWSS3Provider().
-		WithB2Provider().
-		WithLocalProvider().
-		WithMinioS3Provider().
-		WithPaths().
-		Where(repository.ID(newId)).
-		First(ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
 
-	stdout, stderr, errCmd := commands.GetSnapshots(*r)
-
-	if errCmd == nil {
-		db.Logs.
-			Create().
-			SetOperation("GetSnapshots").
-			SetStdout(stdout).
-			SetStderr(stderr).
-			SetError("").
-			SetRepositoryID(r.ID).
-			Save(ctx)
-	} else {
-		log.Err(errCmd)
-		db.Logs.
-			Create().
-			SetOperation("GetSnapshots").
-			SetStdout(stdout).
-			SetStderr(stderr).
-			SetError(errCmd.Error()).
-			SetRepositoryID(r.ID).
-			Save(ctx)
-	}
+	stdout := backup.GetSnapshotsRepository(r)
 
 	var snapshots []Models.Snapshot
 
@@ -442,7 +355,6 @@ func GetSnapshotsRepository(c *gin.Context) {
 	} else {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error converting snapshots to json", "message": err.Error()})
 	}
-
 }
 
 // ValidRepository godoc
@@ -470,57 +382,21 @@ func ValidRepository(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	db := Database.Connect()
-	defer db.Close()
-
-	repository, err := db.Repository.
-		Query().
-		WithBackupSchedule().
-		WithBackupPolicy().
-		WithAWSS3Provider().
-		WithB2Provider().
-		WithLocalProvider().
-		WithMinioS3Provider().
-		WithPaths().
-		Where(repository.ID(newId)).
-		First(ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errQuery)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
 		return
 	}
 
-	if repository != nil {
-		valid, errValid := backup.ValidRepository(*repository)
-		if !valid {
-			log.Debug().Msg("r not valid")
-			_, err := db.Repository.
-				UpdateOneID(newId).
-				SetValid(valid).
-				SetActive(false).
-				Save(ctx)
-			if err != nil {
-				log.Err(err).Msg("Could not update valid and active for repository")
-			}
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": valid, "error": errValid})
-			return
-		} else {
-			log.Debug().Msg("r valid")
-			_, err := db.Repository.
-				UpdateOneID(newId).
-				SetValid(valid).
-				Save(ctx)
-			if err != nil {
-				log.Err(err).Msg("Could not update valid for repository")
-			}
-			c.IndentedJSON(http.StatusOK, gin.H{"valid": valid, "error": errValid})
-			return
-		}
+	if r != nil {
+		r.Valid, _ = backup.ValidRepository(*r)
 
-	} else {
-		log.Err(errors.New("repository is nil"))
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"valid": false, "error": errors.New("repository is nil")})
+		if !r.Valid {
+			r.Active = false
+		}
+		// Update repository
+		r, err = database.UpdateRepositoryDB(*r, newId, ctx)
 	}
 
 	c.Status(http.StatusOK)

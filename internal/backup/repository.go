@@ -17,6 +17,20 @@ func GetStatsRepository(r *ent.Repository) (out string) {
 	return stdout
 }
 
+func CheckRepository(r *ent.Repository) (out string) {
+	ctx := context.Background()
+	stdout, stderr, errCmd := commands.CheckIntegrity(*r, false, 0)
+	database.LogCommand(r.ID, "CheckIntegrity", stdout, stderr, errCmd, ctx)
+	return stdout
+}
+
+func GetSnapshotsRepository(r *ent.Repository) (out string) {
+	ctx := context.Background()
+	stdout, stderr, errCmd := commands.GetSnapshots(*r)
+	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
+	return stdout
+}
+
 func ValidRepository(repository ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("validRepository()")
 

@@ -27,7 +27,6 @@ const errUpdate = entity + "update error"
 const errCreate = entity + "creation failed"
 const errQuery = entity + "query failed"
 
-
 // RemoveRepository godoc
 // @Summary delete repository
 // @Schemes
@@ -63,7 +62,7 @@ func RemoveRepository(c *gin.Context) {
 
 	if repository != nil {
 		// Remove backup scheduled
-		removeScheduledBackup(repository)
+		// removeScheduledBackup(repository)
 
 		// Delete repository
 		log.Debug().Msg("Delete repository")
@@ -500,7 +499,7 @@ func validRepository(repository ent.Repository) (valid bool, err error) {
 	if !valid { // If provider is not valid, repository cannot be valid
 		return false, nil
 	}
-	valid, err = validSchedule(repository.Edges.BackupSchedule)
+	// valid, err = validSchedule(repository.Edges.BackupSchedule)
 	if err != nil {
 		log.Err(err).Msg("Valid repository has failed on schedule check")
 		return false, err

@@ -47,7 +47,7 @@ func SetupRouter() *gin.Engine {
 
 	grpRepositories := router.Group(APIBasePath + "repositories")
 	{
-		grpRepositories.GET("", repository.QueryRepositories)
+		grpRepositories.GET("", QueryRepositories)
 		grpRepositories.GET(":id", repository.GetRepository)
 		grpRepositories.POST("", repository.CreateRepository)
 		grpRepositories.POST(":id/backupschedule", CreateBackupSchedule)
