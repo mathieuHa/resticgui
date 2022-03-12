@@ -133,6 +133,91 @@ func TestCreateRepositoryRoute(t *testing.T) {
 
 }
 
+func TestUpdateRepositoryRoute(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories/%v"
+
+	t.Run("update repository with invalid id format", func(t *testing.T) {
+		// Check invalid id
+		id := "aze"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", url, nil)
+		router.ServeHTTP(w, req)
+
+		var err HTTPError
+		err.Error = errIDNotValid
+		errString, errBind := json.Marshal(err)
+
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
+	t.Run("update repository with not existing id", func(t *testing.T) {
+		id := "1280898"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", url, nil)
+		router.ServeHTTP(w, req)
+
+		var err HTTPError
+		err.Error = errRNotFound
+		errString, errBind := json.Marshal(err)
+
+		assert.Nil(t, errBind)
+		assert.Nil(t, errRNotFound)
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
+	t.Run("update repository with valid id but empty post data", func(t *testing.T) {
+		rName := "myRepo"
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+
+		req, _ := http.NewRequest("POST", url, nil)
+
+		router.ServeHTTP(w, req)
+
+		var errHTTP HTTPError
+		errHTTP.Error = errInvalidRequest
+		errString, errBind := json.Marshal(err)
+
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
+	t.Run("update repository with valid id and valid post data", func(t *testing.T) {
+		id := "1280898"
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+
+		rName := "myRepo"
+		r, _ := json.Marshal(ent.Repository{Name: rName})
+		responseBody := bytes.NewBuffer(r)
+
+		req, _ := http.NewRequest("POST", url, responseBody)
+
+		router.ServeHTTP(w, req)
+
+		var repositoryReceived ent.Repository
+		err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
+		assert.Nil(t, err)
+		assert.GreaterOrEqual(t, repositoryReceived.ID, 0)
+		assert.Equal(t, repositoryReceived.Name, rName)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+}
+
 func TestRemoveRepositoriesRoute(t *testing.T) {
 	router := setupRouterTest(t)
 

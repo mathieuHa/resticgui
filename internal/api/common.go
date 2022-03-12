@@ -8,7 +8,7 @@ const errUpdate = "update error"
 const errCreate = "creation failed"
 const errQuery = "query failed"
 
-const r = "repository"
+const r = "repository "
 const errRNotFound = r + errNotFound
 const errRUpdate = r + errUpdate
 const errRCreate = r + errCreate
