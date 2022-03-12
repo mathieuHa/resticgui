@@ -51,7 +51,7 @@ test:go:coverage:
   stage: test
   image: golang:1.17
   script:
-    - go install
+    # - go install
     - go test ./internal/... -coverprofile=coverage.txt -covermode count
     - go run github.com/t-yuki/gocover-cobertura < coverage.txt > coverage.xml
     - sed -i 's;filename=\"gitlab.com/resticgui/resticgui/;filename=\";g' coverage.xml
