@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -108,6 +109,26 @@ func TestCreateRepositoryRoute(t *testing.T) {
 		assert.Nil(t, errBind)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
+	t.Run("create repository with valid post data", func(t *testing.T) {
+		url := apiURL
+		w := httptest.NewRecorder()
+
+		rName := "myRepo"
+		r, _ := json.Marshal(ent.Repository{Name: rName})
+		responseBody := bytes.NewBuffer(r)
+
+		req, _ := http.NewRequest("POST", url, responseBody)
+
+		router.ServeHTTP(w, req)
+
+		var repositoryReceived ent.Repository
+		err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
+		assert.Nil(t, err)
+		assert.GreaterOrEqual(t, repositoryReceived.ID, 0)
+		assert.Equal(t, repositoryReceived.Name, rName)
+		assert.Equal(t, http.StatusCreated, w.Code)
 	})
 
 }
