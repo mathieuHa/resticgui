@@ -72,24 +72,6 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.GET(":id/valid", ValidRepository)
 	}
 
-	// grpPaths := router.Group(APIBasePath + "paths")
-	// {
-	// 	grpPaths.POST("", GetPath)
-	// 	grpPaths.POST("all", GetAllPath)
-	// }
-
-	// grpCmds := router.Group(APIBasePath + "cmd")
-	// {
-	// 	grpCmds.GET("", ExecuteCmd)
-	// }
-
-	// grpBackupSchedules := router.Group(APIBasePath + "repositories/:id/schedules")
-	// {
-	// 	grpBackupSchedules.PUT("", UpdateBackupSchedule)
-	// 	grpBackupSchedules.GET(":idBackupSchedule", GetBackupSchedule)
-	// 	grpBackupSchedules.GET("", QueryBackupSchedule)
-	// }
-
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	router.NoRoute(func(c *gin.Context) {

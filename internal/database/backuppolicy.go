@@ -10,9 +10,6 @@ import (
 func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context.Context) (b *ent.BackupPolicy, err error) {
 	log.Debug().Msg("CreateBackupPolicyDB()")
 
-	db := Connect()
-	defer db.Close()
-
 	b, err = db.BackupPolicy.
 		Create().
 		SetKeepAll(backupPolicy.KeepAll).
@@ -32,9 +29,6 @@ func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context
 
 func UpdateBackupPolicyDB(backupPolicy ent.BackupPolicy, ctx context.Context) (b *ent.BackupPolicy, err error) {
 	log.Debug().Msg("updateBackupPolicyDB()")
-
-	db := Connect()
-	defer db.Close()
 
 	b, err = db.BackupPolicy.
 		UpdateOneID(backupPolicy.ID).

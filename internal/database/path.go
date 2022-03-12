@@ -10,9 +10,6 @@ import (
 func UpdatePathsDB(paths []*ent.Path, repoID int, ctx context.Context) (p []*ent.Path, err error) {
 	log.Debug().Msg("updatePaths()")
 
-	db := Connect()
-	defer db.Close()
-
 	// Remove old path edges
 	_, err = db.Repository.
 		UpdateOneID(repoID).RemovePaths(db.Repository.Query().QueryPaths().AllX(ctx)...).Save(ctx)
@@ -55,9 +52,6 @@ func UpdatePathsDB(paths []*ent.Path, repoID int, ctx context.Context) (p []*ent
 
 func CreatePathsDB(paths []*ent.Path, repoID int, ctx context.Context) (p []*ent.Path, err error) {
 	log.Debug().Msg("createPaths()")
-
-	db := Connect()
-	defer db.Close()
 
 	if len(paths) > 0 {
 		for _, p := range paths {

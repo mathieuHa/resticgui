@@ -1,21 +1,34 @@
 package api
 
-// func TestQueryRepositoriesRoute(t *testing.T) {
-// 	Utils.TestConfig()
-// 	Database.Migrate()
-// 	db := Database.Connect()
-// 	router := SetupRouter()
-// 	Utils.CleanDatabaseTest(db, t, "repositories")
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-// 	const apiURL = "/api/v1/repositories"
+	"github.com/go-playground/assert/v2"
+	"github.com/rs/zerolog/log"
+	"gitlab.com/resticgui/resticgui/internal/Config"
+	"gitlab.com/resticgui/resticgui/internal/database"
+)
 
-// 	w := httptest.NewRecorder()
-// 	req, _ := http.NewRequest("GET", apiURL, nil)
-// 	router.ServeHTTP(w, req)
+func TestQueryRepositoriesRoute(t *testing.T) {
+	log.Debug().Msg("TestQueryRepositoriesRoute()")
+	Config.InitTestConfig()
 
-// 	assert.Equal(t, 200, w.Code)
-// 	assert.Equal(t, "[]", w.Body.String())
-// }
+	// client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	// defer client.Close()
+	database.Migrate()
+	router := SetupRouter()
+
+	const apiURL = "/api/v1/repositories"
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", apiURL, nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "[]", w.Body.String())
+}
 
 // func TestGetRepositoriesRoute(t *testing.T) {
 // 	Utils.TestConfig()

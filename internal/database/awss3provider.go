@@ -10,9 +10,6 @@ import (
 func UpdateAWSS3ProviderDB(s3Provider ent.AWSS3Provider, ctx context.Context) (s3 *ent.AWSS3Provider, err error) {
 	log.Debug().Msg("UpdateAWSS3Provider()")
 
-	db := Connect()
-	defer db.Close()
-
 	s3, err = db.AWSS3Provider.
 		UpdateOneID(s3Provider.ID).
 		SetAccessKeyID(s3Provider.AccessKeyID).
@@ -29,9 +26,6 @@ func UpdateAWSS3ProviderDB(s3Provider ent.AWSS3Provider, ctx context.Context) (s
 
 func CreateAWSS3ProviderDB(s3Provider ent.AWSS3Provider, repoID int, ctx context.Context) (s3 *ent.AWSS3Provider, err error) {
 	log.Debug().Msg("CreateAWSS3Provider()")
-
-	db := Connect()
-	defer db.Close()
 
 	s3, err = db.AWSS3Provider.
 		Create().

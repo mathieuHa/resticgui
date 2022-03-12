@@ -14,9 +14,6 @@ const errUpdate = "update failed"
 func CreateBackupScheduleDB(backupSchedule ent.BackupSchedule, repoID int, ctx context.Context) (b *ent.BackupSchedule, err error) {
 	log.Debug().Msg("CreateBackupScheduleDB()")
 
-	db := Connect()
-	defer db.Close()
-
 	b, err = db.BackupSchedule.
 		Create().
 		SetChoice(backupSchedule.Choice).
@@ -44,9 +41,6 @@ func CreateBackupScheduleDB(backupSchedule ent.BackupSchedule, repoID int, ctx c
 
 func UpdateBackupScheduleDB(backupSchedule ent.BackupSchedule, ctx context.Context) (b *ent.BackupSchedule, err error) {
 	log.Debug().Msg("updateBackupScheduleDB()")
-
-	db := Connect()
-	defer db.Close()
 
 	b, err = db.BackupSchedule.
 		UpdateOneID(backupSchedule.ID).

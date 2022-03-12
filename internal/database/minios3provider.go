@@ -10,9 +10,6 @@ import (
 func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {
 	log.Debug().Msg("UpdateMinioS3Provider()")
 
-	db := Connect()
-	defer db.Close()
-
 	mS3p, err = db.MinioS3Provider.
 		UpdateOneID(minioS3Provider.ID).
 		SetAccessKeyID(minioS3Provider.AccessKeyID).
@@ -31,9 +28,6 @@ func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, ctx context.Co
 
 func CreateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, repoID int, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {
 	log.Debug().Msg("CreateMinioS3Provider()")
-
-	db := Connect()
-	defer db.Close()
 
 	mS3p, err = db.MinioS3Provider.
 		Create().

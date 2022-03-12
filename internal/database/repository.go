@@ -12,9 +12,6 @@ import (
 
 func GetRepositoriesDB(ctx context.Context) (repositories []*ent.Repository, err error) {
 
-	db := Connect()
-	defer db.Close()
-
 	repositories, err = db.Repository.
 		Query().
 		WithBackupSchedule().
@@ -35,9 +32,6 @@ func GetRepositoriesDB(ctx context.Context) (repositories []*ent.Repository, err
 
 func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err error) {
 
-	db := Connect()
-	defer db.Close()
-
 	r, err = db.Repository.
 		Query().
 		WithBackupSchedule().
@@ -57,8 +51,6 @@ func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err er
 }
 
 func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Repository, err error) {
-	db := Connect()
-	defer db.Close()
 
 	if r.Provider == "" {
 		r.Provider = "localProvider"
@@ -84,10 +76,8 @@ func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Reposi
 }
 
 func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *ent.Repository, err error) {
-	db := Connect()
-	defer db.Close()
 
-	// create repository
+	// update repository
 	r, err = db.Repository.
 		UpdateOneID(id).
 		SetName(repo.Name).
@@ -107,8 +97,6 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 }
 
 func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
-	db := Connect()
-	defer db.Close()
 
 	// create repository
 	err = db.Repository.
@@ -123,8 +111,6 @@ func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 }
 
 func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err error) {
-	db := Connect()
-	defer db.Close()
 
 	// create repository
 	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).All(ctx)
@@ -137,8 +123,6 @@ func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err er
 }
 
 func QueryPathsByRepositoryDB(id int, ctx context.Context) (p []*ent.Path, err error) {
-	db := Connect()
-	defer db.Close()
 
 	// create repository
 	p, err = db.Path.Query().Where(path.HasRepositoryWith(repository.ID(id))).All(ctx)

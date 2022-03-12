@@ -7,8 +7,6 @@ import (
 )
 
 func LogCommand(id int, operation string, stdout string, stderr string, err error, ctx context.Context) {
-	db := Connect()
-	defer db.Close()
 
 	var errStr string
 	if err == nil {

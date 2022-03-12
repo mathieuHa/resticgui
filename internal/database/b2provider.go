@@ -10,9 +10,6 @@ import (
 func UpdateB2ProviderDB(b2Provider ent.B2Provider, ctx context.Context) (b2 *ent.B2Provider, err error) {
 	log.Debug().Msg("UpdateB2Provider()")
 
-	db := Connect()
-	defer db.Close()
-
 	b2, err = db.B2Provider.
 		UpdateOneID(b2Provider.ID).
 		SetAccountID(b2Provider.AccountID).
@@ -28,9 +25,6 @@ func UpdateB2ProviderDB(b2Provider ent.B2Provider, ctx context.Context) (b2 *ent
 
 func CreateB2ProviderDB(b2Provider ent.B2Provider, repoID int, ctx context.Context) (b2 *ent.B2Provider, err error) {
 	log.Debug().Msg("CreateB2Provider()")
-
-	db := Connect()
-	defer db.Close()
 
 	b2, err = db.B2Provider.
 		Create().

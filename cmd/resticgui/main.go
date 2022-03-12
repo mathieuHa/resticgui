@@ -34,6 +34,7 @@ func main() {
 	commands.ResticInit()
 
 	database.Migrate()
+	defer database.Close()
 
 	router := api.SetupRouter()
 

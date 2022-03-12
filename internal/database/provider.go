@@ -13,9 +13,6 @@ func updateValidProvider(repository ent.Repository, valid bool) (err error) {
 	log.Debug().Msg("updateValidProvider()")
 	ctx := context.Background()
 
-	db := Connect()
-	defer db.Close()
-
 	switch repository.Provider {
 	case "localProvider":
 		if repository.Edges.LocalProvider != nil {
