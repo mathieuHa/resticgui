@@ -15,6 +15,8 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
+const errRNotFound = "repository not found"
+
 // QueryRepositories godoc
 // @Summary get all repositories
 // @Schemes
@@ -58,6 +60,10 @@ func GetRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
