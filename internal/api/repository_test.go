@@ -77,7 +77,8 @@ func TestGetRepositoriesRoute(t *testing.T) {
 
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
+		req, err := http.NewRequest("GET", url, nil)
+		assert.Nil(t, err)
 		router.ServeHTTP(w, req)
 
 		var repositoryReceived ent.Repository
