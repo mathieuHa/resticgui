@@ -90,6 +90,28 @@ func TestGetRepositoriesRoute(t *testing.T) {
 	})
 }
 
+func TestCreateRepositoryRoute(t *testing.T) {
+	router := setupRouterTest(t)
+
+	const apiURL = "/api/v1/repositories"
+
+	t.Run("create repository with no post data", func(t *testing.T) {
+		url := apiURL
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", url, nil)
+		router.ServeHTTP(w, req)
+
+		var err HTTPError
+		err.Error = errInvalidRequest
+		errString, errBind := json.Marshal(err)
+
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
+}
+
 func TestRemoveRepositoriesRoute(t *testing.T) {
 	router := setupRouterTest(t)
 

@@ -1,6 +1,7 @@
 package api
 
 const errIDNotValid = "id not valid"
+const errInvalidRequest = "invalid request"
 const errNotFound = "not found"
 const errNotBind = "bind error"
 const errUpdate = "update error"

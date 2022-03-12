@@ -15,7 +15,6 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
-
 // QueryRepositories godoc
 // @Summary get all repositories
 // @Schemes
