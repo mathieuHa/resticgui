@@ -21,8 +21,8 @@ func TestCreateB2Provider(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/b2provider"
 	const httpMethod = "POST"
 
-	newAWS, _ := json.Marshal(ent.B2Provider{BucketName: "newRName"})
-	responseBody := bytes.NewBuffer(newAWS)
+	newB2, _ := json.Marshal(ent.B2Provider{BucketName: "newRName"})
+	responseBody := bytes.NewBuffer(newB2)
 
 	testInvalidFormatID(t, router, httpMethod, apiURL, "create b2 provider with invalid id format", nil, HTTPError{Error: errIDNotValid})
 	testUnknownID(t, router, httpMethod, apiURL, "create b2 provider with valid id not existing", responseBody, HTTPError{Error: errRNotFound})
@@ -95,8 +95,8 @@ func TestUpdateB2Provider(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/b2provider"
 	const httpMethod = "PATCH"
 
-	newAWS, _ := json.Marshal(ent.B2Provider{BucketName: "newRName"})
-	responseBody := bytes.NewBuffer(newAWS)
+	newB2, _ := json.Marshal(ent.B2Provider{BucketName: "newRName"})
+	responseBody := bytes.NewBuffer(newB2)
 
 	testInvalidFormatID(t, router, httpMethod, apiURL, "update b2 provider with invalid id format", nil, HTTPError{Error: errIDNotValid})
 	testUnknownID(t, router, httpMethod, apiURL, "update b2 provider with valid id not existing", responseBody, HTTPError{Error: errRNotFound})
