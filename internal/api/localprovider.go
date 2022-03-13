@@ -123,10 +123,6 @@ func UpdateLocalProvider(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
-		return
-	}
 
 	c.IndentedJSON(http.StatusOK, lp)
 }

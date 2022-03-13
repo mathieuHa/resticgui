@@ -27,11 +27,11 @@ func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context
 	return b, err
 }
 
-func UpdateBackupPolicyDB(backupPolicy ent.BackupPolicy, ctx context.Context) (b *ent.BackupPolicy, err error) {
+func UpdateBackupPolicyDB(backupPolicy ent.BackupPolicy, id int, ctx context.Context) (b *ent.BackupPolicy, err error) {
 	log.Debug().Msg("updateBackupPolicyDB()")
 
 	b, err = db.BackupPolicy.
-		UpdateOneID(backupPolicy.ID).
+		UpdateOneID(id).
 		SetKeepAll(backupPolicy.KeepAll).
 		SetName(backupPolicy.Name).
 		SetNbLastBackup(backupPolicy.NbLastBackup).

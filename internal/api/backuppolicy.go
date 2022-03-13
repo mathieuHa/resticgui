@@ -30,11 +30,6 @@ func CreateBackupPolicy(c *gin.Context) {
 	ctx := context.Background()
 	var b ent.BackupPolicy
 
-	if err := c.BindJSON(&b); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -42,11 +37,23 @@ func CreateBackupPolicy(c *gin.Context) {
 		return
 	}
 
+	if err := c.BindJSON(&b); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+
 	newId, _ := strconv.Atoi(id)
 
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
@@ -95,19 +102,25 @@ func UpdateBackupPolicy(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
-	if b.ID == 0 && err != nil {
+	if r.Edges.LocalProvider == nil || r.Edges.LocalProvider.ID == 0 {
 		backupPolicy, err = database.CreateBackupPolicyDB(b, newId, ctx)
 	} else {
-		backupPolicy, err = database.UpdateBackupPolicyDB(b, ctx)
+		backupPolicy, err = database.UpdateBackupPolicyDB(b, r.Edges.BackupPolicy.ID, ctx)
 	}
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 

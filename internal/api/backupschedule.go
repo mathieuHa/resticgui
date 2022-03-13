@@ -29,11 +29,6 @@ func CreateBackupSchedule(c *gin.Context) {
 	ctx := context.Background()
 	var b ent.BackupSchedule
 
-	if err := c.BindJSON(&b); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -41,11 +36,23 @@ func CreateBackupSchedule(c *gin.Context) {
 		return
 	}
 
+	if err := c.BindJSON(&b); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+
 	newId, _ := strconv.Atoi(id)
 
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
@@ -94,19 +101,25 @@ func UpdateBackupSchedule(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
-	if b.ID == 0 && err != nil {
+	if r.Edges.BackupSchedule == nil || r.Edges.BackupSchedule.ID == 0 {
 		backupSchedule, err = database.CreateBackupScheduleDB(b, newId, ctx)
 	} else {
-		backupSchedule, err = database.UpdateBackupScheduleDB(b, ctx)
+		backupSchedule, err = database.UpdateBackupScheduleDB(b, r.Edges.BackupSchedule.ID, ctx)
 	}
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 

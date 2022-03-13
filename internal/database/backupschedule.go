@@ -39,11 +39,11 @@ func CreateBackupScheduleDB(backupSchedule ent.BackupSchedule, repoID int, ctx c
 	return b, err
 }
 
-func UpdateBackupScheduleDB(backupSchedule ent.BackupSchedule, ctx context.Context) (b *ent.BackupSchedule, err error) {
+func UpdateBackupScheduleDB(backupSchedule ent.BackupSchedule, id int, ctx context.Context) (b *ent.BackupSchedule, err error) {
 	log.Debug().Msg("updateBackupScheduleDB()")
 
 	b, err = db.BackupSchedule.
-		UpdateOneID(backupSchedule.ID).
+		UpdateOneID(id).
 		SetChoice(backupSchedule.Choice).
 		SetCronSyntax(backupSchedule.CronSyntax).
 		SetDay(backupSchedule.Day).
