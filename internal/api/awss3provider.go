@@ -46,7 +46,13 @@ func CreateAWSS3Provider(c *gin.Context) {
 
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
@@ -95,16 +101,24 @@ func UpdateAWSS3Provider(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
-	if s3.ID == 0 && err != nil {
+	if r.Edges.AWSS3Provider == nil || r.Edges.AWSS3Provider.ID == 0 {
+		log.Debug().Msg("if")
 		s3Provider, err = database.CreateAWSS3ProviderDB(s3, newId, ctx)
 	} else {
-		s3Provider, err = database.UpdateAWSS3ProviderDB(s3, ctx)
+		log.Debug().Msg("else")
+		s3Provider, err = database.UpdateAWSS3ProviderDB(s3, r.Edges.AWSS3Provider.ID, ctx)
 	}
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})

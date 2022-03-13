@@ -7,11 +7,11 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func UpdateAWSS3ProviderDB(s3Provider ent.AWSS3Provider, ctx context.Context) (s3 *ent.AWSS3Provider, err error) {
+func UpdateAWSS3ProviderDB(s3Provider ent.AWSS3Provider, id int, ctx context.Context) (s3 *ent.AWSS3Provider, err error) {
 	log.Debug().Msg("UpdateAWSS3Provider()")
 
 	s3, err = db.AWSS3Provider.
-		UpdateOneID(s3Provider.ID).
+		UpdateOneID(id).
 		SetAccessKeyID(s3Provider.AccessKeyID).
 		SetSecretAccessKey(s3Provider.SecretAccessKey).
 		SetBucketName(s3Provider.BucketName).
