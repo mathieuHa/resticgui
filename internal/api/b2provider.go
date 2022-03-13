@@ -30,11 +30,6 @@ func CreateB2Provider(c *gin.Context) {
 	ctx := context.Background()
 	var b2 ent.B2Provider
 
-	if err := c.BindJSON(&b2); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -42,23 +37,35 @@ func CreateB2Provider(c *gin.Context) {
 		return
 	}
 
+	if err := c.BindJSON(&b2); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+
 	newId, _ := strconv.Atoi(id)
 
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
 	// create b2Provider
 	log.Debug().Msg("create b2Provider")
-	backupPolicy, err := database.CreateB2ProviderDB(b2, newId, ctx)
+	b2Provider, err := database.CreateB2ProviderDB(b2, newId, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, backupPolicy)
+	c.IndentedJSON(http.StatusCreated, b2Provider)
 }
 
 // UpdateB2Provider godoc
@@ -95,19 +102,25 @@ func UpdateB2Provider(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
-	if b2.ID == 0 && err != nil {
+	if r.Edges.B2Provider == nil || r.Edges.B2Provider.ID == 0 {
 		b2Provider, err = database.CreateB2ProviderDB(b2, newId, ctx)
 	} else {
-		b2Provider, err = database.UpdateB2ProviderDB(b2, ctx)
+		b2Provider, err = database.UpdateB2ProviderDB(b2, r.Edges.B2Provider.ID, ctx)
 	}
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 

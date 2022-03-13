@@ -58,13 +58,13 @@ func CreateAWSS3Provider(c *gin.Context) {
 
 	// create s3Provider
 	log.Debug().Msg("create s3Provider")
-	backupPolicy, err := database.CreateAWSS3ProviderDB(s3, newId, ctx)
+	s3Provider, err := database.CreateAWSS3ProviderDB(s3, newId, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, backupPolicy)
+	c.IndentedJSON(http.StatusCreated, s3Provider)
 }
 
 // UpdateAWSS3Provider godoc
@@ -114,14 +114,12 @@ func UpdateAWSS3Provider(c *gin.Context) {
 	}
 
 	if r.Edges.AWSS3Provider == nil || r.Edges.AWSS3Provider.ID == 0 {
-		log.Debug().Msg("if")
 		s3Provider, err = database.CreateAWSS3ProviderDB(s3, newId, ctx)
 	} else {
-		log.Debug().Msg("else")
 		s3Provider, err = database.UpdateAWSS3ProviderDB(s3, r.Edges.AWSS3Provider.ID, ctx)
 	}
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 
