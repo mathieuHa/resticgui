@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/database"
@@ -33,16 +32,14 @@ func TestQueryRepositories(t *testing.T) {
 	})
 }
 
-func testInvalidFormatID(t *testing.T, router *gin.Engine, httpMethod string, apiURL string, name string, body *bytes.Buffer) {
+func testInvalidFormatID(t *testing.T, router *gin.Engine, httpMethod string, apiURL string, name string, body *bytes.Buffer, httpError HTTPError) {
 	t.Helper()
-	testName := fmt.Sprintf("[%v] %v repository with invalid id format", httpMethod, name)
 
-	t.Run(testName, func(t *testing.T) {
+	t.Run(name, func(t *testing.T) {
 		cleanDataBaseTest(t)
 		// Check invalid id
-		url := fmt.Sprintf(apiURL, IDNotValid)
-		log.Debug().Msgf("url: %v", url)
 		w := httptest.NewRecorder()
+		url := fmt.Sprintf(apiURL, IDNotValid)
 		var req *http.Request
 		if body == nil {
 			req, _ = http.NewRequest(httpMethod, url, nil)
@@ -51,9 +48,7 @@ func testInvalidFormatID(t *testing.T, router *gin.Engine, httpMethod string, ap
 		}
 		router.ServeHTTP(w, req)
 
-		var err HTTPError
-		err.Error = errIDNotValid
-		errString, errBind := json.Marshal(err)
+		errString, errBind := json.Marshal(httpError)
 
 		assert.Nil(t, errBind)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -61,11 +56,10 @@ func testInvalidFormatID(t *testing.T, router *gin.Engine, httpMethod string, ap
 	})
 }
 
-func testUnknownID(t *testing.T, router *gin.Engine, httpMethod string, apiURL string, name string, body *bytes.Buffer) {
+func testUnknownID(t *testing.T, router *gin.Engine, httpMethod string, apiURL string, name string, body *bytes.Buffer, httpError HTTPError) {
 	t.Helper()
-	testName := fmt.Sprintf("[%v] %v repository with unknown id", httpMethod, name)
 
-	t.Run(testName, func(t *testing.T) {
+	t.Run(name, func(t *testing.T) {
 		cleanDataBaseTest(t)
 		// Check invalid id
 		url := fmt.Sprintf(apiURL, IDUnknown)
@@ -78,9 +72,7 @@ func testUnknownID(t *testing.T, router *gin.Engine, httpMethod string, apiURL s
 		}
 		router.ServeHTTP(w, req)
 
-		var err HTTPError
-		err.Error = errRNotFound
-		errString, errBind := json.Marshal(err)
+		errString, errBind := json.Marshal(httpError)
 
 		assert.Nil(t, errBind)
 		assert.Equal(t, http.StatusNotFound, w.Code)
@@ -94,8 +86,8 @@ func TestGetRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil)
-	testUnknownID(t, router, httpMethod, apiURL, "", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "GET repository Invalid ID Format", nil, HTTPError{Error: errInvalidRequest})
+	testUnknownID(t, router, httpMethod, apiURL, "GET repository Unknown ID", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get repository with existing id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -176,8 +168,8 @@ func TestUpdateRepository(t *testing.T) {
 	newR, _ := json.Marshal(ent.Repository{Name: newRName})
 	responseBody := bytes.NewBuffer(newR)
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "", responseBody)
-	testUnknownID(t, router, httpMethod, apiURL, "", responseBody)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", responseBody, HTTPError{Error: errInvalidRequest})
+	testUnknownID(t, router, httpMethod, apiURL, "", responseBody, HTTPError{Error: errRNotFound})
 
 	t.Run("update repository with valid id but empty post data", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -238,7 +230,7 @@ func TestRemoveRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v"
 	const httpMethod = "DELETE"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil, HTTPError{Error: errInvalidRequest})
 
 	t.Run("delete repository with valid id format non existing", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -278,8 +270,8 @@ func TestLogsRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/logs"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "logs", nil)
-	testUnknownID(t, router, httpMethod, apiURL, "logs", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "logs", nil, HTTPError{Error: errIDNotValid})
+	testUnknownID(t, router, httpMethod, apiURL, "logs", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get logs repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -337,8 +329,8 @@ func TestStatsRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/stats"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "stats", nil)
-	testUnknownID(t, router, httpMethod, apiURL, "stats", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "stats", nil, HTTPError{Error: errIDNotValid})
+	testUnknownID(t, router, httpMethod, apiURL, "stats", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get stats repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -365,8 +357,8 @@ func TestCheckRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/check"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "check", nil)
-	testUnknownID(t, router, httpMethod, apiURL, "check", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "check", nil, HTTPError{Error: errInvalidRequest})
+	testUnknownID(t, router, httpMethod, apiURL, "check", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get check repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -393,8 +385,8 @@ func TestGetSnapshotsRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/snapshots"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "snapshots", nil)
-	testUnknownID(t, router, httpMethod, apiURL, "snapshots", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "snapshots", nil, HTTPError{Error: errInvalidRequest})
+	testUnknownID(t, router, httpMethod, apiURL, "snapshots", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get snapshots repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -421,8 +413,8 @@ func TestValidRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/valid"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "valid", nil)
-	testUnknownID(t, router, httpMethod, apiURL, "valid", nil)
+	testInvalidFormatID(t, router, httpMethod, apiURL, "valid", nil, HTTPError{Error: errIDNotValid})
+	testUnknownID(t, router, httpMethod, apiURL, "valid", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get valid repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)

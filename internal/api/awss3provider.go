@@ -29,16 +29,16 @@ func CreateAWSS3Provider(c *gin.Context) {
 
 	ctx := context.Background()
 	var s3 ent.AWSS3Provider
-
-	if err := c.BindJSON(&s3); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+		return
+	}
+
+	if err := c.BindJSON(&s3); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
 
