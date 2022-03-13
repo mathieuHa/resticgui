@@ -86,7 +86,7 @@ func TestGetRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "GET repository Invalid ID Format", nil, HTTPError{Error: errInvalidRequest})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "GET repository Invalid ID Format", nil, HTTPError{Error: errIDNotValid})
 	testUnknownID(t, router, httpMethod, apiURL, "GET repository Unknown ID", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get repository with existing id", func(t *testing.T) {
@@ -168,7 +168,7 @@ func TestUpdateRepository(t *testing.T) {
 	newR, _ := json.Marshal(ent.Repository{Name: newRName})
 	responseBody := bytes.NewBuffer(newR)
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "", responseBody, HTTPError{Error: errInvalidRequest})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", responseBody, HTTPError{Error: errIDNotValid})
 	testUnknownID(t, router, httpMethod, apiURL, "", responseBody, HTTPError{Error: errRNotFound})
 
 	t.Run("update repository with valid id but empty post data", func(t *testing.T) {
@@ -230,7 +230,7 @@ func TestRemoveRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v"
 	const httpMethod = "DELETE"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil, HTTPError{Error: errInvalidRequest})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "", nil, HTTPError{Error: errIDNotValid})
 
 	t.Run("delete repository with valid id format non existing", func(t *testing.T) {
 		cleanDataBaseTest(t)
