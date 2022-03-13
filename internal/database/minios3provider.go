@@ -7,11 +7,11 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {
+func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, id int, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {
 	log.Debug().Msg("UpdateMinioS3Provider()")
 
 	mS3p, err = db.MinioS3Provider.
-		UpdateOneID(minioS3Provider.ID).
+		UpdateOneID(id).
 		SetAccessKeyID(minioS3Provider.AccessKeyID).
 		SetSecretAccessKey(minioS3Provider.SecretAccessKey).
 		SetBucketName(minioS3Provider.BucketName).

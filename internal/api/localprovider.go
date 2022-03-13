@@ -59,13 +59,13 @@ func CreateLocalProvider(c *gin.Context) {
 
 	// create localprovider
 	log.Debug().Msg("create localprovider")
-	backupPolicy, err := database.CreateLocalProviderDB(p, newId, ctx)
+	localProvider, err := database.CreateLocalProviderDB(p, newId, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, backupPolicy)
+	c.IndentedJSON(http.StatusCreated, localProvider)
 }
 
 // UpdateLocalProvider godoc

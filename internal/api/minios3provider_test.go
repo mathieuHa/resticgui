@@ -18,7 +18,7 @@ import (
 func TestCreateMinioS3Provider(t *testing.T) {
 	router := setupRouterTest(t)
 
-	const apiURL = "/api/v1/repositories/%v/ms3provider"
+	const apiURL = "/api/v1/repositories/%v/minios3provider"
 	const httpMethod = "POST"
 
 	newMS3, _ := json.Marshal(ent.MinioS3Provider{BucketName: "newRName"})
@@ -90,7 +90,7 @@ func TestCreateMinioS3Provider(t *testing.T) {
 func TestUpdateMinioS3Provider(t *testing.T) {
 	router := setupRouterTest(t)
 
-	const apiURL = "/api/v1/repositories/%v/ms3provider"
+	const apiURL = "/api/v1/repositories/%v/minios3provider"
 	const httpMethod = "PATCH"
 
 	newMS3, _ := json.Marshal(ent.MinioS3Provider{BucketName: "newRName"})
