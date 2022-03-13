@@ -30,11 +30,6 @@ func CreateLocalProvider(c *gin.Context) {
 	ctx := context.Background()
 	var p ent.LocalProvider
 
-	if err := c.BindJSON(&p); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
@@ -42,11 +37,23 @@ func CreateLocalProvider(c *gin.Context) {
 		return
 	}
 
+	if err := c.BindJSON(&p); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+
 	newId, _ := strconv.Atoi(id)
 
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
@@ -95,16 +102,26 @@ func UpdateLocalProvider(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
 		return
 	}
 
-	if p.ID == 0 && err != nil {
+	if r.Edges.LocalProvider == nil || r.Edges.LocalProvider.ID == 0 {
 		lp, err = database.CreateLocalProviderDB(p, newId, ctx)
 	} else {
-		lp, err = database.UpdateLocalProviderDB(p, ctx)
+		lp, err = database.UpdateLocalProviderDB(p, r.Edges.LocalProvider.ID, ctx)
+	}
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
+		return
 	}
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})

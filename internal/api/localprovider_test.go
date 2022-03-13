@@ -18,7 +18,7 @@ import (
 func TestCreateLocalProvider(t *testing.T) {
 	router := setupRouterTest(t)
 
-	const apiURL = "/api/v1/repositories/%v/lprovider"
+	const apiURL = "/api/v1/repositories/%v/localprovider"
 	const httpMethod = "POST"
 
 	newLP, _ := json.Marshal(ent.LocalProvider{RepoPath: "newRPath"})
@@ -84,7 +84,7 @@ func TestCreateLocalProvider(t *testing.T) {
 func TestUpdateLocalProvider(t *testing.T) {
 	router := setupRouterTest(t)
 
-	const apiURL = "/api/v1/repositories/%v/lprovider"
+	const apiURL = "/api/v1/repositories/%v/localprovider"
 	const httpMethod = "PATCH"
 
 	newLP, _ := json.Marshal(ent.LocalProvider{RepoPath: "repoPath"})

@@ -7,11 +7,11 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func UpdateLocalProviderDB(localProvider ent.LocalProvider, ctx context.Context) (b2 *ent.LocalProvider, err error) {
+func UpdateLocalProviderDB(localProvider ent.LocalProvider, id int, ctx context.Context) (b2 *ent.LocalProvider, err error) {
 	log.Debug().Msg("UpdateLocalProvider()")
 
 	b2, err = db.LocalProvider.
-		UpdateOneID(localProvider.ID).
+		UpdateOneID(id).
 		SetRepoPath(localProvider.RepoPath).
 		Save(ctx)
 
