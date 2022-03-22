@@ -115,6 +115,8 @@ func BackupRepository(repository ent.Repository, dryRun bool) (string, string, e
 }
 
 func StatsRepository(repository ent.Repository, dryRun bool) (string, string, error) {
+	log.Debug().Msg("StatsRepository()")
+
 	var args []string
 	var env []string
 
@@ -125,6 +127,8 @@ func StatsRepository(repository ent.Repository, dryRun bool) (string, string, er
 }
 
 func getBackupCommonArgs(repository ent.Repository) []string {
+	log.Debug().Msg("getBackupCommonArgs()")
+
 	var args []string
 
 	filesParameter := getIncludedAndExludedFiles(repository)

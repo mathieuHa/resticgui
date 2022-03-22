@@ -270,8 +270,8 @@ func TestLogsRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/logs"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "logs", nil, HTTPError{Error: errIDNotValid})
-	testUnknownID(t, router, httpMethod, apiURL, "logs", nil, HTTPError{Error: errRNotFound})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "get logs with invalid id format", nil, HTTPError{Error: errIDNotValid})
+	testUnknownID(t, router, httpMethod, apiURL, "get logs with valid id not existing", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get logs repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -329,8 +329,8 @@ func TestStatsRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/stats"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "stats", nil, HTTPError{Error: errIDNotValid})
-	testUnknownID(t, router, httpMethod, apiURL, "stats", nil, HTTPError{Error: errRNotFound})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "get stats with invalid id format", nil, HTTPError{Error: errIDNotValid})
+	testUnknownID(t, router, httpMethod, apiURL, "get stats with valid id not existing", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get stats repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -357,8 +357,8 @@ func TestCheckRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/check"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "check", nil, HTTPError{Error: errInvalidRequest})
-	testUnknownID(t, router, httpMethod, apiURL, "check", nil, HTTPError{Error: errRNotFound})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "get check with invalid id format", nil, HTTPError{Error: errInvalidRequest})
+	testUnknownID(t, router, httpMethod, apiURL, "get check with valid id not existing", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get check repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -385,8 +385,8 @@ func TestGetSnapshotsRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/snapshots"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "snapshots", nil, HTTPError{Error: errInvalidRequest})
-	testUnknownID(t, router, httpMethod, apiURL, "snapshots", nil, HTTPError{Error: errRNotFound})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "get snapshots with invalid id format", nil, HTTPError{Error: errInvalidRequest})
+	testUnknownID(t, router, httpMethod, apiURL, "get snapshots with valid id not existing", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get snapshots repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
@@ -413,8 +413,8 @@ func TestValidRepository(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/valid"
 	const httpMethod = "GET"
 
-	testInvalidFormatID(t, router, httpMethod, apiURL, "valid", nil, HTTPError{Error: errIDNotValid})
-	testUnknownID(t, router, httpMethod, apiURL, "valid", nil, HTTPError{Error: errRNotFound})
+	testInvalidFormatID(t, router, httpMethod, apiURL, "get valid with invalid id format", nil, HTTPError{Error: errIDNotValid})
+	testUnknownID(t, router, httpMethod, apiURL, "get valid with valid id not existing", nil, HTTPError{Error: errRNotFound})
 
 	t.Run("get valid repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)

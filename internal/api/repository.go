@@ -289,11 +289,12 @@ func StatsRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil && ent.IsNotFound(err) {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		return
-	} else if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 
@@ -328,11 +329,12 @@ func CheckRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil && ent.IsNotFound(err) {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		return
-	} else if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 
@@ -368,11 +370,12 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil && ent.IsNotFound(err) {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		return
-	} else if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 	stdout := backup.GetSnapshotsRepository(r)
@@ -416,11 +419,12 @@ func ValidRepository(c *gin.Context) {
 
 	r, err := database.GetRepositoryByIDDB(newId, ctx)
 
-	if err != nil && ent.IsNotFound(err) {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		return
-	} else if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRQuery})
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 

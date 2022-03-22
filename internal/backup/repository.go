@@ -11,6 +11,8 @@ import (
 )
 
 func GetStatsRepository(r *ent.Repository) (out string) {
+	log.Debug().Msg("GetStatsRepository()")
+
 	ctx := context.Background()
 	stdout, stderr, errCmd := commands.StatsRepository(*r, false)
 	database.LogCommand(r.ID, "StatsSnapshots", stdout, stderr, errCmd, ctx)
