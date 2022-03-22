@@ -7,10 +7,10 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func UpdateLocalProviderDB(localProvider ent.LocalProvider, id int, ctx context.Context) (b2 *ent.LocalProvider, err error) {
-	log.Debug().Msg("UpdateLocalProvider()")
+func UpdateLocalProviderDB(localProvider ent.LocalProvider, id int, ctx context.Context) (lp *ent.LocalProvider, err error) {
+	log.Debug().Msg("UpdateLocalProviderDB()")
 
-	b2, err = db.LocalProvider.
+	lp, err = db.LocalProvider.
 		UpdateOneID(id).
 		SetRepoPath(localProvider.RepoPath).
 		Save(ctx)
@@ -18,13 +18,13 @@ func UpdateLocalProviderDB(localProvider ent.LocalProvider, id int, ctx context.
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errUpdate)
 	}
-	return b2, err
+	return lp, err
 }
 
-func CreateLocalProviderDB(localProvider ent.LocalProvider, repoID int, ctx context.Context) (b2 *ent.LocalProvider, err error) {
-	log.Debug().Msg("CreateLocalProvider()")
+func CreateLocalProviderDB(localProvider ent.LocalProvider, repoID int, ctx context.Context) (lp *ent.LocalProvider, err error) {
+	log.Debug().Msg("CreateLocalProviderDB()")
 
-	b2, err = db.LocalProvider.
+	lp, err = db.LocalProvider.
 		Create().
 		SetRepoPath(localProvider.RepoPath).
 		SetRepositoryID(repoID).
@@ -34,5 +34,5 @@ func CreateLocalProviderDB(localProvider ent.LocalProvider, repoID int, ctx cont
 		log.Err(err).Msgf("error: %v", errCreate)
 	}
 
-	return b2, err
+	return lp, err
 }

@@ -27,3 +27,21 @@ func TestGetProviderData(t *testing.T) {
 
 	})
 }
+
+func TestGetLocalRepositoryFormat(t *testing.T) {
+	Config.InitTestConfig()
+	database.Migrate()
+
+	t.Run("Get local repository", func(t *testing.T) {
+		database.CleanDatabaseTest(t)
+
+		rName := "myRepo"
+		p := ent.LocalProvider{RepoPath: rName}
+		p, err := database.CreateLocalProviderDB(p, context.Background())
+		assert.Nil(t, err)
+
+		out, _ := getLocalRepositoryFormat(*r)
+		assert.Equal(t, out, "")
+
+	})
+}
