@@ -21,8 +21,11 @@ func TestCreatePaths(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/paths"
 	const httpMethod = "POST"
 
-	newBP, _ := json.Marshal(ent.Path{Name: "MyPath"})
-	requestBody := bytes.NewBuffer(newBP)
+	var myPaths []ent.Path
+	myPaths = append(myPaths, ent.Path{Name: "myBackup"})
+
+	newLP, _ := json.Marshal(myPaths)
+	requestBody := bytes.NewBuffer(newLP)
 
 	testInvalidFormatID(t, router, httpMethod, apiURL, "create paths with invalid id format", nil, HTTPError{Error: errIDNotValid})
 	testUnknownID(t, router, httpMethod, apiURL, "create paths with valid id not existing", requestBody, HTTPError{Error: errRNotFound})
@@ -58,10 +61,10 @@ func TestCreatePaths(t *testing.T) {
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
 
-		name := "myBMName"
-		obj := ent.Path{
-			Name: name,
-		}
+		var obj []*ent.Path
+		name := "myBPName"
+		absPath := "myAbsPath"
+		obj = append(obj, &ent.Path{Name: name, AbsPath: absPath})
 		l, _ := json.Marshal(obj)
 		requestBody := bytes.NewBuffer(l)
 
@@ -69,12 +72,12 @@ func TestCreatePaths(t *testing.T) {
 
 		router.ServeHTTP(w, req)
 
-		var response ent.Path
+		var response []ent.Path
 		err = json.Unmarshal(w.Body.Bytes(), &response)
 		assert.Nil(t, err)
 		log.Debug().Msg(w.Body.String())
-		assert.GreaterOrEqual(t, response.ID, 0)
-		assert.Equal(t, response.Name, name)
+		assert.Equal(t, len(response), len(obj))
+		//assert.Equal(t, response.Name, name)
 		assert.Equal(t, http.StatusCreated, w.Code)
 
 	})

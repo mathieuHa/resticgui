@@ -35,15 +35,16 @@ func createPaths(c *gin.Context) {
 	var paths []*ent.Path
 	var p []*ent.Path
 
-	if err := c.BindJSON(&paths); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
 	id := c.Param("id")
 
 	if !Utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+		return
+	}
+
+	if err := c.BindJSON(&paths); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
 
