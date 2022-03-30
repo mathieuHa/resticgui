@@ -137,6 +137,7 @@ func updatePaths(c *gin.Context) {
 // @Success 200 {string} Helloworld
 // @Router /paths [post]
 func GetPath(c *gin.Context) {
+	log.Debug().Msg("GetPath()")
 	var root ent.Path
 
 	if err := c.BindJSON(&root); err != nil {

@@ -43,6 +43,7 @@ func SetupRouter() *gin.Engine {
 		backup.CreateAllScheduledBackup(cr)
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
+	router.POST(APIBasePath+"/paths", GetPath)
 
 	grpRepositories := router.Group(APIBasePath + "repositories")
 	{
@@ -71,8 +72,6 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.GET(":id/snapshots", GetSnapshotsRepository)
 		grpRepositories.GET(":id/valid", ValidRepository)
 	}
-
-	router.POST("/paths", GetPath)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
