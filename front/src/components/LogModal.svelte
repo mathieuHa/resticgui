@@ -15,7 +15,7 @@
   const dispatch = createEventDispatcher();
   
   onMount(async () => {
-    const data = await agent.get(`/repository/${repositoryId}/log`);
+    const data = await agent.get(`/repository/${repositoryId}/logs`);
     logs = data.map((log) => {
       const date = new Date(log.startTime).toISOString().split('T');
       return {
