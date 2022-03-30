@@ -72,9 +72,9 @@
 		<li>
 			<NavLink href="/">Home</NavLink>
 		</li>
-		<li>
+		<!-- <li>
 			<NavLink href="/users">Users</NavLink>
-		</li>
+		</li> -->
 		<li>
 			<NavLink href="/repositories">Repositories</NavLink>
 		</li>

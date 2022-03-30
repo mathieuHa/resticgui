@@ -1,23 +1,32 @@
 <script>
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
 
   import agent from '../../utils/api';
 
-  let repo;
+  let repo = null;
+  let snapshots = [];
+  let tab = new URLSearchParams($page.url.search).get('tab') || null;
 
   const onRefresh = async (id) => {
     try {
       repo = await agent.get(`/repositories/${id}`);
-      repo.backups = await agent.get(`/repositories/${id}/backups`);
+      repo.backups = await agent.get(`/repositories/${id}/snapshots`);
     } catch (err) {
       console.log(err)
     }
   }
 
-  $:onRefresh($page.params.id);
-
-  onMount(onRefresh);
+  $: onRefresh($page.params.id);
 </script>
 
-<pre class="text-sm">{JSON.stringify(repo, null, 1)}</pre>
+
+
+{#if repo}
+  {#if tab === 'snapshots'}
+    {#each snapshots as snapshot}
+      <pre class="text-sm">{JSON.stringify(snapshot, null, 1)}</pre>
+    {/each}
+  {:else}
+    <pre class="text-sm">{JSON.stringify(repo, null, 1)}</pre>
+  {/if}
+{/if}

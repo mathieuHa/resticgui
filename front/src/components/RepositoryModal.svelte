@@ -31,21 +31,13 @@
     console.log(values);
     try {
       console.log(link);
-      const data = await agent[repository?.id ? 'patch' : 'post'](link, values);
+      await agent[repository?.id ? 'patch' : 'post'](link, values);
       toasts.addToast('Repository updated !');
       dispatch('refresh');
     } catch (err) {
       console.log(err);
       toasts.addToast(err, 'failure');
       console.log(err);
-    }
-  }
-  const onRemove = async (repo) => {
-    try {
-      await agent.delete(`/repositories/${repo.id}`);
-      dispatch('refresh');
-    } catch (err) {
-      console.log(err)
     }
   }
 

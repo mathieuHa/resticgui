@@ -60,7 +60,6 @@
   $:dispatch('update', paths.map((relPath) => relPath[0] === '!'
     ? { ...leaves[relPath.slice(1)], included: false, relPath: relPath.slice(1) }
     : { ...leaves[relPath], included: true, relPath }));
-  $:console.log(paths, leaves);
 </script>
 
 <p>Paths</p>
