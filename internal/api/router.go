@@ -43,7 +43,7 @@ func SetupRouter() *gin.Engine {
 		backup.CreateAllScheduledBackup(cr)
 	}()
 	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
-	router.POST(APIBasePath+"/paths", GetPath)
+	router.POST(APIBasePath+"paths", GetPath)
 
 	grpRepositories := router.Group(APIBasePath + "repositories")
 	{
