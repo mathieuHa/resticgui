@@ -70,7 +70,10 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.GET(":id/check", CheckRepository)
 		grpRepositories.GET(":id/snapshots", GetSnapshotsRepository)
 		grpRepositories.GET(":id/valid", ValidRepository)
+		grpRepositories.GET(":id/logs", LogsRepository)
 	}
+
+	router.GET("/paths", GetPath)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
