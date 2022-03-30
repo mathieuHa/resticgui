@@ -135,7 +135,7 @@ func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err error) {
 
 	// create repository
-	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).All(ctx)
+	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).Order(ent.Desc(logs.FieldStartTime)).Limit(50).All(ctx)
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errUpdate)
