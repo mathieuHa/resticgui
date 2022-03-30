@@ -1,5 +1,14 @@
 package api
 
+import (
+	"context"
+
+	"github.com/rs/zerolog/log"
+	"gitlab.com/resticgui/resticgui/ent"
+	"gitlab.com/resticgui/resticgui/internal/backup"
+	"gitlab.com/resticgui/resticgui/internal/database"
+)
+
 const IDNotValid = "aze"
 const IDUnknown = "1280898"
 const errIDNotValid = "id not valid"
@@ -60,3 +69,25 @@ const errPNotFound = p + errNotFound
 const errPUpdate = p + errUpdate
 const errPCreate = p + errCreate
 const errPQuery = p + errQuery
+
+func updateRepositoryRunning(r *ent.Repository, id int) (err error) {
+	r.Valid, err = backup.ValidRepository(*r)
+	if err != nil {
+		log.Err(err)
+		return err
+	} else {
+		log.Debug().Msgf(" %b ", r.Valid)
+	}
+
+	_, err = database.SetRepositoryValidDB(r.Valid, id, context.Background())
+	if err != nil {
+		log.Err(err)
+		return err
+	}
+
+	if r.Active && r.Valid {
+		backup.AddScheduledBackup(r, cr)
+	}
+
+	return nil
+}

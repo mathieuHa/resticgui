@@ -101,6 +101,23 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 	return r, err
 }
 
+func SetRepositoryValidDB(value bool, id int, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("SetRepositoryValidDB()")
+
+	// update repository
+	r, err = db.Repository.
+		UpdateOneID(id).
+		SetValid(value).
+		Save(ctx)
+
+	if err != nil {
+		log.Err(err)
+		return
+	}
+
+	return r, err
+}
+
 func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 
 	// create repository

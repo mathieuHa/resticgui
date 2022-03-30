@@ -168,11 +168,11 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	// if r.Active && r.Valid {
-	// 	backup.AddScheduledBackup(r, cr)
-	// } else {
-	// 	backup.RemoveScheduledBackup(r)
-	// }
+	if r.Active && r.Valid {
+		backup.AddScheduledBackup(r, cr)
+	} else {
+		// backup.RemoveScheduledBackup(r)
+	}
 
 	c.IndentedJSON(http.StatusOK, r)
 }

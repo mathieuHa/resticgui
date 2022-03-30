@@ -123,5 +123,7 @@ func UpdateBackupSchedule(c *gin.Context) {
 		return
 	}
 
+	updateRepositoryRunning(r, newId)
+
 	c.IndentedJSON(http.StatusOK, backupSchedule)
 }
