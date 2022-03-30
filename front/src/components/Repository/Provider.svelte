@@ -7,7 +7,7 @@
   const dispatch = createEventDispatcher();
   const providers = {
     localProvider: ['repoPath'],
-    MinioS3Provider: ['accessKeyID', 'bucketName', 'port', 'secretAccessKey', 'scheme'],
+    minioS3Provider: ['accessKeyID', 'bucketName', 'port', 'secretAccessKey', 'scheme'],
     B2Provider: ['accountID', 'accountKey', 'bucketName', 'repoName'],
     AWSS3Provider: ['accessKeyID', 'secretAccessKey', 'bucketName', 'defaultRegion'],
   }
@@ -19,7 +19,6 @@
   });
 
 
-  $: console.log(values)
   $: dispatch('update', { provider, edges: { [provider]: values.edges[provider] } });
 </script>
 
@@ -33,7 +32,7 @@
     />
   {/each}
 </div>
-<p class="my-2">{provider ? provider.replace('Provider', '') : 'Select a provider'}</p>
+<p class="my-2">{provider.replace('provider')}</p>
 {#if provider}
   {#each providers[provider] as input}
     <Input
