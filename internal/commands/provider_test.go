@@ -37,10 +37,10 @@ func TestGetLocalRepositoryFormat(t *testing.T) {
 
 		rName := "myRepo"
 		p := ent.LocalProvider{RepoPath: rName}
-		p, err := database.CreateLocalProviderDB(p, context.Background())
+		pa, err := database.CreateLocalProviderDB(p, 1, context.Background())
 		assert.Nil(t, err)
 
-		out, _ := getLocalRepositoryFormat(*r)
+		out := getLocalRepositoryFormat(*pa)
 		assert.Equal(t, out, "")
 
 	})
