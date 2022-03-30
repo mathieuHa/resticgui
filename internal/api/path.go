@@ -107,7 +107,7 @@ func updatePaths(c *gin.Context) {
 
 	newId, _ := strconv.Atoi(id)
 
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -124,6 +124,8 @@ func updatePaths(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
+
+	updateRepositoryRunning(r, newId)
 
 	c.IndentedJSON(http.StatusOK, p)
 }

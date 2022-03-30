@@ -124,5 +124,7 @@ func UpdateLocalProvider(c *gin.Context) {
 		return
 	}
 
+	updateRepositoryRunning(r, newId)
+
 	c.IndentedJSON(http.StatusOK, lp)
 }

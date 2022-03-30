@@ -168,6 +168,8 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
+	updateRepositoryRunning(r, newId)
+
 	if r.Active && r.Valid {
 		backup.AddScheduledBackup(r, cr)
 	} else {

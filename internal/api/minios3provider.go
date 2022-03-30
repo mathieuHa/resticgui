@@ -128,5 +128,7 @@ func UpdateMinioS3Provider(c *gin.Context) {
 		return
 	}
 
+	updateRepositoryRunning(r, newId)
+
 	c.IndentedJSON(http.StatusOK, ms3p)
 }

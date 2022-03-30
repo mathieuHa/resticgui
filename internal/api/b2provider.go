@@ -124,5 +124,7 @@ func UpdateB2Provider(c *gin.Context) {
 		return
 	}
 
+	updateRepositoryRunning(r, newId)
+
 	c.IndentedJSON(http.StatusOK, b2Provider)
 }

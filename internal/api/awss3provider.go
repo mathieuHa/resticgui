@@ -123,5 +123,7 @@ func UpdateAWSS3Provider(c *gin.Context) {
 		return
 	}
 
+	updateRepositoryRunning(r, newId)
+
 	c.IndentedJSON(http.StatusOK, s3Provider)
 }
