@@ -1,7 +1,3 @@
-<script context="module">
-  export const prerender = true;
-</script>
-
 <script>
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
@@ -24,6 +20,7 @@
   let step = 0;
   let values = null;
   let initialValues = null;
+  let link = null;
 
   // const schema = yup.object?.().shape({
   //   name: yup.string().min(4, 'too short').required('required'),
@@ -54,10 +51,10 @@
   const onSubmit = async () => {
     console.log(values);
     try {
-      const data = await agent[values.id ? 'patch' : 'post'](`/repositories/${values.id || ''}`, values);
+      console.log(link);
+      const data = await agent[initialValues?.id ? 'patch' : 'post'](link, values);
       toasts.addToast('Repository updated !');
       await onRefresh();
-      initialValues = data;
     } catch (err) {
       console.log(err);
       toasts.addToast(err, 'failure');
@@ -88,10 +85,10 @@
       >
         {#each ['General', 'Paths', 'Schedule', 'Policy', 'Provider'] as stepped, i}
           <div
-            class="flex-1 text-center pb-1 px-2 rounded-t border border-gray-500 {!initialValues.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
+            class="flex-1 pb-1 px-4 rounded-t border border-gray-500 {!initialValues.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
             on:click={() => { step = i; }}
           >
-            <span class="rounded-xl px-2">{stepped}</span>
+            <span class="rounded-xl">{stepped}</span>
           </div>
         {/each}
       </div>
@@ -99,34 +96,43 @@
         {#if step === 0}
           <General
             initialValues={values}
-            on:update={({ detail: general }) => { values = { ...values, ...general }; }}
+            on:update={({ detail: general }) => {
+              values = { ...values, ...general };
+              link = `/repositories/${initialValues.id || ''}`;
+            }}
           />
         {:else if step === 1}
           <Paths
             initialPaths={values.edges && values.edges.paths
               ? values.edges.paths.map(({ relPath = '/root', included }) => included ? relPath : `!${relPath}`)
               : []}
-            on:update={({ detail: paths }) => { values = { ...values, edges: { paths } }; }}
+            on:update={({ detail: paths }) => {
+              values = paths;
+              link = `/repositories/${initialValues.id}/paths`;
+            }}
           />
         {:else if step === 2}
           <BackupSchedule
             initialBackupSchedule={(values.edges && values.edges.backupSchedule) || {}}
-            on:update={({ detail: backupSchedule }) => { values = { ...values, edges: { backupSchedule } }; }}
+            on:update={({ detail: backupSchedule }) => {
+              values = backupSchedule;
+              link = `/repositories/${initialValues.id}/backupschedule`;
+            }}
           />
         {:else if step === 3}
           <BackupPolicy
             initialBackupPolicy={(values.edges && values.edges.backupPolicy) || {}}
-            on:update={({ detail: backupPolicy }) => { values = { ...values, edges: { backupPolicy } }; }}
+            on:update={({ detail: backupPolicy }) => {
+              values = backupPolicy;
+              link = `/repositories/${initialValues.id}/backuppolicy`;
+            }}
           />
         {:else if step === 4}
           <Provider
             initialProvider={values}
             on:update={({ detail: providers }) => {
-              values = {
-                ...values,
-                provider: providers.provider,
-                edges: { ...providers.edges },
-              };
+              values = providers.edges[providers.provider];
+              link = `/repositories/${initialValues.id}/${providers.provider.toLowerCase()}`;
             }}
           />
         {/if}

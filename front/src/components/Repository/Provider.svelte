@@ -19,7 +19,6 @@
   });
 
 
-  $: console.log(values)
   $: dispatch('update', { provider, edges: { [provider]: values.edges[provider] } });
 </script>
 
@@ -33,7 +32,7 @@
     />
   {/each}
 </div>
-<p class="my-2">{provider ? provider.replace('Provider', '') : 'Select a provider'}</p>
+<p class="my-2">{provider.replace('provider')}</p>
 {#if provider}
   {#each providers[provider] as input}
     <Input
