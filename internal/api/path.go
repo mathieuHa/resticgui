@@ -161,7 +161,8 @@ func GetPath(c *gin.Context) {
 		path.RelPath = root.RelPath
 		path.Name = file.Name()
 		path.IsDir = file.IsDir()
-		path.AbsPath, _ = filepath.Abs(file.Name())
+		path.AbsPath, _ = filepath.Abs(root.Name + "/" + file.Name())
+		// path.RelPath, _ = filepath.Abs(file.Name())
 		paths = append(paths, path)
 	}
 
