@@ -78,6 +78,11 @@ h6 a {
 	content: '#### ';
 }
 
+pre {
+  white-space: pre-wrap;
+  @apply font-sans;
+}
+
 /* https://seek-oss.github.io/capsize/ */
 .capsize::before {
 	content: '';
