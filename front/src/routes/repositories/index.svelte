@@ -22,19 +22,10 @@
   let initialValues = null;
   let link = null;
 
-  // const schema = yup.object?.().shape({
-  //   name: yup.string().min(4, 'too short').required('required'),
-  //   paths: yup.array(yup.object().shape({
-  //     name: yup.string().min(1, 'too short').required('required'),
-  //   })).min(1, 'too short').required('required'),
-  //   backupSchedule: yup.object().shape({
-  //     cron_syntax: yup.string().min(1, 'too short').required('required'),
-  //   }),
-  // });
-
   const onRefresh = async () => {
     try {
       repos = await agent.get(`/repositories`);
+      initialValues = repos.find((repo) => repo.id === initialValues.id);
     } catch (err) {
       // Pass
     }
