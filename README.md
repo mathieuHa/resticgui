@@ -30,7 +30,7 @@ make rundevweb
 ```
 make rundocker
 ```
-> Listen on http://localhost:3030
+> Listen on http://localhost:8000
 
 ## Dependancies
 
@@ -59,7 +59,9 @@ __Windows__
 ```bash
 choco install go mingw make
 ```
+#### Documentation
 
+http://localhost:8000/swagger/index.html
 
 ### Makefile help
 
