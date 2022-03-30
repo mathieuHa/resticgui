@@ -23,7 +23,7 @@ import (
 // @Success 201 {object} ent.AWSS3Provider
 // @Failure 400 {string} errNameUsed
 // @Failure 500 {string} errCreate
-// @Router /repositories/{id}/s3provider [post]
+// @Router /repositories/{id}/awss3provider [post]
 func CreateAWSS3Provider(c *gin.Context) {
 	log.Debug().Msg("CreateAWSS3Provider()")
 
@@ -78,7 +78,7 @@ func CreateAWSS3Provider(c *gin.Context) {
 // @Success 200 {object} ent.AWSS3Provider
 // @Failure 400 {string} errNotBind
 // @Failure 500 {string} errCreate
-// @Router /repositories/{id}/s3provider [patch]
+// @Router /repositories/{id}/awss3provider [patch]
 func UpdateAWSS3Provider(c *gin.Context) {
 	log.Debug().Msg("UpdateAWSS3Provider()")
 
