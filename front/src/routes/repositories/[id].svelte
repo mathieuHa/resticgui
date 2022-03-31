@@ -10,7 +10,7 @@
   const onRefresh = async (id) => {
     try {
       repo = await agent.get(`/repositories/${id}`);
-      repo.backups = await agent.get(`/repositories/${id}/snapshots`);
+      snapshots = await agent.get(`/repositories/${id}/snapshots`);
     } catch (err) {
       console.log(err)
     }
