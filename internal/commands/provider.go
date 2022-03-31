@@ -3,11 +3,14 @@ package commands
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
 // todo check each provider
 func getProviderData(repository ent.Repository) ([]string, []string) {
+	log.Debug().Msg("getProviderData()")
+
 	var args []string
 	var env []string
 
@@ -27,6 +30,7 @@ func getProviderData(repository ent.Repository) ([]string, []string) {
 		args = append(args, getMinioS3RepositoryFormat(*repository.Edges.MinioS3Provider))
 		env = append(args, getMinioS3EnvFormat(*repository.Edges.MinioS3Provider)...)
 	default:
+		log.Warn().Msg("No Provider Found")
 		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
 	}
 	return args, env
@@ -34,12 +38,15 @@ func getProviderData(repository ent.Repository) ([]string, []string) {
 }
 
 func getLocalRepositoryFormat(local ent.LocalProvider) string {
+	log.Debug().Msg("getLocalRepositoryFormat()")
 	// todo check path exists and is writable
 	// todo check repository string
 	return local.RepoPath
 }
 
 func getB2RepositoryFormat(b2 ent.B2Provider) string {
+	log.Debug().Msg("getB2RepositoryFormat()")
+
 	// todo check bucketName, repository
 	repoFormat := fmt.Sprintf("b2:%v:%v", b2.BucketName, b2.RepoName)
 	return repoFormat

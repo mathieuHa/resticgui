@@ -20,6 +20,8 @@ func GetStatsRepository(r *ent.Repository) (out string) {
 }
 
 func CheckRepository(r *ent.Repository) (out string) {
+	log.Debug().Msg("CheckRepository()")
+
 	ctx := context.Background()
 	stdout, stderr, errCmd := commands.CheckIntegrity(*r, false, 0)
 	database.LogCommand(r.ID, "CheckIntegrity", stdout, stderr, errCmd, ctx)
@@ -27,6 +29,8 @@ func CheckRepository(r *ent.Repository) (out string) {
 }
 
 func GetSnapshotsRepository(r *ent.Repository) (out string) {
+	log.Debug().Msg("GetSnapshotsRepository()")
+
 	ctx := context.Background()
 	stdout, stderr, errCmd := commands.GetSnapshots(*r)
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
@@ -34,12 +38,12 @@ func GetSnapshotsRepository(r *ent.Repository) (out string) {
 }
 
 func ValidRepository(repository ent.Repository) (valid bool, err error) {
-	log.Debug().Msg("validRepository()")
+	log.Debug().Msg("ValidRepository()")
 
 	valid = (repository.Password != "")
 	if !valid { // If password is empty, repository cannot be valid
-		log.Debug().Msg("Password empty, repository cannot be valid")
-		return false, errors.New("Password empty, repository cannot be valid")
+		log.Debug().Msg("password empty, repository cannot be valid")
+		return false, errors.New("password empty, repository cannot be valid")
 	}
 	valid, err = validProvider(repository)
 	if err != nil {

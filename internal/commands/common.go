@@ -28,6 +28,8 @@ func GetResticVersion() (string, string, error) {
 }
 
 func GetResticHelp() (string, string, error) {
+	log.Debug().Msg("GetResticHelp()")
+
 	var args []string
 
 	args = append(args, "--help")
@@ -35,6 +37,8 @@ func GetResticHelp() (string, string, error) {
 }
 
 func GetSnapshots(repository ent.Repository) (string, string, error) {
+	log.Debug().Msg("GetSnapshots()")
+
 	var args []string
 	var env []string
 
@@ -46,6 +50,8 @@ func GetSnapshots(repository ent.Repository) (string, string, error) {
 }
 
 func InitRepository(repository ent.Repository) (string, string, error) {
+	log.Debug().Msg("InitRepository()")
+
 	var args []string
 	var env []string
 
@@ -56,6 +62,8 @@ func InitRepository(repository ent.Repository) (string, string, error) {
 }
 
 func RestoreRepository(repository ent.Repository, path string, version string) (string, string, error) {
+	log.Debug().Msg("RestoreRepository()")
+
 	var args []string
 	var env []string
 
@@ -77,6 +85,8 @@ func getRestoreCommonArgs(path string, version string) []string {
 }
 
 func ForgetSnapshots(repository ent.Repository, version string) (string, string, error) {
+	log.Debug().Msg("ForgetSnapshots()")
+
 	var args []string
 	var env []string
 
@@ -88,6 +98,8 @@ func ForgetSnapshots(repository ent.Repository, version string) (string, string,
 }
 
 func PruneSnaphots(repository ent.Repository, version string) (string, string, error) {
+	log.Debug().Msg("PruneSnaphots()")
+
 	var args []string
 	var env []string
 
@@ -99,6 +111,8 @@ func PruneSnaphots(repository ent.Repository, version string) (string, string, e
 }
 
 func BackupRepository(repository ent.Repository, dryRun bool) (string, string, error) {
+	log.Debug().Msg("BackupRepository()")
+
 	var args []string
 	var env []string
 
