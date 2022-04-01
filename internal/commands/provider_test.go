@@ -14,7 +14,7 @@ func TestGetProviderData(t *testing.T) {
 	Config.InitTestConfig()
 	database.Migrate()
 
-	t.Run("Stats repository", func(t *testing.T) {
+	t.Run("Get Provider Data", func(t *testing.T) {
 		database.CleanDatabaseTest(t)
 
 		rName := "myRepo"
@@ -23,7 +23,7 @@ func TestGetProviderData(t *testing.T) {
 		assert.Nil(t, err)
 		if err == nil {
 			out, _, _ := getProviderData(r)
-			assert.Equal(t, out, "")
+			assert.Equal(t, []string([]string(nil)), out)
 		}
 	})
 }
