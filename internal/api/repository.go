@@ -395,7 +395,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 			return
 		}
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
 
@@ -407,7 +407,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadGateway, gin.H{"error": "Repository is not valid", "message": err.Error()})
 		return
 	}
-	
+
 	stdout := backup.GetSnapshotsRepository(r)
 
 	var snapshots []Models.Snapshot
