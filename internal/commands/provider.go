@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -8,32 +9,45 @@ import (
 )
 
 // todo check each provider
-func getProviderData(repository ent.Repository) ([]string, []string) {
+func getProviderData(repository *ent.Repository) (args []string, env []string, err error) {
 	log.Debug().Msg("getProviderData()")
 
-	var args []string
-	var env []string
+	if repository == nil {
+		log.Debug().Msg("repository == nil")
+		return args, env, errors.New("test")
+	} else {
+		log.Debug().Msg("repository != nil")
+	}
+
+	if repository.Password == "" {
+		log.Debug().Msg("password == ''")
+		return args, env, errors.New("test")
+	}
 
 	args = append(args, "-r")
 	envResticPass := fmt.Sprintf("RESTIC_PASSWORD=%v", repository.Password)
 	env = append(env, envResticPass)
 	switch repository.Provider {
 	case "localProvider":
+		log.Debug().Msg("repository.Provider == localProvider")
 		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
 	case "B2Provider":
+		log.Debug().Msg("repository.Provider == B2Provider")
 		args = append(args, getB2RepositoryFormat(*repository.Edges.B2Provider))
 		env = append(args, getB2EnvFormat(*repository.Edges.B2Provider)...)
 	case "AWSS3Provider":
+		log.Debug().Msg("repository.Provider == AWSS3Provider")
 		args = append(args, getAmazonS3RepositoryFormat(*repository.Edges.AWSS3Provider))
 		env = append(args, getAmazonS3EnvFormat(*repository.Edges.AWSS3Provider)...)
 	case "MinioS3Provider":
+		log.Debug().Msg("repository.Provider == MinioS3Provider")
 		args = append(args, getMinioS3RepositoryFormat(*repository.Edges.MinioS3Provider))
 		env = append(args, getMinioS3EnvFormat(*repository.Edges.MinioS3Provider)...)
 	default:
 		log.Warn().Msg("No Provider Found")
 		args = append(args, getLocalRepositoryFormat(*repository.Edges.LocalProvider))
 	}
-	return args, env
+	return args, env, err
 
 }
 

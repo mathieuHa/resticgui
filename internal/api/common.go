@@ -76,7 +76,7 @@ func updateRepositoryRunning(r *ent.Repository, id int) (err error) {
 		log.Err(err)
 		return err
 	} else {
-		log.Debug().Msgf(" %b ", r.Valid)
+		log.Debug().Msgf(" %t ", r.Valid)
 	}
 
 	_, err = database.SetRepositoryValidDB(r.Valid, id, context.Background())

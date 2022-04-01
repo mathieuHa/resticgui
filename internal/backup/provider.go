@@ -7,9 +7,14 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 )
 
-func validProvider(repository ent.Repository) (valid bool, err error) {
+func validProvider(repository *ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("validProvider()")
 
+	if repository == nil {
+		valid = false
+		err = errors.New("repository is nil")
+		return valid, err
+	}
 	switch repository.Provider {
 	case "localProvider":
 		valid, err = validLocalProvider(repository.Edges.LocalProvider)

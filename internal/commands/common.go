@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -36,38 +37,38 @@ func GetResticHelp() (string, string, error) {
 	return runRestic(args, getDefaultEnv())
 }
 
-func GetSnapshots(repository ent.Repository) (string, string, error) {
+func GetSnapshots(repository *ent.Repository) (string, string, error) {
 	log.Debug().Msg("GetSnapshots()")
 
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, repoFormat...)
 	args = append(args, snapshotsCmd)
 	args = append(args, "--json")
 	return runRestic(args, env)
 }
 
-func InitRepository(repository ent.Repository) (string, string, error) {
+func InitRepository(repository *ent.Repository) (string, string, error) {
 	log.Debug().Msg("InitRepository()")
 
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, initCmd)
 	args = append(args, repoFormat...)
 	return runRestic(args, env)
 }
 
-func RestoreRepository(repository ent.Repository, path string, version string) (string, string, error) {
+func RestoreRepository(repository *ent.Repository, path string, version string) (string, string, error) {
 	log.Debug().Msg("RestoreRepository()")
 
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	commonArgs := getRestoreCommonArgs(path, version)
 	args = append(args, repoFormat...)
 	args = append(args, commonArgs...)
@@ -84,40 +85,54 @@ func getRestoreCommonArgs(path string, version string) []string {
 	return args
 }
 
-func ForgetSnapshots(repository ent.Repository, version string) (string, string, error) {
+func ForgetSnapshots(repository *ent.Repository, version string) (string, string, error) {
 	log.Debug().Msg("ForgetSnapshots()")
 
+	if repository == nil {
+		err := errors.New("repository is nil")
+		return "", "", err
+	}
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, forgetCmd)
 	args = append(args, repoFormat...)
 	args = append(args, version)
 	return runRestic(args, env)
 }
 
-func PruneSnaphots(repository ent.Repository, version string) (string, string, error) {
+func PruneSnaphots(repository *ent.Repository, version string) (string, string, error) {
 	log.Debug().Msg("PruneSnaphots()")
+
+	if repository == nil {
+		err := errors.New("repository is nil")
+		return "", "", err
+	}
 
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, pruneCmd)
 	args = append(args, repoFormat...)
 	args = append(args, version)
 	return runRestic(args, env)
 }
 
-func BackupRepository(repository ent.Repository, dryRun bool) (string, string, error) {
+func BackupRepository(repository *ent.Repository, dryRun bool) (string, string, error) {
 	log.Debug().Msg("BackupRepository()")
+
+	if repository == nil {
+		err := errors.New("repository is nil")
+		return "", "", err
+	}
 
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
-	commonArgs := getBackupCommonArgs(repository)
+	repoFormat, env, _ := getProviderData(repository)
+	commonArgs := getBackupCommonArgs(*repository)
 	dryRunParameter := getDryRunParameter(dryRun)
 
 	args = append(args, repoFormat...)
@@ -128,13 +143,18 @@ func BackupRepository(repository ent.Repository, dryRun bool) (string, string, e
 	return runRestic(args, env)
 }
 
-func StatsRepository(repository ent.Repository, dryRun bool) (string, string, error) {
+func StatsRepository(repository *ent.Repository, dryRun bool) (string, string, error) {
 	log.Debug().Msg("StatsRepository()")
+
+	if repository == nil {
+		err := errors.New("repository is nil")
+		return "", "", err
+	}
 
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, repoFormat...)
 	args = append(args, statsCmd)
 	return runRestic(args, env)
@@ -174,6 +194,7 @@ func getMaxSizeParameter(repository ent.Repository) []string {
 
 func getIncludedAndExludedFiles(repository ent.Repository) []string {
 	log.Debug().Msg("getIncludedAndExludedFiles()")
+
 	var files []string
 	var included []string
 	var excluded []string
@@ -194,12 +215,19 @@ func getIncludedAndExludedFiles(repository ent.Repository) []string {
 	return files
 }
 
-func CheckIntegrity(repository ent.Repository, full bool, pourcentage float64) (string, string, error) {
+func CheckIntegrity(repository *ent.Repository, full bool, pourcentage float64) (string, string, error) {
 	// todo check repository string and pourcentage
+	log.Debug().Msg("CheckIntegrity()")
+
+	if repository == nil {
+		err := errors.New("repository is nil")
+		return "", "", err
+	}
+
 	var args []string
 	var env []string
 
-	repoFormat, env := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, checkCmd)
 	args = append(args, repoFormat...)
 	if full {

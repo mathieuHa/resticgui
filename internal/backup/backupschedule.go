@@ -146,14 +146,14 @@ func backupJob(id int) {
 	ctx := context.Background()
 	// Check the validity of the provider and repository in general
 	r, _ := database.GetRepositoryByIDDB(id, ctx)
-	stdout, stderr, errCmd := commands.GetSnapshots(*r)
+	stdout, stderr, errCmd := commands.GetSnapshots(r)
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
 
 	if errCmd != nil {
-		stdout, stderr, errCmd = commands.InitRepository(*r)
+		stdout, stderr, errCmd = commands.InitRepository(r)
 		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
 	}
-	stdout, stderr, errCmd = commands.BackupRepository(*r, false)
+	stdout, stderr, errCmd = commands.BackupRepository(r, false)
 	database.LogCommand(r.ID, "BackupRepository", stdout, stderr, errCmd, ctx)
 
 	log.Info().Msgf("JOB HAS ENDED %v", id)

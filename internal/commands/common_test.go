@@ -54,7 +54,7 @@ func TestStatsRepository(t *testing.T) {
 		r, err := database.CreateRepositoryDB(repository, context.Background())
 		assert.Nil(t, err)
 
-		out, _, _ := StatsRepository(*r, false)
+		out, _, _ := StatsRepository(r, false)
 		assert.Equal(t, out, "")
 
 	})
