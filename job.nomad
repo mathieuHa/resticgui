@@ -46,9 +46,7 @@ job "resticgui_job" {
         "traefik.http.routers.to-resticgui-http.entrypoints=web",
         "traefik.http.routers.to-resticgui-http.rule=Host(`resticgui.hanotaux.local`)",
         "traefik.http.routers.to-resticgui-http.middlewares=force-https@file",
-        "traefik.http.routers.to-resticgui-http.middlewares=privateip@file",
         "traefik.http.routers.to-resticgui-https.entrypoints=websecure",
-        "traefik.http.routers.to-resticgui-https.middlewares=privateip@file",
         "traefik.http.routers.to-resticgui-https.rule=Host(`resticgui.hanotaux.local`)",
         "traefik.http.routers.to-resticgui-https.tls=true",
       ]
