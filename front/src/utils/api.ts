@@ -19,8 +19,7 @@ async function call(method, url, options, data?) {
     body = {};
   }
   if (response.status >= 400) {
-    console.log(body);
-    throw Error(body.error);
+    throw new Error(body.error || response.status);
   }
   return body;
 }
