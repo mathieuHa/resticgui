@@ -7,7 +7,7 @@
   import Logs from '../../components/Icon/Logs.svelte';
   import Pen from '../../components/Icon/Pen.svelte';
   import Trash from '../../components/Icon/Trash.svelte';
-  import LogModal from '../../components/LogModal.svelte';
+  import Stats from '../../components/Icon/Stats.svelte';
   import RepositoryModal from '../../components/RepositoryModal.svelte';
   import Snapshot from '../../components/Icon/Snapshot.svelte';
 
@@ -46,11 +46,6 @@
     on:close={() => { initialValues = null; }}
     on:refresh={onRefresh}
   />
-{:else if logId}
-  <LogModal
-    repositoryId={logId}
-    on:close={() => { logId = null; }}
-  />
 {/if}
 
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -82,19 +77,28 @@
         >
           <Trash />
         </button>
-        <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
-          title="Logs"
-          on:click|preventDefault|stopPropagation={() => { logId = repo.id }}
-        >
-          <Logs />
-        </button>
+        <a href="/repositories/{repo.id}?tab=logs">
+          <button
+            class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
+            title="Logs"
+          >
+            <Logs />
+          </button>
+        </a>
         <a href="/repositories/{repo.id}?tab=snapshots">
           <button
             class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-violet-500 hover:bg-violet-600"
             title="Snapshots"
           >
             <Snapshot />
+          </button>
+        </a>
+        <a href="/repositories/{repo.id}?tab=stats">
+          <button
+            class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
+            title="Stats"
+          >
+            <Stats />
           </button>
         </a>
       </div>

@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  resticgui:
     build: .
     restart: unless-stopped
     ports:
