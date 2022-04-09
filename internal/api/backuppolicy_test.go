@@ -84,7 +84,7 @@ func TestCreateBackupPolicy(t *testing.T) {
 func TestUpdateBackupPolicy(t *testing.T) {
 	router := setupRouterTest(t)
 
-	const apiURL = "/api/v1/repositories/%v/BackupPolicy"
+	const apiURL = "/api/v1/repositories/%v/backuppolicy"
 	const httpMethod = "PATCH"
 
 	newLP, _ := json.Marshal(ent.BackupPolicy{Name: "myBackup"})
@@ -150,7 +150,7 @@ func TestUpdateBackupPolicy(t *testing.T) {
 		assert.Nil(t, err)
 		log.Debug().Msg(w.Body.String())
 		assert.GreaterOrEqual(t, response.ID, 0)
-		assert.Equal(t, response.Name, name)
+		assert.Equal(t, name2, response.Name)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }

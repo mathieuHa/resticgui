@@ -114,7 +114,7 @@ func UpdateBackupPolicy(c *gin.Context) {
 		return
 	}
 
-	if r.Edges.LocalProvider == nil || r.Edges.LocalProvider.ID == 0 {
+	if r.Edges.BackupPolicy == nil || r.Edges.BackupPolicy.ID == 0 {
 		backupPolicy, err = database.CreateBackupPolicyDB(b, newId, ctx)
 	} else {
 		backupPolicy, err = database.UpdateBackupPolicyDB(b, r.Edges.BackupPolicy.ID, ctx)
