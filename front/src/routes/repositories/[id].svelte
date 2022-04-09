@@ -15,7 +15,7 @@
         agent.get(`/repositories/${id}`),
         agent.get(`/repositories/${id}/stats`),
         agent.get(`/repositories/${id}/logs`),
-        // agent.get(`/repositories/${id}/snapshots`),
+        agent.get(`/repositories/${id}/snapshots`),
       ]);
       logs = logs.map((log) => {
         const date = new Date(log.startTime).toISOString().split('T');
