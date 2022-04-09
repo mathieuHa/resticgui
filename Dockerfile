@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY cmd/resticgui/config-docker.yaml ./config.yaml
 
-COPY --from=BuilderRestic /restic /usr/bin/restic
+COPY --from=BuilderRestic --chmod=700 /restic /usr/bin/restic
 COPY --from=BuilderWeb /front/build front
 COPY --from=BuilderResticGui /resticgui resticgui
 
