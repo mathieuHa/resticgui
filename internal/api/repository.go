@@ -404,6 +404,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error in checking validity of repository", "message": err.Error()})
 		return
 	} else if !r.Valid {
+		log.Debug().Msg("repository is not valid")
 		c.IndentedJSON(http.StatusBadGateway, gin.H{"error": "Repository is not valid", "message": err.Error()})
 		return
 	}
