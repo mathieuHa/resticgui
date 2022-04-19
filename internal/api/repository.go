@@ -400,12 +400,12 @@ func GetSnapshotsRepository(c *gin.Context) {
 	}
 
 	r.Valid, err = backup.ValidRepository(*r)
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error in checking validity of repository", "message": err.Error()})
-		return
-	} else if !r.Valid {
+	if !r.Valid {
 		log.Debug().Msg("repository is not valid")
-		c.IndentedJSON(http.StatusBadGateway, gin.H{"error": "Repository is not valid", "message": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Repository is not valid", "message": err.Error()})
+		return
+	} else if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "error in checking validity of repository", "message": err.Error()})
 		return
 	}
 
@@ -415,8 +415,11 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	err = json.Unmarshal([]byte(stdout), &snapshots)
 
-	if err != nil {
+	if err == nil {
 		c.IndentedJSON(http.StatusOK, snapshots)
+		return
+	} else if snapshots == nil {
+		c.IndentedJSON(http.StatusOK, []Models.Snapshot{})
 		return
 	} else {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error converting snapshots to json", "message": err.Error()})
