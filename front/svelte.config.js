@@ -25,7 +25,7 @@ const config = {
 		mdsvex(mdsvexConfig),
 		preprocess({
 			postcss: true
-		})
+		}),
 	],
 	kit: {
 		adapter: adapter({ pages: 'build' }),
@@ -36,10 +36,10 @@ const config = {
 						target: 'http://localhost:3001',
 						changeOrigin: true,
 					},
-				}
-			}
-		})
-	}
+				},
+			},
+		}),
+	},
 };
 
 export default config;
