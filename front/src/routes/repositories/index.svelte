@@ -52,7 +52,7 @@
   {#each repos as repo, i}
     <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
       <p class="truncate text-lg font-bold {repo.active ? '' :'text-red-500'}">#{repo.id} - {repo.name}</p>
-      <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('DD/MM/YY')}</p>
+      <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm ')}</p>
 
       <div class="flex flex-wrap gap-2 mt-auto pt-2 min-h-8 mb-1">
         <a href="/repositories/{repo.id}">

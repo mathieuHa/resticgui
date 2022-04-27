@@ -3,5 +3,6 @@ build/*
 .gitignore
 .vscode
 testdata/resticgui.db
-*/node_modules
-*/.svelte-kit
+front/node_modules
+front/.svelte-kit
+front/build

@@ -6,11 +6,14 @@
   export let id = '';
   export let label = '';
   export let type = 'text';
+  export let options = [];
+  export let selected = '';
 
   let idCheckbox = id;
   let idNumber = id;
   let idPassword = id;
   let val = type === 'text' ? value : null;
+  let select = type === 'select' ? selected : null;
   let check = type === 'checkbox' ? checked : null;
 
   const dispatch = createEventDispatcher();
@@ -41,6 +44,21 @@
       on:change={() => { value = val; dispatch('change'); }}
       {...$$props}
     />
+  </div>
+{:else if type === 'select'}
+  <div class="flex flex-col mb-2">
+    <label for="select">{label}</label>
+    <select
+      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded bg-gray-200 dark:bg-gray-700 disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
+      id="select" 
+      bind:value={select}
+      on:change={() => { selected = select; dispatch('change'); }}
+    >
+      <option value="" default>{$$props.placeholder || 'No selected'}</option>
+      {#each options as option}
+        <option value={option}>{option}</option>
+      {/each}
+    </select>
   </div>
 {:else if type === 'number'}
   <div class="flex flex-col mb-2">
