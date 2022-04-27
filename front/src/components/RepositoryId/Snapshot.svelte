@@ -29,7 +29,7 @@
       <div class="flex flex-wrap gap-2 mt-auto pt-2 min-h-8 mb-1">
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
-          title="Restore"
+          title="See paths"
           on:click={() =>  { visible = snapshot; }}
         >
           <Eye />
