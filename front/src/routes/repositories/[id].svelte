@@ -34,7 +34,7 @@
   $: onRefresh($page.params.id);
 </script>
 
-<div class="w-full max-w-full">
+<div class="mt-2 w-full max-w-full">
   <div class="flex justify-between flex-wrap mb-3">
     {#each ['General', 'Snapshots', 'Logs', 'Stats'] as stepped, i}
       <div
