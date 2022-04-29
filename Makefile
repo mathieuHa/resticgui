@@ -95,7 +95,7 @@ endif
 buildrestic: createdir ## Download restic binary in build dir
 	$(DLRESTIC)
 	bzip2 -d ${BUILDDIR}/restic.bz2
-	chmod "${BUILDDIR}/restic" 
+	chmod +x "${BUILDDIR}/restic" 
 	cp "${BUILDDIR}/restic" ${DISTDIR}
 
 build: buildgo buildweb buildrestic ## Build go backend, Web and restic binary
