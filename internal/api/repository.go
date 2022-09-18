@@ -449,19 +449,22 @@ func ValidRepository(c *gin.Context) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 			return
 		}
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository error", "message": err.Error()})
 		return
 	}
 
 	if r != nil {
-		r.Valid, _ = backup.ValidRepository(*r)
-
-		if !r.Valid {
-			r.Active = false
-		}
+		r.Valid, err = backup.ValidRepository(*r)
 		// Update repository
 		_, _ = database.UpdateRepositoryDB(*r, newId, ctx)
-	}
+		if !r.Valid {
+			r.Active = false
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository is not valid", "message": err.Error()})
+		} else {
+			c.Status(http.StatusOK)
+		}
 
-	c.Status(http.StatusOK)
+	} else {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "repository error", "message": err.Error()})
+	}
 }
