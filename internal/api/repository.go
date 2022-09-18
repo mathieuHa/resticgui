@@ -274,7 +274,7 @@ func LogsRepository(c *gin.Context) {
 // @Success 200
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
-// @Failure 500 {string} errNotFound
+// @Failure 500 {string} error
 // @Router /repositories/{id}/stats [get]
 func StatsRepository(c *gin.Context) {
 	log.Debug().Msg("StatsRepository()")
@@ -296,16 +296,13 @@ func StatsRepository(c *gin.Context) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 			return
 		}
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err, "message": err.Error()})
 		return
 	}
 
 	r.Valid, err = backup.ValidRepository(*r)
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error in checking validity of repository", "message": err.Error()})
-		return
-	} else if !r.Valid {
-		c.IndentedJSON(http.StatusBadGateway, gin.H{"error": "Repository is not valid", "message": err.Error()})
+	if !r.Valid {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Repository is not valid", "message": err.Error()})
 		return
 	}
 
@@ -350,11 +347,8 @@ func CheckRepository(c *gin.Context) {
 	}
 
 	r.Valid, err = backup.ValidRepository(*r)
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error in checking validity of repository", "message": err.Error()})
-		return
-	} else if !r.Valid {
-		c.IndentedJSON(http.StatusBadGateway, gin.H{"error": "Repository is not valid", "message": err.Error()})
+	if !r.Valid {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Repository is not valid", "message": err.Error()})
 		return
 	}
 
@@ -402,10 +396,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 	r.Valid, err = backup.ValidRepository(*r)
 	if !r.Valid {
 		log.Debug().Msg("repository is not valid")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Repository is not valid", "message": err.Error()})
-		return
-	} else if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "error in checking validity of repository", "message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Repository is not valid", "message": err.Error()})
 		return
 	}
 

@@ -346,7 +346,7 @@ func TestStatsRepository(t *testing.T) {
 		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusNotFound, w.Code)
 		//assert.Equal(t, "", w.Body.String())
 	})
 
@@ -374,7 +374,7 @@ func TestCheckRepository(t *testing.T) {
 		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusNotFound, w.Code)
 		// assert.Equal(t, "", w.Body.String())
 	})
 
@@ -402,7 +402,7 @@ func TestGetSnapshotsRepository(t *testing.T) {
 		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusNotFound, w.Code)
 		// assert.Equal(t, "", w.Body.String())
 	})
 

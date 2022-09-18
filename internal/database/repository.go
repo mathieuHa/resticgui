@@ -31,6 +31,7 @@ func GetRepositoriesDB(ctx context.Context) (repositories []*ent.Repository, err
 }
 
 func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("GetRepositoryByIDDB()")
 
 	r, err = db.Repository.
 		Query().
@@ -45,7 +46,7 @@ func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err er
 		Only(ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errCreate)
+		log.Err(err).Msgf("error: %v", err)
 	}
 	return r, err
 }
