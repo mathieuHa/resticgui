@@ -12,8 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 // CreatePaths godoc
@@ -37,7 +37,7 @@ func createPaths(c *gin.Context) {
 
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -94,7 +94,7 @@ func updatePaths(c *gin.Context) {
 
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}

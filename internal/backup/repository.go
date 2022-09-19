@@ -8,6 +8,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 func GetStatsRepository(r *ent.Repository) (out string) {
@@ -42,12 +43,13 @@ func ValidRepository(repository ent.Repository) (valid bool, err error) {
 
 	valid = (repository.Password != "")
 	if !valid { // If password is empty, repository cannot be valid
-		log.Debug().Msg("password empty, repository cannot be valid")
-		return false, errors.New("password empty, repository cannot be valid")
+		log.Debug().Msg(utils.ErrMsgRInvalid_Password)
+
+		return false, errors.New(utils.ErrMsgRInvalid_Password)
 	}
 	valid, err = validProvider(&repository)
 	if err != nil {
-		log.Err(err).Msg("Valid repository has failed on provider check")
+		log.Err(err).Msg(utils.ErrMsgRInvalid_Provider)
 		return false, err
 	}
 	if !valid { // If provider is not valid, repository cannot be valid
@@ -55,7 +57,7 @@ func ValidRepository(repository ent.Repository) (valid bool, err error) {
 	}
 	valid, err = validSchedule(repository.Edges.BackupSchedule)
 	if err != nil {
-		log.Err(err).Msg("Valid repository has failed on schedule check")
+		log.Err(err).Msg(utils.ErrMsgRInvalid_Schedule)
 		return false, err
 	}
 	if !valid { // If schedule is not valid, repository cannot be valid

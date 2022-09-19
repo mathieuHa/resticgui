@@ -10,9 +10,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/Models"
-	"gitlab.com/resticgui/resticgui/internal/Utils"
 	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 // QueryRepositories godoc
@@ -49,7 +49,7 @@ func GetRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -126,7 +126,7 @@ func EditRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -195,7 +195,7 @@ func RemoveRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -240,7 +240,7 @@ func LogsRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -282,7 +282,7 @@ func StatsRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -328,7 +328,7 @@ func CheckRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -375,7 +375,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -395,8 +395,8 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	r.Valid, err = backup.ValidRepository(*r)
 	if !r.Valid {
-		log.Debug().Msg("repository is not valid")
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Repository is not valid", "message": err.Error()})
+		log.Debug().Msg(errRInvalid)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
 		return
 	}
 
@@ -435,7 +435,7 @@ func ValidRepository(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	if !Utils.IsValidInt(id) {
+	if !utils.IsValidInt(id) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
 		return
 	}
@@ -449,7 +449,7 @@ func ValidRepository(c *gin.Context) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 			return
 		}
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository error", "message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRUnknown, "message": err.Error()})
 		return
 	}
 
@@ -459,12 +459,12 @@ func ValidRepository(c *gin.Context) {
 		_, _ = database.UpdateRepositoryDB(*r, newId, ctx)
 		if !r.Valid {
 			r.Active = false
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": "repository is not valid", "message": err.Error()})
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
 		} else {
 			c.Status(http.StatusOK)
 		}
 
 	} else {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "repository error", "message": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errRUnknown, "message": err.Error()})
 	}
 }

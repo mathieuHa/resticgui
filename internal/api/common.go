@@ -19,6 +19,8 @@ const errUpdate = "update error"
 const errCreate = "creation failed"
 const errQuery = "query failed"
 const errConstraint = "contraint failed"
+const errInvalid = "is not valid"
+const errUnknown = "unknown"
 
 const r = "repository "
 const errRNotFound = r + errNotFound
@@ -26,6 +28,9 @@ const errRUpdate = r + errUpdate
 const errRCreate = r + errCreate
 const errRQuery = r + errQuery
 const errRConstraint = r + errConstraint
+const errRInvalid = r + errInvalid
+const errRUnknown = r + errUnknown
+
 
 const bp = "backupPolicy "
 const errBPNotFound = bp + errNotFound

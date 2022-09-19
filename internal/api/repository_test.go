@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 func TestQueryRepositories(t *testing.T) {
@@ -462,7 +463,7 @@ func TestValidRepository(t *testing.T) {
 		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
-		errString, errBind := json.Marshal(HTTPMessageError{Error: "repository is not valid", Message: "password empty, repository cannot be valid"})
+		errString, errBind := json.Marshal(HTTPMessageError{Error: errRInvalid, Message: utils.ErrMsgRInvalid_Password})
 
 		assert.Nil(t, errBind)
 		assert.Equal(t, http.StatusNotFound, w.Code)
