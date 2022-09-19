@@ -14,10 +14,14 @@ sonarqube-check:
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
     GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+    SONAR_SCANNER_OPTS: -Djavax.net.ssl.trustStore=/tmp/sonarqube-keystore.jks -Djavax.net.ssl.trustStorePassword=gitlabci
   cache:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
+  before_script:
+    - echo $HTTPSCA | base64 -d | keytool -import -noprompt -trustcacerts -alias sonarqube -storepass gitlabci -keystore /tmp/sonarqube-keystore.jks
+    - mkdir .scannerwork && chown 1000:1000 .scannerwork
   script: 
     - sonar-scanner
   allow_failure: true
