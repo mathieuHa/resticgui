@@ -31,7 +31,6 @@ const errRConstraint = r + errConstraint
 const errRInvalid = r + errInvalid
 const errRUnknown = r + errUnknown
 
-
 const bp = "backupPolicy "
 const errBPNotFound = bp + errNotFound
 const errBPUpdate = bp + errUpdate
@@ -78,8 +77,7 @@ const errPQuery = p + errQuery
 func updateRepositoryRunning(r *ent.Repository, id int) (err error) {
 	r.Valid, err = backup.ValidRepository(*r)
 	if err != nil {
-		log.Err(err)
-		return err
+		log.Debug().Msg(err.Error())
 	} else {
 		log.Debug().Msgf(" %t ", r.Valid)
 	}

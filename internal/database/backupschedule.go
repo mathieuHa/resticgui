@@ -58,6 +58,7 @@ func UpdateBackupScheduleDB(backupSchedule ent.BackupSchedule, id int, ctx conte
 		SetEveryFriday(backupSchedule.EveryFriday).
 		SetEverySaturday(backupSchedule.EverySaturday).
 		SetEverySunday(backupSchedule.EverySunday).
+		SetInterval(backupSchedule.Interval).
 		Save(ctx)
 
 	if err != nil {
