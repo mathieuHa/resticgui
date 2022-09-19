@@ -20,7 +20,7 @@ sonarqube-check:
     paths:
       - .sonar/cache
   before_script:
-    - echo $HTTPSCA | base64 -d | keytool -import -noprompt -trustcacerts -alias sonarqube -storepass gitlabci -keystore /tmp/sonarqube-keystore.jks
+    - cat $HTTPSCA | keytool -import -noprompt -trustcacerts -alias sonarqube -storepass gitlabci -keystore /tmp/sonarqube-keystore.jks
     - mkdir .scannerwork && chown 1000:1000 .scannerwork
   script: 
     - sonar-scanner
