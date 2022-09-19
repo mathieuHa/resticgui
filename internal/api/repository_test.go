@@ -420,8 +420,16 @@ func TestValidRepository(t *testing.T) {
 	t.Run("get valid repository with valid id", func(t *testing.T) {
 		cleanDataBaseTest(t)
 		rName := "myRepo"
-		repository := ent.Repository{Name: rName}
+		rPassword := "myPassword"
+		lPath := "."
+		lProvider := ent.LocalProvider{RepoPath: lPath}
+		sc := ent.BackupSchedule{Interval: "1m", Choice: "interval"}
+		repository := ent.Repository{Name: rName, Password: rPassword}
 		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+		_, err = database.CreateLocalProviderDB(lProvider, r.ID, context.Background())
+		assert.Nil(t, err)
+		_, err = database.CreateBackupScheduleDB(sc, r.ID, context.Background())
 		assert.Nil(t, err)
 
 		id := r.ID
