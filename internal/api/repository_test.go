@@ -442,4 +442,31 @@ func TestValidRepository(t *testing.T) {
 		assert.Equal(t, "", w.Body.String())
 	})
 
+	t.Run("get invalid repository with missing password", func(t *testing.T) {
+		cleanDataBaseTest(t)
+		rName := "myRepo"
+		lPath := "."
+		lProvider := ent.LocalProvider{RepoPath: lPath}
+		sc := ent.BackupSchedule{Interval: "1m", Choice: "interval"}
+		repository := ent.Repository{Name: rName}
+		r, err := database.CreateRepositoryDB(repository, context.Background())
+		assert.Nil(t, err)
+		_, err = database.CreateLocalProviderDB(lProvider, r.ID, context.Background())
+		assert.Nil(t, err)
+		_, err = database.CreateBackupScheduleDB(sc, r.ID, context.Background())
+		assert.Nil(t, err)
+
+		id := r.ID
+		url := fmt.Sprintf(apiURL, id)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(httpMethod, url, nil)
+		router.ServeHTTP(w, req)
+
+		errString, errBind := json.Marshal(HTTPMessageError{Error: "repository is not valid", Message: "password empty, repository cannot be valid"})
+
+		assert.Nil(t, errBind)
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.JSONEq(t, string(errString), w.Body.String())
+	})
+
 }
