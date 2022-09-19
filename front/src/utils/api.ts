@@ -1,25 +1,20 @@
-async function call(method, url, options, data?) {
-  let response;
-  try {
-    response = await fetch(`/api/v1${url}`, {
-      method,
-      ...data ? { body: JSON.stringify(data) } : {},
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-  } catch (err) {
-    throw err;
-  }
+async function call(method: string, url: string, options?: any, data?: any) {
+  const response = await fetch(`/api/v1${url}`, {
+    method,
+    ...data ? { body: JSON.stringify(data) } : {},
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 
-  let body;
+  let body: any;
   try {
     body = await response.json();
   } catch (err) {
     body = {};
   }
   if (response.status >= 400) {
-    throw new Error(body.error || response.status);
+    throw new Error(body.error ? `${body.error}: ${body.message}` : '' + response.status);
   }
   return body;
 }

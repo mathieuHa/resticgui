@@ -13,7 +13,7 @@ const toasts = (() => {
         timeout: setTimeout(() => update((array) => {
           array.shift();
           return array;
-        }), 3000),
+        }), 5000),
       });
 
       return array;

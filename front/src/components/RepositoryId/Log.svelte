@@ -16,7 +16,6 @@
       __time: date[1],
     };
   });
-  $: console.log(filter)
 </script>
 
 <Input

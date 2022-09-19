@@ -4,6 +4,7 @@
   import Log from '../../components/RepositoryId/Log.svelte';
   import Snapshot from '../../components/RepositoryId/Snapshot.svelte';
   import agent from '../../utils/api';
+  import { toasts } from '../../utils/stores';
 
   let repo = null;
   let stats = null;
@@ -20,7 +21,7 @@
         agent.get(`/repositories/${id}/snapshots`),
       ]);
     } catch (err) {
-      // Pass
+      toasts.addToast(err?.message, 'failure');
     }
   }
 
@@ -53,7 +54,7 @@
     {:else if tab === 'stats'}
       <pre>{stats}</pre>
     {:else}
-        <pre class="text-sm">{JSON.stringify(repo, null, 4)}</pre>
+      <pre class="text-sm">{JSON.stringify(repo, null, 4)}</pre>
     {/if}
   {/if}
 </div>
