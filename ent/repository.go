@@ -32,8 +32,12 @@ type Repository struct {
 	Active bool `json:"active,omitempty"`
 	// Running holds the value of the "running" field.
 	Running bool `json:"running,omitempty"`
+	// Initiated holds the value of the "initiated" field.
+	Initiated bool `json:"initiated,omitempty"`
 	// Valid holds the value of the "valid" field.
 	Valid bool `json:"valid,omitempty"`
+	// Version holds the value of the "version" field.
+	Version repository.Version `json:"version,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"password,omitempty"`
 	// MaxSize holds the value of the "maxSize" field.
@@ -173,11 +177,11 @@ func (*Repository) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case repository.FieldActive, repository.FieldRunning, repository.FieldValid:
+		case repository.FieldActive, repository.FieldRunning, repository.FieldInitiated, repository.FieldValid:
 			values[i] = new(sql.NullBool)
 		case repository.FieldID:
 			values[i] = new(sql.NullInt64)
-		case repository.FieldName, repository.FieldProvider, repository.FieldPassword, repository.FieldMaxSize:
+		case repository.FieldName, repository.FieldProvider, repository.FieldVersion, repository.FieldPassword, repository.FieldMaxSize:
 			values[i] = new(sql.NullString)
 		case repository.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -232,11 +236,23 @@ func (r *Repository) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				r.Running = value.Bool
 			}
+		case repository.FieldInitiated:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field initiated", values[i])
+			} else if value.Valid {
+				r.Initiated = value.Bool
+			}
 		case repository.FieldValid:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field valid", values[i])
 			} else if value.Valid {
 				r.Valid = value.Bool
+			}
+		case repository.FieldVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field version", values[i])
+			} else if value.Valid {
+				r.Version = repository.Version(value.String)
 			}
 		case repository.FieldPassword:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -328,8 +344,12 @@ func (r *Repository) String() string {
 	builder.WriteString(fmt.Sprintf("%v", r.Active))
 	builder.WriteString(", running=")
 	builder.WriteString(fmt.Sprintf("%v", r.Running))
+	builder.WriteString(", initiated=")
+	builder.WriteString(fmt.Sprintf("%v", r.Initiated))
 	builder.WriteString(", valid=")
 	builder.WriteString(fmt.Sprintf("%v", r.Valid))
+	builder.WriteString(", version=")
+	builder.WriteString(fmt.Sprintf("%v", r.Version))
 	builder.WriteString(", password=")
 	builder.WriteString(r.Password)
 	builder.WriteString(", maxSize=")

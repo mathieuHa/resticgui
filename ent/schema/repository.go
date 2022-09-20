@@ -23,7 +23,9 @@ func (Repository) Fields() []ent.Field {
 		field.Enum("provider").Optional().Default("localProvider").Values("localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"),
 		field.Bool("active").Default(false),
 		field.Bool("running").Default(false),
+		field.Bool("initiated").Default(false),
 		field.Bool("valid").Default(false),
+		field.Enum("version").Optional().Default("2").Values("1", "2"),
 		// Password should be set as sensitve, but should be accessible
 		// field.String("password").Optional().Sensitive(),
 		field.String("password").Optional(),

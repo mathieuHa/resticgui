@@ -22,8 +22,12 @@ const (
 	FieldActive = "active"
 	// FieldRunning holds the string denoting the running field in the database.
 	FieldRunning = "running"
+	// FieldInitiated holds the string denoting the initiated field in the database.
+	FieldInitiated = "initiated"
 	// FieldValid holds the string denoting the valid field in the database.
 	FieldValid = "valid"
+	// FieldVersion holds the string denoting the version field in the database.
+	FieldVersion = "version"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
 	// FieldMaxSize holds the string denoting the maxsize field in the database.
@@ -112,7 +116,9 @@ var Columns = []string{
 	FieldProvider,
 	FieldActive,
 	FieldRunning,
+	FieldInitiated,
 	FieldValid,
+	FieldVersion,
 	FieldPassword,
 	FieldMaxSize,
 }
@@ -136,6 +142,8 @@ var (
 	DefaultActive bool
 	// DefaultRunning holds the default value on creation for the "running" field.
 	DefaultRunning bool
+	// DefaultInitiated holds the default value on creation for the "initiated" field.
+	DefaultInitiated bool
 	// DefaultValid holds the default value on creation for the "valid" field.
 	DefaultValid bool
 )
@@ -165,5 +173,31 @@ func ProviderValidator(pr Provider) error {
 		return nil
 	default:
 		return fmt.Errorf("repository: invalid enum value for provider field: %q", pr)
+	}
+}
+
+// Version defines the type for the "version" enum field.
+type Version string
+
+// Version2 is the default value of the Version enum.
+const DefaultVersion = Version2
+
+// Version values.
+const (
+	Version1 Version = "1"
+	Version2 Version = "2"
+)
+
+func (v Version) String() string {
+	return string(v)
+}
+
+// VersionValidator is a validator for the "version" field enum values. It is called by the builders before save.
+func VersionValidator(v Version) error {
+	switch v {
+	case Version1, Version2:
+		return nil
+	default:
+		return fmt.Errorf("repository: invalid enum value for version field: %q", v)
 	}
 }

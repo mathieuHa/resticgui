@@ -234,7 +234,9 @@ var (
 		{Name: "provider", Type: field.TypeEnum, Nullable: true, Enums: []string{"localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"}, Default: "localProvider"},
 		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "running", Type: field.TypeBool, Default: false},
+		{Name: "initiated", Type: field.TypeBool, Default: false},
 		{Name: "valid", Type: field.TypeBool, Default: false},
+		{Name: "version", Type: field.TypeEnum, Nullable: true, Enums: []string{"1", "2"}, Default: "2"},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "max_size", Type: field.TypeString, Nullable: true},
 	}

@@ -90,6 +90,20 @@ func (rc *RepositoryCreate) SetNillableRunning(b *bool) *RepositoryCreate {
 	return rc
 }
 
+// SetInitiated sets the "initiated" field.
+func (rc *RepositoryCreate) SetInitiated(b bool) *RepositoryCreate {
+	rc.mutation.SetInitiated(b)
+	return rc
+}
+
+// SetNillableInitiated sets the "initiated" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableInitiated(b *bool) *RepositoryCreate {
+	if b != nil {
+		rc.SetInitiated(*b)
+	}
+	return rc
+}
+
 // SetValid sets the "valid" field.
 func (rc *RepositoryCreate) SetValid(b bool) *RepositoryCreate {
 	rc.mutation.SetValid(b)
@@ -100,6 +114,20 @@ func (rc *RepositoryCreate) SetValid(b bool) *RepositoryCreate {
 func (rc *RepositoryCreate) SetNillableValid(b *bool) *RepositoryCreate {
 	if b != nil {
 		rc.SetValid(*b)
+	}
+	return rc
+}
+
+// SetVersion sets the "version" field.
+func (rc *RepositoryCreate) SetVersion(r repository.Version) *RepositoryCreate {
+	rc.mutation.SetVersion(r)
+	return rc
+}
+
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableVersion(r *repository.Version) *RepositoryCreate {
+	if r != nil {
+		rc.SetVersion(*r)
 	}
 	return rc
 }
@@ -363,9 +391,17 @@ func (rc *RepositoryCreate) defaults() {
 		v := repository.DefaultRunning
 		rc.mutation.SetRunning(v)
 	}
+	if _, ok := rc.mutation.Initiated(); !ok {
+		v := repository.DefaultInitiated
+		rc.mutation.SetInitiated(v)
+	}
 	if _, ok := rc.mutation.Valid(); !ok {
 		v := repository.DefaultValid
 		rc.mutation.SetValid(v)
+	}
+	if _, ok := rc.mutation.Version(); !ok {
+		v := repository.DefaultVersion
+		rc.mutation.SetVersion(v)
 	}
 }
 
@@ -393,8 +429,16 @@ func (rc *RepositoryCreate) check() error {
 	if _, ok := rc.mutation.Running(); !ok {
 		return &ValidationError{Name: "running", err: errors.New(`ent: missing required field "Repository.running"`)}
 	}
+	if _, ok := rc.mutation.Initiated(); !ok {
+		return &ValidationError{Name: "initiated", err: errors.New(`ent: missing required field "Repository.initiated"`)}
+	}
 	if _, ok := rc.mutation.Valid(); !ok {
 		return &ValidationError{Name: "valid", err: errors.New(`ent: missing required field "Repository.valid"`)}
+	}
+	if v, ok := rc.mutation.Version(); ok {
+		if err := repository.VersionValidator(v); err != nil {
+			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "Repository.version": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -463,6 +507,14 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 		})
 		_node.Running = value
 	}
+	if value, ok := rc.mutation.Initiated(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldInitiated,
+		})
+		_node.Initiated = value
+	}
 	if value, ok := rc.mutation.Valid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -470,6 +522,14 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 			Column: repository.FieldValid,
 		})
 		_node.Valid = value
+	}
+	if value, ok := rc.mutation.Version(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: repository.FieldVersion,
+		})
+		_node.Version = value
 	}
 	if value, ok := rc.mutation.Password(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

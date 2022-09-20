@@ -89,6 +89,20 @@ func (ru *RepositoryUpdate) SetNillableRunning(b *bool) *RepositoryUpdate {
 	return ru
 }
 
+// SetInitiated sets the "initiated" field.
+func (ru *RepositoryUpdate) SetInitiated(b bool) *RepositoryUpdate {
+	ru.mutation.SetInitiated(b)
+	return ru
+}
+
+// SetNillableInitiated sets the "initiated" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableInitiated(b *bool) *RepositoryUpdate {
+	if b != nil {
+		ru.SetInitiated(*b)
+	}
+	return ru
+}
+
 // SetValid sets the "valid" field.
 func (ru *RepositoryUpdate) SetValid(b bool) *RepositoryUpdate {
 	ru.mutation.SetValid(b)
@@ -100,6 +114,26 @@ func (ru *RepositoryUpdate) SetNillableValid(b *bool) *RepositoryUpdate {
 	if b != nil {
 		ru.SetValid(*b)
 	}
+	return ru
+}
+
+// SetVersion sets the "version" field.
+func (ru *RepositoryUpdate) SetVersion(r repository.Version) *RepositoryUpdate {
+	ru.mutation.SetVersion(r)
+	return ru
+}
+
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableVersion(r *repository.Version) *RepositoryUpdate {
+	if r != nil {
+		ru.SetVersion(*r)
+	}
+	return ru
+}
+
+// ClearVersion clears the value of the "version" field.
+func (ru *RepositoryUpdate) ClearVersion() *RepositoryUpdate {
+	ru.mutation.ClearVersion()
 	return ru
 }
 
@@ -442,6 +476,11 @@ func (ru *RepositoryUpdate) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Repository.provider": %w`, err)}
 		}
 	}
+	if v, ok := ru.mutation.Version(); ok {
+		if err := repository.VersionValidator(v); err != nil {
+			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "Repository.version": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -497,11 +536,31 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: repository.FieldRunning,
 		})
 	}
+	if value, ok := ru.mutation.Initiated(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldInitiated,
+		})
+	}
 	if value, ok := ru.mutation.Valid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: repository.FieldValid,
+		})
+	}
+	if value, ok := ru.mutation.Version(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: repository.FieldVersion,
+		})
+	}
+	if ru.mutation.VersionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: repository.FieldVersion,
 		})
 	}
 	if value, ok := ru.mutation.Password(); ok {
@@ -921,6 +980,20 @@ func (ruo *RepositoryUpdateOne) SetNillableRunning(b *bool) *RepositoryUpdateOne
 	return ruo
 }
 
+// SetInitiated sets the "initiated" field.
+func (ruo *RepositoryUpdateOne) SetInitiated(b bool) *RepositoryUpdateOne {
+	ruo.mutation.SetInitiated(b)
+	return ruo
+}
+
+// SetNillableInitiated sets the "initiated" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableInitiated(b *bool) *RepositoryUpdateOne {
+	if b != nil {
+		ruo.SetInitiated(*b)
+	}
+	return ruo
+}
+
 // SetValid sets the "valid" field.
 func (ruo *RepositoryUpdateOne) SetValid(b bool) *RepositoryUpdateOne {
 	ruo.mutation.SetValid(b)
@@ -932,6 +1005,26 @@ func (ruo *RepositoryUpdateOne) SetNillableValid(b *bool) *RepositoryUpdateOne {
 	if b != nil {
 		ruo.SetValid(*b)
 	}
+	return ruo
+}
+
+// SetVersion sets the "version" field.
+func (ruo *RepositoryUpdateOne) SetVersion(r repository.Version) *RepositoryUpdateOne {
+	ruo.mutation.SetVersion(r)
+	return ruo
+}
+
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableVersion(r *repository.Version) *RepositoryUpdateOne {
+	if r != nil {
+		ruo.SetVersion(*r)
+	}
+	return ruo
+}
+
+// ClearVersion clears the value of the "version" field.
+func (ruo *RepositoryUpdateOne) ClearVersion() *RepositoryUpdateOne {
+	ruo.mutation.ClearVersion()
 	return ruo
 }
 
@@ -1281,6 +1374,11 @@ func (ruo *RepositoryUpdateOne) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Repository.provider": %w`, err)}
 		}
 	}
+	if v, ok := ruo.mutation.Version(); ok {
+		if err := repository.VersionValidator(v); err != nil {
+			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "Repository.version": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1353,11 +1451,31 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 			Column: repository.FieldRunning,
 		})
 	}
+	if value, ok := ruo.mutation.Initiated(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: repository.FieldInitiated,
+		})
+	}
 	if value, ok := ruo.mutation.Valid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: repository.FieldValid,
+		})
+	}
+	if value, ok := ruo.mutation.Version(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: repository.FieldVersion,
+		})
+	}
+	if ruo.mutation.VersionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: repository.FieldVersion,
 		})
 	}
 	if value, ok := ruo.mutation.Password(); ok {

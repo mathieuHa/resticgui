@@ -121,6 +121,13 @@ func Running(v bool) predicate.Repository {
 	})
 }
 
+// Initiated applies equality check predicate on the "initiated" field. It's identical to InitiatedEQ.
+func Initiated(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldInitiated), v))
+	})
+}
+
 // Valid applies equality check predicate on the "valid" field. It's identical to ValidEQ.
 func Valid(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
@@ -419,6 +426,20 @@ func RunningNEQ(v bool) predicate.Repository {
 	})
 }
 
+// InitiatedEQ applies the EQ predicate on the "initiated" field.
+func InitiatedEQ(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldInitiated), v))
+	})
+}
+
+// InitiatedNEQ applies the NEQ predicate on the "initiated" field.
+func InitiatedNEQ(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldInitiated), v))
+	})
+}
+
 // ValidEQ applies the EQ predicate on the "valid" field.
 func ValidEQ(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
@@ -430,6 +451,68 @@ func ValidEQ(v bool) predicate.Repository {
 func ValidNEQ(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldValid), v))
+	})
+}
+
+// VersionEQ applies the EQ predicate on the "version" field.
+func VersionEQ(v Version) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldVersion), v))
+	})
+}
+
+// VersionNEQ applies the NEQ predicate on the "version" field.
+func VersionNEQ(v Version) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldVersion), v))
+	})
+}
+
+// VersionIn applies the In predicate on the "version" field.
+func VersionIn(vs ...Version) predicate.Repository {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldVersion), v...))
+	})
+}
+
+// VersionNotIn applies the NotIn predicate on the "version" field.
+func VersionNotIn(vs ...Version) predicate.Repository {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldVersion), v...))
+	})
+}
+
+// VersionIsNil applies the IsNil predicate on the "version" field.
+func VersionIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldVersion)))
+	})
+}
+
+// VersionNotNil applies the NotNil predicate on the "version" field.
+func VersionNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldVersion)))
 	})
 }
 

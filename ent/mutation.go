@@ -6088,7 +6088,9 @@ type RepositoryMutation struct {
 	provider                *repository.Provider
 	active                  *bool
 	running                 *bool
+	initiated               *bool
 	valid                   *bool
+	version                 *repository.Version
 	password                *string
 	maxSize                 *string
 	clearedFields           map[string]struct{}
@@ -6406,6 +6408,42 @@ func (m *RepositoryMutation) ResetRunning() {
 	m.running = nil
 }
 
+// SetInitiated sets the "initiated" field.
+func (m *RepositoryMutation) SetInitiated(b bool) {
+	m.initiated = &b
+}
+
+// Initiated returns the value of the "initiated" field in the mutation.
+func (m *RepositoryMutation) Initiated() (r bool, exists bool) {
+	v := m.initiated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInitiated returns the old "initiated" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldInitiated(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInitiated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInitiated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInitiated: %w", err)
+	}
+	return oldValue.Initiated, nil
+}
+
+// ResetInitiated resets all changes to the "initiated" field.
+func (m *RepositoryMutation) ResetInitiated() {
+	m.initiated = nil
+}
+
 // SetValid sets the "valid" field.
 func (m *RepositoryMutation) SetValid(b bool) {
 	m.valid = &b
@@ -6440,6 +6478,55 @@ func (m *RepositoryMutation) OldValid(ctx context.Context) (v bool, err error) {
 // ResetValid resets all changes to the "valid" field.
 func (m *RepositoryMutation) ResetValid() {
 	m.valid = nil
+}
+
+// SetVersion sets the "version" field.
+func (m *RepositoryMutation) SetVersion(r repository.Version) {
+	m.version = &r
+}
+
+// Version returns the value of the "version" field in the mutation.
+func (m *RepositoryMutation) Version() (r repository.Version, exists bool) {
+	v := m.version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersion returns the old "version" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldVersion(ctx context.Context) (v repository.Version, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
+	}
+	return oldValue.Version, nil
+}
+
+// ClearVersion clears the value of the "version" field.
+func (m *RepositoryMutation) ClearVersion() {
+	m.version = nil
+	m.clearedFields[repository.FieldVersion] = struct{}{}
+}
+
+// VersionCleared returns if the "version" field was cleared in this mutation.
+func (m *RepositoryMutation) VersionCleared() bool {
+	_, ok := m.clearedFields[repository.FieldVersion]
+	return ok
+}
+
+// ResetVersion resets all changes to the "version" field.
+func (m *RepositoryMutation) ResetVersion() {
+	m.version = nil
+	delete(m.clearedFields, repository.FieldVersion)
 }
 
 // SetPassword sets the "password" field.
@@ -6901,7 +6988,7 @@ func (m *RepositoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RepositoryMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.name != nil {
 		fields = append(fields, repository.FieldName)
 	}
@@ -6917,8 +7004,14 @@ func (m *RepositoryMutation) Fields() []string {
 	if m.running != nil {
 		fields = append(fields, repository.FieldRunning)
 	}
+	if m.initiated != nil {
+		fields = append(fields, repository.FieldInitiated)
+	}
 	if m.valid != nil {
 		fields = append(fields, repository.FieldValid)
+	}
+	if m.version != nil {
+		fields = append(fields, repository.FieldVersion)
 	}
 	if m.password != nil {
 		fields = append(fields, repository.FieldPassword)
@@ -6944,8 +7037,12 @@ func (m *RepositoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Active()
 	case repository.FieldRunning:
 		return m.Running()
+	case repository.FieldInitiated:
+		return m.Initiated()
 	case repository.FieldValid:
 		return m.Valid()
+	case repository.FieldVersion:
+		return m.Version()
 	case repository.FieldPassword:
 		return m.Password()
 	case repository.FieldMaxSize:
@@ -6969,8 +7066,12 @@ func (m *RepositoryMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldActive(ctx)
 	case repository.FieldRunning:
 		return m.OldRunning(ctx)
+	case repository.FieldInitiated:
+		return m.OldInitiated(ctx)
 	case repository.FieldValid:
 		return m.OldValid(ctx)
+	case repository.FieldVersion:
+		return m.OldVersion(ctx)
 	case repository.FieldPassword:
 		return m.OldPassword(ctx)
 	case repository.FieldMaxSize:
@@ -7019,12 +7120,26 @@ func (m *RepositoryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRunning(v)
 		return nil
+	case repository.FieldInitiated:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInitiated(v)
+		return nil
 	case repository.FieldValid:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValid(v)
+		return nil
+	case repository.FieldVersion:
+		v, ok := value.(repository.Version)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersion(v)
 		return nil
 	case repository.FieldPassword:
 		v, ok := value.(string)
@@ -7073,6 +7188,9 @@ func (m *RepositoryMutation) ClearedFields() []string {
 	if m.FieldCleared(repository.FieldProvider) {
 		fields = append(fields, repository.FieldProvider)
 	}
+	if m.FieldCleared(repository.FieldVersion) {
+		fields = append(fields, repository.FieldVersion)
+	}
 	if m.FieldCleared(repository.FieldPassword) {
 		fields = append(fields, repository.FieldPassword)
 	}
@@ -7095,6 +7213,9 @@ func (m *RepositoryMutation) ClearField(name string) error {
 	switch name {
 	case repository.FieldProvider:
 		m.ClearProvider()
+		return nil
+	case repository.FieldVersion:
+		m.ClearVersion()
 		return nil
 	case repository.FieldPassword:
 		m.ClearPassword()
@@ -7125,8 +7246,14 @@ func (m *RepositoryMutation) ResetField(name string) error {
 	case repository.FieldRunning:
 		m.ResetRunning()
 		return nil
+	case repository.FieldInitiated:
+		m.ResetInitiated()
+		return nil
 	case repository.FieldValid:
 		m.ResetValid()
+		return nil
+	case repository.FieldVersion:
+		m.ResetVersion()
 		return nil
 	case repository.FieldPassword:
 		m.ResetPassword()
