@@ -141,6 +141,7 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 }
 
 func backupJob(id int) {
+	log.Debug().Msg("backupJob()")
 	log.Info().Msgf("JOB HAS STARTED %v", id)
 
 	ctx := context.Background()
@@ -152,9 +153,19 @@ func backupJob(id int) {
 	if errCmd != nil {
 		stdout, stderr, errCmd = commands.InitRepository(r)
 		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
+		// set intiated to true
+		// how to check it succeded
+		database.SetRepositoryInitiatedDB(id, ctx)
 	}
+
+	// set backup running
+	_, _ = database.SetRepositoryRunningDB(id, true, ctx)
+
 	stdout, stderr, errCmd = commands.BackupRepository(r, false)
 	database.LogCommand(r.ID, "BackupRepository", stdout, stderr, errCmd, ctx)
+
+	// set backup running ended
+	_, _ = database.SetRepositoryRunningDB(id, false, ctx)
 
 	log.Info().Msgf("JOB HAS ENDED %v", id)
 }

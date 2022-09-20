@@ -95,7 +95,41 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 		Save(ctx)
 
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errCreate)
+		log.Err(err).Msgf("error: %v", errUpdate)
+		return
+	}
+
+	return r, err
+}
+
+func SetRepositoryInitiatedDB(id int, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("SetRepositoryInitiatedDB()")
+
+	// update repository
+	r, err = db.Repository.
+		UpdateOneID(id).
+		SetInitiated(true).
+		Save(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errUpdate)
+		return
+	}
+
+	return r, err
+}
+
+func SetRepositoryRunningDB(id int, running bool, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("SetRepositoryInitiatedDB()")
+
+	// update repository
+	r, err = db.Repository.
+		UpdateOneID(id).
+		SetRunning(running).
+		Save(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errUpdate)
 		return
 	}
 
