@@ -29,6 +29,40 @@ func CheckRepository(r *ent.Repository) (out string) {
 	return stdout
 }
 
+func BackupRepository(r *ent.Repository) (out string) {
+	log.Debug().Msg("BackupRepository()")
+
+	log.Info().Msgf("JOB HAS STARTED %v", r.ID)
+
+	ctx := context.Background()
+	// TODO Check the validity of the provider and repository in general
+
+	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
+	stdout, stderr, errCmd := commands.GetSnapshots(r)
+	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
+
+	if errCmd != nil {
+		stdout, stderr, errCmd = commands.InitRepository(r)
+		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
+		// set intiated to true
+		// how to check it succeded
+		database.SetRepositoryInitiatedDB(r.ID, ctx)
+	}
+
+	// set backup running
+	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
+
+	stdout, stderr, errCmd = commands.BackupRepository(r, false)
+	database.LogCommand(r.ID, "BackupRepository", stdout, stderr, errCmd, ctx)
+
+	// set backup running ended
+	_, _ = database.SetRepositoryRunningDB(r.ID, false, ctx)
+
+	log.Info().Msgf("JOB HAS ENDED %v", r.ID)
+
+	return stdout
+}
+
 func GetSnapshotsRepository(r *ent.Repository) (out string) {
 	log.Debug().Msg("GetSnapshotsRepository()")
 

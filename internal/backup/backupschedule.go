@@ -1,7 +1,6 @@
 package backup
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -9,7 +8,6 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
@@ -121,7 +119,7 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 			// Then we had the new job to be run and register it
 			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
 			cronID, err := cr.AddFunc(timing, func() {
-				backupJob(repo.ID)
+				BackupRepository(repo)
 			})
 
 			if err != nil {
@@ -138,36 +136,6 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 		return true
 	}
 
-}
-
-func backupJob(id int) {
-	log.Debug().Msg("backupJob()")
-	log.Info().Msgf("JOB HAS STARTED %v", id)
-
-	ctx := context.Background()
-	// Check the validity of the provider and repository in general
-	r, _ := database.GetRepositoryByIDDB(id, ctx)
-	stdout, stderr, errCmd := commands.GetSnapshots(r)
-	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
-
-	if errCmd != nil {
-		stdout, stderr, errCmd = commands.InitRepository(r)
-		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
-		// set intiated to true
-		// how to check it succeded
-		database.SetRepositoryInitiatedDB(id, ctx)
-	}
-
-	// set backup running
-	_, _ = database.SetRepositoryRunningDB(id, true, ctx)
-
-	stdout, stderr, errCmd = commands.BackupRepository(r, false)
-	database.LogCommand(r.ID, "BackupRepository", stdout, stderr, errCmd, ctx)
-
-	// set backup running ended
-	_, _ = database.SetRepositoryRunningDB(id, false, ctx)
-
-	log.Info().Msgf("JOB HAS ENDED %v", id)
 }
 
 func CreateAllScheduledBackup(cr *cron.Cron) {
