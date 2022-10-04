@@ -86,8 +86,13 @@ func CreateRepository(c *gin.Context) {
 	var repo ent.Repository
 
 	if err := c.BindJSON(&repo); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": err.Error()})
 		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+
+	if repo.Password != "" && len(repo.Password) < 4 {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": "Password length is too short"})
 		return
 	}
 
