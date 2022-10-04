@@ -75,7 +75,7 @@ func GetSnapshotsRepository(r *ent.Repository) (out string) {
 func ValidRepository(repository ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("ValidRepository()")
 
-	valid = (repository.Password != "")
+	valid = (repository.Password != "" && len(repository.Password) > 4)
 	if !valid { // If password is empty, repository cannot be valid
 		log.Debug().Msg(utils.ErrMsgRInvalid_Password)
 

@@ -19,10 +19,11 @@ func validLocalProvider(provider *ent.LocalProvider) (valid bool, err error) {
 
 	log.Info().Msgf("repoPath: %v", provider.RepoPath)
 	fileinfo, err := os.Stat(provider.RepoPath)
-	if os.IsNotExist(err) {
-		log.Err(err).Msgf("Repository Path %v does not exist", provider.RepoPath)
-		return false, err
-	}
+	// repository will be created by restic
+	// if os.IsNotExist(err) {
+	// 	log.Err(err).Msgf("Repository Path %v does not exist", provider.RepoPath)
+	// 	return false, err
+	// }
 	if !fileinfo.IsDir() {
 		log.Err(err).Msgf("Repository Path %v is not a directory", provider.RepoPath)
 		return false, err
