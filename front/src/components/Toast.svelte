@@ -23,6 +23,6 @@
     100% { right: -100%; opacity: 0; }
   }
   .toaster {
-    animation: translation 3000ms;
+    animation: translation 5000ms;
   }
 </style>

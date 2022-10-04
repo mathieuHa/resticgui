@@ -24,7 +24,7 @@
       await agent.get(`/repositories/${id}/valid`);
       toasts.addToast('Repository valid');
     } catch (err) {
-      toasts.addToast('Repository not valid', 'failure');
+      toasts.addToast(err?.message || 'Repository not valid', 'failure');
     }
   }
   const onSubmit = async () => {

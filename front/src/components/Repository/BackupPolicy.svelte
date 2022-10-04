@@ -16,13 +16,6 @@
 </script>
 
 <Input
-  id="name"
-  name="name"
-  type="text"
-  label="File name"
-  bind:value={values.name}
-/>
-<Input
   id="nbLastBackup"
   name="nbLastBackup"
   type="number"
