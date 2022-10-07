@@ -61,7 +61,6 @@ var (
 	BackupPolicyColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "nb_last_backup", Type: field.TypeUint, Default: 10},
-		{Name: "name", Type: field.TypeString},
 		{Name: "one_by_hour", Type: field.TypeBool},
 		{Name: "one_by_day", Type: field.TypeBool},
 		{Name: "one_by_month", Type: field.TypeBool},
@@ -76,7 +75,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "BackupPolicy_repositories_backupPolicy",
-				Columns:    []*schema.Column{BackupPolicyColumns[7]},
+				Columns:    []*schema.Column{BackupPolicyColumns[6]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

@@ -127,8 +127,9 @@ func TestCreateRepository(t *testing.T) {
 		req, _ := http.NewRequest(httpMethod, url, nil)
 		router.ServeHTTP(w, req)
 
-		var err HTTPError
+		var err HTTPMessageError
 		err.Error = errInvalidRequest
+		err.Message = errInvalidRequest
 		errString, errBind := json.Marshal(err)
 
 		assert.Nil(t, errBind)
@@ -142,7 +143,8 @@ func TestCreateRepository(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		rName := "myRepo"
-		r, _ := json.Marshal(ent.Repository{Name: rName})
+		rPassword := "myPasswd"
+		r, _ := json.Marshal(ent.Repository{Name: rName, Password: rPassword})
 		responseBody := bytes.NewBuffer(r)
 
 		req, _ := http.NewRequest(httpMethod, url, responseBody)
@@ -154,6 +156,7 @@ func TestCreateRepository(t *testing.T) {
 		assert.Nil(t, err)
 		assert.GreaterOrEqual(t, repositoryReceived.ID, 0)
 		assert.Equal(t, repositoryReceived.Name, rName)
+		assert.Equal(t, repositoryReceived.Password, rPassword)
 		assert.Equal(t, http.StatusCreated, w.Code)
 	})
 

@@ -9,8 +9,6 @@ const (
 	FieldID = "id"
 	// FieldNbLastBackup holds the string denoting the nblastbackup field in the database.
 	FieldNbLastBackup = "nb_last_backup"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
 	// FieldOneByHour holds the string denoting the onebyhour field in the database.
 	FieldOneByHour = "one_by_hour"
 	// FieldOneByDay holds the string denoting the onebyday field in the database.
@@ -36,7 +34,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldNbLastBackup,
-	FieldName,
 	FieldOneByHour,
 	FieldOneByDay,
 	FieldOneByMonth,

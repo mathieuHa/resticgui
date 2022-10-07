@@ -34,12 +34,6 @@ func (bpc *BackupPolicyCreate) SetNillableNbLastBackup(u *uint) *BackupPolicyCre
 	return bpc
 }
 
-// SetName sets the "name" field.
-func (bpc *BackupPolicyCreate) SetName(s string) *BackupPolicyCreate {
-	bpc.mutation.SetName(s)
-	return bpc
-}
-
 // SetOneByHour sets the "oneByHour" field.
 func (bpc *BackupPolicyCreate) SetOneByHour(b bool) *BackupPolicyCreate {
 	bpc.mutation.SetOneByHour(b)
@@ -169,9 +163,6 @@ func (bpc *BackupPolicyCreate) check() error {
 	if _, ok := bpc.mutation.NbLastBackup(); !ok {
 		return &ValidationError{Name: "nbLastBackup", err: errors.New(`ent: missing required field "BackupPolicy.nbLastBackup"`)}
 	}
-	if _, ok := bpc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "BackupPolicy.name"`)}
-	}
 	if _, ok := bpc.mutation.OneByHour(); !ok {
 		return &ValidationError{Name: "oneByHour", err: errors.New(`ent: missing required field "BackupPolicy.oneByHour"`)}
 	}
@@ -221,14 +212,6 @@ func (bpc *BackupPolicyCreate) createSpec() (*BackupPolicy, *sqlgraph.CreateSpec
 			Column: backuppolicy.FieldNbLastBackup,
 		})
 		_node.NbLastBackup = value
-	}
-	if value, ok := bpc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: backuppolicy.FieldName,
-		})
-		_node.Name = value
 	}
 	if value, ok := bpc.mutation.OneByHour(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

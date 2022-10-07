@@ -24,7 +24,6 @@ func (BackupPolicy) Annotations() []schema.Annotation {
 func (BackupPolicy) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint("nbLastBackup").Default(10),
-		field.String("name"),
 		field.Bool("oneByHour"),
 		field.Bool("oneByDay"),
 		field.Bool("oneByMonth"),

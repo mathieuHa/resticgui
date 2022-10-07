@@ -71,7 +71,7 @@ func init() {
 	// backuppolicy.DefaultNbLastBackup holds the default value on creation for the nbLastBackup field.
 	backuppolicy.DefaultNbLastBackup = backuppolicyDescNbLastBackup.Default.(uint)
 	// backuppolicyDescKeepAll is the schema descriptor for keepAll field.
-	backuppolicyDescKeepAll := backuppolicyFields[5].Descriptor()
+	backuppolicyDescKeepAll := backuppolicyFields[4].Descriptor()
 	// backuppolicy.DefaultKeepAll holds the default value on creation for the keepAll field.
 	backuppolicy.DefaultKeepAll = backuppolicyDescKeepAll.Default.(bool)
 	backupscheduleFields := schema.BackupSchedule{}.Fields()

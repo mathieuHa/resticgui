@@ -18,8 +18,6 @@ type BackupPolicy struct {
 	ID int `json:"id,omitempty"`
 	// NbLastBackup holds the value of the "nbLastBackup" field.
 	NbLastBackup uint `json:"nbLastBackup,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
 	// OneByHour holds the value of the "oneByHour" field.
 	OneByHour bool `json:"oneByHour,omitempty"`
 	// OneByDay holds the value of the "oneByDay" field.
@@ -66,8 +64,6 @@ func (*BackupPolicy) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case backuppolicy.FieldID, backuppolicy.FieldNbLastBackup:
 			values[i] = new(sql.NullInt64)
-		case backuppolicy.FieldName:
-			values[i] = new(sql.NullString)
 		case backuppolicy.ForeignKeys[0]: // repository_backup_policy
 			values[i] = new(sql.NullInt64)
 		default:
@@ -96,12 +92,6 @@ func (bp *BackupPolicy) assignValues(columns []string, values []interface{}) err
 				return fmt.Errorf("unexpected type %T for field nbLastBackup", values[i])
 			} else if value.Valid {
 				bp.NbLastBackup = uint(value.Int64)
-			}
-		case backuppolicy.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				bp.Name = value.String
 			}
 		case backuppolicy.FieldOneByHour:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -169,8 +159,6 @@ func (bp *BackupPolicy) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", bp.ID))
 	builder.WriteString(", nbLastBackup=")
 	builder.WriteString(fmt.Sprintf("%v", bp.NbLastBackup))
-	builder.WriteString(", name=")
-	builder.WriteString(bp.Name)
 	builder.WriteString(", oneByHour=")
 	builder.WriteString(fmt.Sprintf("%v", bp.OneByHour))
 	builder.WriteString(", oneByDay=")

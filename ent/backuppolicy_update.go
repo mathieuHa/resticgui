@@ -49,12 +49,6 @@ func (bpu *BackupPolicyUpdate) AddNbLastBackup(u int) *BackupPolicyUpdate {
 	return bpu
 }
 
-// SetName sets the "name" field.
-func (bpu *BackupPolicyUpdate) SetName(s string) *BackupPolicyUpdate {
-	bpu.mutation.SetName(s)
-	return bpu
-}
-
 // SetOneByHour sets the "oneByHour" field.
 func (bpu *BackupPolicyUpdate) SetOneByHour(b bool) *BackupPolicyUpdate {
 	bpu.mutation.SetOneByHour(b)
@@ -209,13 +203,6 @@ func (bpu *BackupPolicyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: backuppolicy.FieldNbLastBackup,
 		})
 	}
-	if value, ok := bpu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: backuppolicy.FieldName,
-		})
-	}
 	if value, ok := bpu.mutation.OneByHour(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -316,12 +303,6 @@ func (bpuo *BackupPolicyUpdateOne) SetNillableNbLastBackup(u *uint) *BackupPolic
 // AddNbLastBackup adds u to the "nbLastBackup" field.
 func (bpuo *BackupPolicyUpdateOne) AddNbLastBackup(u int) *BackupPolicyUpdateOne {
 	bpuo.mutation.AddNbLastBackup(u)
-	return bpuo
-}
-
-// SetName sets the "name" field.
-func (bpuo *BackupPolicyUpdateOne) SetName(s string) *BackupPolicyUpdateOne {
-	bpuo.mutation.SetName(s)
 	return bpuo
 }
 
@@ -501,13 +482,6 @@ func (bpuo *BackupPolicyUpdateOne) sqlSave(ctx context.Context) (_node *BackupPo
 			Type:   field.TypeUint,
 			Value:  value,
 			Column: backuppolicy.FieldNbLastBackup,
-		})
-	}
-	if value, ok := bpuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: backuppolicy.FieldName,
 		})
 	}
 	if value, ok := bpuo.mutation.OneByHour(); ok {

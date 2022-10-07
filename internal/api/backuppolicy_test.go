@@ -21,7 +21,7 @@ func TestCreateBackupPolicy(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/backuppolicy"
 	const httpMethod = "POST"
 
-	newBP, _ := json.Marshal(ent.BackupPolicy{Name: "BP_test"})
+	newBP, _ := json.Marshal(ent.BackupPolicy{})
 	responseBody := bytes.NewBuffer(newBP)
 
 	testInvalidFormatID(t, router, httpMethod, apiURL, "create backup policy with invalid id format", nil, HTTPError{Error: errIDNotValid})
@@ -58,10 +58,7 @@ func TestCreateBackupPolicy(t *testing.T) {
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
 
-		name := "myBMName"
-		obj := ent.BackupPolicy{
-			Name: name,
-		}
+		obj := ent.BackupPolicy{NbLastBackup: 1}
 		l, _ := json.Marshal(obj)
 		requestBody := bytes.NewBuffer(l)
 
@@ -74,7 +71,6 @@ func TestCreateBackupPolicy(t *testing.T) {
 		assert.Nil(t, err)
 		log.Debug().Msg(w.Body.String())
 		assert.GreaterOrEqual(t, response.ID, 0)
-		assert.Equal(t, response.Name, name)
 		assert.Equal(t, http.StatusCreated, w.Code)
 
 	})
@@ -87,7 +83,7 @@ func TestUpdateBackupPolicy(t *testing.T) {
 	const apiURL = "/api/v1/repositories/%v/backuppolicy"
 	const httpMethod = "PATCH"
 
-	newLP, _ := json.Marshal(ent.BackupPolicy{Name: "myBackup"})
+	newLP, _ := json.Marshal(ent.BackupPolicy{})
 	responseBody := bytes.NewBuffer(newLP)
 
 	testInvalidFormatID(t, router, httpMethod, apiURL, "update backup policy with invalid id format", nil, HTTPError{Error: errIDNotValid})
@@ -125,18 +121,12 @@ func TestUpdateBackupPolicy(t *testing.T) {
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
 
-		name := "myBPName"
-		obj := ent.BackupPolicy{
-			Name: name,
-		}
+		obj := ent.BackupPolicy{}
 
 		_, err = database.CreateBackupPolicyDB(obj, id, ctx)
 		assert.Nil(t, err)
 
-		name2 := "myBPName2"
-		obj2 := ent.BackupPolicy{
-			Name: name2,
-		}
+		obj2 := ent.BackupPolicy{}
 		l, _ := json.Marshal(obj2)
 
 		responseBody := bytes.NewBuffer(l)
@@ -150,7 +140,6 @@ func TestUpdateBackupPolicy(t *testing.T) {
 		assert.Nil(t, err)
 		log.Debug().Msg(w.Body.String())
 		assert.GreaterOrEqual(t, response.ID, 0)
-		assert.Equal(t, name2, response.Name)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }

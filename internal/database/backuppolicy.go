@@ -13,7 +13,6 @@ func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context
 	b, err = db.BackupPolicy.
 		Create().
 		SetKeepAll(backupPolicy.KeepAll).
-		SetName(backupPolicy.Name).
 		SetNbLastBackup(backupPolicy.NbLastBackup).
 		SetOneByDay(backupPolicy.OneByDay).
 		SetOneByHour(backupPolicy.OneByHour).
@@ -33,7 +32,6 @@ func UpdateBackupPolicyDB(backupPolicy ent.BackupPolicy, id int, ctx context.Con
 	b, err = db.BackupPolicy.
 		UpdateOneID(id).
 		SetKeepAll(backupPolicy.KeepAll).
-		SetName(backupPolicy.Name).
 		SetNbLastBackup(backupPolicy.NbLastBackup).
 		SetOneByDay(backupPolicy.OneByDay).
 		SetOneByHour(backupPolicy.OneByHour).
