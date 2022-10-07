@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -30,10 +29,8 @@ func CreateB2Provider(c *gin.Context) {
 	ctx := context.Background()
 	var b2 ent.B2Provider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -43,23 +40,13 @@ func CreateB2Provider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
+	if err := checkRepositoryByID(rID, ctx, c); err != nil {
 		return
 	}
 
 	// create b2Provider
 	log.Debug().Msg("create b2Provider")
-	b2Provider, err := database.CreateB2ProviderDB(b2, newId, ctx)
+	b2Provider, err := database.CreateB2ProviderDB(b2, rID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
@@ -87,10 +74,8 @@ func UpdateB2Provider(c *gin.Context) {
 	var b2 ent.B2Provider
 	var b2Provider *ent.B2Provider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -100,9 +85,7 @@ func UpdateB2Provider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -115,7 +98,7 @@ func UpdateB2Provider(c *gin.Context) {
 	}
 
 	if r.Edges.B2Provider == nil || r.Edges.B2Provider.ID == 0 {
-		b2Provider, err = database.CreateB2ProviderDB(b2, newId, ctx)
+		b2Provider, err = database.CreateB2ProviderDB(b2, rID, ctx)
 	} else {
 		b2Provider, err = database.UpdateB2ProviderDB(b2, r.Edges.B2Provider.ID, ctx)
 	}
@@ -124,7 +107,7 @@ func UpdateB2Provider(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(r, rID)
 
 	c.IndentedJSON(http.StatusOK, b2Provider)
 }

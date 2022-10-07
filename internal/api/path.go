@@ -53,11 +53,11 @@ func createPaths(c *gin.Context) {
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error(), "message": errRNotFound})
 		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": errRConstraint})
 		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error(), "message": errRNotFound})
 		}
 		return
 	}

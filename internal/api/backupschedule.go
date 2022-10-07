@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -29,10 +28,8 @@ func CreateBackupSchedule(c *gin.Context) {
 	ctx := context.Background()
 	var b ent.BackupSchedule
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -42,23 +39,13 @@ func CreateBackupSchedule(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
+	if err := checkRepositoryByID(rID, ctx, c); err != nil {
 		return
 	}
 
 	// create backupSchedule
 	log.Debug().Msg("create backupSchedule")
-	backupSchedule, err := database.CreateBackupScheduleDB(b, newId, ctx)
+	backupSchedule, err := database.CreateBackupScheduleDB(b, rID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
@@ -86,10 +73,8 @@ func UpdateBackupSchedule(c *gin.Context) {
 	var b ent.BackupSchedule
 	var backupSchedule *ent.BackupSchedule
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -99,9 +84,7 @@ func UpdateBackupSchedule(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -114,7 +97,7 @@ func UpdateBackupSchedule(c *gin.Context) {
 	}
 
 	if r.Edges.BackupSchedule == nil || r.Edges.BackupSchedule.ID == 0 {
-		backupSchedule, err = database.CreateBackupScheduleDB(b, newId, ctx)
+		backupSchedule, err = database.CreateBackupScheduleDB(b, rID, ctx)
 	} else {
 		backupSchedule, err = database.UpdateBackupScheduleDB(b, r.Edges.BackupSchedule.ID, ctx)
 	}
@@ -123,7 +106,7 @@ func UpdateBackupSchedule(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(r, rID)
 
 	c.IndentedJSON(http.StatusOK, backupSchedule)
 }

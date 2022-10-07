@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -14,6 +13,34 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/database"
 	"gitlab.com/resticgui/resticgui/internal/utils"
 )
+
+func checkRepositoryByID(id int, ctx context.Context, c *gin.Context) (err error) {
+	_, err = database.GetRepositoryByIDDB(id, ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
+	}
+	return err
+}
+
+func getRepositoryByID(id int, ctx context.Context, c *gin.Context) (r *ent.Repository, err error) {
+	r, err = database.GetRepositoryByIDDB(id, ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+		} else if ent.IsConstraintError(err) {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+		} else {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+		}
+	}
+	return r, err
+}
 
 // QueryRepositories godoc
 // @Summary get all repositories
@@ -47,16 +74,13 @@ func QueryRepositories(c *gin.Context) {
 // @Router /repositories/{id} [get]
 func GetRepository(c *gin.Context) {
 	ctx := context.Background()
-	id := c.Param("id")
 
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -129,14 +153,12 @@ func CreateRepository(c *gin.Context) {
 // @Router /repositories/{id} [patch]
 func EditRepository(c *gin.Context) {
 	ctx := context.Background()
-	id := c.Param("id")
 
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
 	var repo ent.Repository
 
 	if err := c.BindJSON(&repo); err != nil {
@@ -146,7 +168,7 @@ func EditRepository(c *gin.Context) {
 	}
 
 	// Update repository
-	r, err := database.UpdateRepositoryDB(repo, newId, ctx)
+	r, err := database.UpdateRepositoryDB(repo, rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -163,7 +185,7 @@ func EditRepository(c *gin.Context) {
 	r.Valid, _ = backup.ValidRepository(*r)
 
 	// Update repository
-	r, err = database.UpdateRepositoryDB(*r, newId, ctx)
+	r, err = database.UpdateRepositoryDB(*r, rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
@@ -173,7 +195,7 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(r, rID)
 
 	if r.Active && r.Valid {
 		backup.AddScheduledBackup(r, cr)
@@ -198,18 +220,15 @@ func EditRepository(c *gin.Context) {
 // @Router /repositories/{id} [delete]
 func RemoveRepository(c *gin.Context) {
 	ctx := context.Background()
-	id := c.Param("id")
 
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
 	// Query repository to remove backup Schedule
 	log.Debug().Msg("Query repository to remove backup Schedule")
-	repository, err := database.GetRepositoryByIDDB(newId, ctx)
+	repository, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if repository != nil && err == nil {
 		// Remove backup scheduled
@@ -218,7 +237,7 @@ func RemoveRepository(c *gin.Context) {
 
 		// Delete repository
 		log.Debug().Msg("Delete repository")
-		err := database.DeleteRepositoryDB(newId, ctx)
+		err := database.DeleteRepositoryDB(rID, ctx)
 		if err != nil {
 			log.Err(err).Msgf("error: %v", errQuery)
 		}
@@ -243,23 +262,19 @@ func LogsRepository(c *gin.Context) {
 	log.Debug().Msg("LogsRepository()")
 
 	ctx := context.Background()
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
+	_, err = database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil && ent.IsNotFound(err) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 		return
 	}
 
-	logsR, err := database.QueryLogsByRepositoryDB(newId, ctx)
+	logsR, err := database.QueryLogsByRepositoryDB(rID, ctx)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
@@ -285,16 +300,13 @@ func StatsRepository(c *gin.Context) {
 	log.Debug().Msg("StatsRepository()")
 
 	ctx := context.Background()
-	id := c.Param("id")
 
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -331,16 +343,13 @@ func CheckRepository(c *gin.Context) {
 	log.Debug().Msg("CheckRepository()")
 
 	ctx := context.Background()
-	id := c.Param("id")
 
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -353,7 +362,7 @@ func CheckRepository(c *gin.Context) {
 
 	r.Valid, err = backup.ValidRepository(*r)
 	if !r.Valid {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Repository is not valid", "message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
 		return
 	}
 
@@ -378,16 +387,12 @@ func GetSnapshotsRepository(c *gin.Context) {
 	log.Debug().Msg("GetSnapshotsRepository()")
 
 	ctx := context.Background()
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -413,12 +418,10 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	if err == nil {
 		c.IndentedJSON(http.StatusOK, snapshots)
-		return
 	} else if snapshots == nil {
 		c.IndentedJSON(http.StatusOK, []Models.Snapshot{})
-		return
 	} else {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "error converting snapshots to json", "message": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": errRLogsNotJSON})
 	}
 }
 
@@ -438,16 +441,12 @@ func ValidRepository(c *gin.Context) {
 	log.Debug().Msg("ValidRepository()")
 
 	ctx := context.Background()
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -461,9 +460,10 @@ func ValidRepository(c *gin.Context) {
 	if r != nil {
 		r.Valid, err = backup.ValidRepository(*r)
 		// Update repository
-		_, _ = database.UpdateRepositoryDB(*r, newId, ctx)
+		_, _ = database.UpdateRepositoryDB(*r, rID, ctx)
 		if !r.Valid {
 			r.Active = false
+			// this
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
 		} else {
 			c.Status(http.StatusOK)

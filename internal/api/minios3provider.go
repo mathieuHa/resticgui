@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -30,10 +29,8 @@ func CreateMinioS3Provider(c *gin.Context) {
 	ctx := context.Background()
 	var p ent.MinioS3Provider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -43,23 +40,13 @@ func CreateMinioS3Provider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
+	if err := checkRepositoryByID(rID, ctx, c); err != nil {
 		return
 	}
 
 	// create minios3provider
 	log.Debug().Msg("create minios3provider")
-	ms3p, err := database.CreateMinioS3ProviderDB(p, newId, ctx)
+	ms3p, err := database.CreateMinioS3ProviderDB(p, rID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
@@ -87,10 +74,8 @@ func UpdateMinioS3Provider(c *gin.Context) {
 	var p ent.MinioS3Provider
 	var ms3p *ent.MinioS3Provider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -100,9 +85,7 @@ func UpdateMinioS3Provider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -115,7 +98,7 @@ func UpdateMinioS3Provider(c *gin.Context) {
 	}
 
 	if r.Edges.MinioS3Provider == nil || r.Edges.MinioS3Provider.ID == 0 {
-		ms3p, err = database.CreateMinioS3ProviderDB(p, newId, ctx)
+		ms3p, err = database.CreateMinioS3ProviderDB(p, rID, ctx)
 	} else {
 		ms3p, err = database.UpdateMinioS3ProviderDB(p, r.Edges.MinioS3Provider.ID, ctx)
 	}
@@ -128,7 +111,7 @@ func UpdateMinioS3Provider(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(r, rID)
 
 	c.IndentedJSON(http.StatusOK, ms3p)
 }

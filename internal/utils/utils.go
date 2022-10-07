@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -33,4 +35,15 @@ func IsValidInt(s string) bool {
 		log.Info().Msgf("ID is not a valid int")
 	}
 	return value
+}
+
+func ReturnValidID(c *gin.Context) (value int, err error) {
+	id := c.Param("id")
+	value, err = strconv.Atoi(id)
+	if err != nil {
+		// TODO: add variable with error message
+		// Currently not exported by package api
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "id not valid"})
+	}
+	return value, err
 }

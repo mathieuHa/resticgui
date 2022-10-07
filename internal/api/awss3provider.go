@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -29,10 +28,8 @@ func CreateAWSS3Provider(c *gin.Context) {
 
 	ctx := context.Background()
 	var s3 ent.AWSS3Provider
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -41,24 +38,13 @@ func CreateAWSS3Provider(c *gin.Context) {
 		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
-
-	newId, _ := strconv.Atoi(id)
-
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
+	if err := checkRepositoryByID(rID, ctx, c); err != nil {
 		return
 	}
 
 	// create s3Provider
 	log.Debug().Msg("create s3Provider")
-	s3Provider, err := database.CreateAWSS3ProviderDB(s3, newId, ctx)
+	s3Provider, err := database.CreateAWSS3ProviderDB(s3, rID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
@@ -86,10 +72,8 @@ func UpdateAWSS3Provider(c *gin.Context) {
 	var s3 ent.AWSS3Provider
 	var s3Provider *ent.AWSS3Provider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -99,9 +83,7 @@ func UpdateAWSS3Provider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -114,7 +96,7 @@ func UpdateAWSS3Provider(c *gin.Context) {
 	}
 
 	if r.Edges.AWSS3Provider == nil || r.Edges.AWSS3Provider.ID == 0 {
-		s3Provider, err = database.CreateAWSS3ProviderDB(s3, newId, ctx)
+		s3Provider, err = database.CreateAWSS3ProviderDB(s3, rID, ctx)
 	} else {
 		s3Provider, err = database.UpdateAWSS3ProviderDB(s3, r.Edges.AWSS3Provider.ID, ctx)
 	}
@@ -123,7 +105,7 @@ func UpdateAWSS3Provider(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(r, rID)
 
 	c.IndentedJSON(http.StatusOK, s3Provider)
 }

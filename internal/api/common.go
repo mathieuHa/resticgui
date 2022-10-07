@@ -30,6 +30,7 @@ const errRQuery = r + errQuery
 const errRConstraint = r + errConstraint
 const errRInvalid = r + errInvalid
 const errRUnknown = r + errUnknown
+const errRLogsNotJSON = "error converting snapshots to json"
 
 const bp = "backupPolicy "
 const errBPNotFound = bp + errNotFound

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -30,10 +29,8 @@ func CreateLocalProvider(c *gin.Context) {
 	ctx := context.Background()
 	var p ent.LocalProvider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -43,23 +40,13 @@ func CreateLocalProvider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	_, err := database.GetRepositoryByIDDB(newId, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
+	if err := checkRepositoryByID(rID, ctx, c); err != nil {
 		return
 	}
 
 	// create localprovider
 	log.Debug().Msg("create localprovider")
-	localProvider, err := database.CreateLocalProviderDB(p, newId, ctx)
+	localProvider, err := database.CreateLocalProviderDB(p, rID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
@@ -87,10 +74,8 @@ func UpdateLocalProvider(c *gin.Context) {
 	var p ent.LocalProvider
 	var lp *ent.LocalProvider
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -100,9 +85,7 @@ func UpdateLocalProvider(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -115,7 +98,7 @@ func UpdateLocalProvider(c *gin.Context) {
 	}
 
 	if r.Edges.LocalProvider == nil || r.Edges.LocalProvider.ID == 0 {
-		lp, err = database.CreateLocalProviderDB(p, newId, ctx)
+		lp, err = database.CreateLocalProviderDB(p, rID, ctx)
 	} else {
 		lp, err = database.UpdateLocalProviderDB(p, r.Edges.LocalProvider.ID, ctx)
 	}
@@ -124,7 +107,7 @@ func UpdateLocalProvider(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(r, rID)
 
 	c.IndentedJSON(http.StatusOK, lp)
 }
