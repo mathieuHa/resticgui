@@ -155,7 +155,7 @@ func SetRepositoryValidDB(value bool, id int, ctx context.Context) (r *ent.Repos
 
 func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 
-	// create repository
+	// delete repository
 	err = db.Repository.
 		DeleteOneID(id).
 		Exec(ctx)
@@ -169,7 +169,7 @@ func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 
 func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err error) {
 
-	// create repository
+	// query logs by repository
 	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).Order(ent.Desc(logs.FieldStartTime)).Limit(50).All(ctx)
 
 	if err != nil {
@@ -181,7 +181,7 @@ func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err er
 
 func QueryPathsByRepositoryDB(id int, ctx context.Context) (p []*ent.Path, err error) {
 
-	// create repository
+	// query path by repository
 	p, err = db.Path.Query().Where(path.HasRepositoryWith(repository.ID(id))).All(ctx)
 
 	if err != nil {
