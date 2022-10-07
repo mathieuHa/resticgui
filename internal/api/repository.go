@@ -91,7 +91,7 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	if repo.Password != "" && len(repo.Password) < 4 {
+	if repo.Password == "" || len(repo.Password) < 4 {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": "Password length is too short"})
 		return
 	}
