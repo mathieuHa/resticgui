@@ -70,4 +70,18 @@
   {/each}
   ]
 </p>
-<AddPaths path="" tree={tree} {paths} {onTogglePaths} {onDirClick} />
+<div class="relative overflow-y-scroll custom-max-height">
+  <AddPaths
+    path=""
+    tree={tree}
+    {paths}
+    {onTogglePaths}
+    {onDirClick}
+  />
+</div>
+
+<style>
+  .custom-max-height {
+    max-height: calc(100vh - 300px);
+  }
+</style>

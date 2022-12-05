@@ -9,12 +9,13 @@
   import Trash from '../../components/Icon/Trash.svelte';
   import Stats from '../../components/Icon/Stats.svelte';
   import RepositoryModal from '../../components/RepositoryModal.svelte';
+  import Modal from '../../components/Modal.svelte';
   import Snapshot from '../../components/Icon/Snapshot.svelte';
 
   let repos = [];
   let step = 0;
   let initialValues = null;
-  let logId = null;
+  let removeId = null;
 
   const onRefresh = async () => {
     try {
@@ -25,10 +26,11 @@
     }
   }
   
-  const onRemove = async (repo) => {
+  const onRemove = async (repoId) => {
     try {
-      await agent.delete(`/repositories/${repo.id}`);
-      await onRefresh()
+      await agent.delete(`/repositories/${repoId}`);
+      await onRefresh();
+      removeId = null;
     } catch (err) {
       console.log(err)
     }
@@ -40,7 +42,17 @@
   onMount(onRefresh);
 </script>
 
-{#if initialValues}
+{#if removeId}
+  <Modal title="Advertissment" on:close={() => { removeId = null; }}>
+    <div>
+      You really want to delete repository #{removeId}
+      <div class="flex gap-2 justify-end">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition" on:click={() => removeId = null}>No</button>
+        <button class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition" on:click={() => onRemove(removeId)}>Yes</button>
+      </div>
+    </div>
+  </Modal>
+{:else if initialValues}
   <RepositoryModal
     repository={initialValues}
     on:close={() => { initialValues = null; }}
@@ -48,13 +60,15 @@
   />
 {/if}
 
-<div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+<div class="w-full grid gap-3 mb-6">
   {#each repos as repo, i}
-    <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
-      <p class="truncate text-lg font-bold {repo.active ? '' :'text-red-500'}">#{repo.id} - {repo.name}</p>
-      <p class="truncate text-sm font-light my-2">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm ')}</p>
+    <div class="p-3 flex flex-col bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
+      <div class="flex flex-wrap gap-2">
+        <p class="text-lg font-bold leading-7 whitespace-nowrap {repo.active ? '' :'text-red-500'}">#{repo.id} - {repo.name}</p>
+        <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap ">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm ')}</p>
+      </div>
 
-      <div class="flex flex-wrap gap-2 mt-auto pt-2 min-h-8 mb-1">
+      <div class="flex flex-wrap gap-2 mt-3 pt-2 min-h-8 mb-1">
         <a href="/repositories/{repo.id}">
           <button
             class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
@@ -73,7 +87,7 @@
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
           title="Remove"
-          on:click|preventDefault|stopPropagation={() => onRemove(repo)}
+          on:click|preventDefault|stopPropagation={() => { removeId = repo.id}}
         >
           <Trash />
         </button>
@@ -106,8 +120,8 @@
   {/each}
   <div
     on:click={() => { initialValues = {}; }}
-    class="text-3xl p-6 max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
+    class="p-6 bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
-    +
+    Add a repository
   </div>
 </div>

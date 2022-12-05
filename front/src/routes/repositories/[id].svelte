@@ -12,13 +12,20 @@
   let logs = [];
   let tab = new URLSearchParams($page.url.search).get('tab') || null;
 
+  const fetch = async (path) => {
+    try {
+      return await agent.get(path);
+    } catch (err) {
+      return;
+    }
+  }
   const onRefresh = async (id) => {
     try {
       [repo, stats, logs, snapshots] = await Promise.all([
-        agent.get(`/repositories/${id}`),
-        agent.get(`/repositories/${id}/stats`),
-        agent.get(`/repositories/${id}/logs`),
-        agent.get(`/repositories/${id}/snapshots`),
+        fetch(`/repositories/${id}`),
+        fetch(`/repositories/${id}/stats`),
+        fetch(`/repositories/${id}/logs`),
+        fetch(`/repositories/${id}/snapshots`),
       ]);
     } catch (err) {
       toasts.addToast(err?.message, 'failure');
@@ -35,7 +42,7 @@
   $: onRefresh($page.params.id);
 </script>
 
-<div class="mt-2 w-full max-w-full">
+<div class="mt-2 mb-10 w-full max-w-full">
   <div class="flex justify-between flex-wrap mb-3">
     {#each ['General', 'Snapshots', 'Logs', 'Stats'] as stepped, i}
       <div
@@ -48,11 +55,19 @@
   </div>
   {#if repo}
     {#if tab === 'snapshots'}
-      <Snapshot snapshots={snapshots} />
+      {#if logs && logs.length > 0}
+        <Snapshot snapshots={snapshots.sort((a, b) => b.time.localeCompare(a.time))} />
+      {:else}
+        <span>no data</span>
+      {/if}
     {:else if tab === 'logs'}
-      <Log logs={logs} />
+      {#if logs && logs.length > 0}
+        <Log logs={logs} />
+      {:else}
+        <span>no data</span>
+      {/if}
     {:else if tab === 'stats'}
-      <pre>{stats}</pre>
+      <pre>{stats || 'no data'}</pre>
     {:else}
       <pre class="text-sm">{JSON.stringify(repo, null, 4)}</pre>
     {/if}
