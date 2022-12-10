@@ -21,7 +21,7 @@
   const onCheck = async (id) => {
     if (!id) return;
     try {
-      await agent.get(`/repositories/${id}/valid`);
+      await agent.get(`/${id}/valid`);
       toasts.addToast('Repository valid');
     } catch (err) {
       toasts.addToast(err?.message || 'Repository not valid', 'failure');
@@ -66,7 +66,7 @@
           initialValues={values}
           on:update={({ detail: general }) => {
             values = { ...repository, ...general };
-            link = `/repositories/${repository.id || ''}`;
+            link = `/${repository.id || ''}`;
           }}
         />
       {:else if step === 1}
@@ -76,7 +76,7 @@
             : []}
           on:update={({ detail: paths }) => {
             values = paths;
-            link = `/repositories/${repository.id}/paths`;
+            link = `/${repository.id}/paths`;
           }}
         />
       {:else if step === 2}
@@ -84,7 +84,7 @@
           initialBackupSchedule={(values.edges && values.edges.backupSchedule) || {}}
           on:update={({ detail: backupSchedule }) => {
             values = backupSchedule;
-            link = `/repositories/${repository.id}/backupschedule`;
+            link = `/${repository.id}/backupschedule`;
           }}
         />
       {:else if step === 3}
@@ -92,7 +92,7 @@
           initialBackupPolicy={(values.edges && values.edges.backupPolicy) || {}}
           on:update={({ detail: backupPolicy }) => {
             values = backupPolicy;
-            link = `/repositories/${repository.id}/backuppolicy`;
+            link = `/${repository.id}/backuppolicy`;
           }}
         />
       {:else if step === 4}
@@ -100,7 +100,7 @@
           initialProvider={values}
           on:update={({ detail: providers }) => {
             values = providers.edges[providers.provider];
-            link = `/repositories/${repository.id}/${providers.provider.toLowerCase()}`;
+            link = `/${repository.id}/${providers.provider.toLowerCase()}`;
           }}
         />
       {/if}

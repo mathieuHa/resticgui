@@ -69,7 +69,7 @@
       </div>
 
       <div class="flex flex-wrap gap-2 mt-3 pt-2 min-h-8 mb-1">
-        <a href="/repositories/{repo.id}">
+        <a href="/{repo.id}">
           <button
             class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
             title="See"
@@ -91,7 +91,7 @@
         >
           <Trash />
         </button>
-        <a href="/repositories/{repo.id}?tab=logs">
+        <a href="/{repo.id}?tab=logs">
           <button
             class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
             title="Logs"
@@ -99,7 +99,7 @@
             <Logs />
           </button>
         </a>
-        <a href="/repositories/{repo.id}?tab=snapshots">
+        <a href="/{repo.id}?tab=snapshots">
           <button
             class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-violet-500 hover:bg-violet-600"
             title="Snapshots"
@@ -107,7 +107,7 @@
             <Snapshot />
           </button>
         </a>
-        <a href="/repositories/{repo.id}?tab=stats">
+        <a href="/{repo.id}?tab=stats">
           <button
             class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
             title="Stats"
@@ -118,10 +118,10 @@
       </div>
     </div>
   {/each}
-  <div
+  <button
     on:click={() => { initialValues = {}; }}
     class="p-6 bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
     Add a repository
-  </div>
+  </button>
 </div>

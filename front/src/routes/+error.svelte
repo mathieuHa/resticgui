@@ -1,5 +1,4 @@
 <script context="module">
-	/** @type {import('@sveltejs/kit').ErrorLoad} */
 	export function load({ url, error, status }) {
 		return {
 			props: { error, status, url }
@@ -9,7 +8,7 @@
 
 <script>
 	// import Nav from '../components/Nav.svelte';
-	import { dev } from '$app/env';
+	import { dev } from '$app/environment';
 
 	export let url;
 	export let status;
