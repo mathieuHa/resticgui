@@ -1,3 +1,4 @@
+import path from 'path';
 import { defineConfig } from 'vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 
@@ -8,18 +9,17 @@ const config = defineConfig({
     port: 3000,
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:3001/api/v1',
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
     },
-
   },
   build: {
     sourcemap: false,
   },
   resolve: {
     alias: {
-      $utils: 'src/utils',
+      $utils: path.resolve(__dirname, './src/utils'),
     },
   },
 });

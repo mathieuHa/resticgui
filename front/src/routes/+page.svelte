@@ -24,38 +24,51 @@
     } catch (err) {
       // Pass
     }
-  }
-  
+  };
+
   const onRemove = async (repoId: number) => {
     try {
       await agent.delete(`/repositories/${repoId}`);
       await onRefresh();
       removeId = null;
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
-  $:if (initialValues === null) step = 0;
-  $:values = Object.assign({}, initialValues) || step;
+  $: if (initialValues === null) step = 0;
+  $: values = Object.assign({}, initialValues) || step;
 
   onMount(onRefresh);
 </script>
 
 {#if removeId}
-  <Modal title="Advertissment" on:close={() => { removeId = null; }}>
+  <Modal
+    title="Advertissment"
+    on:close={() => {
+      removeId = null;
+    }}
+  >
     <div>
       You really want to delete repository #{removeId}
       <div class="flex gap-2 justify-end">
-        <button class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition" on:click={() => removeId = null}>No</button>
-        <button class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition" on:click={() => onRemove(removeId)}>Yes</button>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
+          on:click={() => (removeId = null)}>No</button
+        >
+        <button
+          class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
+          on:click={() => onRemove(removeId)}>Yes</button
+        >
       </div>
     </div>
   </Modal>
 {:else if initialValues}
   <RepositoryModal
     repository={initialValues}
-    on:close={() => { initialValues = null; }}
+    on:close={() => {
+      initialValues = null;
+    }}
     on:refresh={onRefresh}
   />
 {/if}
@@ -80,14 +93,18 @@
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
           title="Update"
-          on:click|preventDefault|stopPropagation={() => { initialValues = Object.assign({}, repo); }}
+          on:click|preventDefault|stopPropagation={() => {
+            initialValues = Object.assign({}, repo);
+          }}
         >
           <Pen />
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
           title="Remove"
-          on:click|preventDefault|stopPropagation={() => { removeId = repo.id}}
+          on:click|preventDefault|stopPropagation={() => {
+            removeId = repo.id;
+          }}
         >
           <Trash />
         </button>
@@ -119,7 +136,9 @@
     </div>
   {/each}
   <button
-    on:click={() => { initialValues = {}; }}
+    on:click={() => {
+      initialValues = {};
+    }}
     class="p-6 bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
   >
     Add a repository

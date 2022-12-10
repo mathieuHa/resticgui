@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, tick } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import Cross from './Icon/Cross.svelte';
 
   export let title: string;

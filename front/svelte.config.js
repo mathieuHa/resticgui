@@ -8,7 +8,11 @@ const config = {
     }),
   ],
   kit: {
-    adapter: adapter({ pages: 'build' }),
+    adapter: adapter({
+      pages: 'build',
+      precompress: false,
+      strict: false,
+    }),
   },
 };
 

@@ -1,5 +1,5 @@
-async function call(method: string, url: string, options?: any, data?: any) {
-  const response = await fetch(url, {
+async function call(method: string, url: string, options: any = {}, data?: any) {
+  const response = await fetch(`/api/v1${url}`, {
     ...options,
     method,
     ...data ? { body: JSON.stringify(data) } : {},

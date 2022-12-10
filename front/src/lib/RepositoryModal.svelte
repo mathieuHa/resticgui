@@ -14,7 +14,7 @@
 
   let step = 0;
   let values = null;
-  let link = null;
+  let link: string | null = null;
 
   const dispatch = createEventDispatcher();
   
@@ -66,7 +66,7 @@
           initialValues={values}
           on:update={({ detail: general }) => {
             values = { ...repository, ...general };
-            link = `/${repository.id || ''}`;
+            link = `/repositories/${repository.id || ''}`;
           }}
         />
       {:else if step === 1}
@@ -76,7 +76,7 @@
             : []}
           on:update={({ detail: paths }) => {
             values = paths;
-            link = `/${repository.id}/paths`;
+            link = `/repositories/${repository.id}/paths`;
           }}
         />
       {:else if step === 2}
@@ -84,7 +84,7 @@
           initialBackupSchedule={(values.edges && values.edges.backupSchedule) || {}}
           on:update={({ detail: backupSchedule }) => {
             values = backupSchedule;
-            link = `/${repository.id}/backupschedule`;
+            link = `/repositories/${repository.id}/backupschedule`;
           }}
         />
       {:else if step === 3}
@@ -92,7 +92,7 @@
           initialBackupPolicy={(values.edges && values.edges.backupPolicy) || {}}
           on:update={({ detail: backupPolicy }) => {
             values = backupPolicy;
-            link = `/${repository.id}/backuppolicy`;
+            link = `/repositories/${repository.id}/backuppolicy`;
           }}
         />
       {:else if step === 4}
@@ -100,7 +100,7 @@
           initialProvider={values}
           on:update={({ detail: providers }) => {
             values = providers.edges[providers.provider];
-            link = `/${repository.id}/${providers.provider.toLowerCase()}`;
+            link = `/repositories/${repository.id}/${providers.provider.toLowerCase()}`;
           }}
         />
       {/if}
