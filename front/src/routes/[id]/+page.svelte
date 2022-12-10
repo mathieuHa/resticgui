@@ -9,15 +9,15 @@
 
   let repo = null;
   let stats = null;
-  let snapshots = [];
-  let logs = [];
+  let snapshots = null;
+  let logs = null;
   let tab = new URLSearchParams($page.url.search).get('tab') || null;
 
   const fetch = async (path: string) => {
     try {
       return await agent.get(path);
     } catch (err) {
-      return;
+      return null;
     }
   };
 
@@ -59,7 +59,7 @@
   </div>
   {#if repo}
     {#if tab === 'snapshots'}
-      {#if logs && logs.length > 0}
+      {#if snapshots && snapshots.length > 0}
         <Snapshot snapshots={snapshots.sort((a, b) => b.time.localeCompare(a.time))} />
       {:else}
         <span>no data</span>
