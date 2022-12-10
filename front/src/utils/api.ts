@@ -1,5 +1,6 @@
 async function call(method: string, url: string, options?: any, data?: any) {
-  const response = await fetch(`/api/v1${url}`, {
+  const response = await fetch(url, {
+    ...options,
     method,
     ...data ? { body: JSON.stringify(data) } : {},
     headers: {
@@ -20,11 +21,11 @@ async function call(method: string, url: string, options?: any, data?: any) {
 }
 
 const agent = {
-  get: async (url, options) => call('GET', url, options),
-  delete: async (url, options) => call('DELETE', url, options),
-  post: async (url, data, options) => call('POST', url, options, data),
-  put: async (url, data, options) => call('PUT', url, options, data),
-  patch: async (url, data, options) => call('PATCH', url, options, data),
+  get: async (url: string, options?: any) => call('GET', url, options),
+  delete: async (url: string, options?: any) => call('DELETE', url, options),
+  post: async (url: string, data: any, options?: any) => call('POST', url, options, data),
+  put: async (url: string, data: any, options?: any) => call('PUT', url, options, data),
+  patch: async (url: string, data: any, options?: any) => call('PATCH', url, options, data),
 };
 
 export default agent;

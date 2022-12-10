@@ -1,19 +1,20 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import Cross from './Icon/Cross.svelte';
 
-  export let title;
+  export let title: string;
 
-  function portal(node) {
+  function portal(node: HTMLDivElement) {
     const anchor = document.getElementById('modals');
     if (anchor) anchor.insertBefore(node, null);
-    return { destroy: () => anchor.contains(node) && anchor.removeChild(node) };
+    return { destroy: () => anchor?.contains(node) && anchor.removeChild(node) };
   }
 
   const dispatch = createEventDispatcher();
   const onClose = () => dispatch('close', true);
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   use:portal
   class="p-6 fixed top-0 left-0 right-0 bottom-0 bg-gray-200/[.5] dark:bg-gray-900/[.5]"

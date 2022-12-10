@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
 
@@ -15,7 +15,7 @@
   let repos = [];
   let step = 0;
   let initialValues = null;
-  let removeId = null;
+  let removeId: number | null = null;
 
   const onRefresh = async () => {
     try {
@@ -26,7 +26,7 @@
     }
   }
   
-  const onRemove = async (repoId) => {
+  const onRemove = async (repoId: number) => {
     try {
       await agent.delete(`/repositories/${repoId}`);
       await onRefresh();

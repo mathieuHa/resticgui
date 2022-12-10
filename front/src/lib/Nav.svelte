@@ -1,21 +1,8 @@
-<script>
+<script lang="ts">
 	import NavLink from './NavLink.svelte';
 	import Cross from './Icon/Cross.svelte';
 
 	let isOpen = false;
-	let isMenuRendered;
-	$: {
-		if (isOpen) {
-			setTimeout(() => {
-				isMenuRendered = true;
-			}, 20);
-		} else {
-			setTimeout(() => {
-				isMenuRendered = false;
-			}, 300);
-		}
-	}
-
 	let isDark = false;
 	if (typeof localStorage !== 'undefined') {
 		if (
@@ -25,7 +12,7 @@
 			isDark = true;
 		}
 	}
-	function toggleDarkMode() {
+	function toggleDarkMode(): void {
 		if (isDark) {
 			document.documentElement.classList.remove('dark');
 			localStorage.theme = 'light';

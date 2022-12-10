@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
@@ -18,7 +18,7 @@
 
   const dispatch = createEventDispatcher();
   
-  const onCheck = async (id) => {
+  const onCheck = async (id: number) => {
     if (!id) return;
     try {
       await agent.get(`/${id}/valid`);

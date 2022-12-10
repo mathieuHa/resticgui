@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import '../tailwind.css';
 	import Nav from '$lib/Nav.svelte';
 	import Toast from '$lib/Toast.svelte';

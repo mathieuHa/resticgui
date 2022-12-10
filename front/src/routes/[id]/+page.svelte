@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { page } from '$app/stores';
 
   import Log from '$lib/RepositoryId/Log.svelte';
@@ -13,14 +13,14 @@
   let logs = [];
   let tab = new URLSearchParams($page.url.search).get('tab') || null;
 
-  const fetch = async (path) => {
+  const fetch = async (path: string) => {
     try {
       return await agent.get(path);
     } catch (err) {
       return;
     }
   }
-  const onRefresh = async (id) => {
+  const onRefresh = async (id: string) => {
     try {
       [repo, stats, logs, snapshots] = await Promise.all([
         fetch(`/repositories/${id}`),
@@ -28,19 +28,19 @@
         fetch(`/repositories/${id}/logs`),
         fetch(`/repositories/${id}/snapshots`),
       ]);
-    } catch (err) {
+    } catch (err: unknown) {
       toasts.addToast(err?.message, 'failure');
     }
   }
 
-  const replaceStateWithQuery = (value) => {
+  const replaceStateWithQuery = (value: string) => {
     const url = new URL(window.location.toString());
     url.searchParams.set('tab', value);
     history.replaceState({}, '', url);
     tab = value;
   };
 
-  $: onRefresh($page.params.id);
+  $: onRefresh($page.params.id as string);
 </script>
 
 <div class="mt-2 mb-10 w-full max-w-full">

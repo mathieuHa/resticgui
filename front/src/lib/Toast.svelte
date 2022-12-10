@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { toasts } from '$utils/stores';
 </script>
 
