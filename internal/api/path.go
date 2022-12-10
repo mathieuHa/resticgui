@@ -53,11 +53,11 @@ func createPaths(c *gin.Context) {
 	_, err := database.GetRepositoryByIDDB(newId, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error(), "message": errRNotFound})
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": errRConstraint})
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
 		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error(), "message": errRNotFound})
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 		}
 		return
 	}
@@ -100,7 +100,7 @@ func updatePaths(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&paths); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errInvalidRequest})
 		log.Info().Err(err).Msg(errNotBind)
 		return
 	}

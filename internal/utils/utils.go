@@ -43,7 +43,8 @@ func ReturnValidID(c *gin.Context) (value int, err error) {
 	if err != nil {
 		// TODO: add variable with error message
 		// Currently not exported by package api
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "id not valid"})
+		log.Err(err).Msg("id not valid")
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "id not valid"})
 	}
 	return value, err
 }
