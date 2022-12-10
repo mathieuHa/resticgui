@@ -7,8 +7,8 @@ type Snapshot struct {
 	Tree     string    `json:"tree"`
 	Hostname string    `json:"hostname"`
 	Username string    `json:"username"`
-	UID      string    `json:"uid"`
-	GID      string    `json:"gid"`
+	UID      int       `json:"uid"`
+	GID      int       `json:"gid"`
 	ShortID  string    `json:"short_id"`
 	Paths    []string
 }

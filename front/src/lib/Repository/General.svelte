@@ -18,7 +18,7 @@
 />
 <Input
   id="password"
-  label="Password (cannot be change latter)"
+  label="Password (cannot be changed later)"
   type="password"
   bind:value={values.password}
   disabled={!!initialValues.id}
