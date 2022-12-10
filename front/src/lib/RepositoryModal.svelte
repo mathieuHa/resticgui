@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  import agent from '../utils/api';
-  import { toasts } from '../utils/stores';
+  import agent from '$utils/api';
+  import { toasts } from '$utils/stores';
 
   import BackupPolicy from './Repository/BackupPolicy.svelte';
   import BackupSchedule from './Repository/BackupSchedule.svelte';

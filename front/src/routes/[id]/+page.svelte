@@ -1,10 +1,10 @@
 <script>
   import { page } from '$app/stores';
 
-  import Log from '../../components/RepositoryId/Log.svelte';
-  import Snapshot from '../../components/RepositoryId/Snapshot.svelte';
-  import agent from '../../utils/api';
-  import { toasts } from '../../utils/stores';
+  import Log from '$lib/RepositoryId/Log.svelte';
+  import Snapshot from '$lib/RepositoryId/Snapshot.svelte';
+  import agent from '$utils/api';
+  import { toasts } from '$utils/stores';
 
   let repo = null;
   let stats = null;

@@ -2,15 +2,15 @@
   import dayjs from 'dayjs';
   import { onMount } from 'svelte';
 
-  import agent from '../../utils/api';
-  import Eye from '../../components/Icon/Eye.svelte';
-  import Logs from '../../components/Icon/Logs.svelte';
-  import Pen from '../../components/Icon/Pen.svelte';
-  import Trash from '../../components/Icon/Trash.svelte';
-  import Stats from '../../components/Icon/Stats.svelte';
-  import RepositoryModal from '../../components/RepositoryModal.svelte';
-  import Modal from '../../components/Modal.svelte';
-  import Snapshot from '../../components/Icon/Snapshot.svelte';
+  import agent from '$utils/api';
+  import Eye from '$lib/Icon/Eye.svelte';
+  import Logs from '$lib/Icon/Logs.svelte';
+  import Pen from '$lib/Icon/Pen.svelte';
+  import Trash from '$lib/Icon/Trash.svelte';
+  import Stats from '$lib/Icon/Stats.svelte';
+  import RepositoryModal from '$lib/RepositoryModal.svelte';
+  import Modal from '$lib/Modal.svelte';
+  import Snapshot from '$lib/Icon/Snapshot.svelte';
 
   let repos = [];
   let step = 0;

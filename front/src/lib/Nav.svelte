@@ -70,16 +70,7 @@
 	</button>
 	<ul class="{isOpen ? 'order-3 w-full' : 'hidden'} md:flex md:order-unset md:w-auto">
 		<li>
-			<NavLink href="/">Home</NavLink>
-		</li>
-		<!-- <li>
-			<NavLink href="/users">Users</NavLink>
-		</li> -->
-		<li>
-			<NavLink href="/repositories">Repositories</NavLink>
-		</li>
-		<li>
-			<NavLink href="/about">About</NavLink>
+			<NavLink href="/">ResticGUI</NavLink>
 		</li>
 	</ul>
 	<div class="flex items-center space-x-4">

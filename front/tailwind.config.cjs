@@ -1,8 +1,8 @@
 module.exports = {
 	content: [
-		'./src/**/*.svelte',
+		'src/**/*.svelte',
 		// may also want to include HTML files
-		'./src/**/*.html'
+		'src/**/*.html'
 	],
 	darkMode: 'class',
 	theme: {
