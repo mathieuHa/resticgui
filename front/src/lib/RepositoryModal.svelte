@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import agent from '../utils/api';
-  import { toasts } from '../utils/stores';
+  import agent from '$utils/api';
+  import { toasts } from '$utils/stores';
 
   import BackupPolicy from './Repository/BackupPolicy.svelte';
   import BackupSchedule from './Repository/BackupSchedule.svelte';
@@ -14,14 +14,14 @@
 
   let step = 0;
   let values = null;
-  let link = null;
+  let link: string | null = null;
 
   const dispatch = createEventDispatcher();
   
-  const onCheck = async (id) => {
+  const onCheck = async (id: number) => {
     if (!id) return;
     try {
-      await agent.get(`/repositories/${id}/valid`);
+      await agent.get(`/${id}/valid`);
       toasts.addToast('Repository valid');
     } catch (err) {
       toasts.addToast(err?.message || 'Repository not valid', 'failure');

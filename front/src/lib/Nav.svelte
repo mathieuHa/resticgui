@@ -1,21 +1,8 @@
-<script>
+<script lang="ts">
 	import NavLink from './NavLink.svelte';
 	import Cross from './Icon/Cross.svelte';
 
 	let isOpen = false;
-	let isMenuRendered;
-	$: {
-		if (isOpen) {
-			setTimeout(() => {
-				isMenuRendered = true;
-			}, 20);
-		} else {
-			setTimeout(() => {
-				isMenuRendered = false;
-			}, 300);
-		}
-	}
-
 	let isDark = false;
 	if (typeof localStorage !== 'undefined') {
 		if (
@@ -25,7 +12,7 @@
 			isDark = true;
 		}
 	}
-	function toggleDarkMode() {
+	function toggleDarkMode(): void {
 		if (isDark) {
 			document.documentElement.classList.remove('dark');
 			localStorage.theme = 'light';
@@ -70,16 +57,7 @@
 	</button>
 	<ul class="{isOpen ? 'order-3 w-full' : 'hidden'} md:flex md:order-unset md:w-auto">
 		<li>
-			<NavLink href="/">Home</NavLink>
-		</li>
-		<!-- <li>
-			<NavLink href="/users">Users</NavLink>
-		</li> -->
-		<li>
-			<NavLink href="/repositories">Repositories</NavLink>
-		</li>
-		<li>
-			<NavLink href="/about">About</NavLink>
+			<NavLink href="/">ResticGUI</NavLink>
 		</li>
 	</ul>
 	<div class="flex items-center space-x-4">

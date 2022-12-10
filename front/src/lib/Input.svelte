@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  export let value = '';
-  export let checked = false;
+  export let value: string | null = '';
+  export let checked: boolean | null = false;
   export let id = '';
   export let label = '';
   export let type = 'text';
   export let options = [];
-  export let selected = '';
+  export let selected: string | null = '';
 
   let idCheckbox = id;
   let idNumber = id;

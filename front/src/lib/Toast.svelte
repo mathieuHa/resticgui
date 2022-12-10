@@ -1,5 +1,5 @@
-<script>
-  import { toasts } from '../utils/stores';
+<script lang="ts">
+  import { toasts } from '$utils/stores';
 </script>
 
 {#if $toasts.length}

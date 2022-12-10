@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import AddPaths from './AddPaths.svelte';
   import Arrow from '../../Icon/Arrow.svelte';
 
@@ -20,7 +20,7 @@
     }
     return deepInclude.included;
   }
-  let included;
+  let included = false;
   $:included = isIncluded(paths)
 </script>
 

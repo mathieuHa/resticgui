@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
 
-  import agent from '../../../utils/api';
+  import agent from '$utils/api';
 
   import AddPaths from './AddPaths.svelte';
 
