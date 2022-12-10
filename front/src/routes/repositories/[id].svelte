@@ -3,6 +3,7 @@
 
   import Log from '../../components/RepositoryId/Log.svelte';
   import Snapshot from '../../components/RepositoryId/Snapshot.svelte';
+  import General from '../../components/RepositoryId/General.svelte';
   import agent from '../../utils/api';
   import { toasts } from '../../utils/stores';
 
@@ -62,14 +63,15 @@
       {/if}
     {:else if tab === 'logs'}
       {#if logs && logs.length > 0}
-        <Log logs={logs} />
+        <Log {logs} />
       {:else}
         <span>no data</span>
       {/if}
     {:else if tab === 'stats'}
       <pre>{stats || 'no data'}</pre>
     {:else}
-      <pre class="text-sm">{JSON.stringify(repo, null, 4)}</pre>
+      <General {repo}/>
+      <!-- <pre class="text-sm">{JSON.stringify(repo, null, 4)}</pre> -->
     {/if}
   {/if}
 </div>
