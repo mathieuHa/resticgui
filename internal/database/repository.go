@@ -113,24 +113,26 @@ func SetRepositoryInitiatedDB(id int, ctx context.Context) (r *ent.Repository, e
 
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errUpdate)
-		return
+		return r, err
 	}
 
 	return r, err
 }
 
 func SetRepositoryRunningDB(id int, running bool, ctx context.Context) (r *ent.Repository, err error) {
-	log.Debug().Msg("SetRepositoryInitiatedDB()")
+	log.Debug().Msg("SetRepositoryRunningDB()")
 
-	// update repository
+	// update repository set running
 	r, err = db.Repository.
 		UpdateOneID(id).
 		SetRunning(running).
 		Save(ctx)
 
+	log.Debug().Msgf("running %v", r.Running)
+
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errUpdate)
-		return
+		return r, err
 	}
 
 	return r, err
@@ -147,7 +149,7 @@ func SetRepositoryValidDB(value bool, id int, ctx context.Context) (r *ent.Repos
 
 	if err != nil {
 		log.Err(err)
-		return
+		return r, err
 	}
 
 	return r, err

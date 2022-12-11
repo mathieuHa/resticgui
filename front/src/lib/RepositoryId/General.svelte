@@ -10,7 +10,7 @@
     </div>
     <br />
     
-    <div class="grid grid-cols-3">
+    <div class="grid grid-cols-4">
     {#if repo.active}
         <span class="bg-green-600 rounded-full w-24 min-w-min text-center">active</span>
     {:else}
@@ -25,6 +25,11 @@
         <span class="bg-green-600 rounded-full w-24 min-w-min text-center">valid</span>
     {:else}
         <div class="bg-red-600 rounded-full w-24 min-w-min text-center">valid</div>
+    {/if}
+    {#if repo.running}
+        <span class="bg-green-600 rounded-full w-24 min-w-min text-center">running</span>
+    {:else}
+        <div class="bg-red-600 rounded-full w-24 min-w-min text-center">running</div>
     {/if}
     </div>
     <br />
