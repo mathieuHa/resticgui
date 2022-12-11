@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/resticgui/resticgui/internal/Config"
+	"gitlab.com/resticgui/resticgui/internal/config"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 

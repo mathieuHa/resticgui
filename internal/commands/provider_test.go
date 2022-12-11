@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Config"
+	Config "gitlab.com/resticgui/resticgui/internal/config"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
