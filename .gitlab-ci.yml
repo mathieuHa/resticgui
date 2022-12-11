@@ -42,7 +42,7 @@ test:go:
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME
 
-  image: golang:1.17.7
+  image: golang:1.19.4
   stage: test
   script:
     - make testgoci
@@ -57,7 +57,7 @@ test:go:
 
 test:go:coverage:
   stage: test
-  image: golang:1.17
+  image: golang:1.19.4
   script:
     # - go install
     - go test ./internal/... -coverprofile=coverage.txt -covermode count
@@ -113,7 +113,7 @@ test:go:coverage:
 
 
 build:docker:
-  image: docker:20.10.12
+  image: docker:20.10.21
   stage: build
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
@@ -121,7 +121,7 @@ build:docker:
     DOCKER_BUILDKIT: 1
     TAG: ${CI_COMMIT_SHORT_SHA}
   services:
-    - docker:20.10.12-dind
+    - docker:20.10.21-dind
 
   before_script:
     - apk add make

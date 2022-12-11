@@ -1,4 +1,4 @@
-FROM node:16.14.0-alpine as BuilderWeb
+FROM node:16.18.1-alpine as BuilderWeb
 
 COPY front/ /front
 
@@ -8,7 +8,7 @@ RUN npm ci
 
 RUN npm run build
 
-FROM ubuntu:focal-20220113 as BuilderRestic
+FROM ubuntu:focal-20221130 as BuilderRestic
 
 ARG RESTICVERSION=0.12.1
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
@@ -28,7 +28,7 @@ RUN bzip2 -d ${BUILDDIR}/restic.bz2
 
 RUN	cp "${BUILDDIR}/restic" /restic
 
-FROM golang:1.17.7 as BuilderResticGui
+FROM golang:1.19.4 as BuilderResticGui
 
 ARG BUILDDIR=./build
 
@@ -40,7 +40,7 @@ WORKDIR ${BUILDDIR}
 
 RUN cd cmd/resticgui && go build -o /resticgui
 
-FROM ubuntu:focal-20220113
+FROM ubuntu:focal-20221130
 
 LABEL "hanotaux.mathieu.vendor"="MHX"
 LABEL version="1.0"
