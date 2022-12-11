@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/models"
 	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	Models "gitlab.com/resticgui/resticgui/internal/models"
 	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
@@ -30,19 +30,20 @@ func checkRepositoryByID(id int, ctx context.Context, c *gin.Context) (err error
 	return err
 }
 
-func getRepositoryByID(id int, ctx context.Context, c *gin.Context) (r *ent.Repository, err error) {
-	r, err = database.GetRepositoryByIDDB(id, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
-	}
-	return r, err
-}
+// func getRepositoryByID(id int, ctx context.Context, c *gin.Context) (r *ent.Repository, err error) {
+// 	r, err = database.GetRepositoryByIDDB(id, ctx)
+
+// 	if err != nil {
+// 		if ent.IsNotFound(err) {
+// 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+// 		} else if ent.IsConstraintError(err) {
+// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
+// 		} else {
+// 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+// 		}
+// 	}
+// 	return r, err
+// }
 
 // QueryRepositories godoc
 // @Summary get all repositories
@@ -83,6 +84,7 @@ func GetRepository(c *gin.Context) {
 	}
 
 	r, err := database.GetRepositoryByIDDB(rID, ctx)
+
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -202,6 +204,7 @@ func EditRepository(c *gin.Context) {
 	if r.Active && r.Valid {
 		backup.AddScheduledBackup(r, cr)
 	} else {
+		log.Debug().Msg("We may need to call backup.RemoveScheduledBackup(r)")
 		// backup.RemoveScheduledBackup(r)
 	}
 
