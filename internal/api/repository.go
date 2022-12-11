@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/Models"
+	"gitlab.com/resticgui/resticgui/internal/models"
 	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/database"
 	"gitlab.com/resticgui/resticgui/internal/utils"

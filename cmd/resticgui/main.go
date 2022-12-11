@@ -11,12 +11,12 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"gitlab.com/resticgui/resticgui/internal/Config"
-	"gitlab.com/resticgui/resticgui/internal/Logs"
 	"gitlab.com/resticgui/resticgui/internal/api"
 	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/commands"
+	Config "gitlab.com/resticgui/resticgui/internal/config"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	Logs "gitlab.com/resticgui/resticgui/internal/logs"
 )
 
 var (
