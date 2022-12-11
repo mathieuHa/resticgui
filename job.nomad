@@ -44,10 +44,12 @@ job "resticgui_job" {
         "traefik.enable=true",
         "traefik.consulcatalog.connect=true",
         "traefik.http.routers.to-resticgui-http.entrypoints=web",
-        "traefik.http.routers.to-resticgui-http.rule=Host(`resticgui.hanotaux.local`)",
+        "traefik.http.routers.to-resticgui-http.rule=Host(`resticgui.mhx.lan`)",
         "traefik.http.routers.to-resticgui-http.middlewares=force-https@file",
         "traefik.http.routers.to-resticgui-https.entrypoints=websecure",
-        "traefik.http.routers.to-resticgui-https.rule=Host(`resticgui.hanotaux.local`)",
+        "traefik.http.routers.to-resticgui-https.rule=Host(`resticgui.mhx.lan`)",
+        "traefik.http.routers.to-resticgui-https.middlewares=sec-header@file",
+        "traefik.http.routers.to-resticgui-https.middlewares=private-ip@file",
         "traefik.http.routers.to-resticgui-https.tls=true",
       ]
     }
