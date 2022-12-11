@@ -113,29 +113,29 @@ test:go:coverage:
 
 
 build:docker:
-  image: docker:20.10.21
+  image: quay.io/buildah/stable:v1.28.0
   stage: build
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_DRIVER: overlay2
-    DOCKER_BUILDKIT: 1
-    TAG: ${CI_COMMIT_SHORT_SHA}
-  services:
-    - docker:20.10.21-dind
-
+    # Use vfs with buildah. Docker offers overlayfs as a default, but buildah
+    # cannot stack overlayfs on top of another overlayfs filesystem.
+    STORAGE_DRIVER: vfs
+    # Write all image metadata in the docker format, not the standard OCI format.
+    # Newer versions of docker can handle the OCI format, but older versions, like
+    # the one shipped with Fedora 30, cannot handle the format.
+    BUILDAH_FORMAT: docker
+    # You may need this workaround for some errors: https://stackoverflow.com/a/70438141/1233435
+    BUILDAH_ISOLATION: chroot
+    FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui:${CI_COMMIT_SHORT_SHA}"
   before_script:
-    - apk add make
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE}
-    - export TAG=${TAG}
-    - export CI=true
-
+    # Log in to the GitLab container registry
+    - export REGISTRY_AUTH_FILE=${HOME}/auth.json
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
-    - make builddocker
-    - make pushdocker
-  
-  after_script:
-    - docker logout
+    - buildah images
+    - buildah build -t $FQ_IMAGE_NAME
+    - buildah images
+    - buildah push $FQ_IMAGE_NAME
+
   extends:
     - .rule_build_deploy
 
