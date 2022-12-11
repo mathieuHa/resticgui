@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -266,15 +268,23 @@ func LogsRepository(c *gin.Context) {
 	if err != nil {
 		return
 	}
-
+	limit := 10
+	page := 0
+	limitStr := c.DefaultQuery("limit", "10")
+	if utils.IsValidInt(limitStr) {
+		limit, _ = strconv.Atoi(limitStr)
+	}
+	pageStr := c.DefaultQuery("page", "0")
+	if utils.IsValidInt(pageStr) {
+		page, _ = strconv.Atoi(pageStr)
+	}
 	_, err = database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil && ent.IsNotFound(err) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
 		return
 	}
-
-	logsR, err := database.QueryLogsByRepositoryDB(rID, ctx)
+	logsR, err := database.QueryLogsByRepositoryDB(rID, limit, page, ctx)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errQuery, "message": err.Error()})
@@ -392,6 +402,19 @@ func GetSnapshotsRepository(c *gin.Context) {
 		return
 	}
 
+	limit := 0
+	page := 0
+	limitStr := c.DefaultQuery("limit", "0")
+	if utils.IsValidInt(limitStr) {
+		limit, _ = strconv.Atoi(limitStr)
+		limit = int(math.Abs(float64(limit)))
+	}
+	pageStr := c.DefaultQuery("page", "0")
+	if utils.IsValidInt(pageStr) {
+		page, _ = strconv.Atoi(pageStr)
+		page = int(math.Abs(float64(page)))
+	}
+
 	r, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil {
@@ -413,11 +436,24 @@ func GetSnapshotsRepository(c *gin.Context) {
 	stdout := backup.GetSnapshotsRepository(r)
 
 	var snapshots []Models.Snapshot
-
+	var snapshotExtract []Models.Snapshot
 	err = json.Unmarshal([]byte(stdout), &snapshots)
 
 	if err == nil {
-		c.IndentedJSON(http.StatusOK, snapshots)
+		if limit != 0 {
+			offset := int(math.Min(float64(page*limit), float64(len(snapshots))))
+			nextOffset := int(math.Min(float64((page+1)*limit), float64(len(snapshots))))
+			for i := offset; i < nextOffset; i++ {
+				snapshotExtract = append(snapshotExtract, snapshots[i])
+			}
+			if snapshotExtract == nil {
+				c.IndentedJSON(http.StatusOK, []Models.Snapshot{})
+			} else {
+				c.IndentedJSON(http.StatusOK, snapshotExtract)
+			}
+		} else {
+			c.IndentedJSON(http.StatusOK, snapshots)
+		}
 	} else if snapshots == nil {
 		c.IndentedJSON(http.StatusOK, []Models.Snapshot{})
 	} else {

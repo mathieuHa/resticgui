@@ -30,9 +30,9 @@ func IsValidInt(s string) bool {
 	_, err := strconv.Atoi(s)
 	value := (err == nil)
 	if value {
-		log.Debug().Msg("ID is valid")
+		log.Debug().Msgf("%s is a valid int", s)
 	} else {
-		log.Info().Msgf("ID is not a valid int")
+		log.Info().Msgf("%s is not a valid int", s)
 	}
 	return value
 }
