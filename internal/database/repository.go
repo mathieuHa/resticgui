@@ -167,13 +167,13 @@ func DeleteRepositoryDB(id int, ctx context.Context) (err error) {
 	return err
 }
 
-func QueryLogsByRepositoryDB(id int, ctx context.Context) (l []*ent.Logs, err error) {
+func QueryLogsByRepositoryDB(id int, limit int, page int, ctx context.Context) (l []*ent.Logs, err error) {
 
+	offset := page * limit
 	// query logs by repository
-	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).Order(ent.Desc(logs.FieldStartTime)).Limit(50).All(ctx)
-
+	l, err = db.Logs.Query().Where(logs.HasRepositoryWith(repository.ID(id))).Order(ent.Desc(logs.FieldStartTime)).Limit(limit).Offset(offset).All(ctx)
 	if err != nil {
-		log.Err(err).Msgf("error: %v", errUpdate)
+		log.Err(err).Msgf("error: %v", "error Query Logs")
 	}
 
 	return l, err
