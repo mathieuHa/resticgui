@@ -22,7 +22,7 @@ func TestGetStatsRepository(t *testing.T) {
 		r, err := database.CreateRepositoryDB(repository, context.Background())
 		assert.Nil(t, err)
 
-		out := GetStatsRepository(r)
+		out, _ := GetStatsRepository(r, "latest")
 		assert.Equal(t, out, "")
 
 	})

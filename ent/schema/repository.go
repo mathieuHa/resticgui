@@ -30,6 +30,11 @@ func (Repository) Fields() []ent.Field {
 		// field.String("password").Optional().Sensitive(),
 		field.String("password").Optional(),
 		field.String("maxSize").Optional(),
+		field.String("repositorySize").Optional(),
+		field.String("repositoryFileCount").Optional(),
+		field.String("lastSnapshotSize").Optional(),
+		field.String("lastSnapshotDuration").Optional(),
+		field.Int("snapshotCount").Optional(),
 	}
 }
 

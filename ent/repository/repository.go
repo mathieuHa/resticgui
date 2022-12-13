@@ -32,6 +32,16 @@ const (
 	FieldPassword = "password"
 	// FieldMaxSize holds the string denoting the maxsize field in the database.
 	FieldMaxSize = "max_size"
+	// FieldRepositorySize holds the string denoting the repositorysize field in the database.
+	FieldRepositorySize = "repository_size"
+	// FieldRepositoryFileCount holds the string denoting the repositoryfilecount field in the database.
+	FieldRepositoryFileCount = "repository_file_count"
+	// FieldLastSnapshotSize holds the string denoting the lastsnapshotsize field in the database.
+	FieldLastSnapshotSize = "last_snapshot_size"
+	// FieldLastSnapshotDuration holds the string denoting the lastsnapshotduration field in the database.
+	FieldLastSnapshotDuration = "last_snapshot_duration"
+	// FieldSnapshotCount holds the string denoting the snapshotcount field in the database.
+	FieldSnapshotCount = "snapshot_count"
 	// EdgeBackupSchedule holds the string denoting the backupschedule edge name in mutations.
 	EdgeBackupSchedule = "backupSchedule"
 	// EdgeBackupPolicy holds the string denoting the backuppolicy edge name in mutations.
@@ -121,6 +131,11 @@ var Columns = []string{
 	FieldVersion,
 	FieldPassword,
 	FieldMaxSize,
+	FieldRepositorySize,
+	FieldRepositoryFileCount,
+	FieldLastSnapshotSize,
+	FieldLastSnapshotDuration,
+	FieldSnapshotCount,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

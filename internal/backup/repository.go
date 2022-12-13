@@ -2,22 +2,25 @@ package backup
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/commands"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	Models "gitlab.com/resticgui/resticgui/internal/models"
 	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
-func GetStatsRepository(r *ent.Repository) (out string) {
+func GetStatsRepository(r *ent.Repository, snapshotID string) (out string, err string) {
 	log.Debug().Msg("GetStatsRepository()")
 
 	ctx := context.Background()
-	stdout, stderr, errCmd := commands.StatsRepository(r, false)
+	stdout, stderr, errCmd := commands.StatsRepository(r, snapshotID)
 	database.LogCommand(r.ID, "StatsSnapshots", stdout, stderr, errCmd, ctx)
-	return stdout
+	return stdout, stderr
 }
 
 func CheckRepository(r *ent.Repository) (out string) {
@@ -29,16 +32,33 @@ func CheckRepository(r *ent.Repository) (out string) {
 	return stdout
 }
 
-func BackupRepository(r *ent.Repository) (out string) {
+func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	log.Debug().Msg("BackupRepository()")
 
 	log.Info().Msgf("JOB HAS STARTED %v", r.ID)
 
 	ctx := context.Background()
+
+	var cronEntry cron.Entry
+	if r.Edges.BackupSchedule != nil && r.Edges.BackupSchedule.CronID != nil {
+		cronID := cron.EntryID(*r.Edges.BackupSchedule.CronID)
+		cronEntry = cr.Entry(cronID)
+	} else {
+		log.Error().Msg("Not cron entry")
+	}
 	// TODO Check the validity of the provider and repository in general
 
 	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
 	stdout, stderr, errCmd := commands.GetSnapshots(r)
+	var snapshots []Models.Snapshot
+	err := json.Unmarshal([]byte(stdout), &snapshots)
+	if err == nil && snapshots != nil {
+		r.SnapshotCount = len(snapshots)
+		_, err = database.UpdateRepositoryDB(*r, r.ID, ctx)
+		if err != nil {
+			log.Err(err).Msg("Error update db")
+		}
+	}
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
 
 	if errCmd != nil {
@@ -51,6 +71,9 @@ func BackupRepository(r *ent.Repository) (out string) {
 
 	// set backup running
 	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
+
+	_ = database.UpdateCronLastRun(*r.Edges.BackupSchedule, cronEntry.Prev.String())
+	_ = database.UpdateCronNextRun(*r.Edges.BackupSchedule, cronEntry.Next.String())
 
 	stdout, stderr, errCmd = commands.BackupRepository(r, false)
 	database.LogCommand(r.ID, "BackupRepository", stdout, stderr, errCmd, ctx)

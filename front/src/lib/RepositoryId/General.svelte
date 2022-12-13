@@ -31,6 +31,7 @@
     {:else}
         <div class="bg-red-600 rounded-full w-24 min-w-min text-center">running</div>
     {/if}
+
     </div>
     <br />
 
@@ -59,6 +60,14 @@
     </div>
     <br />
 
+    {#if repo.active}
+        <div class="grid grid-cols-2">
+            <span class="bg-orange-600 rounded-full w-50 min-w-min text-center">{repo.edges.backupSchedule.nextRun}</span>
+            <span class="bg-orange-600 rounded-full w-50 min-w-min text-center">{repo.edges.backupSchedule.lastRun}</span>
+        </div>
+        <br />
+    {/if}
+
     <div class="grid grid-cols-2">
         <div>Paths</div>
         <div>
@@ -66,6 +75,13 @@
                 "<span class={path.included === false ? 'text-orange-500' : 'text-green-500'}>{path.absPath}</span>"{i !== repo.edges.paths.length - 1 ? ', ' : ''}
             {/each}
         </div>
+    </div>
+    <br />
+
+    <div class="grid grid-cols-3">
+        <span class="bg-yellow-600 rounded-full w-50 min-w-min text-center">Repository Size {repo.repositorySize}</span>
+        <span class="bg-yellow-600 rounded-full w-50 min-w-min text-center">Repository Total File Number {repo.repositoryFileCount}</span>
+        <span class="bg-yellow-600 rounded-full w-50 min-w-min text-center">Repository Snapshot count {repo.snapshotCount}</span>
     </div>
     <br />
     

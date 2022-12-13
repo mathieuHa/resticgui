@@ -48,6 +48,10 @@ type BackupSchedule struct {
 	CronSyntax string `json:"cronSyntax,omitempty"`
 	// CronID holds the value of the "cronID" field.
 	CronID *int `json:"cronID,omitempty"`
+	// NextRun holds the value of the "nextRun" field.
+	NextRun string `json:"nextRun,omitempty"`
+	// LastRun holds the value of the "lastRun" field.
+	LastRun string `json:"lastRun,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BackupScheduleQuery when eager-loading is set.
 	Edges                      BackupScheduleEdges `json:"edges"`
@@ -85,7 +89,7 @@ func (*BackupSchedule) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case backupschedule.FieldID, backupschedule.FieldCronID:
 			values[i] = new(sql.NullInt64)
-		case backupschedule.FieldChoice, backupschedule.FieldHour, backupschedule.FieldDay, backupschedule.FieldInterval, backupschedule.FieldCronSyntax:
+		case backupschedule.FieldChoice, backupschedule.FieldHour, backupschedule.FieldDay, backupschedule.FieldInterval, backupschedule.FieldCronSyntax, backupschedule.FieldNextRun, backupschedule.FieldLastRun:
 			values[i] = new(sql.NullString)
 		case backupschedule.ForeignKeys[0]: // repository_backup_schedule
 			values[i] = new(sql.NullInt64)
@@ -207,6 +211,18 @@ func (bs *BackupSchedule) assignValues(columns []string, values []any) error {
 				bs.CronID = new(int)
 				*bs.CronID = int(value.Int64)
 			}
+		case backupschedule.FieldNextRun:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nextRun", values[i])
+			} else if value.Valid {
+				bs.NextRun = value.String
+			}
+		case backupschedule.FieldLastRun:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field lastRun", values[i])
+			} else if value.Valid {
+				bs.LastRun = value.String
+			}
 		case backupschedule.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field repository_backup_schedule", value)
@@ -296,6 +312,12 @@ func (bs *BackupSchedule) String() string {
 		builder.WriteString("cronID=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("nextRun=")
+	builder.WriteString(bs.NextRun)
+	builder.WriteString(", ")
+	builder.WriteString("lastRun=")
+	builder.WriteString(bs.LastRun)
 	builder.WriteByte(')')
 	return builder.String()
 }
