@@ -177,6 +177,113 @@ func (ru *RepositoryUpdate) ClearMaxSize() *RepositoryUpdate {
 	return ru
 }
 
+// SetRepositorySize sets the "repositorySize" field.
+func (ru *RepositoryUpdate) SetRepositorySize(s string) *RepositoryUpdate {
+	ru.mutation.SetRepositorySize(s)
+	return ru
+}
+
+// SetNillableRepositorySize sets the "repositorySize" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableRepositorySize(s *string) *RepositoryUpdate {
+	if s != nil {
+		ru.SetRepositorySize(*s)
+	}
+	return ru
+}
+
+// ClearRepositorySize clears the value of the "repositorySize" field.
+func (ru *RepositoryUpdate) ClearRepositorySize() *RepositoryUpdate {
+	ru.mutation.ClearRepositorySize()
+	return ru
+}
+
+// SetRepositoryFileCount sets the "repositoryFileCount" field.
+func (ru *RepositoryUpdate) SetRepositoryFileCount(s string) *RepositoryUpdate {
+	ru.mutation.SetRepositoryFileCount(s)
+	return ru
+}
+
+// SetNillableRepositoryFileCount sets the "repositoryFileCount" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableRepositoryFileCount(s *string) *RepositoryUpdate {
+	if s != nil {
+		ru.SetRepositoryFileCount(*s)
+	}
+	return ru
+}
+
+// ClearRepositoryFileCount clears the value of the "repositoryFileCount" field.
+func (ru *RepositoryUpdate) ClearRepositoryFileCount() *RepositoryUpdate {
+	ru.mutation.ClearRepositoryFileCount()
+	return ru
+}
+
+// SetLastSnapshotSize sets the "lastSnapshotSize" field.
+func (ru *RepositoryUpdate) SetLastSnapshotSize(s string) *RepositoryUpdate {
+	ru.mutation.SetLastSnapshotSize(s)
+	return ru
+}
+
+// SetNillableLastSnapshotSize sets the "lastSnapshotSize" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableLastSnapshotSize(s *string) *RepositoryUpdate {
+	if s != nil {
+		ru.SetLastSnapshotSize(*s)
+	}
+	return ru
+}
+
+// ClearLastSnapshotSize clears the value of the "lastSnapshotSize" field.
+func (ru *RepositoryUpdate) ClearLastSnapshotSize() *RepositoryUpdate {
+	ru.mutation.ClearLastSnapshotSize()
+	return ru
+}
+
+// SetLastSnapshotDuration sets the "lastSnapshotDuration" field.
+func (ru *RepositoryUpdate) SetLastSnapshotDuration(s string) *RepositoryUpdate {
+	ru.mutation.SetLastSnapshotDuration(s)
+	return ru
+}
+
+// SetNillableLastSnapshotDuration sets the "lastSnapshotDuration" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableLastSnapshotDuration(s *string) *RepositoryUpdate {
+	if s != nil {
+		ru.SetLastSnapshotDuration(*s)
+	}
+	return ru
+}
+
+// ClearLastSnapshotDuration clears the value of the "lastSnapshotDuration" field.
+func (ru *RepositoryUpdate) ClearLastSnapshotDuration() *RepositoryUpdate {
+	ru.mutation.ClearLastSnapshotDuration()
+	return ru
+}
+
+// SetSnapshotCount sets the "snapshotCount" field.
+func (ru *RepositoryUpdate) SetSnapshotCount(i int) *RepositoryUpdate {
+	ru.mutation.ResetSnapshotCount()
+	ru.mutation.SetSnapshotCount(i)
+	return ru
+}
+
+// SetNillableSnapshotCount sets the "snapshotCount" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillableSnapshotCount(i *int) *RepositoryUpdate {
+	if i != nil {
+		ru.SetSnapshotCount(*i)
+	}
+	return ru
+}
+
+// AddSnapshotCount adds i to the "snapshotCount" field.
+func (ru *RepositoryUpdate) AddSnapshotCount(i int) *RepositoryUpdate {
+	ru.mutation.AddSnapshotCount(i)
+	return ru
+}
+
+// ClearSnapshotCount clears the value of the "snapshotCount" field.
+func (ru *RepositoryUpdate) ClearSnapshotCount() *RepositoryUpdate {
+	ru.mutation.ClearSnapshotCount()
+	return ru
+}
+
 // SetBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by ID.
 func (ru *RepositoryUpdate) SetBackupScheduleID(id int) *RepositoryUpdate {
 	ru.mutation.SetBackupScheduleID(id)
@@ -540,6 +647,39 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ru.mutation.MaxSizeCleared() {
 		_spec.ClearField(repository.FieldMaxSize, field.TypeString)
+	}
+	if value, ok := ru.mutation.RepositorySize(); ok {
+		_spec.SetField(repository.FieldRepositorySize, field.TypeString, value)
+	}
+	if ru.mutation.RepositorySizeCleared() {
+		_spec.ClearField(repository.FieldRepositorySize, field.TypeString)
+	}
+	if value, ok := ru.mutation.RepositoryFileCount(); ok {
+		_spec.SetField(repository.FieldRepositoryFileCount, field.TypeString, value)
+	}
+	if ru.mutation.RepositoryFileCountCleared() {
+		_spec.ClearField(repository.FieldRepositoryFileCount, field.TypeString)
+	}
+	if value, ok := ru.mutation.LastSnapshotSize(); ok {
+		_spec.SetField(repository.FieldLastSnapshotSize, field.TypeString, value)
+	}
+	if ru.mutation.LastSnapshotSizeCleared() {
+		_spec.ClearField(repository.FieldLastSnapshotSize, field.TypeString)
+	}
+	if value, ok := ru.mutation.LastSnapshotDuration(); ok {
+		_spec.SetField(repository.FieldLastSnapshotDuration, field.TypeString, value)
+	}
+	if ru.mutation.LastSnapshotDurationCleared() {
+		_spec.ClearField(repository.FieldLastSnapshotDuration, field.TypeString)
+	}
+	if value, ok := ru.mutation.SnapshotCount(); ok {
+		_spec.SetField(repository.FieldSnapshotCount, field.TypeInt, value)
+	}
+	if value, ok := ru.mutation.AddedSnapshotCount(); ok {
+		_spec.AddField(repository.FieldSnapshotCount, field.TypeInt, value)
+	}
+	if ru.mutation.SnapshotCountCleared() {
+		_spec.ClearField(repository.FieldSnapshotCount, field.TypeInt)
 	}
 	if ru.mutation.BackupScheduleCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1020,6 +1160,113 @@ func (ruo *RepositoryUpdateOne) ClearMaxSize() *RepositoryUpdateOne {
 	return ruo
 }
 
+// SetRepositorySize sets the "repositorySize" field.
+func (ruo *RepositoryUpdateOne) SetRepositorySize(s string) *RepositoryUpdateOne {
+	ruo.mutation.SetRepositorySize(s)
+	return ruo
+}
+
+// SetNillableRepositorySize sets the "repositorySize" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableRepositorySize(s *string) *RepositoryUpdateOne {
+	if s != nil {
+		ruo.SetRepositorySize(*s)
+	}
+	return ruo
+}
+
+// ClearRepositorySize clears the value of the "repositorySize" field.
+func (ruo *RepositoryUpdateOne) ClearRepositorySize() *RepositoryUpdateOne {
+	ruo.mutation.ClearRepositorySize()
+	return ruo
+}
+
+// SetRepositoryFileCount sets the "repositoryFileCount" field.
+func (ruo *RepositoryUpdateOne) SetRepositoryFileCount(s string) *RepositoryUpdateOne {
+	ruo.mutation.SetRepositoryFileCount(s)
+	return ruo
+}
+
+// SetNillableRepositoryFileCount sets the "repositoryFileCount" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableRepositoryFileCount(s *string) *RepositoryUpdateOne {
+	if s != nil {
+		ruo.SetRepositoryFileCount(*s)
+	}
+	return ruo
+}
+
+// ClearRepositoryFileCount clears the value of the "repositoryFileCount" field.
+func (ruo *RepositoryUpdateOne) ClearRepositoryFileCount() *RepositoryUpdateOne {
+	ruo.mutation.ClearRepositoryFileCount()
+	return ruo
+}
+
+// SetLastSnapshotSize sets the "lastSnapshotSize" field.
+func (ruo *RepositoryUpdateOne) SetLastSnapshotSize(s string) *RepositoryUpdateOne {
+	ruo.mutation.SetLastSnapshotSize(s)
+	return ruo
+}
+
+// SetNillableLastSnapshotSize sets the "lastSnapshotSize" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableLastSnapshotSize(s *string) *RepositoryUpdateOne {
+	if s != nil {
+		ruo.SetLastSnapshotSize(*s)
+	}
+	return ruo
+}
+
+// ClearLastSnapshotSize clears the value of the "lastSnapshotSize" field.
+func (ruo *RepositoryUpdateOne) ClearLastSnapshotSize() *RepositoryUpdateOne {
+	ruo.mutation.ClearLastSnapshotSize()
+	return ruo
+}
+
+// SetLastSnapshotDuration sets the "lastSnapshotDuration" field.
+func (ruo *RepositoryUpdateOne) SetLastSnapshotDuration(s string) *RepositoryUpdateOne {
+	ruo.mutation.SetLastSnapshotDuration(s)
+	return ruo
+}
+
+// SetNillableLastSnapshotDuration sets the "lastSnapshotDuration" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableLastSnapshotDuration(s *string) *RepositoryUpdateOne {
+	if s != nil {
+		ruo.SetLastSnapshotDuration(*s)
+	}
+	return ruo
+}
+
+// ClearLastSnapshotDuration clears the value of the "lastSnapshotDuration" field.
+func (ruo *RepositoryUpdateOne) ClearLastSnapshotDuration() *RepositoryUpdateOne {
+	ruo.mutation.ClearLastSnapshotDuration()
+	return ruo
+}
+
+// SetSnapshotCount sets the "snapshotCount" field.
+func (ruo *RepositoryUpdateOne) SetSnapshotCount(i int) *RepositoryUpdateOne {
+	ruo.mutation.ResetSnapshotCount()
+	ruo.mutation.SetSnapshotCount(i)
+	return ruo
+}
+
+// SetNillableSnapshotCount sets the "snapshotCount" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillableSnapshotCount(i *int) *RepositoryUpdateOne {
+	if i != nil {
+		ruo.SetSnapshotCount(*i)
+	}
+	return ruo
+}
+
+// AddSnapshotCount adds i to the "snapshotCount" field.
+func (ruo *RepositoryUpdateOne) AddSnapshotCount(i int) *RepositoryUpdateOne {
+	ruo.mutation.AddSnapshotCount(i)
+	return ruo
+}
+
+// ClearSnapshotCount clears the value of the "snapshotCount" field.
+func (ruo *RepositoryUpdateOne) ClearSnapshotCount() *RepositoryUpdateOne {
+	ruo.mutation.ClearSnapshotCount()
+	return ruo
+}
+
 // SetBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by ID.
 func (ruo *RepositoryUpdateOne) SetBackupScheduleID(id int) *RepositoryUpdateOne {
 	ruo.mutation.SetBackupScheduleID(id)
@@ -1413,6 +1660,39 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 	}
 	if ruo.mutation.MaxSizeCleared() {
 		_spec.ClearField(repository.FieldMaxSize, field.TypeString)
+	}
+	if value, ok := ruo.mutation.RepositorySize(); ok {
+		_spec.SetField(repository.FieldRepositorySize, field.TypeString, value)
+	}
+	if ruo.mutation.RepositorySizeCleared() {
+		_spec.ClearField(repository.FieldRepositorySize, field.TypeString)
+	}
+	if value, ok := ruo.mutation.RepositoryFileCount(); ok {
+		_spec.SetField(repository.FieldRepositoryFileCount, field.TypeString, value)
+	}
+	if ruo.mutation.RepositoryFileCountCleared() {
+		_spec.ClearField(repository.FieldRepositoryFileCount, field.TypeString)
+	}
+	if value, ok := ruo.mutation.LastSnapshotSize(); ok {
+		_spec.SetField(repository.FieldLastSnapshotSize, field.TypeString, value)
+	}
+	if ruo.mutation.LastSnapshotSizeCleared() {
+		_spec.ClearField(repository.FieldLastSnapshotSize, field.TypeString)
+	}
+	if value, ok := ruo.mutation.LastSnapshotDuration(); ok {
+		_spec.SetField(repository.FieldLastSnapshotDuration, field.TypeString, value)
+	}
+	if ruo.mutation.LastSnapshotDurationCleared() {
+		_spec.ClearField(repository.FieldLastSnapshotDuration, field.TypeString)
+	}
+	if value, ok := ruo.mutation.SnapshotCount(); ok {
+		_spec.SetField(repository.FieldSnapshotCount, field.TypeInt, value)
+	}
+	if value, ok := ruo.mutation.AddedSnapshotCount(); ok {
+		_spec.AddField(repository.FieldSnapshotCount, field.TypeInt, value)
+	}
+	if ruo.mutation.SnapshotCountCleared() {
+		_spec.ClearField(repository.FieldSnapshotCount, field.TypeInt)
 	}
 	if ruo.mutation.BackupScheduleCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -244,6 +244,34 @@ func (bsc *BackupScheduleCreate) SetNillableCronID(i *int) *BackupScheduleCreate
 	return bsc
 }
 
+// SetNextRun sets the "nextRun" field.
+func (bsc *BackupScheduleCreate) SetNextRun(s string) *BackupScheduleCreate {
+	bsc.mutation.SetNextRun(s)
+	return bsc
+}
+
+// SetNillableNextRun sets the "nextRun" field if the given value is not nil.
+func (bsc *BackupScheduleCreate) SetNillableNextRun(s *string) *BackupScheduleCreate {
+	if s != nil {
+		bsc.SetNextRun(*s)
+	}
+	return bsc
+}
+
+// SetLastRun sets the "lastRun" field.
+func (bsc *BackupScheduleCreate) SetLastRun(s string) *BackupScheduleCreate {
+	bsc.mutation.SetLastRun(s)
+	return bsc
+}
+
+// SetNillableLastRun sets the "lastRun" field if the given value is not nil.
+func (bsc *BackupScheduleCreate) SetNillableLastRun(s *string) *BackupScheduleCreate {
+	if s != nil {
+		bsc.SetLastRun(*s)
+	}
+	return bsc
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (bsc *BackupScheduleCreate) SetRepositoryID(id int) *BackupScheduleCreate {
 	bsc.mutation.SetRepositoryID(id)
@@ -392,6 +420,14 @@ func (bsc *BackupScheduleCreate) defaults() {
 		v := backupschedule.DefaultCronSyntax
 		bsc.mutation.SetCronSyntax(v)
 	}
+	if _, ok := bsc.mutation.NextRun(); !ok {
+		v := backupschedule.DefaultNextRun
+		bsc.mutation.SetNextRun(v)
+	}
+	if _, ok := bsc.mutation.LastRun(); !ok {
+		v := backupschedule.DefaultLastRun
+		bsc.mutation.SetLastRun(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -527,6 +563,14 @@ func (bsc *BackupScheduleCreate) createSpec() (*BackupSchedule, *sqlgraph.Create
 	if value, ok := bsc.mutation.CronID(); ok {
 		_spec.SetField(backupschedule.FieldCronID, field.TypeInt, value)
 		_node.CronID = &value
+	}
+	if value, ok := bsc.mutation.NextRun(); ok {
+		_spec.SetField(backupschedule.FieldNextRun, field.TypeString, value)
+		_node.NextRun = value
+	}
+	if value, ok := bsc.mutation.LastRun(); ok {
+		_spec.SetField(backupschedule.FieldLastRun, field.TypeString, value)
+		_node.LastRun = value
 	}
 	if nodes := bsc.mutation.RepositoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

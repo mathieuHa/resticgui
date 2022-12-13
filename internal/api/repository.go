@@ -3,9 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -319,6 +321,9 @@ func StatsRepository(c *gin.Context) {
 		return
 	}
 
+	snapshotID := c.DefaultQuery("snapshotID", "")
+	background := c.DefaultQuery("background", "false")
+
 	r, err := database.GetRepositoryByIDDB(rID, ctx)
 
 	if err != nil {
@@ -336,8 +341,46 @@ func StatsRepository(c *gin.Context) {
 		return
 	}
 
-	stdout := backup.GetStatsRepository(r)
-	c.IndentedJSON(http.StatusOK, stdout)
+	if background == "false" || (background != "false" && snapshotID != "") {
+		stdout, stderr := backup.GetStatsRepository(r, snapshotID)
+		var stat Models.Stat
+
+		err = json.Unmarshal([]byte(stdout), &stat)
+		invalidSnapshot := strings.Contains(stderr, "it is not a snapshot id")
+		if err == nil && !invalidSnapshot {
+			c.IndentedJSON(http.StatusOK, stat)
+			return
+		}
+		if invalidSnapshot {
+			c.IndentedJSON(http.StatusOK, gin.H{"error": stderr, "message": "err is not a snapshot id"})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": errStatLogsNotJSON})
+	} else if snapshotID == "" {
+		go func() {
+			stdout, stderr := backup.GetStatsRepository(r, snapshotID)
+			var stat Models.Stat
+
+			err = json.Unmarshal([]byte(stdout), &stat)
+			invalidSnapshot := strings.Contains(stderr, "it is not a snapshot id")
+			if err == nil && !invalidSnapshot {
+				r.RepositorySize = fmt.Sprint(stat.TotalSize)
+				r.RepositoryFileCount = fmt.Sprint(stat.TotalFileCount)
+				_, err = database.UpdateRepositoryDB(*r, r.ID, ctx)
+				if err != nil {
+					log.Err(err).Msg("Err stats in background")
+				}
+				return
+			}
+			if invalidSnapshot {
+				log.Warn().Msg("Invalid Snapshot ID")
+			} else {
+				log.Err(err).Msg("Error getting stats")
+			}
+		}()
+		c.IndentedJSON(http.StatusOK, gin.H{"message": "task launched"})
+	}
+
 }
 
 // CheckRepository godoc
@@ -460,7 +503,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 	} else if snapshots == nil {
 		c.IndentedJSON(http.StatusOK, []Models.Snapshot{})
 	} else {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": errRLogsNotJSON})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": errSnapLogsNotJSON})
 	}
 }
 

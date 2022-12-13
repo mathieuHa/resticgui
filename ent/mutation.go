@@ -1912,6 +1912,8 @@ type BackupScheduleMutation struct {
 	cronSyntax        *string
 	cronID            *int
 	addcronID         *int
+	nextRun           *string
+	lastRun           *string
 	clearedFields     map[string]struct{}
 	repository        *int
 	clearedrepository bool
@@ -2680,6 +2682,104 @@ func (m *BackupScheduleMutation) ResetCronID() {
 	delete(m.clearedFields, backupschedule.FieldCronID)
 }
 
+// SetNextRun sets the "nextRun" field.
+func (m *BackupScheduleMutation) SetNextRun(s string) {
+	m.nextRun = &s
+}
+
+// NextRun returns the value of the "nextRun" field in the mutation.
+func (m *BackupScheduleMutation) NextRun() (r string, exists bool) {
+	v := m.nextRun
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextRun returns the old "nextRun" field's value of the BackupSchedule entity.
+// If the BackupSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BackupScheduleMutation) OldNextRun(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextRun is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextRun requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextRun: %w", err)
+	}
+	return oldValue.NextRun, nil
+}
+
+// ClearNextRun clears the value of the "nextRun" field.
+func (m *BackupScheduleMutation) ClearNextRun() {
+	m.nextRun = nil
+	m.clearedFields[backupschedule.FieldNextRun] = struct{}{}
+}
+
+// NextRunCleared returns if the "nextRun" field was cleared in this mutation.
+func (m *BackupScheduleMutation) NextRunCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldNextRun]
+	return ok
+}
+
+// ResetNextRun resets all changes to the "nextRun" field.
+func (m *BackupScheduleMutation) ResetNextRun() {
+	m.nextRun = nil
+	delete(m.clearedFields, backupschedule.FieldNextRun)
+}
+
+// SetLastRun sets the "lastRun" field.
+func (m *BackupScheduleMutation) SetLastRun(s string) {
+	m.lastRun = &s
+}
+
+// LastRun returns the value of the "lastRun" field in the mutation.
+func (m *BackupScheduleMutation) LastRun() (r string, exists bool) {
+	v := m.lastRun
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastRun returns the old "lastRun" field's value of the BackupSchedule entity.
+// If the BackupSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BackupScheduleMutation) OldLastRun(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastRun is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastRun requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastRun: %w", err)
+	}
+	return oldValue.LastRun, nil
+}
+
+// ClearLastRun clears the value of the "lastRun" field.
+func (m *BackupScheduleMutation) ClearLastRun() {
+	m.lastRun = nil
+	m.clearedFields[backupschedule.FieldLastRun] = struct{}{}
+}
+
+// LastRunCleared returns if the "lastRun" field was cleared in this mutation.
+func (m *BackupScheduleMutation) LastRunCleared() bool {
+	_, ok := m.clearedFields[backupschedule.FieldLastRun]
+	return ok
+}
+
+// ResetLastRun resets all changes to the "lastRun" field.
+func (m *BackupScheduleMutation) ResetLastRun() {
+	m.lastRun = nil
+	delete(m.clearedFields, backupschedule.FieldLastRun)
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by id.
 func (m *BackupScheduleMutation) SetRepositoryID(id int) {
 	m.repository = &id
@@ -2738,7 +2838,7 @@ func (m *BackupScheduleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BackupScheduleMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 18)
 	if m.choice != nil {
 		fields = append(fields, backupschedule.FieldChoice)
 	}
@@ -2787,6 +2887,12 @@ func (m *BackupScheduleMutation) Fields() []string {
 	if m.cronID != nil {
 		fields = append(fields, backupschedule.FieldCronID)
 	}
+	if m.nextRun != nil {
+		fields = append(fields, backupschedule.FieldNextRun)
+	}
+	if m.lastRun != nil {
+		fields = append(fields, backupschedule.FieldLastRun)
+	}
 	return fields
 }
 
@@ -2827,6 +2933,10 @@ func (m *BackupScheduleMutation) Field(name string) (ent.Value, bool) {
 		return m.CronSyntax()
 	case backupschedule.FieldCronID:
 		return m.CronID()
+	case backupschedule.FieldNextRun:
+		return m.NextRun()
+	case backupschedule.FieldLastRun:
+		return m.LastRun()
 	}
 	return nil, false
 }
@@ -2868,6 +2978,10 @@ func (m *BackupScheduleMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldCronSyntax(ctx)
 	case backupschedule.FieldCronID:
 		return m.OldCronID(ctx)
+	case backupschedule.FieldNextRun:
+		return m.OldNextRun(ctx)
+	case backupschedule.FieldLastRun:
+		return m.OldLastRun(ctx)
 	}
 	return nil, fmt.Errorf("unknown BackupSchedule field %s", name)
 }
@@ -2989,6 +3103,20 @@ func (m *BackupScheduleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCronID(v)
 		return nil
+	case backupschedule.FieldNextRun:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextRun(v)
+		return nil
+	case backupschedule.FieldLastRun:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastRun(v)
+		return nil
 	}
 	return fmt.Errorf("unknown BackupSchedule field %s", name)
 }
@@ -3049,6 +3177,12 @@ func (m *BackupScheduleMutation) ClearedFields() []string {
 	if m.FieldCleared(backupschedule.FieldCronID) {
 		fields = append(fields, backupschedule.FieldCronID)
 	}
+	if m.FieldCleared(backupschedule.FieldNextRun) {
+		fields = append(fields, backupschedule.FieldNextRun)
+	}
+	if m.FieldCleared(backupschedule.FieldLastRun) {
+		fields = append(fields, backupschedule.FieldLastRun)
+	}
 	return fields
 }
 
@@ -3077,6 +3211,12 @@ func (m *BackupScheduleMutation) ClearField(name string) error {
 		return nil
 	case backupschedule.FieldCronID:
 		m.ClearCronID()
+		return nil
+	case backupschedule.FieldNextRun:
+		m.ClearNextRun()
+		return nil
+	case backupschedule.FieldLastRun:
+		m.ClearLastRun()
 		return nil
 	}
 	return fmt.Errorf("unknown BackupSchedule nullable field %s", name)
@@ -3133,6 +3273,12 @@ func (m *BackupScheduleMutation) ResetField(name string) error {
 		return nil
 	case backupschedule.FieldCronID:
 		m.ResetCronID()
+		return nil
+	case backupschedule.FieldNextRun:
+		m.ResetNextRun()
+		return nil
+	case backupschedule.FieldLastRun:
+		m.ResetLastRun()
 		return nil
 	}
 	return fmt.Errorf("unknown BackupSchedule field %s", name)
@@ -6023,6 +6169,12 @@ type RepositoryMutation struct {
 	version                 *repository.Version
 	password                *string
 	maxSize                 *string
+	repositorySize          *string
+	repositoryFileCount     *string
+	lastSnapshotSize        *string
+	lastSnapshotDuration    *string
+	snapshotCount           *int
+	addsnapshotCount        *int
 	clearedFields           map[string]struct{}
 	backupSchedule          *int
 	clearedbackupSchedule   bool
@@ -6557,6 +6709,272 @@ func (m *RepositoryMutation) ResetMaxSize() {
 	delete(m.clearedFields, repository.FieldMaxSize)
 }
 
+// SetRepositorySize sets the "repositorySize" field.
+func (m *RepositoryMutation) SetRepositorySize(s string) {
+	m.repositorySize = &s
+}
+
+// RepositorySize returns the value of the "repositorySize" field in the mutation.
+func (m *RepositoryMutation) RepositorySize() (r string, exists bool) {
+	v := m.repositorySize
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRepositorySize returns the old "repositorySize" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldRepositorySize(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRepositorySize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRepositorySize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRepositorySize: %w", err)
+	}
+	return oldValue.RepositorySize, nil
+}
+
+// ClearRepositorySize clears the value of the "repositorySize" field.
+func (m *RepositoryMutation) ClearRepositorySize() {
+	m.repositorySize = nil
+	m.clearedFields[repository.FieldRepositorySize] = struct{}{}
+}
+
+// RepositorySizeCleared returns if the "repositorySize" field was cleared in this mutation.
+func (m *RepositoryMutation) RepositorySizeCleared() bool {
+	_, ok := m.clearedFields[repository.FieldRepositorySize]
+	return ok
+}
+
+// ResetRepositorySize resets all changes to the "repositorySize" field.
+func (m *RepositoryMutation) ResetRepositorySize() {
+	m.repositorySize = nil
+	delete(m.clearedFields, repository.FieldRepositorySize)
+}
+
+// SetRepositoryFileCount sets the "repositoryFileCount" field.
+func (m *RepositoryMutation) SetRepositoryFileCount(s string) {
+	m.repositoryFileCount = &s
+}
+
+// RepositoryFileCount returns the value of the "repositoryFileCount" field in the mutation.
+func (m *RepositoryMutation) RepositoryFileCount() (r string, exists bool) {
+	v := m.repositoryFileCount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRepositoryFileCount returns the old "repositoryFileCount" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldRepositoryFileCount(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRepositoryFileCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRepositoryFileCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRepositoryFileCount: %w", err)
+	}
+	return oldValue.RepositoryFileCount, nil
+}
+
+// ClearRepositoryFileCount clears the value of the "repositoryFileCount" field.
+func (m *RepositoryMutation) ClearRepositoryFileCount() {
+	m.repositoryFileCount = nil
+	m.clearedFields[repository.FieldRepositoryFileCount] = struct{}{}
+}
+
+// RepositoryFileCountCleared returns if the "repositoryFileCount" field was cleared in this mutation.
+func (m *RepositoryMutation) RepositoryFileCountCleared() bool {
+	_, ok := m.clearedFields[repository.FieldRepositoryFileCount]
+	return ok
+}
+
+// ResetRepositoryFileCount resets all changes to the "repositoryFileCount" field.
+func (m *RepositoryMutation) ResetRepositoryFileCount() {
+	m.repositoryFileCount = nil
+	delete(m.clearedFields, repository.FieldRepositoryFileCount)
+}
+
+// SetLastSnapshotSize sets the "lastSnapshotSize" field.
+func (m *RepositoryMutation) SetLastSnapshotSize(s string) {
+	m.lastSnapshotSize = &s
+}
+
+// LastSnapshotSize returns the value of the "lastSnapshotSize" field in the mutation.
+func (m *RepositoryMutation) LastSnapshotSize() (r string, exists bool) {
+	v := m.lastSnapshotSize
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSnapshotSize returns the old "lastSnapshotSize" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldLastSnapshotSize(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSnapshotSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSnapshotSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSnapshotSize: %w", err)
+	}
+	return oldValue.LastSnapshotSize, nil
+}
+
+// ClearLastSnapshotSize clears the value of the "lastSnapshotSize" field.
+func (m *RepositoryMutation) ClearLastSnapshotSize() {
+	m.lastSnapshotSize = nil
+	m.clearedFields[repository.FieldLastSnapshotSize] = struct{}{}
+}
+
+// LastSnapshotSizeCleared returns if the "lastSnapshotSize" field was cleared in this mutation.
+func (m *RepositoryMutation) LastSnapshotSizeCleared() bool {
+	_, ok := m.clearedFields[repository.FieldLastSnapshotSize]
+	return ok
+}
+
+// ResetLastSnapshotSize resets all changes to the "lastSnapshotSize" field.
+func (m *RepositoryMutation) ResetLastSnapshotSize() {
+	m.lastSnapshotSize = nil
+	delete(m.clearedFields, repository.FieldLastSnapshotSize)
+}
+
+// SetLastSnapshotDuration sets the "lastSnapshotDuration" field.
+func (m *RepositoryMutation) SetLastSnapshotDuration(s string) {
+	m.lastSnapshotDuration = &s
+}
+
+// LastSnapshotDuration returns the value of the "lastSnapshotDuration" field in the mutation.
+func (m *RepositoryMutation) LastSnapshotDuration() (r string, exists bool) {
+	v := m.lastSnapshotDuration
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSnapshotDuration returns the old "lastSnapshotDuration" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldLastSnapshotDuration(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSnapshotDuration is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSnapshotDuration requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSnapshotDuration: %w", err)
+	}
+	return oldValue.LastSnapshotDuration, nil
+}
+
+// ClearLastSnapshotDuration clears the value of the "lastSnapshotDuration" field.
+func (m *RepositoryMutation) ClearLastSnapshotDuration() {
+	m.lastSnapshotDuration = nil
+	m.clearedFields[repository.FieldLastSnapshotDuration] = struct{}{}
+}
+
+// LastSnapshotDurationCleared returns if the "lastSnapshotDuration" field was cleared in this mutation.
+func (m *RepositoryMutation) LastSnapshotDurationCleared() bool {
+	_, ok := m.clearedFields[repository.FieldLastSnapshotDuration]
+	return ok
+}
+
+// ResetLastSnapshotDuration resets all changes to the "lastSnapshotDuration" field.
+func (m *RepositoryMutation) ResetLastSnapshotDuration() {
+	m.lastSnapshotDuration = nil
+	delete(m.clearedFields, repository.FieldLastSnapshotDuration)
+}
+
+// SetSnapshotCount sets the "snapshotCount" field.
+func (m *RepositoryMutation) SetSnapshotCount(i int) {
+	m.snapshotCount = &i
+	m.addsnapshotCount = nil
+}
+
+// SnapshotCount returns the value of the "snapshotCount" field in the mutation.
+func (m *RepositoryMutation) SnapshotCount() (r int, exists bool) {
+	v := m.snapshotCount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSnapshotCount returns the old "snapshotCount" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldSnapshotCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSnapshotCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSnapshotCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSnapshotCount: %w", err)
+	}
+	return oldValue.SnapshotCount, nil
+}
+
+// AddSnapshotCount adds i to the "snapshotCount" field.
+func (m *RepositoryMutation) AddSnapshotCount(i int) {
+	if m.addsnapshotCount != nil {
+		*m.addsnapshotCount += i
+	} else {
+		m.addsnapshotCount = &i
+	}
+}
+
+// AddedSnapshotCount returns the value that was added to the "snapshotCount" field in this mutation.
+func (m *RepositoryMutation) AddedSnapshotCount() (r int, exists bool) {
+	v := m.addsnapshotCount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSnapshotCount clears the value of the "snapshotCount" field.
+func (m *RepositoryMutation) ClearSnapshotCount() {
+	m.snapshotCount = nil
+	m.addsnapshotCount = nil
+	m.clearedFields[repository.FieldSnapshotCount] = struct{}{}
+}
+
+// SnapshotCountCleared returns if the "snapshotCount" field was cleared in this mutation.
+func (m *RepositoryMutation) SnapshotCountCleared() bool {
+	_, ok := m.clearedFields[repository.FieldSnapshotCount]
+	return ok
+}
+
+// ResetSnapshotCount resets all changes to the "snapshotCount" field.
+func (m *RepositoryMutation) ResetSnapshotCount() {
+	m.snapshotCount = nil
+	m.addsnapshotCount = nil
+	delete(m.clearedFields, repository.FieldSnapshotCount)
+}
+
 // SetBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by id.
 func (m *RepositoryMutation) SetBackupScheduleID(id int) {
 	m.backupSchedule = &id
@@ -6918,7 +7336,7 @@ func (m *RepositoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RepositoryMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 15)
 	if m.name != nil {
 		fields = append(fields, repository.FieldName)
 	}
@@ -6949,6 +7367,21 @@ func (m *RepositoryMutation) Fields() []string {
 	if m.maxSize != nil {
 		fields = append(fields, repository.FieldMaxSize)
 	}
+	if m.repositorySize != nil {
+		fields = append(fields, repository.FieldRepositorySize)
+	}
+	if m.repositoryFileCount != nil {
+		fields = append(fields, repository.FieldRepositoryFileCount)
+	}
+	if m.lastSnapshotSize != nil {
+		fields = append(fields, repository.FieldLastSnapshotSize)
+	}
+	if m.lastSnapshotDuration != nil {
+		fields = append(fields, repository.FieldLastSnapshotDuration)
+	}
+	if m.snapshotCount != nil {
+		fields = append(fields, repository.FieldSnapshotCount)
+	}
 	return fields
 }
 
@@ -6977,6 +7410,16 @@ func (m *RepositoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Password()
 	case repository.FieldMaxSize:
 		return m.MaxSize()
+	case repository.FieldRepositorySize:
+		return m.RepositorySize()
+	case repository.FieldRepositoryFileCount:
+		return m.RepositoryFileCount()
+	case repository.FieldLastSnapshotSize:
+		return m.LastSnapshotSize()
+	case repository.FieldLastSnapshotDuration:
+		return m.LastSnapshotDuration()
+	case repository.FieldSnapshotCount:
+		return m.SnapshotCount()
 	}
 	return nil, false
 }
@@ -7006,6 +7449,16 @@ func (m *RepositoryMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldPassword(ctx)
 	case repository.FieldMaxSize:
 		return m.OldMaxSize(ctx)
+	case repository.FieldRepositorySize:
+		return m.OldRepositorySize(ctx)
+	case repository.FieldRepositoryFileCount:
+		return m.OldRepositoryFileCount(ctx)
+	case repository.FieldLastSnapshotSize:
+		return m.OldLastSnapshotSize(ctx)
+	case repository.FieldLastSnapshotDuration:
+		return m.OldLastSnapshotDuration(ctx)
+	case repository.FieldSnapshotCount:
+		return m.OldSnapshotCount(ctx)
 	}
 	return nil, fmt.Errorf("unknown Repository field %s", name)
 }
@@ -7085,6 +7538,41 @@ func (m *RepositoryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMaxSize(v)
 		return nil
+	case repository.FieldRepositorySize:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRepositorySize(v)
+		return nil
+	case repository.FieldRepositoryFileCount:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRepositoryFileCount(v)
+		return nil
+	case repository.FieldLastSnapshotSize:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSnapshotSize(v)
+		return nil
+	case repository.FieldLastSnapshotDuration:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSnapshotDuration(v)
+		return nil
+	case repository.FieldSnapshotCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSnapshotCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Repository field %s", name)
 }
@@ -7092,13 +7580,21 @@ func (m *RepositoryMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RepositoryMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addsnapshotCount != nil {
+		fields = append(fields, repository.FieldSnapshotCount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RepositoryMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case repository.FieldSnapshotCount:
+		return m.AddedSnapshotCount()
+	}
 	return nil, false
 }
 
@@ -7107,6 +7603,13 @@ func (m *RepositoryMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RepositoryMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case repository.FieldSnapshotCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSnapshotCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Repository numeric field %s", name)
 }
@@ -7126,6 +7629,21 @@ func (m *RepositoryMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(repository.FieldMaxSize) {
 		fields = append(fields, repository.FieldMaxSize)
+	}
+	if m.FieldCleared(repository.FieldRepositorySize) {
+		fields = append(fields, repository.FieldRepositorySize)
+	}
+	if m.FieldCleared(repository.FieldRepositoryFileCount) {
+		fields = append(fields, repository.FieldRepositoryFileCount)
+	}
+	if m.FieldCleared(repository.FieldLastSnapshotSize) {
+		fields = append(fields, repository.FieldLastSnapshotSize)
+	}
+	if m.FieldCleared(repository.FieldLastSnapshotDuration) {
+		fields = append(fields, repository.FieldLastSnapshotDuration)
+	}
+	if m.FieldCleared(repository.FieldSnapshotCount) {
+		fields = append(fields, repository.FieldSnapshotCount)
 	}
 	return fields
 }
@@ -7152,6 +7670,21 @@ func (m *RepositoryMutation) ClearField(name string) error {
 		return nil
 	case repository.FieldMaxSize:
 		m.ClearMaxSize()
+		return nil
+	case repository.FieldRepositorySize:
+		m.ClearRepositorySize()
+		return nil
+	case repository.FieldRepositoryFileCount:
+		m.ClearRepositoryFileCount()
+		return nil
+	case repository.FieldLastSnapshotSize:
+		m.ClearLastSnapshotSize()
+		return nil
+	case repository.FieldLastSnapshotDuration:
+		m.ClearLastSnapshotDuration()
+		return nil
+	case repository.FieldSnapshotCount:
+		m.ClearSnapshotCount()
 		return nil
 	}
 	return fmt.Errorf("unknown Repository nullable field %s", name)
@@ -7190,6 +7723,21 @@ func (m *RepositoryMutation) ResetField(name string) error {
 		return nil
 	case repository.FieldMaxSize:
 		m.ResetMaxSize()
+		return nil
+	case repository.FieldRepositorySize:
+		m.ResetRepositorySize()
+		return nil
+	case repository.FieldRepositoryFileCount:
+		m.ResetRepositoryFileCount()
+		return nil
+	case repository.FieldLastSnapshotSize:
+		m.ResetLastSnapshotSize()
+		return nil
+	case repository.FieldLastSnapshotDuration:
+		m.ResetLastSnapshotDuration()
+		return nil
+	case repository.FieldSnapshotCount:
+		m.ResetSnapshotCount()
 		return nil
 	}
 	return fmt.Errorf("unknown Repository field %s", name)

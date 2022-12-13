@@ -82,6 +82,42 @@ func UpdateCronID(backupSchedule ent.BackupSchedule, newCronID int) (err error) 
 	return err
 }
 
+func UpdateCronNextRun(backupSchedule ent.BackupSchedule, nextRun string) (err error) {
+	log.Debug().Msg("UpdateCronNextRun()")
+
+	ctx := context.Background()
+	db := Connect()
+	defer db.Close()
+
+	_, err = db.BackupSchedule.
+		UpdateOneID(backupSchedule.ID).
+		SetNextRun(nextRun).
+		Save(ctx)
+	if err != nil {
+		log.Err(err).Msg("Error updating CronRuns")
+	}
+
+	return err
+}
+
+func UpdateCronLastRun(backupSchedule ent.BackupSchedule, lastRun string) (err error) {
+	log.Debug().Msg("UpdateCronLastRun()")
+
+	ctx := context.Background()
+	db := Connect()
+	defer db.Close()
+
+	_, err = db.BackupSchedule.
+		UpdateOneID(backupSchedule.ID).
+		SetLastRun(lastRun).
+		Save(ctx)
+	if err != nil {
+		log.Err(err).Msg("Error updating CronRuns")
+	}
+
+	return err
+}
+
 func QueryActiveRWithBackupSchedule() (r []*ent.Repository, err error) {
 	ctx := context.Background()
 

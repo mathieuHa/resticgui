@@ -160,6 +160,76 @@ func (rc *RepositoryCreate) SetNillableMaxSize(s *string) *RepositoryCreate {
 	return rc
 }
 
+// SetRepositorySize sets the "repositorySize" field.
+func (rc *RepositoryCreate) SetRepositorySize(s string) *RepositoryCreate {
+	rc.mutation.SetRepositorySize(s)
+	return rc
+}
+
+// SetNillableRepositorySize sets the "repositorySize" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableRepositorySize(s *string) *RepositoryCreate {
+	if s != nil {
+		rc.SetRepositorySize(*s)
+	}
+	return rc
+}
+
+// SetRepositoryFileCount sets the "repositoryFileCount" field.
+func (rc *RepositoryCreate) SetRepositoryFileCount(s string) *RepositoryCreate {
+	rc.mutation.SetRepositoryFileCount(s)
+	return rc
+}
+
+// SetNillableRepositoryFileCount sets the "repositoryFileCount" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableRepositoryFileCount(s *string) *RepositoryCreate {
+	if s != nil {
+		rc.SetRepositoryFileCount(*s)
+	}
+	return rc
+}
+
+// SetLastSnapshotSize sets the "lastSnapshotSize" field.
+func (rc *RepositoryCreate) SetLastSnapshotSize(s string) *RepositoryCreate {
+	rc.mutation.SetLastSnapshotSize(s)
+	return rc
+}
+
+// SetNillableLastSnapshotSize sets the "lastSnapshotSize" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableLastSnapshotSize(s *string) *RepositoryCreate {
+	if s != nil {
+		rc.SetLastSnapshotSize(*s)
+	}
+	return rc
+}
+
+// SetLastSnapshotDuration sets the "lastSnapshotDuration" field.
+func (rc *RepositoryCreate) SetLastSnapshotDuration(s string) *RepositoryCreate {
+	rc.mutation.SetLastSnapshotDuration(s)
+	return rc
+}
+
+// SetNillableLastSnapshotDuration sets the "lastSnapshotDuration" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableLastSnapshotDuration(s *string) *RepositoryCreate {
+	if s != nil {
+		rc.SetLastSnapshotDuration(*s)
+	}
+	return rc
+}
+
+// SetSnapshotCount sets the "snapshotCount" field.
+func (rc *RepositoryCreate) SetSnapshotCount(i int) *RepositoryCreate {
+	rc.mutation.SetSnapshotCount(i)
+	return rc
+}
+
+// SetNillableSnapshotCount sets the "snapshotCount" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillableSnapshotCount(i *int) *RepositoryCreate {
+	if i != nil {
+		rc.SetSnapshotCount(*i)
+	}
+	return rc
+}
+
 // SetBackupScheduleID sets the "backupSchedule" edge to the BackupSchedule entity by ID.
 func (rc *RepositoryCreate) SetBackupScheduleID(id int) *RepositoryCreate {
 	rc.mutation.SetBackupScheduleID(id)
@@ -512,6 +582,26 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 	if value, ok := rc.mutation.MaxSize(); ok {
 		_spec.SetField(repository.FieldMaxSize, field.TypeString, value)
 		_node.MaxSize = value
+	}
+	if value, ok := rc.mutation.RepositorySize(); ok {
+		_spec.SetField(repository.FieldRepositorySize, field.TypeString, value)
+		_node.RepositorySize = value
+	}
+	if value, ok := rc.mutation.RepositoryFileCount(); ok {
+		_spec.SetField(repository.FieldRepositoryFileCount, field.TypeString, value)
+		_node.RepositoryFileCount = value
+	}
+	if value, ok := rc.mutation.LastSnapshotSize(); ok {
+		_spec.SetField(repository.FieldLastSnapshotSize, field.TypeString, value)
+		_node.LastSnapshotSize = value
+	}
+	if value, ok := rc.mutation.LastSnapshotDuration(); ok {
+		_spec.SetField(repository.FieldLastSnapshotDuration, field.TypeString, value)
+		_node.LastSnapshotDuration = value
+	}
+	if value, ok := rc.mutation.SnapshotCount(); ok {
+		_spec.SetField(repository.FieldSnapshotCount, field.TypeInt, value)
+		_node.SnapshotCount = value
 	}
 	if nodes := rc.mutation.BackupScheduleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

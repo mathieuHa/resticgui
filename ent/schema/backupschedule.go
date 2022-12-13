@@ -39,6 +39,8 @@ func (BackupSchedule) Fields() []ent.Field {
 		field.String("interval").Optional().Default(""),
 		field.String("cronSyntax").Optional().Default(""),
 		field.Int("cronID").Optional().Nillable(),
+		field.String("nextRun").Optional().Default(""),
+		field.String("lastRun").Optional().Default(""),
 	}
 }
 

@@ -184,6 +184,20 @@ func CronID(v int) predicate.BackupSchedule {
 	})
 }
 
+// NextRun applies equality check predicate on the "nextRun" field. It's identical to NextRunEQ.
+func NextRun(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNextRun), v))
+	})
+}
+
+// LastRun applies equality check predicate on the "lastRun" field. It's identical to LastRunEQ.
+func LastRun(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastRun), v))
+	})
+}
+
 // ChoiceEQ applies the EQ predicate on the "choice" field.
 func ChoiceEQ(v Choice) predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
@@ -887,6 +901,232 @@ func CronIDIsNil() predicate.BackupSchedule {
 func CronIDNotNil() predicate.BackupSchedule {
 	return predicate.BackupSchedule(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldCronID)))
+	})
+}
+
+// NextRunEQ applies the EQ predicate on the "nextRun" field.
+func NextRunEQ(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunNEQ applies the NEQ predicate on the "nextRun" field.
+func NextRunNEQ(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunIn applies the In predicate on the "nextRun" field.
+func NextRunIn(vs ...string) predicate.BackupSchedule {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldNextRun), v...))
+	})
+}
+
+// NextRunNotIn applies the NotIn predicate on the "nextRun" field.
+func NextRunNotIn(vs ...string) predicate.BackupSchedule {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldNextRun), v...))
+	})
+}
+
+// NextRunGT applies the GT predicate on the "nextRun" field.
+func NextRunGT(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunGTE applies the GTE predicate on the "nextRun" field.
+func NextRunGTE(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunLT applies the LT predicate on the "nextRun" field.
+func NextRunLT(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunLTE applies the LTE predicate on the "nextRun" field.
+func NextRunLTE(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunContains applies the Contains predicate on the "nextRun" field.
+func NextRunContains(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunHasPrefix applies the HasPrefix predicate on the "nextRun" field.
+func NextRunHasPrefix(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunHasSuffix applies the HasSuffix predicate on the "nextRun" field.
+func NextRunHasSuffix(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunIsNil applies the IsNil predicate on the "nextRun" field.
+func NextRunIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNextRun)))
+	})
+}
+
+// NextRunNotNil applies the NotNil predicate on the "nextRun" field.
+func NextRunNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNextRun)))
+	})
+}
+
+// NextRunEqualFold applies the EqualFold predicate on the "nextRun" field.
+func NextRunEqualFold(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNextRun), v))
+	})
+}
+
+// NextRunContainsFold applies the ContainsFold predicate on the "nextRun" field.
+func NextRunContainsFold(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNextRun), v))
+	})
+}
+
+// LastRunEQ applies the EQ predicate on the "lastRun" field.
+func LastRunEQ(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunNEQ applies the NEQ predicate on the "lastRun" field.
+func LastRunNEQ(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunIn applies the In predicate on the "lastRun" field.
+func LastRunIn(vs ...string) predicate.BackupSchedule {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLastRun), v...))
+	})
+}
+
+// LastRunNotIn applies the NotIn predicate on the "lastRun" field.
+func LastRunNotIn(vs ...string) predicate.BackupSchedule {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLastRun), v...))
+	})
+}
+
+// LastRunGT applies the GT predicate on the "lastRun" field.
+func LastRunGT(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunGTE applies the GTE predicate on the "lastRun" field.
+func LastRunGTE(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunLT applies the LT predicate on the "lastRun" field.
+func LastRunLT(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunLTE applies the LTE predicate on the "lastRun" field.
+func LastRunLTE(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunContains applies the Contains predicate on the "lastRun" field.
+func LastRunContains(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunHasPrefix applies the HasPrefix predicate on the "lastRun" field.
+func LastRunHasPrefix(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunHasSuffix applies the HasSuffix predicate on the "lastRun" field.
+func LastRunHasSuffix(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunIsNil applies the IsNil predicate on the "lastRun" field.
+func LastRunIsNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLastRun)))
+	})
+}
+
+// LastRunNotNil applies the NotNil predicate on the "lastRun" field.
+func LastRunNotNil() predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLastRun)))
+	})
+}
+
+// LastRunEqualFold applies the EqualFold predicate on the "lastRun" field.
+func LastRunEqualFold(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldLastRun), v))
+	})
+}
+
+// LastRunContainsFold applies the ContainsFold predicate on the "lastRun" field.
+func LastRunContainsFold(v string) predicate.BackupSchedule {
+	return predicate.BackupSchedule(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldLastRun), v))
 	})
 }
 

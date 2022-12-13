@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/config"
+	Config "gitlab.com/resticgui/resticgui/internal/config"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
@@ -54,8 +54,7 @@ func TestStatsRepository(t *testing.T) {
 		r, err := database.CreateRepositoryDB(repository, context.Background())
 		assert.Nil(t, err)
 
-		out, _, _ := StatsRepository(r, false)
+		out, _, _ := StatsRepository(r, "latest")
 		assert.Equal(t, out, "")
-
 	})
 }

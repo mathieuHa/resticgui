@@ -16,6 +16,7 @@ const forgetCmd = "forget"
 const pruneCmd = "prune"
 const statsCmd = "stats"
 const checkCmd = "check"
+const jsonFormat = "--json"
 
 func getDefaultEnv() []string {
 	return []string{}
@@ -46,7 +47,8 @@ func GetSnapshots(repository *ent.Repository) (string, string, error) {
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, repoFormat...)
 	args = append(args, snapshotsCmd)
-	args = append(args, "--json")
+	args = append(args)
+	args = append(args, jsonFormat)
 	return runRestic(args, env)
 }
 
@@ -139,11 +141,12 @@ func BackupRepository(repository *ent.Repository, dryRun bool) (string, string, 
 	args = append(args, backupCmd)
 	args = append(args, commonArgs...)
 	args = append(args, dryRunParameter)
+	args = append(args, jsonFormat)
 
 	return runRestic(args, env)
 }
 
-func StatsRepository(repository *ent.Repository, dryRun bool) (string, string, error) {
+func StatsRepository(repository *ent.Repository, snapshotID string) (string, string, error) {
 	log.Debug().Msg("StatsRepository()")
 
 	if repository == nil {
@@ -157,6 +160,10 @@ func StatsRepository(repository *ent.Repository, dryRun bool) (string, string, e
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, repoFormat...)
 	args = append(args, statsCmd)
+	if snapshotID != "" {
+		args = append(args, snapshotID)
+	}
+	args = append(args, jsonFormat)
 	return runRestic(args, env)
 }
 

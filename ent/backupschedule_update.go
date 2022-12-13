@@ -289,6 +289,46 @@ func (bsu *BackupScheduleUpdate) ClearCronID() *BackupScheduleUpdate {
 	return bsu
 }
 
+// SetNextRun sets the "nextRun" field.
+func (bsu *BackupScheduleUpdate) SetNextRun(s string) *BackupScheduleUpdate {
+	bsu.mutation.SetNextRun(s)
+	return bsu
+}
+
+// SetNillableNextRun sets the "nextRun" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableNextRun(s *string) *BackupScheduleUpdate {
+	if s != nil {
+		bsu.SetNextRun(*s)
+	}
+	return bsu
+}
+
+// ClearNextRun clears the value of the "nextRun" field.
+func (bsu *BackupScheduleUpdate) ClearNextRun() *BackupScheduleUpdate {
+	bsu.mutation.ClearNextRun()
+	return bsu
+}
+
+// SetLastRun sets the "lastRun" field.
+func (bsu *BackupScheduleUpdate) SetLastRun(s string) *BackupScheduleUpdate {
+	bsu.mutation.SetLastRun(s)
+	return bsu
+}
+
+// SetNillableLastRun sets the "lastRun" field if the given value is not nil.
+func (bsu *BackupScheduleUpdate) SetNillableLastRun(s *string) *BackupScheduleUpdate {
+	if s != nil {
+		bsu.SetLastRun(*s)
+	}
+	return bsu
+}
+
+// ClearLastRun clears the value of the "lastRun" field.
+func (bsu *BackupScheduleUpdate) ClearLastRun() *BackupScheduleUpdate {
+	bsu.mutation.ClearLastRun()
+	return bsu
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (bsu *BackupScheduleUpdate) SetRepositoryID(id int) *BackupScheduleUpdate {
 	bsu.mutation.SetRepositoryID(id)
@@ -467,6 +507,18 @@ func (bsu *BackupScheduleUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if bsu.mutation.CronIDCleared() {
 		_spec.ClearField(backupschedule.FieldCronID, field.TypeInt)
+	}
+	if value, ok := bsu.mutation.NextRun(); ok {
+		_spec.SetField(backupschedule.FieldNextRun, field.TypeString, value)
+	}
+	if bsu.mutation.NextRunCleared() {
+		_spec.ClearField(backupschedule.FieldNextRun, field.TypeString)
+	}
+	if value, ok := bsu.mutation.LastRun(); ok {
+		_spec.SetField(backupschedule.FieldLastRun, field.TypeString, value)
+	}
+	if bsu.mutation.LastRunCleared() {
+		_spec.ClearField(backupschedule.FieldLastRun, field.TypeString)
 	}
 	if bsu.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -783,6 +835,46 @@ func (bsuo *BackupScheduleUpdateOne) ClearCronID() *BackupScheduleUpdateOne {
 	return bsuo
 }
 
+// SetNextRun sets the "nextRun" field.
+func (bsuo *BackupScheduleUpdateOne) SetNextRun(s string) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetNextRun(s)
+	return bsuo
+}
+
+// SetNillableNextRun sets the "nextRun" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableNextRun(s *string) *BackupScheduleUpdateOne {
+	if s != nil {
+		bsuo.SetNextRun(*s)
+	}
+	return bsuo
+}
+
+// ClearNextRun clears the value of the "nextRun" field.
+func (bsuo *BackupScheduleUpdateOne) ClearNextRun() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearNextRun()
+	return bsuo
+}
+
+// SetLastRun sets the "lastRun" field.
+func (bsuo *BackupScheduleUpdateOne) SetLastRun(s string) *BackupScheduleUpdateOne {
+	bsuo.mutation.SetLastRun(s)
+	return bsuo
+}
+
+// SetNillableLastRun sets the "lastRun" field if the given value is not nil.
+func (bsuo *BackupScheduleUpdateOne) SetNillableLastRun(s *string) *BackupScheduleUpdateOne {
+	if s != nil {
+		bsuo.SetLastRun(*s)
+	}
+	return bsuo
+}
+
+// ClearLastRun clears the value of the "lastRun" field.
+func (bsuo *BackupScheduleUpdateOne) ClearLastRun() *BackupScheduleUpdateOne {
+	bsuo.mutation.ClearLastRun()
+	return bsuo
+}
+
 // SetRepositoryID sets the "repository" edge to the Repository entity by ID.
 func (bsuo *BackupScheduleUpdateOne) SetRepositoryID(id int) *BackupScheduleUpdateOne {
 	bsuo.mutation.SetRepositoryID(id)
@@ -991,6 +1083,18 @@ func (bsuo *BackupScheduleUpdateOne) sqlSave(ctx context.Context) (_node *Backup
 	}
 	if bsuo.mutation.CronIDCleared() {
 		_spec.ClearField(backupschedule.FieldCronID, field.TypeInt)
+	}
+	if value, ok := bsuo.mutation.NextRun(); ok {
+		_spec.SetField(backupschedule.FieldNextRun, field.TypeString, value)
+	}
+	if bsuo.mutation.NextRunCleared() {
+		_spec.ClearField(backupschedule.FieldNextRun, field.TypeString)
+	}
+	if value, ok := bsuo.mutation.LastRun(); ok {
+		_spec.SetField(backupschedule.FieldLastRun, field.TypeString, value)
+	}
+	if bsuo.mutation.LastRunCleared() {
+		_spec.ClearField(backupschedule.FieldLastRun, field.TypeString)
 	}
 	if bsuo.mutation.RepositoryCleared() {
 		edge := &sqlgraph.EdgeSpec{

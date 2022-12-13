@@ -43,6 +43,10 @@ const (
 	FieldCronSyntax = "cron_syntax"
 	// FieldCronID holds the string denoting the cronid field in the database.
 	FieldCronID = "cron_id"
+	// FieldNextRun holds the string denoting the nextrun field in the database.
+	FieldNextRun = "next_run"
+	// FieldLastRun holds the string denoting the lastrun field in the database.
+	FieldLastRun = "last_run"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
 	EdgeRepository = "repository"
 	// Table holds the table name of the backupschedule in the database.
@@ -75,6 +79,8 @@ var Columns = []string{
 	FieldInterval,
 	FieldCronSyntax,
 	FieldCronID,
+	FieldNextRun,
+	FieldLastRun,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "BackupSchedule"
@@ -127,6 +133,10 @@ var (
 	DefaultInterval string
 	// DefaultCronSyntax holds the default value on creation for the "cronSyntax" field.
 	DefaultCronSyntax string
+	// DefaultNextRun holds the default value on creation for the "nextRun" field.
+	DefaultNextRun string
+	// DefaultLastRun holds the default value on creation for the "lastRun" field.
+	DefaultLastRun string
 )
 
 // Choice defines the type for the "choice" enum field.

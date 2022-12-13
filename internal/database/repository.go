@@ -92,6 +92,9 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 		SetPassword(repo.Password).
 		SetProvider(repo.Provider).
 		SetMaxSize(repo.MaxSize).
+		SetRepositorySize(repo.RepositorySize).
+		SetRepositoryFileCount(repo.RepositoryFileCount).
+		SetSnapshotCount(repo.SnapshotCount).
 		Save(ctx)
 
 	if err != nil {

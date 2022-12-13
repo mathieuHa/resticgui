@@ -42,6 +42,16 @@ type Repository struct {
 	Password string `json:"password,omitempty"`
 	// MaxSize holds the value of the "maxSize" field.
 	MaxSize string `json:"maxSize,omitempty"`
+	// RepositorySize holds the value of the "repositorySize" field.
+	RepositorySize string `json:"repositorySize,omitempty"`
+	// RepositoryFileCount holds the value of the "repositoryFileCount" field.
+	RepositoryFileCount string `json:"repositoryFileCount,omitempty"`
+	// LastSnapshotSize holds the value of the "lastSnapshotSize" field.
+	LastSnapshotSize string `json:"lastSnapshotSize,omitempty"`
+	// LastSnapshotDuration holds the value of the "lastSnapshotDuration" field.
+	LastSnapshotDuration string `json:"lastSnapshotDuration,omitempty"`
+	// SnapshotCount holds the value of the "snapshotCount" field.
+	SnapshotCount int `json:"snapshotCount,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RepositoryQuery when eager-loading is set.
 	Edges RepositoryEdges `json:"edges"`
@@ -173,9 +183,9 @@ func (*Repository) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case repository.FieldActive, repository.FieldRunning, repository.FieldInitiated, repository.FieldValid:
 			values[i] = new(sql.NullBool)
-		case repository.FieldID:
+		case repository.FieldID, repository.FieldSnapshotCount:
 			values[i] = new(sql.NullInt64)
-		case repository.FieldName, repository.FieldProvider, repository.FieldVersion, repository.FieldPassword, repository.FieldMaxSize:
+		case repository.FieldName, repository.FieldProvider, repository.FieldVersion, repository.FieldPassword, repository.FieldMaxSize, repository.FieldRepositorySize, repository.FieldRepositoryFileCount, repository.FieldLastSnapshotSize, repository.FieldLastSnapshotDuration:
 			values[i] = new(sql.NullString)
 		case repository.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -259,6 +269,36 @@ func (r *Repository) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field maxSize", values[i])
 			} else if value.Valid {
 				r.MaxSize = value.String
+			}
+		case repository.FieldRepositorySize:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field repositorySize", values[i])
+			} else if value.Valid {
+				r.RepositorySize = value.String
+			}
+		case repository.FieldRepositoryFileCount:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field repositoryFileCount", values[i])
+			} else if value.Valid {
+				r.RepositoryFileCount = value.String
+			}
+		case repository.FieldLastSnapshotSize:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field lastSnapshotSize", values[i])
+			} else if value.Valid {
+				r.LastSnapshotSize = value.String
+			}
+		case repository.FieldLastSnapshotDuration:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field lastSnapshotDuration", values[i])
+			} else if value.Valid {
+				r.LastSnapshotDuration = value.String
+			}
+		case repository.FieldSnapshotCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field snapshotCount", values[i])
+			} else if value.Valid {
+				r.SnapshotCount = int(value.Int64)
 			}
 		}
 	}
@@ -357,6 +397,21 @@ func (r *Repository) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("maxSize=")
 	builder.WriteString(r.MaxSize)
+	builder.WriteString(", ")
+	builder.WriteString("repositorySize=")
+	builder.WriteString(r.RepositorySize)
+	builder.WriteString(", ")
+	builder.WriteString("repositoryFileCount=")
+	builder.WriteString(r.RepositoryFileCount)
+	builder.WriteString(", ")
+	builder.WriteString("lastSnapshotSize=")
+	builder.WriteString(r.LastSnapshotSize)
+	builder.WriteString(", ")
+	builder.WriteString("lastSnapshotDuration=")
+	builder.WriteString(r.LastSnapshotDuration)
+	builder.WriteString(", ")
+	builder.WriteString("snapshotCount=")
+	builder.WriteString(fmt.Sprintf("%v", r.SnapshotCount))
 	builder.WriteByte(')')
 	return builder.String()
 }

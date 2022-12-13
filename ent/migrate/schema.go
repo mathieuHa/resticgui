@@ -100,6 +100,8 @@ var (
 		{Name: "interval", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "cron_syntax", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "cron_id", Type: field.TypeInt, Nullable: true},
+		{Name: "next_run", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "last_run", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "repository_backup_schedule", Type: field.TypeInt, Unique: true},
 	}
 	// BackupScheduleTable holds the schema information for the "BackupSchedule" table.
@@ -110,7 +112,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "BackupSchedule_repositories_backupSchedule",
-				Columns:    []*schema.Column{BackupScheduleColumns[17]},
+				Columns:    []*schema.Column{BackupScheduleColumns[19]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -238,6 +240,11 @@ var (
 		{Name: "version", Type: field.TypeEnum, Nullable: true, Enums: []string{"1", "2"}, Default: "2"},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "max_size", Type: field.TypeString, Nullable: true},
+		{Name: "repository_size", Type: field.TypeString, Nullable: true},
+		{Name: "repository_file_count", Type: field.TypeString, Nullable: true},
+		{Name: "last_snapshot_size", Type: field.TypeString, Nullable: true},
+		{Name: "last_snapshot_duration", Type: field.TypeString, Nullable: true},
+		{Name: "snapshot_count", Type: field.TypeInt, Nullable: true},
 	}
 	// RepositoriesTable holds the schema information for the "repositories" table.
 	RepositoriesTable = &schema.Table{

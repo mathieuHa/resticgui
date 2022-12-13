@@ -137,6 +137,41 @@ func MaxSize(v string) predicate.Repository {
 	})
 }
 
+// RepositorySize applies equality check predicate on the "repositorySize" field. It's identical to RepositorySizeEQ.
+func RepositorySize(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositoryFileCount applies equality check predicate on the "repositoryFileCount" field. It's identical to RepositoryFileCountEQ.
+func RepositoryFileCount(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// LastSnapshotSize applies equality check predicate on the "lastSnapshotSize" field. It's identical to LastSnapshotSizeEQ.
+func LastSnapshotSize(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotDuration applies equality check predicate on the "lastSnapshotDuration" field. It's identical to LastSnapshotDurationEQ.
+func LastSnapshotDuration(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// SnapshotCount applies equality check predicate on the "snapshotCount" field. It's identical to SnapshotCountEQ.
+func SnapshotCount(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSnapshotCount), v))
+	})
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
@@ -679,6 +714,536 @@ func MaxSizeEqualFold(v string) predicate.Repository {
 func MaxSizeContainsFold(v string) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldMaxSize), v))
+	})
+}
+
+// RepositorySizeEQ applies the EQ predicate on the "repositorySize" field.
+func RepositorySizeEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeNEQ applies the NEQ predicate on the "repositorySize" field.
+func RepositorySizeNEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeIn applies the In predicate on the "repositorySize" field.
+func RepositorySizeIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldRepositorySize), v...))
+	})
+}
+
+// RepositorySizeNotIn applies the NotIn predicate on the "repositorySize" field.
+func RepositorySizeNotIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldRepositorySize), v...))
+	})
+}
+
+// RepositorySizeGT applies the GT predicate on the "repositorySize" field.
+func RepositorySizeGT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeGTE applies the GTE predicate on the "repositorySize" field.
+func RepositorySizeGTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeLT applies the LT predicate on the "repositorySize" field.
+func RepositorySizeLT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeLTE applies the LTE predicate on the "repositorySize" field.
+func RepositorySizeLTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeContains applies the Contains predicate on the "repositorySize" field.
+func RepositorySizeContains(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeHasPrefix applies the HasPrefix predicate on the "repositorySize" field.
+func RepositorySizeHasPrefix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeHasSuffix applies the HasSuffix predicate on the "repositorySize" field.
+func RepositorySizeHasSuffix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeIsNil applies the IsNil predicate on the "repositorySize" field.
+func RepositorySizeIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRepositorySize)))
+	})
+}
+
+// RepositorySizeNotNil applies the NotNil predicate on the "repositorySize" field.
+func RepositorySizeNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRepositorySize)))
+	})
+}
+
+// RepositorySizeEqualFold applies the EqualFold predicate on the "repositorySize" field.
+func RepositorySizeEqualFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositorySizeContainsFold applies the ContainsFold predicate on the "repositorySize" field.
+func RepositorySizeContainsFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRepositorySize), v))
+	})
+}
+
+// RepositoryFileCountEQ applies the EQ predicate on the "repositoryFileCount" field.
+func RepositoryFileCountEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountNEQ applies the NEQ predicate on the "repositoryFileCount" field.
+func RepositoryFileCountNEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountIn applies the In predicate on the "repositoryFileCount" field.
+func RepositoryFileCountIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldRepositoryFileCount), v...))
+	})
+}
+
+// RepositoryFileCountNotIn applies the NotIn predicate on the "repositoryFileCount" field.
+func RepositoryFileCountNotIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldRepositoryFileCount), v...))
+	})
+}
+
+// RepositoryFileCountGT applies the GT predicate on the "repositoryFileCount" field.
+func RepositoryFileCountGT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountGTE applies the GTE predicate on the "repositoryFileCount" field.
+func RepositoryFileCountGTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountLT applies the LT predicate on the "repositoryFileCount" field.
+func RepositoryFileCountLT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountLTE applies the LTE predicate on the "repositoryFileCount" field.
+func RepositoryFileCountLTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountContains applies the Contains predicate on the "repositoryFileCount" field.
+func RepositoryFileCountContains(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountHasPrefix applies the HasPrefix predicate on the "repositoryFileCount" field.
+func RepositoryFileCountHasPrefix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountHasSuffix applies the HasSuffix predicate on the "repositoryFileCount" field.
+func RepositoryFileCountHasSuffix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountIsNil applies the IsNil predicate on the "repositoryFileCount" field.
+func RepositoryFileCountIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRepositoryFileCount)))
+	})
+}
+
+// RepositoryFileCountNotNil applies the NotNil predicate on the "repositoryFileCount" field.
+func RepositoryFileCountNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRepositoryFileCount)))
+	})
+}
+
+// RepositoryFileCountEqualFold applies the EqualFold predicate on the "repositoryFileCount" field.
+func RepositoryFileCountEqualFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// RepositoryFileCountContainsFold applies the ContainsFold predicate on the "repositoryFileCount" field.
+func RepositoryFileCountContainsFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRepositoryFileCount), v))
+	})
+}
+
+// LastSnapshotSizeEQ applies the EQ predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeNEQ applies the NEQ predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeNEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeIn applies the In predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLastSnapshotSize), v...))
+	})
+}
+
+// LastSnapshotSizeNotIn applies the NotIn predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeNotIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLastSnapshotSize), v...))
+	})
+}
+
+// LastSnapshotSizeGT applies the GT predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeGT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeGTE applies the GTE predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeGTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeLT applies the LT predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeLT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeLTE applies the LTE predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeLTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeContains applies the Contains predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeContains(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeHasPrefix applies the HasPrefix predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeHasPrefix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeHasSuffix applies the HasSuffix predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeHasSuffix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeIsNil applies the IsNil predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLastSnapshotSize)))
+	})
+}
+
+// LastSnapshotSizeNotNil applies the NotNil predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLastSnapshotSize)))
+	})
+}
+
+// LastSnapshotSizeEqualFold applies the EqualFold predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeEqualFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotSizeContainsFold applies the ContainsFold predicate on the "lastSnapshotSize" field.
+func LastSnapshotSizeContainsFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldLastSnapshotSize), v))
+	})
+}
+
+// LastSnapshotDurationEQ applies the EQ predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationNEQ applies the NEQ predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationNEQ(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationIn applies the In predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLastSnapshotDuration), v...))
+	})
+}
+
+// LastSnapshotDurationNotIn applies the NotIn predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationNotIn(vs ...string) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLastSnapshotDuration), v...))
+	})
+}
+
+// LastSnapshotDurationGT applies the GT predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationGT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationGTE applies the GTE predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationGTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationLT applies the LT predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationLT(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationLTE applies the LTE predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationLTE(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationContains applies the Contains predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationContains(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationHasPrefix applies the HasPrefix predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationHasPrefix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationHasSuffix applies the HasSuffix predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationHasSuffix(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationIsNil applies the IsNil predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLastSnapshotDuration)))
+	})
+}
+
+// LastSnapshotDurationNotNil applies the NotNil predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLastSnapshotDuration)))
+	})
+}
+
+// LastSnapshotDurationEqualFold applies the EqualFold predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationEqualFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// LastSnapshotDurationContainsFold applies the ContainsFold predicate on the "lastSnapshotDuration" field.
+func LastSnapshotDurationContainsFold(v string) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldLastSnapshotDuration), v))
+	})
+}
+
+// SnapshotCountEQ applies the EQ predicate on the "snapshotCount" field.
+func SnapshotCountEQ(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSnapshotCount), v))
+	})
+}
+
+// SnapshotCountNEQ applies the NEQ predicate on the "snapshotCount" field.
+func SnapshotCountNEQ(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSnapshotCount), v))
+	})
+}
+
+// SnapshotCountIn applies the In predicate on the "snapshotCount" field.
+func SnapshotCountIn(vs ...int) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldSnapshotCount), v...))
+	})
+}
+
+// SnapshotCountNotIn applies the NotIn predicate on the "snapshotCount" field.
+func SnapshotCountNotIn(vs ...int) predicate.Repository {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldSnapshotCount), v...))
+	})
+}
+
+// SnapshotCountGT applies the GT predicate on the "snapshotCount" field.
+func SnapshotCountGT(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSnapshotCount), v))
+	})
+}
+
+// SnapshotCountGTE applies the GTE predicate on the "snapshotCount" field.
+func SnapshotCountGTE(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSnapshotCount), v))
+	})
+}
+
+// SnapshotCountLT applies the LT predicate on the "snapshotCount" field.
+func SnapshotCountLT(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSnapshotCount), v))
+	})
+}
+
+// SnapshotCountLTE applies the LTE predicate on the "snapshotCount" field.
+func SnapshotCountLTE(v int) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSnapshotCount), v))
+	})
+}
+
+// SnapshotCountIsNil applies the IsNil predicate on the "snapshotCount" field.
+func SnapshotCountIsNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSnapshotCount)))
+	})
+}
+
+// SnapshotCountNotNil applies the NotNil predicate on the "snapshotCount" field.
+func SnapshotCountNotNil() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSnapshotCount)))
 	})
 }
 

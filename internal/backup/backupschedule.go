@@ -119,7 +119,7 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 			// Then we had the new job to be run and register it
 			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
 			cronID, err := cr.AddFunc(timing, func() {
-				BackupRepository(repo)
+				BackupRepository(repo, cr)
 			})
 
 			if err != nil {
@@ -131,6 +131,13 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 			if err != nil {
 				log.Err(err).Msgf("error: repository %v", "")
 				return false
+			}
+			if len(cr.Entries()) > 0 {
+				err = database.UpdateCronNextRun(*repo.Edges.BackupSchedule, cr.Entries()[0].Next.String())
+				if err != nil {
+					log.Err(err).Msgf("error: repository %v", "")
+					return false
+				}
 			}
 		}
 		return true

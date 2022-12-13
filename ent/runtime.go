@@ -132,6 +132,14 @@ func init() {
 	backupscheduleDescCronSyntax := backupscheduleFields[14].Descriptor()
 	// backupschedule.DefaultCronSyntax holds the default value on creation for the cronSyntax field.
 	backupschedule.DefaultCronSyntax = backupscheduleDescCronSyntax.Default.(string)
+	// backupscheduleDescNextRun is the schema descriptor for nextRun field.
+	backupscheduleDescNextRun := backupscheduleFields[16].Descriptor()
+	// backupschedule.DefaultNextRun holds the default value on creation for the nextRun field.
+	backupschedule.DefaultNextRun = backupscheduleDescNextRun.Default.(string)
+	// backupscheduleDescLastRun is the schema descriptor for lastRun field.
+	backupscheduleDescLastRun := backupscheduleFields[17].Descriptor()
+	// backupschedule.DefaultLastRun holds the default value on creation for the lastRun field.
+	backupschedule.DefaultLastRun = backupscheduleDescLastRun.Default.(string)
 	localproviderFields := schema.LocalProvider{}.Fields()
 	_ = localproviderFields
 	// localproviderDescValid is the schema descriptor for valid field.
