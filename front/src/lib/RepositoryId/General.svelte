@@ -36,22 +36,41 @@
         src="/{repo.provider}.svg"
         alt={repo.provider}
       />
-      <h2 class="text-md"><span class="font-bold mr-3">Provider:</span>{repo.provider.replace('Provider', '')}</h2>
+      <h2 class="text-md">
+        <span class="font-bold mr-3">Provider:</span>
+        {repo.provider.replace('Provider', '')}
+      </h2>
     </div>
     <br />
 
     {#if repo.active}
       <h2 class="text-md font-bold">Backup schedule</h2>
       {#if repo.edges.backupSchedule.choice === "interval"}
-        <p>Interval:<span class="ml-3">{repo.edges.backupSchedule.interval}</span></p>
+        <p>
+          Interval:
+          <span class="ml-3">{repo.edges.backupSchedule.interval}</span>
+        </p>
       {:else if repo.edges.backupSchedule.choice === "cron"}
-        <p>Cron:<span class="ml-3">{repo.edges.backupSchedule.cronSyntax}</span></p>
+        <p>
+          Cron:
+          <span class="ml-3">{repo.edges.backupSchedule.cronSyntax}</span>
+        </p>
       {:else}
         <p>No planning set</p>
       {/if}
       <div class="flex flex-wrap gap-2 whitespace-nowrap">
-        <p class="flex-1">Last:<span class="ml-3">{repo.edges.backupSchedule.lastRun || ''}</span></p>
-        <p class="flex-1">Next:<span class="ml-3">{repo.edges.backupSchedule.nextRun || ''}</span></p>
+        <p class="flex-1">
+          Last:
+          <span class="ml-3">
+            {repo.edges.backupSchedule?.lastRun?.replace('+0000 UTC', '') || ''}
+          </span>
+        </p>
+        <p class="flex-1">
+          Next:
+          <span class="ml-3">
+            {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}
+          </span>
+        </p>
       </div>
       <br />
     {/if}
@@ -64,10 +83,22 @@
     </p>
     <br />
 
-    <p>Size:<span class="ml-3">{repo.repositorySize || 0}</span></p>
-    <p>Total file number:<span class="ml-3">{repo.repositoryFileCount || 0}</span></p>
-    <p>Snapshots count:<span class="ml-3">{repo.snapshotCount || 0}</span></p>
+    <p>
+      Size:
+      <span class="ml-3">{repo.repositorySize || 0}</span>
+    </p>
+    <p>
+      Total file number:
+      <span class="ml-3">{repo.repositoryFileCount || 0}</span>
+    </p>
+    <p>
+      Snapshots count:
+      <span class="ml-3">{repo.snapshotCount || 0}</span>
+    </p>
     <br />
-    <p class="text-sm font-light italic">Restic repository version: {repo.version} </p>
+    <p class="text-sm font-light italic">
+      Restic repository version:
+      <span class="font-normal ml-3 not-italic">{repo.version}</span>
+    </p>
 
 
