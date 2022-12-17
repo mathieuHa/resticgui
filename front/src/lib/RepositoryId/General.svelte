@@ -1,95 +1,73 @@
 <script>
     export let repo;
-    
-    console.log(repo);
 </script>
-<div>
-    <div class="grid grid-cols-2">
-        <div class="bg-sky-500 rounded-full w-25 min-w-min text-center">Repository Name: {repo.name}</div>
-        <div>Created Date: {repo.createdAt.split('.')[0].replace('T', ' ')}</div>
+
+    <div class="flex flex-wrap justify-between gap-2 mt-5">
+        <h1 class="text-xl font-bold leading-7 whitespace-nowrap">{repo.name}</h1>
+        <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">
+          Created Date: {repo.createdAt.split('.')[0].replace('T', ' ')}
+        </p>
     </div>
     <br />
     
-    <div class="grid grid-cols-4">
-    {#if repo.active}
-        <span class="bg-green-600 rounded-full w-24 min-w-min text-center">active</span>
-    {:else}
-        <div class="bg-red-600 rounded-full w-24 min-w-min text-center">active</div>
-    {/if}
-    {#if repo.initiated}
-        <span class="bg-green-600 rounded-full w-24 min-w-min text-center">initiated</span>
-    {:else}
-        <div class="bg-red-600 rounded-full w-24 min-w-min text-center">initiated</div>
-    {/if}
-    {#if repo.valid}
-        <span class="bg-green-600 rounded-full w-24 min-w-min text-center">valid</span>
-    {:else}
-        <div class="bg-red-600 rounded-full w-24 min-w-min text-center">valid</div>
-    {/if}
-    {#if repo.running}
-        <span class="bg-green-600 rounded-full w-24 min-w-min text-center">running</span>
-    {:else}
-        <div class="bg-red-600 rounded-full w-24 min-w-min text-center">running</div>
-    {/if}
-
+    <div class="flex flex-wrap gap-2">
+      <p class="flex items-center">
+        active:
+        <span class="ml-2 block bg-{repo.active ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+      </p>
+      <p class="flex items-center">
+        initiated:
+        <span class="ml-2 block bg-{repo.initiated ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+      </p>
+      <p class="flex items-center">
+        valid:
+        <span class="ml-2 block bg-{repo.valid ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+      </p>
+      <p class="flex items-center">
+        running:
+        <span class="ml-2 block bg-{repo.running ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+      </p>
     </div>
     <br />
 
-    <div class="grid grid-cols-3">
-        <div>Provider</div>
-        <div>{repo.provider}</div>
-        <div>
-            <img
-            class="h-10 w-10 mr-2 cursor-pointer rounded 'bg-black' transition-all"
-            src="/{repo.provider}.svg"
-            alt={repo.provider}
-            />
-        </div>
-    </div>
-    <br />
-
-    <div class="grid grid-cols-2">
-        <div>Schedule</div>
-        {#if repo.edges.backupSchedule.choice === "interval"}
-            <span class="bg-purple-300 rounded-full w-24 min-w-min text-center">interval {repo.edges.backupSchedule.interval}</span>
-        {:else if repo.edges.backupSchedule.choice === "cron"}
-            <div class="bg-purple-300 rounded-full w-24 min-w-min text-center">cron {repo.edges.backupSchedule.cron}</div>
-        {:else}
-            <div class="bg-purple-300 rounded-full w-24 min-w-min text-center">No planning set</div>
-        {/if}
-    </div>
-    <br />
-
-    {#if repo.active}
-        <div class="grid grid-cols-2">
-            <span class="bg-orange-600 rounded-full w-50 min-w-min text-center">{repo.edges.backupSchedule.nextRun}</span>
-            <span class="bg-orange-600 rounded-full w-50 min-w-min text-center">{repo.edges.backupSchedule.lastRun}</span>
-        </div>
-        <br />
-    {/if}
-
-    <div class="grid grid-cols-2">
-        <div>Paths</div>
-        <div>
-            {#each repo.edges.paths as path, i}
-                "<span class={path.included === false ? 'text-orange-500' : 'text-green-500'}>{path.absPath}</span>"{i !== repo.edges.paths.length - 1 ? ', ' : ''}
-            {/each}
-        </div>
-    </div>
-    <br />
-
-    <div class="grid grid-cols-3">
-        <span class="bg-yellow-600 rounded-full w-50 min-w-min text-center">Repository Size {repo.repositorySize}</span>
-        <span class="bg-yellow-600 rounded-full w-50 min-w-min text-center">Repository Total File Number {repo.repositoryFileCount}</span>
-        <span class="bg-yellow-600 rounded-full w-50 min-w-min text-center">Repository Snapshot count {repo.snapshotCount}</span>
-    </div>
-    <br />
-    
     <div>
-        <div class="italic">Restic repository version: {repo.version} </div>
+      <img
+        class="h-10 w-10 rounded bg-black transition-all"
+        src="/{repo.provider}.svg"
+        alt={repo.provider}
+      />
+      <h2 class="text-md"><span class="font-bold mr-3">Provider:</span>{repo.provider.replace('Provider', '')}</h2>
     </div>
+    <br />
 
-</div>
+    {#if repo.active}
+      <h2 class="text-md font-bold">Backup schedule</h2>
+      {#if repo.edges.backupSchedule.choice === "interval"}
+        <p>Interval:<span class="ml-3">{repo.edges.backupSchedule.interval}</span></p>
+      {:else if repo.edges.backupSchedule.choice === "cron"}
+        <p>Cron:<span class="ml-3">{repo.edges.backupSchedule.cronSyntax}</span></p>
+      {:else}
+        <p>No planning set</p>
+      {/if}
+      <div class="flex flex-wrap gap-2 whitespace-nowrap">
+        <p class="flex-1">Last:<span class="ml-3">{repo.edges.backupSchedule.lastRun || ''}</span></p>
+        <p class="flex-1">Next:<span class="ml-3">{repo.edges.backupSchedule.nextRun || ''}</span></p>
+      </div>
+      <br />
+    {/if}
 
+    <h2 class="text-md font-bold">Paths</h2>
+    <p>
+      {#each repo.edges?.paths as path, i}
+        "<span class="text-{!path.included ? 'orange' : 'green'}-500">{path.absPath}</span>"{i !== repo.edges.paths.length - 1 ? ', ' : ''}
+      {/each}
+    </p>
+    <br />
+
+    <p>Size:<span class="ml-3">{repo.repositorySize || 0}</span></p>
+    <p>Total file number:<span class="ml-3">{repo.repositoryFileCount || 0}</span></p>
+    <p>Snapshots count:<span class="ml-3">{repo.snapshotCount || 0}</span></p>
+    <br />
+    <p class="text-sm font-light italic">Restic repository version: {repo.version} </p>
 
 

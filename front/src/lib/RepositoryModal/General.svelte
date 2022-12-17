@@ -29,8 +29,3 @@
   type="checkbox"
   bind:checked={values.active}
 />
-{#if values.running}
-    <span class="bg-green-600 rounded-full w-30 min-w-min text-center">running status</span>
-{:else}
-    <div class="bg-red-600 rounded-full w-30 min-w-min text-center">running status</div>
-{/if}

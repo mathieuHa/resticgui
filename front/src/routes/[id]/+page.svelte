@@ -47,14 +47,14 @@
 <div class="mt-2 mb-10 w-full max-w-full">
   <div class="flex justify-between flex-wrap mb-3">
     {#each ["General", "Snapshots", "Logs", "Stats"] as stepped, i}
-      <div
+      <button
         on:click={() => replaceStateWithQuery(stepped.toLowerCase())}
         class="flex-1 pb-2 px-4 {tab === stepped.toLowerCase()
           ? 'border-b-2 border-gray-500 order-4 md:order-unset'
           : 'cursor-pointer hover:border-b-2 hover:border-b-blue-500/[.5]'}"
       >
         <span class="rounded-xl">{stepped}</span>
-      </div>
+        </button>
     {/each}
   </div>
   {#if repo}

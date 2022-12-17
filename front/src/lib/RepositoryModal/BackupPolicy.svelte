@@ -1,8 +1,11 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import Input from '../Input.svelte';
 
-  export let initialBackupPolicy = {};
+  export let initialBackupPolicy: {
+    nbLastBackup?: number,
+    keepAll?: boolean,
+  } = {};
   let values = initialBackupPolicy;
 
   const dispatch = createEventDispatcher();
@@ -10,7 +13,7 @@
   $:dispatch('update', {
     ...values,
     keepAll: values.nbLastBackup === 0,
-    nbLastBackup: values.nbLastBackup > 0 ? values.nbLastBackup : null,
+    nbLastBackup: values.nbLastBackup && values.nbLastBackup > 0 ? values.nbLastBackup : null,
   });
   $:console.log(values)
 </script>

@@ -1,25 +1,30 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
 
   import agent from '$utils/api';
 
   import AddPaths from './AddPaths.svelte';
+  
+  interface Tree {
+    [key: string]: Tree | boolean
+  }
 
-  export let initialPaths = [];
-  let tree = {};
-  let paths = initialPaths;
+  export let initialPaths: string[] = [];
+  let tree: Tree = {};
+  let paths: string[] = initialPaths;
 
   const leaves = {};
   const dispatch = createEventDispatcher();
 
-  const populateTree = (treeCopy, root, leaf) => {
+  const populateTree = (treeCopy?: Tree, root?: string[], leaf?: Tree | boolean): Tree | undefined => {
+    if (!treeCopy || !root || leaf === undefined) throw new Error()
     if (root.length === 0) return leaf;
-    const path = root.shift();
+    const path = root.shift() ?? '';
     if (root.length === 0) return { ...treeCopy, [path]: leaf };
     return { ...treeCopy, [path]: { __visible: true, __fetched: true, ...populateTree(treeCopy[path], root, leaf) } };
   }
 
-  const onLoad = async (root) => {
+  const onLoad = async (root: string): Promise<void> => {
     const rootArray = root.split('/').filter((path) => !!path);
     let result;
     try {
@@ -36,7 +41,7 @@
     tree = populateTree(tree, rootArray, leaf);
   }
 
-  const onTogglePaths = (path, include = true) => {
+  const onTogglePaths = (path: string, include = true) => {
     const index = paths.findIndex((p) => p === path || p === `!${path}`);
     if (index > -1) paths = [...paths.slice(0, index), ...paths.slice(index + 1)];
     else paths = [...paths, `${include ? '' : '!'}${path}`];
@@ -50,7 +55,7 @@
     }
   };
 
-  const onDirClick = (root, fetched, visible) => {
+  const onDirClick = (root: string, fetched: boolean, visible: boolean) => {
     const rootArray = root.split('/').filter((path) => !!path);
     if (fetched) tree = populateTree(tree, [...rootArray, '__visible'], !visible);
     else onLoad(root);

@@ -3,12 +3,12 @@
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
 
-  import BackupPolicy from './Repository/BackupPolicy.svelte';
-  import BackupSchedule from './Repository/BackupSchedule.svelte';
-  import General from './Repository/General.svelte';
+  import BackupPolicy from './RepositoryModal/BackupPolicy.svelte';
+  import BackupSchedule from './RepositoryModal/BackupSchedule.svelte';
+  import General from './RepositoryModal/General.svelte';
   import Modal from './Modal.svelte';
-  import Provider from './Repository/Provider.svelte';
-  import Paths from './Repository/FileSystem/Paths.svelte';
+  import Provider from './RepositoryModal/Provider.svelte';
+  import Paths from './RepositoryModal/FileSystem/Paths.svelte';
 
   export let repository = null;
 
