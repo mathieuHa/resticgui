@@ -507,6 +507,53 @@ func GetSnapshotsRepository(c *gin.Context) {
 	}
 }
 
+// ForgetSnapshotRepository godoc
+// @Summary get snapshots repository
+// @Schemes
+// @Description return the snapshots command output for the repository
+// @Param id path int true "Repository ID"
+// @Param snapshotID path string true "Snapshot ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/snapshots/{snapshotID} [delete]
+func ForgetSnapshotRepository(c *gin.Context) {
+	log.Debug().Msg("ForgetSnapshotRepository()")
+
+	ctx := context.Background()
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
+		return
+	}
+	snapshotID := c.Param("snapshotID")
+	log.Debug().Msgf("SnapshotID: %s", snapshotID)
+
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+		return
+	}
+
+	r.Valid, err = backup.ValidRepository(*r)
+	if !r.Valid {
+		log.Debug().Msg(errRInvalid)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
+		return
+	}
+
+	stdout, stderr := backup.ForgetSnapshotRepository(r, snapshotID)
+
+	c.IndentedJSON(http.StatusOK, gin.H{"stdout": stdout, "stderr": stderr})
+}
+
 // ValidRepository godoc
 // @Summary valid repository
 // @Schemes

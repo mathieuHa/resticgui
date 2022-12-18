@@ -109,9 +109,7 @@
             <button
               class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
               title="Remove"
-              on:click|preventDefault|stopPropagation={() => {
-                removeId = repo.id;
-              }}
+              on:click|preventDefault|stopPropagation={() => (removeId = repo.id)}
             >
               <Trash />
             </button>

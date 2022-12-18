@@ -41,7 +41,7 @@
           : 'cursor-pointer hover:border-b-2 hover:border-b-blue-500/[.5]'}"
       >
         <span class="rounded-xl">{stepped}</span>
-        </button>
+      </button>
     {/each}
   </div>
 
@@ -50,7 +50,10 @@
       <Loader />
     {:then snapshots}
       {#if snapshots && snapshots.length > 0}
-        <Snapshot snapshots={snapshots.sort((a, b) => b.time.localeCompare(a.time))} />
+        <Snapshot 
+          on:delete={() => (snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`))}
+          snapshots={snapshots.sort((a, b) => b.time.localeCompare(a.time))}
+        />
       {:else}
         <span>no data</span>
       {/if}

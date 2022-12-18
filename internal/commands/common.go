@@ -122,11 +122,7 @@ func ForgetSnapshots(repository *ent.Repository, version string) (string, string
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, forgetCmd)
 	args = append(args, repoFormat...)
-	if version == "" {
-		args = append(args, version)
-	} else {
-		args = append(args, getPruneCommonArgs(repository)...)
-	}
+	args = append(args, version)
 	return runRestic(args, env)
 }
 
