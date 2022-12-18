@@ -52,12 +52,12 @@
       class="flex justify-between flex-wrap {!repository.id ? 'cursor-not-allowed' : ''}"
     >
       {#each ['General', 'Paths', 'Schedule', 'Policy', 'Provider'] as stepped, i}
-        <div
+        <button
           class="flex-1 pb-1 px-4 rounded-t border border-gray-500 {!repository.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
-          on:click={() => { step = i; }}
+          on:click|preventDefault|stopPropagation={() => { step = i; }}
         >
           <span class="rounded-xl">{stepped}</span>
-        </div>
+        </button>
       {/each}
     </div>
     <div class="flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">

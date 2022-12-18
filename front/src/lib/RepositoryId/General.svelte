@@ -76,11 +76,11 @@
     {/if}
 
     <h2 class="text-md font-bold">Paths</h2>
-    <p>
+    <ul class="list-disc ml-5">
       {#each repo.edges?.paths as path, i}
-        "<span class="text-{!path.included ? 'orange' : 'green'}-500">{path.absPath}</span>"{i !== repo.edges.paths.length - 1 ? ', ' : ''}
+        <li class="text-{!path.included ? 'orange' : 'green'}-500">{path.absPath}</li>
       {/each}
-    </p>
+    </ul>
     <br />
 
     <p>
