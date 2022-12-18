@@ -19,6 +19,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/ent/role"
 	"gitlab.com/resticgui/resticgui/ent/user"
@@ -44,6 +45,7 @@ const (
 	TypeMinioS3Provider = "MinioS3Provider"
 	TypePath            = "Path"
 	TypePermission      = "Permission"
+	TypePruneSchedule   = "PruneSchedule"
 	TypeRepository      = "Repository"
 	TypeRole            = "Role"
 	TypeUser            = "User"
@@ -1267,9 +1269,12 @@ type BackupPolicyMutation struct {
 	id                *int
 	nbLastBackup      *uint
 	addnbLastBackup   *int
-	oneByHour         *bool
-	oneByDay          *bool
-	oneByMonth        *bool
+	oneByHour         *uint
+	addoneByHour      *int
+	oneByDay          *uint
+	addoneByDay       *int
+	oneByMonth        *uint
+	addoneByMonth     *int
 	keepAll           *bool
 	clearedFields     map[string]struct{}
 	repository        *int
@@ -1434,12 +1439,13 @@ func (m *BackupPolicyMutation) ResetNbLastBackup() {
 }
 
 // SetOneByHour sets the "oneByHour" field.
-func (m *BackupPolicyMutation) SetOneByHour(b bool) {
-	m.oneByHour = &b
+func (m *BackupPolicyMutation) SetOneByHour(u uint) {
+	m.oneByHour = &u
+	m.addoneByHour = nil
 }
 
 // OneByHour returns the value of the "oneByHour" field in the mutation.
-func (m *BackupPolicyMutation) OneByHour() (r bool, exists bool) {
+func (m *BackupPolicyMutation) OneByHour() (r uint, exists bool) {
 	v := m.oneByHour
 	if v == nil {
 		return
@@ -1450,7 +1456,7 @@ func (m *BackupPolicyMutation) OneByHour() (r bool, exists bool) {
 // OldOneByHour returns the old "oneByHour" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldOneByHour(ctx context.Context) (v bool, err error) {
+func (m *BackupPolicyMutation) OldOneByHour(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOneByHour is only allowed on UpdateOne operations")
 	}
@@ -1464,18 +1470,38 @@ func (m *BackupPolicyMutation) OldOneByHour(ctx context.Context) (v bool, err er
 	return oldValue.OneByHour, nil
 }
 
+// AddOneByHour adds u to the "oneByHour" field.
+func (m *BackupPolicyMutation) AddOneByHour(u int) {
+	if m.addoneByHour != nil {
+		*m.addoneByHour += u
+	} else {
+		m.addoneByHour = &u
+	}
+}
+
+// AddedOneByHour returns the value that was added to the "oneByHour" field in this mutation.
+func (m *BackupPolicyMutation) AddedOneByHour() (r int, exists bool) {
+	v := m.addoneByHour
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetOneByHour resets all changes to the "oneByHour" field.
 func (m *BackupPolicyMutation) ResetOneByHour() {
 	m.oneByHour = nil
+	m.addoneByHour = nil
 }
 
 // SetOneByDay sets the "oneByDay" field.
-func (m *BackupPolicyMutation) SetOneByDay(b bool) {
-	m.oneByDay = &b
+func (m *BackupPolicyMutation) SetOneByDay(u uint) {
+	m.oneByDay = &u
+	m.addoneByDay = nil
 }
 
 // OneByDay returns the value of the "oneByDay" field in the mutation.
-func (m *BackupPolicyMutation) OneByDay() (r bool, exists bool) {
+func (m *BackupPolicyMutation) OneByDay() (r uint, exists bool) {
 	v := m.oneByDay
 	if v == nil {
 		return
@@ -1486,7 +1512,7 @@ func (m *BackupPolicyMutation) OneByDay() (r bool, exists bool) {
 // OldOneByDay returns the old "oneByDay" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldOneByDay(ctx context.Context) (v bool, err error) {
+func (m *BackupPolicyMutation) OldOneByDay(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOneByDay is only allowed on UpdateOne operations")
 	}
@@ -1500,18 +1526,38 @@ func (m *BackupPolicyMutation) OldOneByDay(ctx context.Context) (v bool, err err
 	return oldValue.OneByDay, nil
 }
 
+// AddOneByDay adds u to the "oneByDay" field.
+func (m *BackupPolicyMutation) AddOneByDay(u int) {
+	if m.addoneByDay != nil {
+		*m.addoneByDay += u
+	} else {
+		m.addoneByDay = &u
+	}
+}
+
+// AddedOneByDay returns the value that was added to the "oneByDay" field in this mutation.
+func (m *BackupPolicyMutation) AddedOneByDay() (r int, exists bool) {
+	v := m.addoneByDay
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetOneByDay resets all changes to the "oneByDay" field.
 func (m *BackupPolicyMutation) ResetOneByDay() {
 	m.oneByDay = nil
+	m.addoneByDay = nil
 }
 
 // SetOneByMonth sets the "oneByMonth" field.
-func (m *BackupPolicyMutation) SetOneByMonth(b bool) {
-	m.oneByMonth = &b
+func (m *BackupPolicyMutation) SetOneByMonth(u uint) {
+	m.oneByMonth = &u
+	m.addoneByMonth = nil
 }
 
 // OneByMonth returns the value of the "oneByMonth" field in the mutation.
-func (m *BackupPolicyMutation) OneByMonth() (r bool, exists bool) {
+func (m *BackupPolicyMutation) OneByMonth() (r uint, exists bool) {
 	v := m.oneByMonth
 	if v == nil {
 		return
@@ -1522,7 +1568,7 @@ func (m *BackupPolicyMutation) OneByMonth() (r bool, exists bool) {
 // OldOneByMonth returns the old "oneByMonth" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldOneByMonth(ctx context.Context) (v bool, err error) {
+func (m *BackupPolicyMutation) OldOneByMonth(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOneByMonth is only allowed on UpdateOne operations")
 	}
@@ -1536,9 +1582,28 @@ func (m *BackupPolicyMutation) OldOneByMonth(ctx context.Context) (v bool, err e
 	return oldValue.OneByMonth, nil
 }
 
+// AddOneByMonth adds u to the "oneByMonth" field.
+func (m *BackupPolicyMutation) AddOneByMonth(u int) {
+	if m.addoneByMonth != nil {
+		*m.addoneByMonth += u
+	} else {
+		m.addoneByMonth = &u
+	}
+}
+
+// AddedOneByMonth returns the value that was added to the "oneByMonth" field in this mutation.
+func (m *BackupPolicyMutation) AddedOneByMonth() (r int, exists bool) {
+	v := m.addoneByMonth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetOneByMonth resets all changes to the "oneByMonth" field.
 func (m *BackupPolicyMutation) ResetOneByMonth() {
 	m.oneByMonth = nil
+	m.addoneByMonth = nil
 }
 
 // SetKeepAll sets the "keepAll" field.
@@ -1705,21 +1770,21 @@ func (m *BackupPolicyMutation) SetField(name string, value ent.Value) error {
 		m.SetNbLastBackup(v)
 		return nil
 	case backuppolicy.FieldOneByHour:
-		v, ok := value.(bool)
+		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOneByHour(v)
 		return nil
 	case backuppolicy.FieldOneByDay:
-		v, ok := value.(bool)
+		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOneByDay(v)
 		return nil
 	case backuppolicy.FieldOneByMonth:
-		v, ok := value.(bool)
+		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1743,6 +1808,15 @@ func (m *BackupPolicyMutation) AddedFields() []string {
 	if m.addnbLastBackup != nil {
 		fields = append(fields, backuppolicy.FieldNbLastBackup)
 	}
+	if m.addoneByHour != nil {
+		fields = append(fields, backuppolicy.FieldOneByHour)
+	}
+	if m.addoneByDay != nil {
+		fields = append(fields, backuppolicy.FieldOneByDay)
+	}
+	if m.addoneByMonth != nil {
+		fields = append(fields, backuppolicy.FieldOneByMonth)
+	}
 	return fields
 }
 
@@ -1753,6 +1827,12 @@ func (m *BackupPolicyMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case backuppolicy.FieldNbLastBackup:
 		return m.AddedNbLastBackup()
+	case backuppolicy.FieldOneByHour:
+		return m.AddedOneByHour()
+	case backuppolicy.FieldOneByDay:
+		return m.AddedOneByDay()
+	case backuppolicy.FieldOneByMonth:
+		return m.AddedOneByMonth()
 	}
 	return nil, false
 }
@@ -1768,6 +1848,27 @@ func (m *BackupPolicyMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddNbLastBackup(v)
+		return nil
+	case backuppolicy.FieldOneByHour:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOneByHour(v)
+		return nil
+	case backuppolicy.FieldOneByDay:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOneByDay(v)
+		return nil
+	case backuppolicy.FieldOneByMonth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOneByMonth(v)
 		return nil
 	}
 	return fmt.Errorf("unknown BackupPolicy numeric field %s", name)
@@ -6153,6 +6254,1475 @@ func (m *PermissionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Permission edge %s", name)
 }
 
+// PruneScheduleMutation represents an operation that mutates the PruneSchedule nodes in the graph.
+type PruneScheduleMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	choice            *pruneschedule.Choice
+	everyDay          *bool
+	everyWeek         *bool
+	everyMonth        *bool
+	everyMonday       *bool
+	everyTuesday      *bool
+	everyWednesday    *bool
+	everyThursday     *bool
+	everyFriday       *bool
+	everySaturday     *bool
+	everySunday       *bool
+	hour              *string
+	day               *string
+	interval          *string
+	cronSyntax        *string
+	cronID            *int
+	addcronID         *int
+	nextRun           *string
+	lastRun           *string
+	clearedFields     map[string]struct{}
+	repository        *int
+	clearedrepository bool
+	done              bool
+	oldValue          func(context.Context) (*PruneSchedule, error)
+	predicates        []predicate.PruneSchedule
+}
+
+var _ ent.Mutation = (*PruneScheduleMutation)(nil)
+
+// prunescheduleOption allows management of the mutation configuration using functional options.
+type prunescheduleOption func(*PruneScheduleMutation)
+
+// newPruneScheduleMutation creates new mutation for the PruneSchedule entity.
+func newPruneScheduleMutation(c config, op Op, opts ...prunescheduleOption) *PruneScheduleMutation {
+	m := &PruneScheduleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePruneSchedule,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPruneScheduleID sets the ID field of the mutation.
+func withPruneScheduleID(id int) prunescheduleOption {
+	return func(m *PruneScheduleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PruneSchedule
+		)
+		m.oldValue = func(ctx context.Context) (*PruneSchedule, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PruneSchedule.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPruneSchedule sets the old PruneSchedule of the mutation.
+func withPruneSchedule(node *PruneSchedule) prunescheduleOption {
+	return func(m *PruneScheduleMutation) {
+		m.oldValue = func(context.Context) (*PruneSchedule, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PruneScheduleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PruneScheduleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PruneScheduleMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PruneScheduleMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PruneSchedule.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetChoice sets the "choice" field.
+func (m *PruneScheduleMutation) SetChoice(pr pruneschedule.Choice) {
+	m.choice = &pr
+}
+
+// Choice returns the value of the "choice" field in the mutation.
+func (m *PruneScheduleMutation) Choice() (r pruneschedule.Choice, exists bool) {
+	v := m.choice
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChoice returns the old "choice" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldChoice(ctx context.Context) (v pruneschedule.Choice, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChoice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChoice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChoice: %w", err)
+	}
+	return oldValue.Choice, nil
+}
+
+// ResetChoice resets all changes to the "choice" field.
+func (m *PruneScheduleMutation) ResetChoice() {
+	m.choice = nil
+}
+
+// SetEveryDay sets the "everyDay" field.
+func (m *PruneScheduleMutation) SetEveryDay(b bool) {
+	m.everyDay = &b
+}
+
+// EveryDay returns the value of the "everyDay" field in the mutation.
+func (m *PruneScheduleMutation) EveryDay() (r bool, exists bool) {
+	v := m.everyDay
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryDay returns the old "everyDay" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryDay(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryDay: %w", err)
+	}
+	return oldValue.EveryDay, nil
+}
+
+// ResetEveryDay resets all changes to the "everyDay" field.
+func (m *PruneScheduleMutation) ResetEveryDay() {
+	m.everyDay = nil
+}
+
+// SetEveryWeek sets the "everyWeek" field.
+func (m *PruneScheduleMutation) SetEveryWeek(b bool) {
+	m.everyWeek = &b
+}
+
+// EveryWeek returns the value of the "everyWeek" field in the mutation.
+func (m *PruneScheduleMutation) EveryWeek() (r bool, exists bool) {
+	v := m.everyWeek
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryWeek returns the old "everyWeek" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryWeek(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryWeek is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryWeek requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryWeek: %w", err)
+	}
+	return oldValue.EveryWeek, nil
+}
+
+// ResetEveryWeek resets all changes to the "everyWeek" field.
+func (m *PruneScheduleMutation) ResetEveryWeek() {
+	m.everyWeek = nil
+}
+
+// SetEveryMonth sets the "everyMonth" field.
+func (m *PruneScheduleMutation) SetEveryMonth(b bool) {
+	m.everyMonth = &b
+}
+
+// EveryMonth returns the value of the "everyMonth" field in the mutation.
+func (m *PruneScheduleMutation) EveryMonth() (r bool, exists bool) {
+	v := m.everyMonth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryMonth returns the old "everyMonth" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryMonth(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryMonth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryMonth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryMonth: %w", err)
+	}
+	return oldValue.EveryMonth, nil
+}
+
+// ResetEveryMonth resets all changes to the "everyMonth" field.
+func (m *PruneScheduleMutation) ResetEveryMonth() {
+	m.everyMonth = nil
+}
+
+// SetEveryMonday sets the "everyMonday" field.
+func (m *PruneScheduleMutation) SetEveryMonday(b bool) {
+	m.everyMonday = &b
+}
+
+// EveryMonday returns the value of the "everyMonday" field in the mutation.
+func (m *PruneScheduleMutation) EveryMonday() (r bool, exists bool) {
+	v := m.everyMonday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryMonday returns the old "everyMonday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryMonday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryMonday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryMonday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryMonday: %w", err)
+	}
+	return oldValue.EveryMonday, nil
+}
+
+// ResetEveryMonday resets all changes to the "everyMonday" field.
+func (m *PruneScheduleMutation) ResetEveryMonday() {
+	m.everyMonday = nil
+}
+
+// SetEveryTuesday sets the "everyTuesday" field.
+func (m *PruneScheduleMutation) SetEveryTuesday(b bool) {
+	m.everyTuesday = &b
+}
+
+// EveryTuesday returns the value of the "everyTuesday" field in the mutation.
+func (m *PruneScheduleMutation) EveryTuesday() (r bool, exists bool) {
+	v := m.everyTuesday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryTuesday returns the old "everyTuesday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryTuesday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryTuesday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryTuesday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryTuesday: %w", err)
+	}
+	return oldValue.EveryTuesday, nil
+}
+
+// ResetEveryTuesday resets all changes to the "everyTuesday" field.
+func (m *PruneScheduleMutation) ResetEveryTuesday() {
+	m.everyTuesday = nil
+}
+
+// SetEveryWednesday sets the "everyWednesday" field.
+func (m *PruneScheduleMutation) SetEveryWednesday(b bool) {
+	m.everyWednesday = &b
+}
+
+// EveryWednesday returns the value of the "everyWednesday" field in the mutation.
+func (m *PruneScheduleMutation) EveryWednesday() (r bool, exists bool) {
+	v := m.everyWednesday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryWednesday returns the old "everyWednesday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryWednesday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryWednesday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryWednesday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryWednesday: %w", err)
+	}
+	return oldValue.EveryWednesday, nil
+}
+
+// ResetEveryWednesday resets all changes to the "everyWednesday" field.
+func (m *PruneScheduleMutation) ResetEveryWednesday() {
+	m.everyWednesday = nil
+}
+
+// SetEveryThursday sets the "everyThursday" field.
+func (m *PruneScheduleMutation) SetEveryThursday(b bool) {
+	m.everyThursday = &b
+}
+
+// EveryThursday returns the value of the "everyThursday" field in the mutation.
+func (m *PruneScheduleMutation) EveryThursday() (r bool, exists bool) {
+	v := m.everyThursday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryThursday returns the old "everyThursday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryThursday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryThursday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryThursday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryThursday: %w", err)
+	}
+	return oldValue.EveryThursday, nil
+}
+
+// ResetEveryThursday resets all changes to the "everyThursday" field.
+func (m *PruneScheduleMutation) ResetEveryThursday() {
+	m.everyThursday = nil
+}
+
+// SetEveryFriday sets the "everyFriday" field.
+func (m *PruneScheduleMutation) SetEveryFriday(b bool) {
+	m.everyFriday = &b
+}
+
+// EveryFriday returns the value of the "everyFriday" field in the mutation.
+func (m *PruneScheduleMutation) EveryFriday() (r bool, exists bool) {
+	v := m.everyFriday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEveryFriday returns the old "everyFriday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEveryFriday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEveryFriday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEveryFriday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEveryFriday: %w", err)
+	}
+	return oldValue.EveryFriday, nil
+}
+
+// ResetEveryFriday resets all changes to the "everyFriday" field.
+func (m *PruneScheduleMutation) ResetEveryFriday() {
+	m.everyFriday = nil
+}
+
+// SetEverySaturday sets the "everySaturday" field.
+func (m *PruneScheduleMutation) SetEverySaturday(b bool) {
+	m.everySaturday = &b
+}
+
+// EverySaturday returns the value of the "everySaturday" field in the mutation.
+func (m *PruneScheduleMutation) EverySaturday() (r bool, exists bool) {
+	v := m.everySaturday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEverySaturday returns the old "everySaturday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEverySaturday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEverySaturday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEverySaturday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEverySaturday: %w", err)
+	}
+	return oldValue.EverySaturday, nil
+}
+
+// ResetEverySaturday resets all changes to the "everySaturday" field.
+func (m *PruneScheduleMutation) ResetEverySaturday() {
+	m.everySaturday = nil
+}
+
+// SetEverySunday sets the "everySunday" field.
+func (m *PruneScheduleMutation) SetEverySunday(b bool) {
+	m.everySunday = &b
+}
+
+// EverySunday returns the value of the "everySunday" field in the mutation.
+func (m *PruneScheduleMutation) EverySunday() (r bool, exists bool) {
+	v := m.everySunday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEverySunday returns the old "everySunday" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldEverySunday(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEverySunday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEverySunday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEverySunday: %w", err)
+	}
+	return oldValue.EverySunday, nil
+}
+
+// ResetEverySunday resets all changes to the "everySunday" field.
+func (m *PruneScheduleMutation) ResetEverySunday() {
+	m.everySunday = nil
+}
+
+// SetHour sets the "hour" field.
+func (m *PruneScheduleMutation) SetHour(s string) {
+	m.hour = &s
+}
+
+// Hour returns the value of the "hour" field in the mutation.
+func (m *PruneScheduleMutation) Hour() (r string, exists bool) {
+	v := m.hour
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHour returns the old "hour" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldHour(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHour is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHour requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHour: %w", err)
+	}
+	return oldValue.Hour, nil
+}
+
+// ClearHour clears the value of the "hour" field.
+func (m *PruneScheduleMutation) ClearHour() {
+	m.hour = nil
+	m.clearedFields[pruneschedule.FieldHour] = struct{}{}
+}
+
+// HourCleared returns if the "hour" field was cleared in this mutation.
+func (m *PruneScheduleMutation) HourCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldHour]
+	return ok
+}
+
+// ResetHour resets all changes to the "hour" field.
+func (m *PruneScheduleMutation) ResetHour() {
+	m.hour = nil
+	delete(m.clearedFields, pruneschedule.FieldHour)
+}
+
+// SetDay sets the "day" field.
+func (m *PruneScheduleMutation) SetDay(s string) {
+	m.day = &s
+}
+
+// Day returns the value of the "day" field in the mutation.
+func (m *PruneScheduleMutation) Day() (r string, exists bool) {
+	v := m.day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDay returns the old "day" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldDay(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDay: %w", err)
+	}
+	return oldValue.Day, nil
+}
+
+// ClearDay clears the value of the "day" field.
+func (m *PruneScheduleMutation) ClearDay() {
+	m.day = nil
+	m.clearedFields[pruneschedule.FieldDay] = struct{}{}
+}
+
+// DayCleared returns if the "day" field was cleared in this mutation.
+func (m *PruneScheduleMutation) DayCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldDay]
+	return ok
+}
+
+// ResetDay resets all changes to the "day" field.
+func (m *PruneScheduleMutation) ResetDay() {
+	m.day = nil
+	delete(m.clearedFields, pruneschedule.FieldDay)
+}
+
+// SetInterval sets the "interval" field.
+func (m *PruneScheduleMutation) SetInterval(s string) {
+	m.interval = &s
+}
+
+// Interval returns the value of the "interval" field in the mutation.
+func (m *PruneScheduleMutation) Interval() (r string, exists bool) {
+	v := m.interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInterval returns the old "interval" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldInterval(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInterval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInterval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInterval: %w", err)
+	}
+	return oldValue.Interval, nil
+}
+
+// ClearInterval clears the value of the "interval" field.
+func (m *PruneScheduleMutation) ClearInterval() {
+	m.interval = nil
+	m.clearedFields[pruneschedule.FieldInterval] = struct{}{}
+}
+
+// IntervalCleared returns if the "interval" field was cleared in this mutation.
+func (m *PruneScheduleMutation) IntervalCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldInterval]
+	return ok
+}
+
+// ResetInterval resets all changes to the "interval" field.
+func (m *PruneScheduleMutation) ResetInterval() {
+	m.interval = nil
+	delete(m.clearedFields, pruneschedule.FieldInterval)
+}
+
+// SetCronSyntax sets the "cronSyntax" field.
+func (m *PruneScheduleMutation) SetCronSyntax(s string) {
+	m.cronSyntax = &s
+}
+
+// CronSyntax returns the value of the "cronSyntax" field in the mutation.
+func (m *PruneScheduleMutation) CronSyntax() (r string, exists bool) {
+	v := m.cronSyntax
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCronSyntax returns the old "cronSyntax" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldCronSyntax(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCronSyntax is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCronSyntax requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCronSyntax: %w", err)
+	}
+	return oldValue.CronSyntax, nil
+}
+
+// ClearCronSyntax clears the value of the "cronSyntax" field.
+func (m *PruneScheduleMutation) ClearCronSyntax() {
+	m.cronSyntax = nil
+	m.clearedFields[pruneschedule.FieldCronSyntax] = struct{}{}
+}
+
+// CronSyntaxCleared returns if the "cronSyntax" field was cleared in this mutation.
+func (m *PruneScheduleMutation) CronSyntaxCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldCronSyntax]
+	return ok
+}
+
+// ResetCronSyntax resets all changes to the "cronSyntax" field.
+func (m *PruneScheduleMutation) ResetCronSyntax() {
+	m.cronSyntax = nil
+	delete(m.clearedFields, pruneschedule.FieldCronSyntax)
+}
+
+// SetCronID sets the "cronID" field.
+func (m *PruneScheduleMutation) SetCronID(i int) {
+	m.cronID = &i
+	m.addcronID = nil
+}
+
+// CronID returns the value of the "cronID" field in the mutation.
+func (m *PruneScheduleMutation) CronID() (r int, exists bool) {
+	v := m.cronID
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCronID returns the old "cronID" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldCronID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCronID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCronID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCronID: %w", err)
+	}
+	return oldValue.CronID, nil
+}
+
+// AddCronID adds i to the "cronID" field.
+func (m *PruneScheduleMutation) AddCronID(i int) {
+	if m.addcronID != nil {
+		*m.addcronID += i
+	} else {
+		m.addcronID = &i
+	}
+}
+
+// AddedCronID returns the value that was added to the "cronID" field in this mutation.
+func (m *PruneScheduleMutation) AddedCronID() (r int, exists bool) {
+	v := m.addcronID
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCronID clears the value of the "cronID" field.
+func (m *PruneScheduleMutation) ClearCronID() {
+	m.cronID = nil
+	m.addcronID = nil
+	m.clearedFields[pruneschedule.FieldCronID] = struct{}{}
+}
+
+// CronIDCleared returns if the "cronID" field was cleared in this mutation.
+func (m *PruneScheduleMutation) CronIDCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldCronID]
+	return ok
+}
+
+// ResetCronID resets all changes to the "cronID" field.
+func (m *PruneScheduleMutation) ResetCronID() {
+	m.cronID = nil
+	m.addcronID = nil
+	delete(m.clearedFields, pruneschedule.FieldCronID)
+}
+
+// SetNextRun sets the "nextRun" field.
+func (m *PruneScheduleMutation) SetNextRun(s string) {
+	m.nextRun = &s
+}
+
+// NextRun returns the value of the "nextRun" field in the mutation.
+func (m *PruneScheduleMutation) NextRun() (r string, exists bool) {
+	v := m.nextRun
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextRun returns the old "nextRun" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldNextRun(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextRun is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextRun requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextRun: %w", err)
+	}
+	return oldValue.NextRun, nil
+}
+
+// ClearNextRun clears the value of the "nextRun" field.
+func (m *PruneScheduleMutation) ClearNextRun() {
+	m.nextRun = nil
+	m.clearedFields[pruneschedule.FieldNextRun] = struct{}{}
+}
+
+// NextRunCleared returns if the "nextRun" field was cleared in this mutation.
+func (m *PruneScheduleMutation) NextRunCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldNextRun]
+	return ok
+}
+
+// ResetNextRun resets all changes to the "nextRun" field.
+func (m *PruneScheduleMutation) ResetNextRun() {
+	m.nextRun = nil
+	delete(m.clearedFields, pruneschedule.FieldNextRun)
+}
+
+// SetLastRun sets the "lastRun" field.
+func (m *PruneScheduleMutation) SetLastRun(s string) {
+	m.lastRun = &s
+}
+
+// LastRun returns the value of the "lastRun" field in the mutation.
+func (m *PruneScheduleMutation) LastRun() (r string, exists bool) {
+	v := m.lastRun
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastRun returns the old "lastRun" field's value of the PruneSchedule entity.
+// If the PruneSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PruneScheduleMutation) OldLastRun(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastRun is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastRun requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastRun: %w", err)
+	}
+	return oldValue.LastRun, nil
+}
+
+// ClearLastRun clears the value of the "lastRun" field.
+func (m *PruneScheduleMutation) ClearLastRun() {
+	m.lastRun = nil
+	m.clearedFields[pruneschedule.FieldLastRun] = struct{}{}
+}
+
+// LastRunCleared returns if the "lastRun" field was cleared in this mutation.
+func (m *PruneScheduleMutation) LastRunCleared() bool {
+	_, ok := m.clearedFields[pruneschedule.FieldLastRun]
+	return ok
+}
+
+// ResetLastRun resets all changes to the "lastRun" field.
+func (m *PruneScheduleMutation) ResetLastRun() {
+	m.lastRun = nil
+	delete(m.clearedFields, pruneschedule.FieldLastRun)
+}
+
+// SetRepositoryID sets the "repository" edge to the Repository entity by id.
+func (m *PruneScheduleMutation) SetRepositoryID(id int) {
+	m.repository = &id
+}
+
+// ClearRepository clears the "repository" edge to the Repository entity.
+func (m *PruneScheduleMutation) ClearRepository() {
+	m.clearedrepository = true
+}
+
+// RepositoryCleared reports if the "repository" edge to the Repository entity was cleared.
+func (m *PruneScheduleMutation) RepositoryCleared() bool {
+	return m.clearedrepository
+}
+
+// RepositoryID returns the "repository" edge ID in the mutation.
+func (m *PruneScheduleMutation) RepositoryID() (id int, exists bool) {
+	if m.repository != nil {
+		return *m.repository, true
+	}
+	return
+}
+
+// RepositoryIDs returns the "repository" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RepositoryID instead. It exists only for internal usage by the builders.
+func (m *PruneScheduleMutation) RepositoryIDs() (ids []int) {
+	if id := m.repository; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRepository resets all changes to the "repository" edge.
+func (m *PruneScheduleMutation) ResetRepository() {
+	m.repository = nil
+	m.clearedrepository = false
+}
+
+// Where appends a list predicates to the PruneScheduleMutation builder.
+func (m *PruneScheduleMutation) Where(ps ...predicate.PruneSchedule) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *PruneScheduleMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (PruneSchedule).
+func (m *PruneScheduleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PruneScheduleMutation) Fields() []string {
+	fields := make([]string, 0, 18)
+	if m.choice != nil {
+		fields = append(fields, pruneschedule.FieldChoice)
+	}
+	if m.everyDay != nil {
+		fields = append(fields, pruneschedule.FieldEveryDay)
+	}
+	if m.everyWeek != nil {
+		fields = append(fields, pruneschedule.FieldEveryWeek)
+	}
+	if m.everyMonth != nil {
+		fields = append(fields, pruneschedule.FieldEveryMonth)
+	}
+	if m.everyMonday != nil {
+		fields = append(fields, pruneschedule.FieldEveryMonday)
+	}
+	if m.everyTuesday != nil {
+		fields = append(fields, pruneschedule.FieldEveryTuesday)
+	}
+	if m.everyWednesday != nil {
+		fields = append(fields, pruneschedule.FieldEveryWednesday)
+	}
+	if m.everyThursday != nil {
+		fields = append(fields, pruneschedule.FieldEveryThursday)
+	}
+	if m.everyFriday != nil {
+		fields = append(fields, pruneschedule.FieldEveryFriday)
+	}
+	if m.everySaturday != nil {
+		fields = append(fields, pruneschedule.FieldEverySaturday)
+	}
+	if m.everySunday != nil {
+		fields = append(fields, pruneschedule.FieldEverySunday)
+	}
+	if m.hour != nil {
+		fields = append(fields, pruneschedule.FieldHour)
+	}
+	if m.day != nil {
+		fields = append(fields, pruneschedule.FieldDay)
+	}
+	if m.interval != nil {
+		fields = append(fields, pruneschedule.FieldInterval)
+	}
+	if m.cronSyntax != nil {
+		fields = append(fields, pruneschedule.FieldCronSyntax)
+	}
+	if m.cronID != nil {
+		fields = append(fields, pruneschedule.FieldCronID)
+	}
+	if m.nextRun != nil {
+		fields = append(fields, pruneschedule.FieldNextRun)
+	}
+	if m.lastRun != nil {
+		fields = append(fields, pruneschedule.FieldLastRun)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PruneScheduleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pruneschedule.FieldChoice:
+		return m.Choice()
+	case pruneschedule.FieldEveryDay:
+		return m.EveryDay()
+	case pruneschedule.FieldEveryWeek:
+		return m.EveryWeek()
+	case pruneschedule.FieldEveryMonth:
+		return m.EveryMonth()
+	case pruneschedule.FieldEveryMonday:
+		return m.EveryMonday()
+	case pruneschedule.FieldEveryTuesday:
+		return m.EveryTuesday()
+	case pruneschedule.FieldEveryWednesday:
+		return m.EveryWednesday()
+	case pruneschedule.FieldEveryThursday:
+		return m.EveryThursday()
+	case pruneschedule.FieldEveryFriday:
+		return m.EveryFriday()
+	case pruneschedule.FieldEverySaturday:
+		return m.EverySaturday()
+	case pruneschedule.FieldEverySunday:
+		return m.EverySunday()
+	case pruneschedule.FieldHour:
+		return m.Hour()
+	case pruneschedule.FieldDay:
+		return m.Day()
+	case pruneschedule.FieldInterval:
+		return m.Interval()
+	case pruneschedule.FieldCronSyntax:
+		return m.CronSyntax()
+	case pruneschedule.FieldCronID:
+		return m.CronID()
+	case pruneschedule.FieldNextRun:
+		return m.NextRun()
+	case pruneschedule.FieldLastRun:
+		return m.LastRun()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PruneScheduleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pruneschedule.FieldChoice:
+		return m.OldChoice(ctx)
+	case pruneschedule.FieldEveryDay:
+		return m.OldEveryDay(ctx)
+	case pruneschedule.FieldEveryWeek:
+		return m.OldEveryWeek(ctx)
+	case pruneschedule.FieldEveryMonth:
+		return m.OldEveryMonth(ctx)
+	case pruneschedule.FieldEveryMonday:
+		return m.OldEveryMonday(ctx)
+	case pruneschedule.FieldEveryTuesday:
+		return m.OldEveryTuesday(ctx)
+	case pruneschedule.FieldEveryWednesday:
+		return m.OldEveryWednesday(ctx)
+	case pruneschedule.FieldEveryThursday:
+		return m.OldEveryThursday(ctx)
+	case pruneschedule.FieldEveryFriday:
+		return m.OldEveryFriday(ctx)
+	case pruneschedule.FieldEverySaturday:
+		return m.OldEverySaturday(ctx)
+	case pruneschedule.FieldEverySunday:
+		return m.OldEverySunday(ctx)
+	case pruneschedule.FieldHour:
+		return m.OldHour(ctx)
+	case pruneschedule.FieldDay:
+		return m.OldDay(ctx)
+	case pruneschedule.FieldInterval:
+		return m.OldInterval(ctx)
+	case pruneschedule.FieldCronSyntax:
+		return m.OldCronSyntax(ctx)
+	case pruneschedule.FieldCronID:
+		return m.OldCronID(ctx)
+	case pruneschedule.FieldNextRun:
+		return m.OldNextRun(ctx)
+	case pruneschedule.FieldLastRun:
+		return m.OldLastRun(ctx)
+	}
+	return nil, fmt.Errorf("unknown PruneSchedule field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PruneScheduleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pruneschedule.FieldChoice:
+		v, ok := value.(pruneschedule.Choice)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChoice(v)
+		return nil
+	case pruneschedule.FieldEveryDay:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryDay(v)
+		return nil
+	case pruneschedule.FieldEveryWeek:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryWeek(v)
+		return nil
+	case pruneschedule.FieldEveryMonth:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryMonth(v)
+		return nil
+	case pruneschedule.FieldEveryMonday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryMonday(v)
+		return nil
+	case pruneschedule.FieldEveryTuesday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryTuesday(v)
+		return nil
+	case pruneschedule.FieldEveryWednesday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryWednesday(v)
+		return nil
+	case pruneschedule.FieldEveryThursday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryThursday(v)
+		return nil
+	case pruneschedule.FieldEveryFriday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEveryFriday(v)
+		return nil
+	case pruneschedule.FieldEverySaturday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEverySaturday(v)
+		return nil
+	case pruneschedule.FieldEverySunday:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEverySunday(v)
+		return nil
+	case pruneschedule.FieldHour:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHour(v)
+		return nil
+	case pruneschedule.FieldDay:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDay(v)
+		return nil
+	case pruneschedule.FieldInterval:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInterval(v)
+		return nil
+	case pruneschedule.FieldCronSyntax:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCronSyntax(v)
+		return nil
+	case pruneschedule.FieldCronID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCronID(v)
+		return nil
+	case pruneschedule.FieldNextRun:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextRun(v)
+		return nil
+	case pruneschedule.FieldLastRun:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastRun(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PruneSchedule field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PruneScheduleMutation) AddedFields() []string {
+	var fields []string
+	if m.addcronID != nil {
+		fields = append(fields, pruneschedule.FieldCronID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PruneScheduleMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pruneschedule.FieldCronID:
+		return m.AddedCronID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PruneScheduleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case pruneschedule.FieldCronID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCronID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PruneSchedule numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PruneScheduleMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(pruneschedule.FieldHour) {
+		fields = append(fields, pruneschedule.FieldHour)
+	}
+	if m.FieldCleared(pruneschedule.FieldDay) {
+		fields = append(fields, pruneschedule.FieldDay)
+	}
+	if m.FieldCleared(pruneschedule.FieldInterval) {
+		fields = append(fields, pruneschedule.FieldInterval)
+	}
+	if m.FieldCleared(pruneschedule.FieldCronSyntax) {
+		fields = append(fields, pruneschedule.FieldCronSyntax)
+	}
+	if m.FieldCleared(pruneschedule.FieldCronID) {
+		fields = append(fields, pruneschedule.FieldCronID)
+	}
+	if m.FieldCleared(pruneschedule.FieldNextRun) {
+		fields = append(fields, pruneschedule.FieldNextRun)
+	}
+	if m.FieldCleared(pruneschedule.FieldLastRun) {
+		fields = append(fields, pruneschedule.FieldLastRun)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PruneScheduleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PruneScheduleMutation) ClearField(name string) error {
+	switch name {
+	case pruneschedule.FieldHour:
+		m.ClearHour()
+		return nil
+	case pruneschedule.FieldDay:
+		m.ClearDay()
+		return nil
+	case pruneschedule.FieldInterval:
+		m.ClearInterval()
+		return nil
+	case pruneschedule.FieldCronSyntax:
+		m.ClearCronSyntax()
+		return nil
+	case pruneschedule.FieldCronID:
+		m.ClearCronID()
+		return nil
+	case pruneschedule.FieldNextRun:
+		m.ClearNextRun()
+		return nil
+	case pruneschedule.FieldLastRun:
+		m.ClearLastRun()
+		return nil
+	}
+	return fmt.Errorf("unknown PruneSchedule nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PruneScheduleMutation) ResetField(name string) error {
+	switch name {
+	case pruneschedule.FieldChoice:
+		m.ResetChoice()
+		return nil
+	case pruneschedule.FieldEveryDay:
+		m.ResetEveryDay()
+		return nil
+	case pruneschedule.FieldEveryWeek:
+		m.ResetEveryWeek()
+		return nil
+	case pruneschedule.FieldEveryMonth:
+		m.ResetEveryMonth()
+		return nil
+	case pruneschedule.FieldEveryMonday:
+		m.ResetEveryMonday()
+		return nil
+	case pruneschedule.FieldEveryTuesday:
+		m.ResetEveryTuesday()
+		return nil
+	case pruneschedule.FieldEveryWednesday:
+		m.ResetEveryWednesday()
+		return nil
+	case pruneschedule.FieldEveryThursday:
+		m.ResetEveryThursday()
+		return nil
+	case pruneschedule.FieldEveryFriday:
+		m.ResetEveryFriday()
+		return nil
+	case pruneschedule.FieldEverySaturday:
+		m.ResetEverySaturday()
+		return nil
+	case pruneschedule.FieldEverySunday:
+		m.ResetEverySunday()
+		return nil
+	case pruneschedule.FieldHour:
+		m.ResetHour()
+		return nil
+	case pruneschedule.FieldDay:
+		m.ResetDay()
+		return nil
+	case pruneschedule.FieldInterval:
+		m.ResetInterval()
+		return nil
+	case pruneschedule.FieldCronSyntax:
+		m.ResetCronSyntax()
+		return nil
+	case pruneschedule.FieldCronID:
+		m.ResetCronID()
+		return nil
+	case pruneschedule.FieldNextRun:
+		m.ResetNextRun()
+		return nil
+	case pruneschedule.FieldLastRun:
+		m.ResetLastRun()
+		return nil
+	}
+	return fmt.Errorf("unknown PruneSchedule field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PruneScheduleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.repository != nil {
+		edges = append(edges, pruneschedule.EdgeRepository)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PruneScheduleMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case pruneschedule.EdgeRepository:
+		if id := m.repository; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PruneScheduleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PruneScheduleMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PruneScheduleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedrepository {
+		edges = append(edges, pruneschedule.EdgeRepository)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PruneScheduleMutation) EdgeCleared(name string) bool {
+	switch name {
+	case pruneschedule.EdgeRepository:
+		return m.clearedrepository
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PruneScheduleMutation) ClearEdge(name string) error {
+	switch name {
+	case pruneschedule.EdgeRepository:
+		m.ClearRepository()
+		return nil
+	}
+	return fmt.Errorf("unknown PruneSchedule unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PruneScheduleMutation) ResetEdge(name string) error {
+	switch name {
+	case pruneschedule.EdgeRepository:
+		m.ResetRepository()
+		return nil
+	}
+	return fmt.Errorf("unknown PruneSchedule edge %s", name)
+}
+
 // RepositoryMutation represents an operation that mutates the Repository nodes in the graph.
 type RepositoryMutation struct {
 	config
@@ -6178,6 +7748,8 @@ type RepositoryMutation struct {
 	clearedFields           map[string]struct{}
 	backupSchedule          *int
 	clearedbackupSchedule   bool
+	pruneSchedule           *int
+	clearedpruneSchedule    bool
 	backupPolicy            *int
 	clearedbackupPolicy     bool
 	localProvider           *int
@@ -7014,6 +8586,45 @@ func (m *RepositoryMutation) ResetBackupSchedule() {
 	m.clearedbackupSchedule = false
 }
 
+// SetPruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by id.
+func (m *RepositoryMutation) SetPruneScheduleID(id int) {
+	m.pruneSchedule = &id
+}
+
+// ClearPruneSchedule clears the "pruneSchedule" edge to the PruneSchedule entity.
+func (m *RepositoryMutation) ClearPruneSchedule() {
+	m.clearedpruneSchedule = true
+}
+
+// PruneScheduleCleared reports if the "pruneSchedule" edge to the PruneSchedule entity was cleared.
+func (m *RepositoryMutation) PruneScheduleCleared() bool {
+	return m.clearedpruneSchedule
+}
+
+// PruneScheduleID returns the "pruneSchedule" edge ID in the mutation.
+func (m *RepositoryMutation) PruneScheduleID() (id int, exists bool) {
+	if m.pruneSchedule != nil {
+		return *m.pruneSchedule, true
+	}
+	return
+}
+
+// PruneScheduleIDs returns the "pruneSchedule" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PruneScheduleID instead. It exists only for internal usage by the builders.
+func (m *RepositoryMutation) PruneScheduleIDs() (ids []int) {
+	if id := m.pruneSchedule; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPruneSchedule resets all changes to the "pruneSchedule" edge.
+func (m *RepositoryMutation) ResetPruneSchedule() {
+	m.pruneSchedule = nil
+	m.clearedpruneSchedule = false
+}
+
 // SetBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by id.
 func (m *RepositoryMutation) SetBackupPolicyID(id int) {
 	m.backupPolicy = &id
@@ -7745,9 +9356,12 @@ func (m *RepositoryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RepositoryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.backupSchedule != nil {
 		edges = append(edges, repository.EdgeBackupSchedule)
+	}
+	if m.pruneSchedule != nil {
+		edges = append(edges, repository.EdgePruneSchedule)
 	}
 	if m.backupPolicy != nil {
 		edges = append(edges, repository.EdgeBackupPolicy)
@@ -7779,6 +9393,10 @@ func (m *RepositoryMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case repository.EdgeBackupSchedule:
 		if id := m.backupSchedule; id != nil {
+			return []ent.Value{*id}
+		}
+	case repository.EdgePruneSchedule:
+		if id := m.pruneSchedule; id != nil {
 			return []ent.Value{*id}
 		}
 	case repository.EdgeBackupPolicy:
@@ -7819,7 +9437,7 @@ func (m *RepositoryMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RepositoryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.removedpaths != nil {
 		edges = append(edges, repository.EdgePaths)
 	}
@@ -7851,9 +9469,12 @@ func (m *RepositoryMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RepositoryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.clearedbackupSchedule {
 		edges = append(edges, repository.EdgeBackupSchedule)
+	}
+	if m.clearedpruneSchedule {
+		edges = append(edges, repository.EdgePruneSchedule)
 	}
 	if m.clearedbackupPolicy {
 		edges = append(edges, repository.EdgeBackupPolicy)
@@ -7885,6 +9506,8 @@ func (m *RepositoryMutation) EdgeCleared(name string) bool {
 	switch name {
 	case repository.EdgeBackupSchedule:
 		return m.clearedbackupSchedule
+	case repository.EdgePruneSchedule:
+		return m.clearedpruneSchedule
 	case repository.EdgeBackupPolicy:
 		return m.clearedbackupPolicy
 	case repository.EdgeLocalProvider:
@@ -7909,6 +9532,9 @@ func (m *RepositoryMutation) ClearEdge(name string) error {
 	switch name {
 	case repository.EdgeBackupSchedule:
 		m.ClearBackupSchedule()
+		return nil
+	case repository.EdgePruneSchedule:
+		m.ClearPruneSchedule()
 		return nil
 	case repository.EdgeBackupPolicy:
 		m.ClearBackupPolicy()
@@ -7935,6 +9561,9 @@ func (m *RepositoryMutation) ResetEdge(name string) error {
 	switch name {
 	case repository.EdgeBackupSchedule:
 		m.ResetBackupSchedule()
+		return nil
+	case repository.EdgePruneSchedule:
+		m.ResetPruneSchedule()
 		return nil
 	case repository.EdgeBackupPolicy:
 		m.ResetBackupPolicy()

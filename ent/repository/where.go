@@ -1275,6 +1275,34 @@ func HasBackupScheduleWith(preds ...predicate.BackupSchedule) predicate.Reposito
 	})
 }
 
+// HasPruneSchedule applies the HasEdge predicate on the "pruneSchedule" edge.
+func HasPruneSchedule() predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PruneScheduleTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, PruneScheduleTable, PruneScheduleColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPruneScheduleWith applies the HasEdge predicate on the "pruneSchedule" edge with a given conditions (other predicates).
+func HasPruneScheduleWith(preds ...predicate.PruneSchedule) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PruneScheduleInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, PruneScheduleTable, PruneScheduleColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasBackupPolicy applies the HasEdge predicate on the "backupPolicy" edge.
 func HasBackupPolicy() predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {

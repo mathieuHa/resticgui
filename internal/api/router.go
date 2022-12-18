@@ -52,6 +52,8 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.POST("", CreateRepository)
 		grpRepositories.POST(":id/backupschedule", CreateBackupSchedule)
 		grpRepositories.PATCH(":id/backupschedule", UpdateBackupSchedule)
+		grpRepositories.POST(":id/pruneschedule", CreatePruneSchedule)
+		grpRepositories.PATCH(":id/pruneschedule", UpdatePruneSchedule)
 		grpRepositories.POST(":id/backuppolicy", CreateBackupPolicy)
 		grpRepositories.PATCH(":id/backuppolicy", UpdateBackupPolicy)
 		grpRepositories.POST(":id/b2provider", CreateB2Provider)

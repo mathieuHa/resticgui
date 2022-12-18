@@ -14,6 +14,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/ent/role"
 	"gitlab.com/resticgui/resticgui/ent/schema"
@@ -70,6 +71,18 @@ func init() {
 	backuppolicyDescNbLastBackup := backuppolicyFields[0].Descriptor()
 	// backuppolicy.DefaultNbLastBackup holds the default value on creation for the nbLastBackup field.
 	backuppolicy.DefaultNbLastBackup = backuppolicyDescNbLastBackup.Default.(uint)
+	// backuppolicyDescOneByHour is the schema descriptor for oneByHour field.
+	backuppolicyDescOneByHour := backuppolicyFields[1].Descriptor()
+	// backuppolicy.DefaultOneByHour holds the default value on creation for the oneByHour field.
+	backuppolicy.DefaultOneByHour = backuppolicyDescOneByHour.Default.(uint)
+	// backuppolicyDescOneByDay is the schema descriptor for oneByDay field.
+	backuppolicyDescOneByDay := backuppolicyFields[2].Descriptor()
+	// backuppolicy.DefaultOneByDay holds the default value on creation for the oneByDay field.
+	backuppolicy.DefaultOneByDay = backuppolicyDescOneByDay.Default.(uint)
+	// backuppolicyDescOneByMonth is the schema descriptor for oneByMonth field.
+	backuppolicyDescOneByMonth := backuppolicyFields[3].Descriptor()
+	// backuppolicy.DefaultOneByMonth holds the default value on creation for the oneByMonth field.
+	backuppolicy.DefaultOneByMonth = backuppolicyDescOneByMonth.Default.(uint)
 	// backuppolicyDescKeepAll is the schema descriptor for keepAll field.
 	backuppolicyDescKeepAll := backuppolicyFields[4].Descriptor()
 	// backuppolicy.DefaultKeepAll holds the default value on creation for the keepAll field.
@@ -190,6 +203,72 @@ func init() {
 	permissionDescName := permissionFields[0].Descriptor()
 	// permission.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	permission.NameValidator = permissionDescName.Validators[0].(func(string) error)
+	prunescheduleFields := schema.PruneSchedule{}.Fields()
+	_ = prunescheduleFields
+	// prunescheduleDescEveryDay is the schema descriptor for everyDay field.
+	prunescheduleDescEveryDay := prunescheduleFields[1].Descriptor()
+	// pruneschedule.DefaultEveryDay holds the default value on creation for the everyDay field.
+	pruneschedule.DefaultEveryDay = prunescheduleDescEveryDay.Default.(bool)
+	// prunescheduleDescEveryWeek is the schema descriptor for everyWeek field.
+	prunescheduleDescEveryWeek := prunescheduleFields[2].Descriptor()
+	// pruneschedule.DefaultEveryWeek holds the default value on creation for the everyWeek field.
+	pruneschedule.DefaultEveryWeek = prunescheduleDescEveryWeek.Default.(bool)
+	// prunescheduleDescEveryMonth is the schema descriptor for everyMonth field.
+	prunescheduleDescEveryMonth := prunescheduleFields[3].Descriptor()
+	// pruneschedule.DefaultEveryMonth holds the default value on creation for the everyMonth field.
+	pruneschedule.DefaultEveryMonth = prunescheduleDescEveryMonth.Default.(bool)
+	// prunescheduleDescEveryMonday is the schema descriptor for everyMonday field.
+	prunescheduleDescEveryMonday := prunescheduleFields[4].Descriptor()
+	// pruneschedule.DefaultEveryMonday holds the default value on creation for the everyMonday field.
+	pruneschedule.DefaultEveryMonday = prunescheduleDescEveryMonday.Default.(bool)
+	// prunescheduleDescEveryTuesday is the schema descriptor for everyTuesday field.
+	prunescheduleDescEveryTuesday := prunescheduleFields[5].Descriptor()
+	// pruneschedule.DefaultEveryTuesday holds the default value on creation for the everyTuesday field.
+	pruneschedule.DefaultEveryTuesday = prunescheduleDescEveryTuesday.Default.(bool)
+	// prunescheduleDescEveryWednesday is the schema descriptor for everyWednesday field.
+	prunescheduleDescEveryWednesday := prunescheduleFields[6].Descriptor()
+	// pruneschedule.DefaultEveryWednesday holds the default value on creation for the everyWednesday field.
+	pruneschedule.DefaultEveryWednesday = prunescheduleDescEveryWednesday.Default.(bool)
+	// prunescheduleDescEveryThursday is the schema descriptor for everyThursday field.
+	prunescheduleDescEveryThursday := prunescheduleFields[7].Descriptor()
+	// pruneschedule.DefaultEveryThursday holds the default value on creation for the everyThursday field.
+	pruneschedule.DefaultEveryThursday = prunescheduleDescEveryThursday.Default.(bool)
+	// prunescheduleDescEveryFriday is the schema descriptor for everyFriday field.
+	prunescheduleDescEveryFriday := prunescheduleFields[8].Descriptor()
+	// pruneschedule.DefaultEveryFriday holds the default value on creation for the everyFriday field.
+	pruneschedule.DefaultEveryFriday = prunescheduleDescEveryFriday.Default.(bool)
+	// prunescheduleDescEverySaturday is the schema descriptor for everySaturday field.
+	prunescheduleDescEverySaturday := prunescheduleFields[9].Descriptor()
+	// pruneschedule.DefaultEverySaturday holds the default value on creation for the everySaturday field.
+	pruneschedule.DefaultEverySaturday = prunescheduleDescEverySaturday.Default.(bool)
+	// prunescheduleDescEverySunday is the schema descriptor for everySunday field.
+	prunescheduleDescEverySunday := prunescheduleFields[10].Descriptor()
+	// pruneschedule.DefaultEverySunday holds the default value on creation for the everySunday field.
+	pruneschedule.DefaultEverySunday = prunescheduleDescEverySunday.Default.(bool)
+	// prunescheduleDescHour is the schema descriptor for hour field.
+	prunescheduleDescHour := prunescheduleFields[11].Descriptor()
+	// pruneschedule.DefaultHour holds the default value on creation for the hour field.
+	pruneschedule.DefaultHour = prunescheduleDescHour.Default.(string)
+	// prunescheduleDescDay is the schema descriptor for day field.
+	prunescheduleDescDay := prunescheduleFields[12].Descriptor()
+	// pruneschedule.DefaultDay holds the default value on creation for the day field.
+	pruneschedule.DefaultDay = prunescheduleDescDay.Default.(string)
+	// prunescheduleDescInterval is the schema descriptor for interval field.
+	prunescheduleDescInterval := prunescheduleFields[13].Descriptor()
+	// pruneschedule.DefaultInterval holds the default value on creation for the interval field.
+	pruneschedule.DefaultInterval = prunescheduleDescInterval.Default.(string)
+	// prunescheduleDescCronSyntax is the schema descriptor for cronSyntax field.
+	prunescheduleDescCronSyntax := prunescheduleFields[14].Descriptor()
+	// pruneschedule.DefaultCronSyntax holds the default value on creation for the cronSyntax field.
+	pruneschedule.DefaultCronSyntax = prunescheduleDescCronSyntax.Default.(string)
+	// prunescheduleDescNextRun is the schema descriptor for nextRun field.
+	prunescheduleDescNextRun := prunescheduleFields[16].Descriptor()
+	// pruneschedule.DefaultNextRun holds the default value on creation for the nextRun field.
+	pruneschedule.DefaultNextRun = prunescheduleDescNextRun.Default.(string)
+	// prunescheduleDescLastRun is the schema descriptor for lastRun field.
+	prunescheduleDescLastRun := prunescheduleFields[17].Descriptor()
+	// pruneschedule.DefaultLastRun holds the default value on creation for the lastRun field.
+	pruneschedule.DefaultLastRun = prunescheduleDescLastRun.Default.(string)
 	repositoryFields := schema.Repository{}.Fields()
 	_ = repositoryFields
 	// repositoryDescName is the schema descriptor for name field.

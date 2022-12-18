@@ -86,6 +86,61 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	return stdout
 }
 
+func PruneRepository(r *ent.Repository, cr *cron.Cron) (out string) {
+	// It is advisable to run restic check after pruning, to make sure you are alerted, should the internal data structures of the repository be damaged.
+	log.Debug().Msg("PruneRepository()")
+
+	log.Info().Msgf("JOB HAS STARTED %v", r.ID)
+
+	ctx := context.Background()
+
+	var cronEntry cron.Entry
+	if r.Edges.PruneSchedule != nil && r.Edges.PruneSchedule.CronID != nil {
+		cronID := cron.EntryID(*r.Edges.PruneSchedule.CronID)
+		cronEntry = cr.Entry(cronID)
+	} else {
+		log.Error().Msg("Not cron entry")
+	}
+	// TODO Check the validity of the provider and repository in general
+
+	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
+	stdout, stderr, errCmd := commands.GetSnapshots(r)
+	var snapshots []Models.Snapshot
+	err := json.Unmarshal([]byte(stdout), &snapshots)
+	if err == nil && snapshots != nil {
+		r.SnapshotCount = len(snapshots)
+		_, err = database.UpdateRepositoryDB(*r, r.ID, ctx)
+		if err != nil {
+			log.Err(err).Msg("Error update db")
+		}
+	}
+	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
+
+	if errCmd != nil {
+		stdout, stderr, errCmd = commands.InitRepository(r)
+		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
+		// set intiated to true
+		// how to check it succeded
+	}
+	database.SetRepositoryInitiatedDB(r.ID, ctx)
+
+	// set prune running
+	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
+
+	_ = database.UpdatePruneCronLastRun(*r.Edges.PruneSchedule, cronEntry.Prev.String())
+	_ = database.UpdatePruneCronNextRun(*r.Edges.PruneSchedule, cronEntry.Next.String())
+
+	stdout, stderr, errCmd = commands.ForgetSnapshots(r, "")
+	database.LogCommand(r.ID, "PruneRepository", stdout, stderr, errCmd, ctx)
+
+	// set prune running ended
+	_, _ = database.SetRepositoryRunningDB(r.ID, false, ctx)
+
+	log.Info().Msgf("JOB HAS ENDED %v", r.ID)
+
+	return stdout
+}
+
 func GetSnapshotsRepository(r *ent.Repository) (out string) {
 	log.Debug().Msg("GetSnapshotsRepository()")
 

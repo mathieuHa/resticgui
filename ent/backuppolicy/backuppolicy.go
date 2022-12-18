@@ -64,6 +64,12 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultNbLastBackup holds the default value on creation for the "nbLastBackup" field.
 	DefaultNbLastBackup uint
+	// DefaultOneByHour holds the default value on creation for the "oneByHour" field.
+	DefaultOneByHour uint
+	// DefaultOneByDay holds the default value on creation for the "oneByDay" field.
+	DefaultOneByDay uint
+	// DefaultOneByMonth holds the default value on creation for the "oneByMonth" field.
+	DefaultOneByMonth uint
 	// DefaultKeepAll holds the default value on creation for the "keepAll" field.
 	DefaultKeepAll bool
 )

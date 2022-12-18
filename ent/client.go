@@ -19,6 +19,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/ent/role"
 	"gitlab.com/resticgui/resticgui/ent/user"
@@ -51,6 +52,8 @@ type Client struct {
 	Path *PathClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
+	// PruneSchedule is the client for interacting with the PruneSchedule builders.
+	PruneSchedule *PruneScheduleClient
 	// Repository is the client for interacting with the Repository builders.
 	Repository *RepositoryClient
 	// Role is the client for interacting with the Role builders.
@@ -79,6 +82,7 @@ func (c *Client) init() {
 	c.MinioS3Provider = NewMinioS3ProviderClient(c.config)
 	c.Path = NewPathClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
+	c.PruneSchedule = NewPruneScheduleClient(c.config)
 	c.Repository = NewRepositoryClient(c.config)
 	c.Role = NewRoleClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -124,6 +128,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		MinioS3Provider: NewMinioS3ProviderClient(cfg),
 		Path:            NewPathClient(cfg),
 		Permission:      NewPermissionClient(cfg),
+		PruneSchedule:   NewPruneScheduleClient(cfg),
 		Repository:      NewRepositoryClient(cfg),
 		Role:            NewRoleClient(cfg),
 		User:            NewUserClient(cfg),
@@ -155,6 +160,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		MinioS3Provider: NewMinioS3ProviderClient(cfg),
 		Path:            NewPathClient(cfg),
 		Permission:      NewPermissionClient(cfg),
+		PruneSchedule:   NewPruneScheduleClient(cfg),
 		Repository:      NewRepositoryClient(cfg),
 		Role:            NewRoleClient(cfg),
 		User:            NewUserClient(cfg),
@@ -195,6 +201,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.MinioS3Provider.Use(hooks...)
 	c.Path.Use(hooks...)
 	c.Permission.Use(hooks...)
+	c.PruneSchedule.Use(hooks...)
 	c.Repository.Use(hooks...)
 	c.Role.Use(hooks...)
 	c.User.Use(hooks...)
@@ -1138,6 +1145,112 @@ func (c *PermissionClient) Hooks() []Hook {
 	return c.hooks.Permission
 }
 
+// PruneScheduleClient is a client for the PruneSchedule schema.
+type PruneScheduleClient struct {
+	config
+}
+
+// NewPruneScheduleClient returns a client for the PruneSchedule from the given config.
+func NewPruneScheduleClient(c config) *PruneScheduleClient {
+	return &PruneScheduleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pruneschedule.Hooks(f(g(h())))`.
+func (c *PruneScheduleClient) Use(hooks ...Hook) {
+	c.hooks.PruneSchedule = append(c.hooks.PruneSchedule, hooks...)
+}
+
+// Create returns a builder for creating a PruneSchedule entity.
+func (c *PruneScheduleClient) Create() *PruneScheduleCreate {
+	mutation := newPruneScheduleMutation(c.config, OpCreate)
+	return &PruneScheduleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PruneSchedule entities.
+func (c *PruneScheduleClient) CreateBulk(builders ...*PruneScheduleCreate) *PruneScheduleCreateBulk {
+	return &PruneScheduleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PruneSchedule.
+func (c *PruneScheduleClient) Update() *PruneScheduleUpdate {
+	mutation := newPruneScheduleMutation(c.config, OpUpdate)
+	return &PruneScheduleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PruneScheduleClient) UpdateOne(ps *PruneSchedule) *PruneScheduleUpdateOne {
+	mutation := newPruneScheduleMutation(c.config, OpUpdateOne, withPruneSchedule(ps))
+	return &PruneScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PruneScheduleClient) UpdateOneID(id int) *PruneScheduleUpdateOne {
+	mutation := newPruneScheduleMutation(c.config, OpUpdateOne, withPruneScheduleID(id))
+	return &PruneScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PruneSchedule.
+func (c *PruneScheduleClient) Delete() *PruneScheduleDelete {
+	mutation := newPruneScheduleMutation(c.config, OpDelete)
+	return &PruneScheduleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PruneScheduleClient) DeleteOne(ps *PruneSchedule) *PruneScheduleDeleteOne {
+	return c.DeleteOneID(ps.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PruneScheduleClient) DeleteOneID(id int) *PruneScheduleDeleteOne {
+	builder := c.Delete().Where(pruneschedule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PruneScheduleDeleteOne{builder}
+}
+
+// Query returns a query builder for PruneSchedule.
+func (c *PruneScheduleClient) Query() *PruneScheduleQuery {
+	return &PruneScheduleQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a PruneSchedule entity by its id.
+func (c *PruneScheduleClient) Get(ctx context.Context, id int) (*PruneSchedule, error) {
+	return c.Query().Where(pruneschedule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PruneScheduleClient) GetX(ctx context.Context, id int) *PruneSchedule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRepository queries the repository edge of a PruneSchedule.
+func (c *PruneScheduleClient) QueryRepository(ps *PruneSchedule) *RepositoryQuery {
+	query := &RepositoryQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pruneschedule.Table, pruneschedule.FieldID, id),
+			sqlgraph.To(repository.Table, repository.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, pruneschedule.RepositoryTable, pruneschedule.RepositoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PruneScheduleClient) Hooks() []Hook {
+	return c.hooks.PruneSchedule
+}
+
 // RepositoryClient is a client for the Repository schema.
 type RepositoryClient struct {
 	config
@@ -1232,6 +1345,22 @@ func (c *RepositoryClient) QueryBackupSchedule(r *Repository) *BackupScheduleQue
 			sqlgraph.From(repository.Table, repository.FieldID, id),
 			sqlgraph.To(backupschedule.Table, backupschedule.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupScheduleTable, repository.BackupScheduleColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPruneSchedule queries the pruneSchedule edge of a Repository.
+func (c *RepositoryClient) QueryPruneSchedule(r *Repository) *PruneScheduleQuery {
+	query := &PruneScheduleQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, id),
+			sqlgraph.To(pruneschedule.Table, pruneschedule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.PruneScheduleTable, repository.PruneScheduleColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil

@@ -44,6 +44,8 @@ const (
 	FieldSnapshotCount = "snapshot_count"
 	// EdgeBackupSchedule holds the string denoting the backupschedule edge name in mutations.
 	EdgeBackupSchedule = "backupSchedule"
+	// EdgePruneSchedule holds the string denoting the pruneschedule edge name in mutations.
+	EdgePruneSchedule = "pruneSchedule"
 	// EdgeBackupPolicy holds the string denoting the backuppolicy edge name in mutations.
 	EdgeBackupPolicy = "backupPolicy"
 	// EdgeLocalProvider holds the string denoting the localprovider edge name in mutations.
@@ -67,6 +69,13 @@ const (
 	BackupScheduleInverseTable = "BackupSchedule"
 	// BackupScheduleColumn is the table column denoting the backupSchedule relation/edge.
 	BackupScheduleColumn = "repository_backup_schedule"
+	// PruneScheduleTable is the table that holds the pruneSchedule relation/edge.
+	PruneScheduleTable = "PruneSchedule"
+	// PruneScheduleInverseTable is the table name for the PruneSchedule entity.
+	// It exists in this package in order to avoid circular dependency with the "pruneschedule" package.
+	PruneScheduleInverseTable = "PruneSchedule"
+	// PruneScheduleColumn is the table column denoting the pruneSchedule relation/edge.
+	PruneScheduleColumn = "repository_prune_schedule"
 	// BackupPolicyTable is the table that holds the backupPolicy relation/edge.
 	BackupPolicyTable = "BackupPolicy"
 	// BackupPolicyInverseTable is the table name for the BackupPolicy entity.

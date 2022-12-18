@@ -35,20 +35,44 @@ func (bpc *BackupPolicyCreate) SetNillableNbLastBackup(u *uint) *BackupPolicyCre
 }
 
 // SetOneByHour sets the "oneByHour" field.
-func (bpc *BackupPolicyCreate) SetOneByHour(b bool) *BackupPolicyCreate {
-	bpc.mutation.SetOneByHour(b)
+func (bpc *BackupPolicyCreate) SetOneByHour(u uint) *BackupPolicyCreate {
+	bpc.mutation.SetOneByHour(u)
+	return bpc
+}
+
+// SetNillableOneByHour sets the "oneByHour" field if the given value is not nil.
+func (bpc *BackupPolicyCreate) SetNillableOneByHour(u *uint) *BackupPolicyCreate {
+	if u != nil {
+		bpc.SetOneByHour(*u)
+	}
 	return bpc
 }
 
 // SetOneByDay sets the "oneByDay" field.
-func (bpc *BackupPolicyCreate) SetOneByDay(b bool) *BackupPolicyCreate {
-	bpc.mutation.SetOneByDay(b)
+func (bpc *BackupPolicyCreate) SetOneByDay(u uint) *BackupPolicyCreate {
+	bpc.mutation.SetOneByDay(u)
+	return bpc
+}
+
+// SetNillableOneByDay sets the "oneByDay" field if the given value is not nil.
+func (bpc *BackupPolicyCreate) SetNillableOneByDay(u *uint) *BackupPolicyCreate {
+	if u != nil {
+		bpc.SetOneByDay(*u)
+	}
 	return bpc
 }
 
 // SetOneByMonth sets the "oneByMonth" field.
-func (bpc *BackupPolicyCreate) SetOneByMonth(b bool) *BackupPolicyCreate {
-	bpc.mutation.SetOneByMonth(b)
+func (bpc *BackupPolicyCreate) SetOneByMonth(u uint) *BackupPolicyCreate {
+	bpc.mutation.SetOneByMonth(u)
+	return bpc
+}
+
+// SetNillableOneByMonth sets the "oneByMonth" field if the given value is not nil.
+func (bpc *BackupPolicyCreate) SetNillableOneByMonth(u *uint) *BackupPolicyCreate {
+	if u != nil {
+		bpc.SetOneByMonth(*u)
+	}
 	return bpc
 }
 
@@ -158,6 +182,18 @@ func (bpc *BackupPolicyCreate) defaults() {
 		v := backuppolicy.DefaultNbLastBackup
 		bpc.mutation.SetNbLastBackup(v)
 	}
+	if _, ok := bpc.mutation.OneByHour(); !ok {
+		v := backuppolicy.DefaultOneByHour
+		bpc.mutation.SetOneByHour(v)
+	}
+	if _, ok := bpc.mutation.OneByDay(); !ok {
+		v := backuppolicy.DefaultOneByDay
+		bpc.mutation.SetOneByDay(v)
+	}
+	if _, ok := bpc.mutation.OneByMonth(); !ok {
+		v := backuppolicy.DefaultOneByMonth
+		bpc.mutation.SetOneByMonth(v)
+	}
 	if _, ok := bpc.mutation.KeepAll(); !ok {
 		v := backuppolicy.DefaultKeepAll
 		bpc.mutation.SetKeepAll(v)
@@ -216,15 +252,15 @@ func (bpc *BackupPolicyCreate) createSpec() (*BackupPolicy, *sqlgraph.CreateSpec
 		_node.NbLastBackup = value
 	}
 	if value, ok := bpc.mutation.OneByHour(); ok {
-		_spec.SetField(backuppolicy.FieldOneByHour, field.TypeBool, value)
+		_spec.SetField(backuppolicy.FieldOneByHour, field.TypeUint, value)
 		_node.OneByHour = value
 	}
 	if value, ok := bpc.mutation.OneByDay(); ok {
-		_spec.SetField(backuppolicy.FieldOneByDay, field.TypeBool, value)
+		_spec.SetField(backuppolicy.FieldOneByDay, field.TypeUint, value)
 		_node.OneByDay = value
 	}
 	if value, ok := bpc.mutation.OneByMonth(); ok {
-		_spec.SetField(backuppolicy.FieldOneByMonth, field.TypeBool, value)
+		_spec.SetField(backuppolicy.FieldOneByMonth, field.TypeUint, value)
 		_node.OneByMonth = value
 	}
 	if value, ok := bpc.mutation.KeepAll(); ok {

@@ -33,6 +33,7 @@ type hooks struct {
 	MinioS3Provider []ent.Hook
 	Path            []ent.Hook
 	Permission      []ent.Hook
+	PruneSchedule   []ent.Hook
 	Repository      []ent.Hook
 	Role            []ent.Hook
 	User            []ent.Hook

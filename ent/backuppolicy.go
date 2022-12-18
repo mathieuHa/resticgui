@@ -19,11 +19,11 @@ type BackupPolicy struct {
 	// NbLastBackup holds the value of the "nbLastBackup" field.
 	NbLastBackup uint `json:"nbLastBackup,omitempty"`
 	// OneByHour holds the value of the "oneByHour" field.
-	OneByHour bool `json:"oneByHour,omitempty"`
+	OneByHour uint `json:"oneByHour,omitempty"`
 	// OneByDay holds the value of the "oneByDay" field.
-	OneByDay bool `json:"oneByDay,omitempty"`
+	OneByDay uint `json:"oneByDay,omitempty"`
 	// OneByMonth holds the value of the "oneByMonth" field.
-	OneByMonth bool `json:"oneByMonth,omitempty"`
+	OneByMonth uint `json:"oneByMonth,omitempty"`
 	// KeepAll holds the value of the "keepAll" field.
 	KeepAll bool `json:"keepAll,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -59,9 +59,9 @@ func (*BackupPolicy) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case backuppolicy.FieldOneByHour, backuppolicy.FieldOneByDay, backuppolicy.FieldOneByMonth, backuppolicy.FieldKeepAll:
+		case backuppolicy.FieldKeepAll:
 			values[i] = new(sql.NullBool)
-		case backuppolicy.FieldID, backuppolicy.FieldNbLastBackup:
+		case backuppolicy.FieldID, backuppolicy.FieldNbLastBackup, backuppolicy.FieldOneByHour, backuppolicy.FieldOneByDay, backuppolicy.FieldOneByMonth:
 			values[i] = new(sql.NullInt64)
 		case backuppolicy.ForeignKeys[0]: // repository_backup_policy
 			values[i] = new(sql.NullInt64)
@@ -93,22 +93,22 @@ func (bp *BackupPolicy) assignValues(columns []string, values []any) error {
 				bp.NbLastBackup = uint(value.Int64)
 			}
 		case backuppolicy.FieldOneByHour:
-			if value, ok := values[i].(*sql.NullBool); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field oneByHour", values[i])
 			} else if value.Valid {
-				bp.OneByHour = value.Bool
+				bp.OneByHour = uint(value.Int64)
 			}
 		case backuppolicy.FieldOneByDay:
-			if value, ok := values[i].(*sql.NullBool); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field oneByDay", values[i])
 			} else if value.Valid {
-				bp.OneByDay = value.Bool
+				bp.OneByDay = uint(value.Int64)
 			}
 		case backuppolicy.FieldOneByMonth:
-			if value, ok := values[i].(*sql.NullBool); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field oneByMonth", values[i])
 			} else if value.Valid {
-				bp.OneByMonth = value.Bool
+				bp.OneByMonth = uint(value.Int64)
 			}
 		case backuppolicy.FieldKeepAll:
 			if value, ok := values[i].(*sql.NullBool); !ok {

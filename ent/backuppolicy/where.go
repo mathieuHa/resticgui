@@ -87,21 +87,21 @@ func NbLastBackup(v uint) predicate.BackupPolicy {
 }
 
 // OneByHour applies equality check predicate on the "oneByHour" field. It's identical to OneByHourEQ.
-func OneByHour(v bool) predicate.BackupPolicy {
+func OneByHour(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneByHour), v))
 	})
 }
 
 // OneByDay applies equality check predicate on the "oneByDay" field. It's identical to OneByDayEQ.
-func OneByDay(v bool) predicate.BackupPolicy {
+func OneByDay(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneByDay), v))
 	})
 }
 
 // OneByMonth applies equality check predicate on the "oneByMonth" field. It's identical to OneByMonthEQ.
-func OneByMonth(v bool) predicate.BackupPolicy {
+func OneByMonth(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneByMonth), v))
 	})
@@ -179,44 +179,194 @@ func NbLastBackupLTE(v uint) predicate.BackupPolicy {
 }
 
 // OneByHourEQ applies the EQ predicate on the "oneByHour" field.
-func OneByHourEQ(v bool) predicate.BackupPolicy {
+func OneByHourEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneByHour), v))
 	})
 }
 
 // OneByHourNEQ applies the NEQ predicate on the "oneByHour" field.
-func OneByHourNEQ(v bool) predicate.BackupPolicy {
+func OneByHourNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldOneByHour), v))
 	})
 }
 
+// OneByHourIn applies the In predicate on the "oneByHour" field.
+func OneByHourIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldOneByHour), v...))
+	})
+}
+
+// OneByHourNotIn applies the NotIn predicate on the "oneByHour" field.
+func OneByHourNotIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldOneByHour), v...))
+	})
+}
+
+// OneByHourGT applies the GT predicate on the "oneByHour" field.
+func OneByHourGT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOneByHour), v))
+	})
+}
+
+// OneByHourGTE applies the GTE predicate on the "oneByHour" field.
+func OneByHourGTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOneByHour), v))
+	})
+}
+
+// OneByHourLT applies the LT predicate on the "oneByHour" field.
+func OneByHourLT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOneByHour), v))
+	})
+}
+
+// OneByHourLTE applies the LTE predicate on the "oneByHour" field.
+func OneByHourLTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOneByHour), v))
+	})
+}
+
 // OneByDayEQ applies the EQ predicate on the "oneByDay" field.
-func OneByDayEQ(v bool) predicate.BackupPolicy {
+func OneByDayEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneByDay), v))
 	})
 }
 
 // OneByDayNEQ applies the NEQ predicate on the "oneByDay" field.
-func OneByDayNEQ(v bool) predicate.BackupPolicy {
+func OneByDayNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldOneByDay), v))
 	})
 }
 
+// OneByDayIn applies the In predicate on the "oneByDay" field.
+func OneByDayIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldOneByDay), v...))
+	})
+}
+
+// OneByDayNotIn applies the NotIn predicate on the "oneByDay" field.
+func OneByDayNotIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldOneByDay), v...))
+	})
+}
+
+// OneByDayGT applies the GT predicate on the "oneByDay" field.
+func OneByDayGT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOneByDay), v))
+	})
+}
+
+// OneByDayGTE applies the GTE predicate on the "oneByDay" field.
+func OneByDayGTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOneByDay), v))
+	})
+}
+
+// OneByDayLT applies the LT predicate on the "oneByDay" field.
+func OneByDayLT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOneByDay), v))
+	})
+}
+
+// OneByDayLTE applies the LTE predicate on the "oneByDay" field.
+func OneByDayLTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOneByDay), v))
+	})
+}
+
 // OneByMonthEQ applies the EQ predicate on the "oneByMonth" field.
-func OneByMonthEQ(v bool) predicate.BackupPolicy {
+func OneByMonthEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneByMonth), v))
 	})
 }
 
 // OneByMonthNEQ applies the NEQ predicate on the "oneByMonth" field.
-func OneByMonthNEQ(v bool) predicate.BackupPolicy {
+func OneByMonthNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldOneByMonth), v))
+	})
+}
+
+// OneByMonthIn applies the In predicate on the "oneByMonth" field.
+func OneByMonthIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldOneByMonth), v...))
+	})
+}
+
+// OneByMonthNotIn applies the NotIn predicate on the "oneByMonth" field.
+func OneByMonthNotIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldOneByMonth), v...))
+	})
+}
+
+// OneByMonthGT applies the GT predicate on the "oneByMonth" field.
+func OneByMonthGT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOneByMonth), v))
+	})
+}
+
+// OneByMonthGTE applies the GTE predicate on the "oneByMonth" field.
+func OneByMonthGTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOneByMonth), v))
+	})
+}
+
+// OneByMonthLT applies the LT predicate on the "oneByMonth" field.
+func OneByMonthLT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOneByMonth), v))
+	})
+}
+
+// OneByMonthLTE applies the LTE predicate on the "oneByMonth" field.
+func OneByMonthLTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOneByMonth), v))
 	})
 }
 

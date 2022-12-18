@@ -19,6 +19,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -303,6 +304,25 @@ func (ru *RepositoryUpdate) SetBackupSchedule(b *BackupSchedule) *RepositoryUpda
 	return ru.SetBackupScheduleID(b.ID)
 }
 
+// SetPruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by ID.
+func (ru *RepositoryUpdate) SetPruneScheduleID(id int) *RepositoryUpdate {
+	ru.mutation.SetPruneScheduleID(id)
+	return ru
+}
+
+// SetNillablePruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by ID if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillablePruneScheduleID(id *int) *RepositoryUpdate {
+	if id != nil {
+		ru = ru.SetPruneScheduleID(*id)
+	}
+	return ru
+}
+
+// SetPruneSchedule sets the "pruneSchedule" edge to the PruneSchedule entity.
+func (ru *RepositoryUpdate) SetPruneSchedule(p *PruneSchedule) *RepositoryUpdate {
+	return ru.SetPruneScheduleID(p.ID)
+}
+
 // SetBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by ID.
 func (ru *RepositoryUpdate) SetBackupPolicyID(id int) *RepositoryUpdate {
 	ru.mutation.SetBackupPolicyID(id)
@@ -436,6 +456,12 @@ func (ru *RepositoryUpdate) Mutation() *RepositoryMutation {
 // ClearBackupSchedule clears the "backupSchedule" edge to the BackupSchedule entity.
 func (ru *RepositoryUpdate) ClearBackupSchedule() *RepositoryUpdate {
 	ru.mutation.ClearBackupSchedule()
+	return ru
+}
+
+// ClearPruneSchedule clears the "pruneSchedule" edge to the PruneSchedule entity.
+func (ru *RepositoryUpdate) ClearPruneSchedule() *RepositoryUpdate {
+	ru.mutation.ClearPruneSchedule()
 	return ru
 }
 
@@ -708,6 +734,41 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.PruneScheduleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.PruneScheduleTable,
+			Columns: []string{repository.PruneScheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pruneschedule.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.PruneScheduleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.PruneScheduleTable,
+			Columns: []string{repository.PruneScheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pruneschedule.FieldID,
 				},
 			},
 		}
@@ -1286,6 +1347,25 @@ func (ruo *RepositoryUpdateOne) SetBackupSchedule(b *BackupSchedule) *Repository
 	return ruo.SetBackupScheduleID(b.ID)
 }
 
+// SetPruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by ID.
+func (ruo *RepositoryUpdateOne) SetPruneScheduleID(id int) *RepositoryUpdateOne {
+	ruo.mutation.SetPruneScheduleID(id)
+	return ruo
+}
+
+// SetNillablePruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by ID if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillablePruneScheduleID(id *int) *RepositoryUpdateOne {
+	if id != nil {
+		ruo = ruo.SetPruneScheduleID(*id)
+	}
+	return ruo
+}
+
+// SetPruneSchedule sets the "pruneSchedule" edge to the PruneSchedule entity.
+func (ruo *RepositoryUpdateOne) SetPruneSchedule(p *PruneSchedule) *RepositoryUpdateOne {
+	return ruo.SetPruneScheduleID(p.ID)
+}
+
 // SetBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by ID.
 func (ruo *RepositoryUpdateOne) SetBackupPolicyID(id int) *RepositoryUpdateOne {
 	ruo.mutation.SetBackupPolicyID(id)
@@ -1419,6 +1499,12 @@ func (ruo *RepositoryUpdateOne) Mutation() *RepositoryMutation {
 // ClearBackupSchedule clears the "backupSchedule" edge to the BackupSchedule entity.
 func (ruo *RepositoryUpdateOne) ClearBackupSchedule() *RepositoryUpdateOne {
 	ruo.mutation.ClearBackupSchedule()
+	return ruo
+}
+
+// ClearPruneSchedule clears the "pruneSchedule" edge to the PruneSchedule entity.
+func (ruo *RepositoryUpdateOne) ClearPruneSchedule() *RepositoryUpdateOne {
+	ruo.mutation.ClearPruneSchedule()
 	return ruo
 }
 
@@ -1721,6 +1807,41 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.PruneScheduleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.PruneScheduleTable,
+			Columns: []string{repository.PruneScheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pruneschedule.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.PruneScheduleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.PruneScheduleTable,
+			Columns: []string{repository.PruneScheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pruneschedule.FieldID,
 				},
 			},
 		}
