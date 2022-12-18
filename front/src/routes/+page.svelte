@@ -90,12 +90,12 @@
         <div class="flex flex-wrap justify-between mt-5 mb-1 ">
           <div class="flex flex-wrap gap-2 min-w-[200px]">
             <a href="/{repo.id}">
-              <button
+              <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
                 title="See"
               >
                 <Eye />
-              </button>
+              </div>
             </a>
             <button
               class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
@@ -116,28 +116,28 @@
               <Trash />
             </button>
             <a href="/{repo.id}?tab=logs">
-              <button
+              <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
                 title="Logs"
               >
                 <Logs />
-              </button>
+              </div>
             </a>
             <a href="/{repo.id}?tab=snapshots">
-              <button
+              <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-violet-500 hover:bg-violet-600"
                 title="Snapshots"
               >
                 <Snapshot />
-              </button>
+              </div>
             </a>
             <a href="/{repo.id}?tab=stats">
-              <button
+              <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
                 title="Stats"
               >
                 <Stats />
-              </button>
+            </div>
             </a>
           </div>
           <span class="text-{values.running ? 'green' : 'red'}-500 flex-1 pl-1 whitespace-nowrap text-right ">

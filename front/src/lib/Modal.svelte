@@ -23,9 +23,9 @@
   <div class="custom-max-height overflow-y-auto relative max-w-xl bg-gray-200 dark:bg-gray-700 rounded-md m-auto shadow-lg shadow-gray-400 dark:shadow-black">
     <div class="flex bg-white dark:bg-gray-800">
       <p class="flex-1 px-2 py-1">{title}</p>
-      <div on:click={onClose} class="hover:bg-red-600 p-2 cursor-pointer transition-all">
+      <button on:click|preventDefault|stopPropagation={onClose} class="hover:bg-red-600 p-2 cursor-pointer transition-all">
         <Cross />
-      </div>
+      </button>
     </div>
     <div class="p-2">
       <slot />

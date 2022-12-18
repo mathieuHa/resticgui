@@ -6,34 +6,22 @@
   import General from '$lib/RepositoryId/General.svelte';
   import Loader from '$lib/Loader.svelte';
   import agent from '$utils/api';
-  import { toasts } from '$utils/stores';
+  import { refresh } from '$utils/stores';
 
-  let repo = null;
-  let snapshots = null;
-  let logs = null;
-  let tab = new URLSearchParams($page.url.search).get('tab') || null;
-  let loading = true;
+  let tab = new URLSearchParams($page.url.search).get('tab') || 'general';
 
   const fetch = async (path: string) => {
-    try {
-      return await agent.get(path);
-    } catch (err) {
-      return null;
-    }
+    return await agent.get(path);
   };
 
-  const onRefresh = async (id: string) => {
-    try {
-      [repo, logs, snapshots] = await Promise.all([
-        fetch(`/repositories/${id}`),
-        fetch(`/repositories/${id}/logs`),
-        fetch(`/repositories/${id}/snapshots`),
-      ]);
-    } catch (err: unknown) {
-      toasts.addToast(err?.message, 'failure');
-    }
-    loading = false;
-  };
+  let repoPromise = fetch(`/repositories/${$page.params.id}`);
+  let logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
+  let snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
+  refresh.subscribe(() => {
+    if (tab === 'general') repoPromise = fetch(`/repositories/${$page.params.id}`);
+    else if (tab === 'logs') logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
+    else if (tab === 'snapshots') snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
+  })
 
   const replaceStateWithQuery = (value: string) => {
     const url = new URL(window.location.toString());
@@ -41,12 +29,10 @@
     history.replaceState({}, '', url);
     tab = value;
   };
-
-  $: onRefresh($page.params.id as string);
 </script>
 
 <div class="mt-2 mb-10 w-full max-w-full">
-  <div class="flex justify-between flex-wrap mb-3">
+  <div class="flex justify-between flex-wrap mb-5">
     {#each ["General", "Snapshots", "Logs"] as stepped, i}
       <button
         on:click={() => replaceStateWithQuery(stepped.toLowerCase())}
@@ -57,27 +43,39 @@
         <span class="rounded-xl">{stepped}</span>
         </button>
     {/each}
-    </div>
+  </div>
 
-  {#if loading}
-    <Loader />
-  {:else}
-    {#if repo}
-      {#if tab === 'snapshots'}
-        {#if snapshots && snapshots.length > 0}
-          <Snapshot snapshots={snapshots.sort((a, b) => b.time.localeCompare(a.time))} />
-        {:else}
-          <span>no data</span>
-        {/if}
-      {:else if tab === 'logs'}
-        {#if logs && logs.length > 0}
-          <Log {logs} />
-        {:else}
-          <span>no data</span>
-        {/if}
+  {#if tab === 'snapshots'}
+    {#await snapshotsPromise}
+      <Loader />
+    {:then snapshots}
+      {#if snapshots && snapshots.length > 0}
+        <Snapshot snapshots={snapshots.sort((a, b) => b.time.localeCompare(a.time))} />
       {:else}
-        <General {repo} />
+        <span>no data</span>
       {/if}
-    {/if}
+    {:catch err}
+      <pre>{err}</pre>
+    {/await}
+  {:else if tab === 'logs'}
+    {#await logsPromise}
+      <Loader />
+    {:then logs}
+      {#if logs && logs.length > 0}
+        <Log {logs} />
+      {:else}
+        <span>no data</span>
+      {/if}
+    {:catch err}
+      <pre>{err}</pre>
+    {/await}
+  {:else}
+    {#await repoPromise}
+      <Loader />
+    {:then repo}
+      <General {repo} />
+    {:catch err}
+      <pre>{err}</pre>
+    {/await}
   {/if}
 </div>

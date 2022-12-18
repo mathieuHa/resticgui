@@ -24,9 +24,12 @@
 
 <div class="flex justify-between">
   {#each Object.keys(providers) as backupProvider}
-    <button on:click|preventDefault|stopPropagation={() => { provider = backupProvider }}>
+    <button
+      class=" mr-2"
+      on:click|preventDefault|stopPropagation={() => { provider = backupProvider }}
+    >
       <img
-        class="h-10 w-10 mr-2 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-all"
+        class="h-10 w-10 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-all"
         src="/{backupProvider}.svg"
         alt={backupProvider}
         

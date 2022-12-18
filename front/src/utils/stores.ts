@@ -7,6 +7,7 @@ interface Toast {
   value: string
   timeout: unknown
 }
+
 const toasts = (() => {
   const { subscribe, update } = writable([] as Toast[]);
 
@@ -28,4 +29,12 @@ const toasts = (() => {
   }
 })();
 
-export { toasts };
+const refresh = (() => {
+  const { subscribe, update } = writable(0);
+  return {
+    subscribe,
+    update: () => update((data) => data + 1),
+  }
+})();
+
+export { toasts, refresh };
