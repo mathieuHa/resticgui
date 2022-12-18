@@ -14,7 +14,7 @@
 
   let step = 0;
   let values = null;
-  let link: string | null = null;
+  let link: string = '';
 
   const dispatch = createEventDispatcher();
   
@@ -30,7 +30,6 @@
   const onSubmit = async () => {
     console.log(values);
     try {
-      console.log(link);
       await agent[repository?.id ? 'patch' : 'post'](link, values);
       toasts.addToast('Repository updated !');
       dispatch('refresh');
