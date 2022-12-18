@@ -33,6 +33,9 @@ type Path func(*sql.Selector)
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
 
+// PruneSchedule is the predicate function for pruneschedule builders.
+type PruneSchedule func(*sql.Selector)
+
 // Repository is the predicate function for repository builders.
 type Repository func(*sql.Selector)
 

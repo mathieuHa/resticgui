@@ -20,6 +20,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -33,6 +34,7 @@ type RepositoryQuery struct {
 	fields              []string
 	predicates          []predicate.Repository
 	withBackupSchedule  *BackupScheduleQuery
+	withPruneSchedule   *PruneScheduleQuery
 	withBackupPolicy    *BackupPolicyQuery
 	withLocalProvider   *LocalProviderQuery
 	withB2Provider      *B2ProviderQuery
@@ -91,6 +93,28 @@ func (rq *RepositoryQuery) QueryBackupSchedule() *BackupScheduleQuery {
 			sqlgraph.From(repository.Table, repository.FieldID, selector),
 			sqlgraph.To(backupschedule.Table, backupschedule.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, repository.BackupScheduleTable, repository.BackupScheduleColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPruneSchedule chains the current query on the "pruneSchedule" edge.
+func (rq *RepositoryQuery) QueryPruneSchedule() *PruneScheduleQuery {
+	query := &PruneScheduleQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(repository.Table, repository.FieldID, selector),
+			sqlgraph.To(pruneschedule.Table, pruneschedule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, repository.PruneScheduleTable, repository.PruneScheduleColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -434,6 +458,7 @@ func (rq *RepositoryQuery) Clone() *RepositoryQuery {
 		order:               append([]OrderFunc{}, rq.order...),
 		predicates:          append([]predicate.Repository{}, rq.predicates...),
 		withBackupSchedule:  rq.withBackupSchedule.Clone(),
+		withPruneSchedule:   rq.withPruneSchedule.Clone(),
 		withBackupPolicy:    rq.withBackupPolicy.Clone(),
 		withLocalProvider:   rq.withLocalProvider.Clone(),
 		withB2Provider:      rq.withB2Provider.Clone(),
@@ -456,6 +481,17 @@ func (rq *RepositoryQuery) WithBackupSchedule(opts ...func(*BackupScheduleQuery)
 		opt(query)
 	}
 	rq.withBackupSchedule = query
+	return rq
+}
+
+// WithPruneSchedule tells the query-builder to eager-load the nodes that are connected to
+// the "pruneSchedule" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RepositoryQuery) WithPruneSchedule(opts ...func(*PruneScheduleQuery)) *RepositoryQuery {
+	query := &PruneScheduleQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withPruneSchedule = query
 	return rq
 }
 
@@ -609,8 +645,9 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*R
 	var (
 		nodes       = []*Repository{}
 		_spec       = rq.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			rq.withBackupSchedule != nil,
+			rq.withPruneSchedule != nil,
 			rq.withBackupPolicy != nil,
 			rq.withLocalProvider != nil,
 			rq.withB2Provider != nil,
@@ -641,6 +678,12 @@ func (rq *RepositoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*R
 	if query := rq.withBackupSchedule; query != nil {
 		if err := rq.loadBackupSchedule(ctx, query, nodes, nil,
 			func(n *Repository, e *BackupSchedule) { n.Edges.BackupSchedule = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := rq.withPruneSchedule; query != nil {
+		if err := rq.loadPruneSchedule(ctx, query, nodes, nil,
+			func(n *Repository, e *PruneSchedule) { n.Edges.PruneSchedule = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -714,6 +757,34 @@ func (rq *RepositoryQuery) loadBackupSchedule(ctx context.Context, query *Backup
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "repository_backup_schedule" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (rq *RepositoryQuery) loadPruneSchedule(ctx context.Context, query *PruneScheduleQuery, nodes []*Repository, init func(*Repository), assign func(*Repository, *PruneSchedule)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Repository)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.PruneSchedule(func(s *sql.Selector) {
+		s.Where(sql.InValues(repository.PruneScheduleColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.repository_prune_schedule
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "repository_prune_schedule" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "repository_prune_schedule" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

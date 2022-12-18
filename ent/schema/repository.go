@@ -44,6 +44,9 @@ func (Repository) Edges() []ent.Edge {
 		edge.To("backupSchedule", BackupSchedule.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
+		edge.To("pruneSchedule", PruneSchedule.Type).Unique().Annotations(entsql.Annotation{
+			OnDelete: entsql.Cascade,
+		}),
 		edge.To("backupPolicy", BackupPolicy.Type).Unique().Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),

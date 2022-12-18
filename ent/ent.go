@@ -19,6 +19,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
 	"gitlab.com/resticgui/resticgui/ent/permission"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 	"gitlab.com/resticgui/resticgui/ent/role"
 	"gitlab.com/resticgui/resticgui/ent/user"
@@ -51,6 +52,7 @@ func columnChecker(table string) func(string) error {
 		minios3provider.Table: minios3provider.ValidColumn,
 		path.Table:            path.ValidColumn,
 		permission.Table:      permission.ValidColumn,
+		pruneschedule.Table:   pruneschedule.ValidColumn,
 		repository.Table:      repository.ValidColumn,
 		role.Table:            role.ValidColumn,
 		user.Table:            user.ValidColumn,

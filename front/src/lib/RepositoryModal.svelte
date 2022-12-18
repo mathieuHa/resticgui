@@ -5,6 +5,7 @@
 
   import BackupPolicy from './RepositoryModal/BackupPolicy.svelte';
   import BackupSchedule from './RepositoryModal/BackupSchedule.svelte';
+  import PruneSchedule from './RepositoryModal/PruneSchedule.svelte';
   import General from './RepositoryModal/General.svelte';
   import Modal from './Modal.svelte';
   import Provider from './RepositoryModal/Provider.svelte';
@@ -50,7 +51,7 @@
       title={!repository.id ? 'Give to repository a name' : null}
       class="flex justify-between flex-wrap {!repository.id ? 'cursor-not-allowed' : ''}"
     >
-      {#each ['General', 'Paths', 'Schedule', 'Policy', 'Provider'] as stepped, i}
+      {#each ['General', 'Paths', 'Schedule', 'Policy', 'Provider', 'Prune'] as stepped, i}
         <button
           class="flex-1 pb-1 px-4 rounded-t border border-gray-500 {!repository.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
           on:click|preventDefault|stopPropagation={() => { step = i; }}
@@ -100,6 +101,14 @@
           on:update={({ detail: providers }) => {
             values = providers.edges[providers.provider];
             link = `/repositories/${repository.id}/${providers.provider.toLowerCase()}`;
+          }}
+        />
+      {:else if step === 5}
+        <PruneSchedule
+          initialPruneSchedule={(values.edges && values.edges.pruneSchedule) || {}}
+          on:update={({ detail: pruneSchedule }) => {
+            values = pruneSchedule;
+            link = `/repositories/${repository.id}/pruneschedule`;
           }}
         />
       {/if}

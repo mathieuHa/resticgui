@@ -126,6 +126,19 @@ func (f PermissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return f(ctx, mv)
 }
 
+// The PruneScheduleFunc type is an adapter to allow the use of ordinary
+// function as PruneSchedule mutator.
+type PruneScheduleFunc func(context.Context, *ent.PruneScheduleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PruneScheduleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PruneScheduleMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PruneScheduleMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The RepositoryFunc type is an adapter to allow the use of ordinary
 // function as Repository mutator.
 type RepositoryFunc func(context.Context, *ent.RepositoryMutation) (ent.Value, error)

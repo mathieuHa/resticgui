@@ -61,9 +61,9 @@ var (
 	BackupPolicyColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "nb_last_backup", Type: field.TypeUint, Default: 10},
-		{Name: "one_by_hour", Type: field.TypeBool},
-		{Name: "one_by_day", Type: field.TypeBool},
-		{Name: "one_by_month", Type: field.TypeBool},
+		{Name: "one_by_hour", Type: field.TypeUint, Default: 1},
+		{Name: "one_by_day", Type: field.TypeUint, Default: 1},
+		{Name: "one_by_month", Type: field.TypeUint, Default: 1},
 		{Name: "keep_all", Type: field.TypeBool, Default: true},
 		{Name: "repository_backup_policy", Type: field.TypeInt, Unique: true},
 	}
@@ -227,6 +227,43 @@ var (
 		Columns:    PermissionsColumns,
 		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
 	}
+	// PruneScheduleColumns holds the columns for the "PruneSchedule" table.
+	PruneScheduleColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "choice", Type: field.TypeEnum, Enums: []string{"cron", "interval", "monthly", "weekly"}, Default: "cron"},
+		{Name: "every_day", Type: field.TypeBool, Default: false},
+		{Name: "every_week", Type: field.TypeBool, Default: false},
+		{Name: "every_month", Type: field.TypeBool, Default: false},
+		{Name: "every_monday", Type: field.TypeBool, Default: false},
+		{Name: "every_tuesday", Type: field.TypeBool, Default: false},
+		{Name: "every_wednesday", Type: field.TypeBool, Default: false},
+		{Name: "every_thursday", Type: field.TypeBool, Default: false},
+		{Name: "every_friday", Type: field.TypeBool, Default: false},
+		{Name: "every_saturday", Type: field.TypeBool, Default: false},
+		{Name: "every_sunday", Type: field.TypeBool, Default: false},
+		{Name: "hour", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "day", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "interval", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "cron_syntax", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "cron_id", Type: field.TypeInt, Nullable: true},
+		{Name: "next_run", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "last_run", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "repository_prune_schedule", Type: field.TypeInt, Unique: true},
+	}
+	// PruneScheduleTable holds the schema information for the "PruneSchedule" table.
+	PruneScheduleTable = &schema.Table{
+		Name:       "PruneSchedule",
+		Columns:    PruneScheduleColumns,
+		PrimaryKey: []*schema.Column{PruneScheduleColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "PruneSchedule_repositories_pruneSchedule",
+				Columns:    []*schema.Column{PruneScheduleColumns[19]},
+				RefColumns: []*schema.Column{RepositoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// RepositoriesColumns holds the columns for the "repositories" table.
 	RepositoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -293,6 +330,7 @@ var (
 		MinioS3ProviderTable,
 		PathsTable,
 		PermissionsTable,
+		PruneScheduleTable,
 		RepositoriesTable,
 		RolesTable,
 		UsersTable,
@@ -329,4 +367,8 @@ func init() {
 		Table: "MinioS3Provider",
 	}
 	PathsTable.ForeignKeys[0].RefTable = RepositoriesTable
+	PruneScheduleTable.ForeignKeys[0].RefTable = RepositoriesTable
+	PruneScheduleTable.Annotation = &entsql.Annotation{
+		Table: "PruneSchedule",
+	}
 }

@@ -18,6 +18,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/logs"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
 	"gitlab.com/resticgui/resticgui/ent/path"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -247,6 +248,25 @@ func (rc *RepositoryCreate) SetNillableBackupScheduleID(id *int) *RepositoryCrea
 // SetBackupSchedule sets the "backupSchedule" edge to the BackupSchedule entity.
 func (rc *RepositoryCreate) SetBackupSchedule(b *BackupSchedule) *RepositoryCreate {
 	return rc.SetBackupScheduleID(b.ID)
+}
+
+// SetPruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by ID.
+func (rc *RepositoryCreate) SetPruneScheduleID(id int) *RepositoryCreate {
+	rc.mutation.SetPruneScheduleID(id)
+	return rc
+}
+
+// SetNillablePruneScheduleID sets the "pruneSchedule" edge to the PruneSchedule entity by ID if the given value is not nil.
+func (rc *RepositoryCreate) SetNillablePruneScheduleID(id *int) *RepositoryCreate {
+	if id != nil {
+		rc = rc.SetPruneScheduleID(*id)
+	}
+	return rc
+}
+
+// SetPruneSchedule sets the "pruneSchedule" edge to the PruneSchedule entity.
+func (rc *RepositoryCreate) SetPruneSchedule(p *PruneSchedule) *RepositoryCreate {
+	return rc.SetPruneScheduleID(p.ID)
 }
 
 // SetBackupPolicyID sets the "backupPolicy" edge to the BackupPolicy entity by ID.
@@ -614,6 +634,25 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: backupschedule.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.PruneScheduleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   repository.PruneScheduleTable,
+			Columns: []string{repository.PruneScheduleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pruneschedule.FieldID,
 				},
 			},
 		}

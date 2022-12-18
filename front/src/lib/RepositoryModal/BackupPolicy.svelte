@@ -4,6 +4,9 @@
 
   export let initialBackupPolicy: {
     nbLastBackup?: number,
+    oneByHour?: number,
+    oneByDay?: number,
+    oneByMonth?: number,
     keepAll?: boolean,
   } = {};
   let values = initialBackupPolicy;
@@ -29,21 +32,24 @@
 <Input
   id="oneByHour"
   name="oneByHour"
-  type="checkbox"
-  label="One by hour"
-  bind:checked={values.oneByHour}
+  type="number"
+  min="0"
+  label="Keep One by hour for"
+  bind:value={values.oneByHour}
 />
 <Input
   id="oneByDay"
   name="oneByDay"
-  type="checkbox"
-  label="One by day"
-  bind:checked={values.oneByDay}
+  type="number"
+  min="0"
+  label="Keep One by day for"
+  bind:value={values.oneByDay}
 />
 <Input
   id="oneByMonth"
   name="oneByMonth"
-  type="checkbox"
-  label="One by month"
-  bind:checked={values.oneByMonth}
+  type="number"
+  min="0"
+  label="Keep One by month for"
+  bind:value={values.oneByMonth}
 />

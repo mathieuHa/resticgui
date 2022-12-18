@@ -87,6 +87,28 @@ func getRestoreCommonArgs(path string, version string) []string {
 	return args
 }
 
+func getPruneCommonArgs(r *ent.Repository) []string {
+	var args []string
+	if r.Edges.BackupPolicy.NbLastBackup != 0 {
+		args = append(args, "--keep-last")
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbLastBackup))
+	}
+	if r.Edges.BackupPolicy.OneByHour != 0 {
+		args = append(args, "--keep-hourly")
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.OneByHour != 0))
+	}
+	if r.Edges.BackupPolicy.OneByDay != 0 {
+		args = append(args, "--keep-daily")
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.OneByDay))
+	}
+	if r.Edges.BackupPolicy.OneByMonth != 0 {
+		args = append(args, "--keep-monthly")
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.OneByMonth))
+	}
+
+	return args
+}
+
 func ForgetSnapshots(repository *ent.Repository, version string) (string, string, error) {
 	log.Debug().Msg("ForgetSnapshots()")
 
@@ -100,11 +122,16 @@ func ForgetSnapshots(repository *ent.Repository, version string) (string, string
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, forgetCmd)
 	args = append(args, repoFormat...)
-	args = append(args, version)
+	if version == "" {
+		args = append(args, version)
+	} else {
+		args = append(args, getPruneCommonArgs(repository)...)
+	}
 	return runRestic(args, env)
 }
 
-func PruneSnaphots(repository *ent.Repository, version string) (string, string, error) {
+func PruneSnaphots(repository *ent.Repository) (string, string, error) {
+
 	log.Debug().Msg("PruneSnaphots()")
 
 	if repository == nil {
@@ -118,7 +145,6 @@ func PruneSnaphots(repository *ent.Repository, version string) (string, string, 
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, pruneCmd)
 	args = append(args, repoFormat...)
-	args = append(args, version)
 	return runRestic(args, env)
 }
 

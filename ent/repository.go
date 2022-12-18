@@ -14,6 +14,7 @@ import (
 	"gitlab.com/resticgui/resticgui/ent/backupschedule"
 	"gitlab.com/resticgui/resticgui/ent/localprovider"
 	"gitlab.com/resticgui/resticgui/ent/minios3provider"
+	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
 	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
@@ -61,6 +62,8 @@ type Repository struct {
 type RepositoryEdges struct {
 	// BackupSchedule holds the value of the backupSchedule edge.
 	BackupSchedule *BackupSchedule `json:"backupSchedule,omitempty"`
+	// PruneSchedule holds the value of the pruneSchedule edge.
+	PruneSchedule *PruneSchedule `json:"pruneSchedule,omitempty"`
 	// BackupPolicy holds the value of the backupPolicy edge.
 	BackupPolicy *BackupPolicy `json:"backupPolicy,omitempty"`
 	// LocalProvider holds the value of the localProvider edge.
@@ -77,7 +80,7 @@ type RepositoryEdges struct {
 	Logs []*Logs `json:"logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // BackupScheduleOrErr returns the BackupSchedule value or an error if the edge
@@ -93,10 +96,23 @@ func (e RepositoryEdges) BackupScheduleOrErr() (*BackupSchedule, error) {
 	return nil, &NotLoadedError{edge: "backupSchedule"}
 }
 
+// PruneScheduleOrErr returns the PruneSchedule value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RepositoryEdges) PruneScheduleOrErr() (*PruneSchedule, error) {
+	if e.loadedTypes[1] {
+		if e.PruneSchedule == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: pruneschedule.Label}
+		}
+		return e.PruneSchedule, nil
+	}
+	return nil, &NotLoadedError{edge: "pruneSchedule"}
+}
+
 // BackupPolicyOrErr returns the BackupPolicy value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RepositoryEdges) BackupPolicyOrErr() (*BackupPolicy, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.BackupPolicy == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: backuppolicy.Label}
@@ -109,7 +125,7 @@ func (e RepositoryEdges) BackupPolicyOrErr() (*BackupPolicy, error) {
 // LocalProviderOrErr returns the LocalProvider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RepositoryEdges) LocalProviderOrErr() (*LocalProvider, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		if e.LocalProvider == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: localprovider.Label}
@@ -122,7 +138,7 @@ func (e RepositoryEdges) LocalProviderOrErr() (*LocalProvider, error) {
 // B2ProviderOrErr returns the B2Provider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RepositoryEdges) B2ProviderOrErr() (*B2Provider, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		if e.B2Provider == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: b2provider.Label}
@@ -135,7 +151,7 @@ func (e RepositoryEdges) B2ProviderOrErr() (*B2Provider, error) {
 // AWSS3ProviderOrErr returns the AWSS3Provider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RepositoryEdges) AWSS3ProviderOrErr() (*AWSS3Provider, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		if e.AWSS3Provider == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: awss3provider.Label}
@@ -148,7 +164,7 @@ func (e RepositoryEdges) AWSS3ProviderOrErr() (*AWSS3Provider, error) {
 // MinioS3ProviderOrErr returns the MinioS3Provider value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RepositoryEdges) MinioS3ProviderOrErr() (*MinioS3Provider, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		if e.MinioS3Provider == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: minios3provider.Label}
@@ -161,7 +177,7 @@ func (e RepositoryEdges) MinioS3ProviderOrErr() (*MinioS3Provider, error) {
 // PathsOrErr returns the Paths value or an error if the edge
 // was not loaded in eager-loading.
 func (e RepositoryEdges) PathsOrErr() ([]*Path, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Paths, nil
 	}
 	return nil, &NotLoadedError{edge: "paths"}
@@ -170,7 +186,7 @@ func (e RepositoryEdges) PathsOrErr() ([]*Path, error) {
 // LogsOrErr returns the Logs value or an error if the edge
 // was not loaded in eager-loading.
 func (e RepositoryEdges) LogsOrErr() ([]*Logs, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Logs, nil
 	}
 	return nil, &NotLoadedError{edge: "logs"}
@@ -308,6 +324,11 @@ func (r *Repository) assignValues(columns []string, values []any) error {
 // QueryBackupSchedule queries the "backupSchedule" edge of the Repository entity.
 func (r *Repository) QueryBackupSchedule() *BackupScheduleQuery {
 	return (&RepositoryClient{config: r.config}).QueryBackupSchedule(r)
+}
+
+// QueryPruneSchedule queries the "pruneSchedule" edge of the Repository entity.
+func (r *Repository) QueryPruneSchedule() *PruneScheduleQuery {
+	return (&RepositoryClient{config: r.config}).QueryPruneSchedule(r)
 }
 
 // QueryBackupPolicy queries the "backupPolicy" edge of the Repository entity.

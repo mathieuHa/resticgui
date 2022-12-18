@@ -30,6 +30,8 @@ type Tx struct {
 	Path *PathClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
+	// PruneSchedule is the client for interacting with the PruneSchedule builders.
+	PruneSchedule *PruneScheduleClient
 	// Repository is the client for interacting with the Repository builders.
 	Repository *RepositoryClient
 	// Role is the client for interacting with the Role builders.
@@ -176,6 +178,7 @@ func (tx *Tx) init() {
 	tx.MinioS3Provider = NewMinioS3ProviderClient(tx.config)
 	tx.Path = NewPathClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
+	tx.PruneSchedule = NewPruneScheduleClient(tx.config)
 	tx.Repository = NewRepositoryClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.User = NewUserClient(tx.config)

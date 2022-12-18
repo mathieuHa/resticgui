@@ -94,6 +94,61 @@ func getScheduleStringSyntax(schedule ent.BackupSchedule) string {
 	return ""
 }
 
+// This returns the schedule in string format that can be used by cron
+func getPruneScheduleStringSyntax(schedule ent.PruneSchedule) string {
+	log.Debug().Msg("getScheduleStringSyntax()")
+
+	if schedule.Choice == "cron" {
+		return schedule.CronSyntax
+	} else if schedule.Choice == "interval" {
+		return fmt.Sprintf("@every %v", schedule.Interval)
+	} else if schedule.Choice == "regular" {
+		hour, _ := time.Parse("15:04", schedule.Hour)
+		log.Debug().Msgf("hour = %v", hour)
+		if schedule.EveryDay {
+			return fmt.Sprintf("%d %d * * *", hour.Minute(), hour.Hour())
+		} else if schedule.EveryWeek {
+			return fmt.Sprintf("%d %d * * %v", hour.Minute(), hour.Hour(), schedule.Day)
+		} else if schedule.EveryMonth {
+			return fmt.Sprintf("%d %d %v * *", hour.Minute(), hour.Hour(), schedule.Day)
+		}
+	} else if schedule.Choice == "weekly" {
+		// check weekly
+		hour, err := time.Parse("15:04", schedule.Hour)
+		log.Debug().Err(err).Msgf("hour = %v", hour)
+		day := ""
+		if schedule.EveryMonday {
+			day = fmt.Sprintf("%v1,", day)
+		}
+		if schedule.EveryTuesday {
+			day = fmt.Sprintf("%v2,", day)
+		}
+		if schedule.EveryWednesday {
+			day = fmt.Sprintf("%v3,", day)
+		}
+		if schedule.EveryThursday {
+			day = fmt.Sprintf("%v4,", day)
+		}
+		if schedule.EveryFriday {
+			day = fmt.Sprintf("%v5,", day)
+		}
+		if schedule.EverySaturday {
+			day = fmt.Sprintf("%v6,", day)
+		}
+		if schedule.EverySunday {
+			day = fmt.Sprintf("%v0,", day)
+		}
+		if len(day) > 0 {
+			log.Debug().Msgf("DAY = %v", day)
+			day = day[:len(day)-1]
+			log.Debug().Msgf("DAY = %v", day)
+
+		}
+		return fmt.Sprintf("%d %d * * %v", hour.Minute(), hour.Hour(), day)
+	}
+	return ""
+}
+
 func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 	log.Debug().Msg("addScheduledBackup()")
 
@@ -142,7 +197,56 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 		}
 		return true
 	}
+}
 
+func AddScheduledPrune(repo *ent.Repository, cr *cron.Cron) bool {
+	log.Debug().Msg("AddScheduledPrune()")
+
+	// we check if the cron has been initialized
+	if cr == nil {
+		log.Error().Msg("cr is not initialied")
+		return false
+	}
+
+	// we check if the repository is valid
+	if !repo.Valid {
+		log.Debug().Msg("repository is not valid")
+		return false
+	} else {
+		log.Debug().Msg("repository is valid")
+
+		// First we remove the previous job launched for this repository
+		log.Debug().Msg("remove previous job for the repository")
+		if repo.Edges.PruneSchedule != nil {
+			if repo.Edges.PruneSchedule.CronID != nil {
+				cr.Remove(cron.EntryID(*repo.Edges.PruneSchedule.CronID))
+			}
+			// Then we had the new job to be run and register it
+			timing := getPruneScheduleStringSyntax(*repo.Edges.PruneSchedule)
+			cronID, err := cr.AddFunc(timing, func() {
+				PruneRepository(repo, cr)
+			})
+
+			if err != nil {
+				log.Error().Err(err)
+				return false
+			}
+
+			err = database.UpdatePruneCronID(*repo.Edges.PruneSchedule, int(cronID))
+			if err != nil {
+				log.Err(err).Msgf("error: repository %v", "")
+				return false
+			}
+			if len(cr.Entries()) > 0 {
+				err = database.UpdatePruneCronNextRun(*repo.Edges.PruneSchedule, cr.Entries()[0].Next.String())
+				if err != nil {
+					log.Err(err).Msgf("error: repository %v", "")
+					return false
+				}
+			}
+		}
+		return true
+	}
 }
 
 func CreateAllScheduledBackup(cr *cron.Cron) {
@@ -156,6 +260,7 @@ func CreateAllScheduledBackup(cr *cron.Cron) {
 		for _, repo := range repositories {
 			log.Debug().Msgf("start repos %v", repo.ID)
 			AddScheduledBackup(repo, cr)
+			AddScheduledPrune(repo, cr)
 		}
 	}
 }

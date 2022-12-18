@@ -16,6 +16,7 @@ func GetRepositoriesDB(ctx context.Context) (repositories []*ent.Repository, err
 		Query().
 		WithBackupSchedule().
 		WithBackupPolicy().
+		WithPruneSchedule().
 		WithAWSS3Provider().
 		WithB2Provider().
 		WithLocalProvider().
@@ -37,6 +38,7 @@ func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err er
 		Query().
 		WithBackupSchedule().
 		WithBackupPolicy().
+		WithPruneSchedule().
 		WithAWSS3Provider().
 		WithB2Provider().
 		WithLocalProvider().
