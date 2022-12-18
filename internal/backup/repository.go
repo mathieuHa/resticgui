@@ -23,6 +23,15 @@ func GetStatsRepository(r *ent.Repository, snapshotID string) (out string, err s
 	return stdout, stderr
 }
 
+func ForgetSnapshotRepository(r *ent.Repository, snapshotID string) (out string, err string) {
+	log.Debug().Msg("ForgetSnapshotRepository()")
+
+	ctx := context.Background()
+	stdout, stderr, errCmd := commands.ForgetSnapshots(r, snapshotID)
+	database.LogCommand(r.ID, "ForgetSnapshots", stdout, stderr, errCmd, ctx)
+	return stdout, stderr
+}
+
 func CheckRepository(r *ent.Repository) (out string) {
 	log.Debug().Msg("CheckRepository()")
 
