@@ -74,6 +74,8 @@ func RestoreRepository(repository *ent.Repository, path string, version string) 
 	commonArgs := getRestoreCommonArgs(path, version)
 	args = append(args, repoFormat...)
 	args = append(args, commonArgs...)
+	// does not support json format output
+	// args = append(args, jsonFormat)
 	return runRestic(args, env)
 }
 

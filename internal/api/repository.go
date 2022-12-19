@@ -32,21 +32,6 @@ func checkRepositoryByID(id int, ctx context.Context, c *gin.Context) (err error
 	return err
 }
 
-// func getRepositoryByID(id int, ctx context.Context, c *gin.Context) (r *ent.Repository, err error) {
-// 	r, err = database.GetRepositoryByIDDB(id, ctx)
-
-// 	if err != nil {
-// 		if ent.IsNotFound(err) {
-// 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-// 		} else if ent.IsConstraintError(err) {
-// 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-// 		} else {
-// 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-// 		}
-// 	}
-// 	return r, err
-// }
-
 // QueryRepositories godoc
 // @Summary get all repositories
 // @Schemes
@@ -552,6 +537,58 @@ func ForgetSnapshotRepository(c *gin.Context) {
 	stdout, stderr := backup.ForgetSnapshotRepository(r, snapshotID)
 
 	c.IndentedJSON(http.StatusOK, gin.H{"stdout": stdout, "stderr": stderr})
+}
+
+// RestoreSnapshotRepository godoc
+// @Summary restore a snapshot from the repository
+// @Schemes
+// @Description restore a snapshot from the repository
+// @Param id path int true "Repository ID"
+// @Param snapshotID path string true "Snapshot ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/restore/{snapshotID} [get]
+func RestoreSnapshotRepository(c *gin.Context) {
+	log.Debug().Msg("RestoreSnapshotRepository()")
+
+	ctx := context.Background()
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
+		return
+	}
+	snapshotID := c.Param("snapshotID")
+	path := c.DefaultQuery("path", "")
+	log.Debug().Msgf("SnapshotID: %s", snapshotID)
+	log.Debug().Msgf("path: %s", path)
+
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+		return
+	}
+
+	r.Valid, err = backup.ValidRepository(*r)
+	if !r.Valid {
+		log.Debug().Msg(errRInvalid)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
+		return
+	}
+
+	go func() {
+		stdout, stderr := backup.RestoreRepository(r, path, snapshotID)
+		log.Debug().Msgf("stdout: %v, stderr: %v", stdout, stderr)
+	}()
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "task launched"})
 }
 
 // ValidRepository godoc

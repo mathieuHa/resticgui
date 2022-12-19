@@ -5,11 +5,14 @@
   import agent from '$utils/api';
   import Eye from '../Icon/Eye.svelte';
   import Modal from '../Modal.svelte';
-    import Trash from '$lib/Icon/Trash.svelte';
-  export let snapshots = [];
+  import Trash from '../Icon/Trash.svelte';
+  import Restore from '../Icon/Restore.svelte';
+  import RestoreModal from './RestoreModal.svelte';
+  export let snapshots: any = [];
 
   let visible: any = null;
   let removeId: string | null = null;
+  let restoreId: string | null = null;
   const dispatch = createEventDispatcher();
 
   const deleteSnapshot = async (snapshotId: string) => {
@@ -17,6 +20,7 @@
     await agent.delete(`/repositories/${id}/snapshots/${snapshotId}`);
     dispatch('delete');
   };
+  
 </script>
   
 
@@ -32,7 +36,7 @@
 {:else if removeId !== null}
   <Modal title="Warning" on:close={() => (removeId = null)}>
     <div>
-      You really want to delete snapshot #{removeId}
+      Do you really want to delete this snapshot #{removeId}
       <div class="flex gap-2 justify-end">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
@@ -49,6 +53,8 @@
       </div>
     </div>
   </Modal>
+{:else if restoreId !== null}
+  <RestoreModal {restoreId} on:close={() => (restoreId=null)} />
 {/if}
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each snapshots as snapshot}
@@ -70,6 +76,13 @@
           on:click|preventDefault|stopPropagation={() => (removeId = snapshot.short_id)}
         >
           <Trash />
+        </button>
+        <button
+          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-cyan-500 hover:bg-cyan-600"
+          title="restore snapshot"
+          on:click|preventDefault|stopPropagation={() => (restoreId = snapshot.short_id)}
+        >
+          <Restore />
         </button>
       </div>
     </div>

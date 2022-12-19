@@ -41,6 +41,46 @@ func CheckRepository(r *ent.Repository) (out string) {
 	return stdout
 }
 
+func RestoreRepository(r *ent.Repository, path string, snapshotID string) (out string, stderr string) {
+	log.Debug().Msg("RestoreRepository()")
+
+	ctx := context.Background()
+
+	// TODO Check the validity of the provider and repository in general
+	validPath, err := validRestorePath(path)
+	if err != nil {
+		return "Path is not valid", err.Error()
+	}
+	if !validPath {
+		log.Error().Msg("Not valid")
+		return "Path is not valid", ""
+	}
+	// TODO Check that the snapshot exists
+
+	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
+	// stdout, _, _ := commands.GetSnapshots(r)
+	// var snapshots []Models.Snapshot
+	// err = json.Unmarshal([]byte(stdout), &snapshots)
+	// if err == nil && snapshots != nil {
+	// 	r.SnapshotCount = len(snapshots)
+	// 	_, err = database.UpdateRepositoryDB(*r, r.ID, ctx)
+	// 	if err != nil {
+	// 		log.Err(err).Msg("Error update db")
+	// 	}
+	// }
+
+	// set restore running
+	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
+
+	stdout, stderr, errCmd := commands.RestoreRepository(r, path, snapshotID)
+	database.LogCommand(r.ID, "RestoreRepository", stdout, stderr, errCmd, ctx)
+
+	// set restore running ended
+	_, _ = database.SetRepositoryRunningDB(r.ID, false, ctx)
+
+	return stdout, stderr
+}
+
 func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	log.Debug().Msg("BackupRepository()")
 
