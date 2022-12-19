@@ -199,6 +199,14 @@ func GetSnapshotsRepository(r *ent.Repository) (out string) {
 	return stdout
 }
 
+func ListFilesSnapshotRepository(r *ent.Repository, version string) (out string, stderr string) {
+	log.Debug().Msg("ListFilesSnapshotRepository()")
+	ctx := context.Background()
+	stdout, stderr, errCmd := commands.ListFilesSnapshot(r, version)
+	database.LogCommand(r.ID, "ListFiles", stdout, stderr, errCmd, ctx)
+	return stdout, stderr
+}
+
 func ValidRepository(repository ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("ValidRepository()")
 

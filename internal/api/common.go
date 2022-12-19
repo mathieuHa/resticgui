@@ -9,6 +9,7 @@ import (
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
+const limitAPI = 20
 const IDNotValid = "aze"
 const IDUnknown = "1280898"
 const errIDNotValid = "id not valid"
@@ -31,6 +32,7 @@ const errRConstraint = r + errConstraint
 const errRInvalid = r + errInvalid
 const errRUnknown = r + errUnknown
 const errSnapLogsNotJSON = "error converting snapshots to json"
+const errFileLogsNotJSON = "error converting files to json"
 const errStatLogsNotJSON = "error converting stat to json"
 
 const bp = "backupPolicy "

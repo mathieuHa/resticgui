@@ -12,6 +12,7 @@ const backupCmd = "backup"
 const initCmd = "init"
 const restoreCmd = "restore"
 const snapshotsCmd = "snapshots"
+const lsCmd = "ls"
 const forgetCmd = "forget"
 const pruneCmd = "prune"
 const statsCmd = "stats"
@@ -61,6 +62,20 @@ func InitRepository(repository *ent.Repository) (string, string, error) {
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, initCmd)
 	args = append(args, repoFormat...)
+	return runRestic(args, env)
+}
+
+func ListFilesSnapshot(repository *ent.Repository, version string) (string, string, error) {
+	log.Debug().Msg("ListFilesSnapshot()")
+
+	var args []string
+	var env []string
+
+	repoFormat, env, _ := getProviderData(repository)
+	args = append(args, lsCmd)
+	args = append(args, repoFormat...)
+	args = append(args, version)
+	args = append(args, jsonFormat)
 	return runRestic(args, env)
 }
 

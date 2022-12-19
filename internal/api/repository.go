@@ -260,7 +260,7 @@ func LogsRepository(c *gin.Context) {
 	}
 	limit := 10
 	page := 0
-	limitStr := c.DefaultQuery("limit", "10")
+	limitStr := c.DefaultQuery("limit", fmt.Sprint(limitAPI))
 	if utils.IsValidInt(limitStr) {
 		limit, _ = strconv.Atoi(limitStr)
 	}
@@ -435,7 +435,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 
 	limit := 0
 	page := 0
-	limitStr := c.DefaultQuery("limit", "0")
+	limitStr := c.DefaultQuery("limit", fmt.Sprint(limitAPI))
 	if utils.IsValidInt(limitStr) {
 		limit, _ = strconv.Atoi(limitStr)
 		limit = int(math.Abs(float64(limit)))
@@ -589,6 +589,102 @@ func RestoreSnapshotRepository(c *gin.Context) {
 	}()
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "task launched"})
+}
+
+// ListFilesSnapshotRepository godoc
+// @Summary list files present in a snapshot from the repository
+// @Schemes
+// @Description list files present in a snapshot from the repository
+// @Param id path int true "Repository ID"
+// @Param snapshotID path string true "Snapshot ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/restore/{snapshotID} [get]
+func ListFilesSnapshotRepository(c *gin.Context) {
+	log.Debug().Msg("ListFilesSnapshotRepository()")
+
+	ctx := context.Background()
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
+		return
+	}
+	snapshotID := c.Param("snapshotID")
+	path := c.DefaultQuery("path", "")
+	log.Debug().Msgf("SnapshotID: %s", snapshotID)
+	log.Debug().Msgf("path: %s", path)
+
+	limit := 0
+	page := 0
+	limitStr := c.DefaultQuery("limit", fmt.Sprint(limitAPI))
+	if utils.IsValidInt(limitStr) {
+		limit, _ = strconv.Atoi(limitStr)
+		limit = int(math.Abs(float64(limit)))
+	}
+	pageStr := c.DefaultQuery("page", "0")
+	if utils.IsValidInt(pageStr) {
+		page, _ = strconv.Atoi(pageStr)
+		page = int(math.Abs(float64(page)))
+	}
+
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+		return
+	}
+
+	r.Valid, err = backup.ValidRepository(*r)
+	if !r.Valid {
+		log.Debug().Msg(errRInvalid)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
+		return
+	}
+
+	stdout, _ := backup.ListFilesSnapshotRepository(r, snapshotID)
+	// log.Debug().Msgf("stdout: %v, stderr: %v", stdout, stderr)
+
+	stdOutArray := strings.Split(strings.ReplaceAll(stdout, "\r\n", "\n"), "\n")
+	var obj Models.Files
+	var files []Models.Files
+	var filesExtract []Models.Files
+	for _, s := range stdOutArray {
+		log.Debug().Msgf("%s", s)
+		err := json.Unmarshal([]byte(s), &obj)
+		if err == nil && obj.StructType == "node" {
+			files = append(files, obj)
+		} else {
+			log.Err(err).Msg("Could not convert to Modals.Files")
+		}
+	}
+
+	if files != nil {
+		if limit != 0 {
+			offset := int(math.Min(float64(page*limit), float64(len(files))))
+			nextOffset := int(math.Min(float64((page+1)*limit), float64(len(files))))
+			for i := offset; i < nextOffset; i++ {
+				filesExtract = append(filesExtract, files[i])
+			}
+			if filesExtract == nil {
+				c.IndentedJSON(http.StatusOK, []Models.Files{})
+			} else {
+				c.IndentedJSON(http.StatusOK, filesExtract)
+			}
+		} else {
+			c.IndentedJSON(http.StatusOK, files)
+		}
+	} else {
+		log.Debug().Msg("Files == nil")
+		log.Debug().Fields(stdout)
+		c.IndentedJSON(http.StatusOK, []Models.Files{})
+	}
 }
 
 // ValidRepository godoc
