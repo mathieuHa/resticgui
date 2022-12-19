@@ -2,9 +2,7 @@
   import { page } from '$app/stores';
   import { refresh } from '$utils/stores';
 	import NavLink from './NavLink.svelte';
-	import Cross from './Icon/Cross.svelte';
 
-	let isOpen = false;
 	let isDark = false;
 	if (typeof localStorage !== 'undefined') {
 		if (
@@ -27,37 +25,8 @@
 	}
 </script>
 
-<nav
-	class="relative mx-auto flex flex-wrap w-full max-w-2xl items-center justify-between border-gray-200
-	bg-gray-50 bg-opacity-60 py-8 text-gray-900 dark:border-gray-700 dark:bg-gray-900
-	dark:text-gray-100 sm:pb-16"
->
-	<button
-		class="md:hidden burger relative visible h-5 w-5 "
-		aria-label="Toggle menu"
-		type="button"
-		on:click={() => (isOpen = !isOpen)}
-	>
-		{#if !isOpen}
-			<svg
-				class="text-gray-900 dark:text-gray-100"
-				width="20"
-				height="20"
-				viewBox="0 0 20 20"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="M2.5 7.5H17.5"/>
-				<path d="M2.5 12.5H17.5"/>
-			</svg>
-		{:else}
-			<Cross />
-		{/if}
-	</button>
-	<ul class="{isOpen ? 'order-3 w-full' : 'hidden'} md:flex md:order-unset md:w-auto">
+<nav class="relative mx-auto flex flex-wrap w-full max-w-2xl items-center justify-between text-gray-900 dark:text-gray-100 py-8 sm:pb-10">
+	<ul class="md:flex md:order-unset md:w-auto">
 		<li>
 			<NavLink href="/">ResticGUI</NavLink>
 		</li>
@@ -66,7 +35,7 @@
     {#if $page.params.id}
       <button
         aria-label="Toggle Dark Mode"
-        class="ml-1 flex h-9 w-9 items-center justify-center rounded-lg ring-yellow-400 transition-all hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800"
+        class="ml-1 flex h-9 w-9 items-center justify-center rounded ring-yellow-400 transition-all hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800"
         on:click|preventDefault|stopPropagation={refresh.update}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 491.236 491.236" width="16" height="16" fill="currentColor" stroke="currentColor">
@@ -82,7 +51,7 @@
     {/if}
 		<button
 			aria-label="Toggle Dark Mode"
-			class="ml-1 flex h-9 w-9 items-center justify-center rounded-lg ring-yellow-400 transition-all hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800"
+			class="ml-1 flex h-9 w-9 items-center justify-center rounded ring-yellow-400 transition-all hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800"
 			on:click|preventDefault|stopPropagation={toggleDarkMode}
 		>
 			{#if isDark}

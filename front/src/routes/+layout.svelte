@@ -27,28 +27,30 @@
   <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
 </svelte:head>
 
-<div class="flex flex-col justify-center bg-gray-50 px-4 dark:bg-gray-900 sm:px-8">
+<div class="flex flex-col justify-center bg-gray-50 px-4 dark:bg-gray-900 sm:px-8 mb-8">
 	<Nav />
 </div>
-<main class="px-8 mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 dark:border-gray-700 text-black dark:text-white">
+
+<main class="min-h-[80vh] px-8 mx-auto max-w-2xl text-black dark:text-white">
 	<slot />
 	<div id="modals"></div>
 	<Toast />
 </main>
 
-
 <footer class="mx-auto mb-8 flex w-full max-w-2xl flex-col items-start justify-center">
 	<hr class="border-1 mb-8 w-full border-gray-200 dark:border-gray-800" />
 	<div class="grid w-full max-w-2xl grid-cols-1 gap-4 px-4 pb-16 sm:grid-cols-2 sm:px-8">
 		<div class="flex flex-col space-y-4">
-			<a
-				class="text-gray-500 transition hover:text-gray-300"
-				target="_blank"
-				rel="noopener noreferrer"
-				href={REPO_URL}
-			>
-				GitLab
-			</a>
+			<span>
+        <a
+          class="text-gray-500 transition hover:text-gray-300"
+          target="_blank"
+          rel="noopener noreferrer"
+          href={REPO_URL}
+        >
+          GitLab
+        </a>
+      </span>
 		</div>
 	</div>
 </footer>

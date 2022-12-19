@@ -76,7 +76,7 @@
   />
 {/if}
 
-<div class="w-full grid gap-3 mb-6">
+<div class="w-full flex flex-col gap-3 mb-6">
   {#if loading}
     <Loader />
   {:else}
@@ -129,14 +129,14 @@
                 <Snapshot />
               </div>
             </a>
-            <a href="/{repo.id}?tab=stats">
+            <!-- <a href="/{repo.id}?tab=stats">
               <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
                 title="Stats"
               >
                 <Stats />
-            </div>
-            </a>
+              </div>
+            </a> -->
           </div>
           <span class="text-{values.running ? 'green' : 'red'}-500 flex-1 pl-1 whitespace-nowrap text-right ">
             {values.running ? 'running' : 'not running'}
