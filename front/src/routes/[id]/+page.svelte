@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
+
   import { page } from '$app/stores';
 
   import Log from '$lib/RepositoryId/Log.svelte';
@@ -14,21 +16,22 @@
     return await agent.get(path);
   };
 
-  let repoPromise = fetch(`/repositories/${$page.params.id}`);
-  let logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
-  let snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
-  refresh.subscribe(() => {
-    if (tab === 'general') repoPromise = fetch(`/repositories/${$page.params.id}`);
-    else if (tab === 'logs') logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
-    else if (tab === 'snapshots') snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
-  })
-
   const replaceStateWithQuery = (value: string) => {
     const url = new URL(window.location.toString());
     url.searchParams.set('tab', value);
     history.replaceState({}, '', url);
     tab = value;
   };
+
+  let repoPromise = fetch(`/repositories/${$page.params.id}`);
+  let logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
+  let snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
+  const unsuscribe = refresh.subscribe(() => {
+    repoPromise = fetch(`/repositories/${$page.params.id}`);
+    logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
+    snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
+  });
+  onDestroy(unsuscribe);
 </script>
 
 <div class="mt-2 mb-10 w-full max-w-full">

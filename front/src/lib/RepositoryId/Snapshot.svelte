@@ -12,9 +12,9 @@
   let removeId: string | null = null;
   const dispatch = createEventDispatcher();
 
-  const deleteSnapshot = (snapshotId: string) => {
+  const deleteSnapshot = async (snapshotId: string) => {
     const id = $page.params.id;
-    agent.delete(`/repositories/${id}/snapshots/${snapshotId}`);
+    await agent.delete(`/repositories/${id}/snapshots/${snapshotId}`);
     dispatch('delete');
   };
 </script>
