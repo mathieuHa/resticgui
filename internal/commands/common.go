@@ -9,6 +9,7 @@ import (
 )
 
 const backupCmd = "backup"
+const findCmd = "find"
 const initCmd = "init"
 const restoreCmd = "restore"
 const snapshotsCmd = "snapshots"
@@ -74,6 +75,22 @@ func ListFilesSnapshot(repository *ent.Repository, version string) (string, stri
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, lsCmd)
 	args = append(args, repoFormat...)
+	args = append(args, version)
+	args = append(args, jsonFormat)
+	return runRestic(args, env)
+}
+
+func SearchFilesSnapshot(repository *ent.Repository, version string, pattern string) (string, string, error) {
+	log.Debug().Msg("SearchFilesSnapshot()")
+
+	var args []string
+	var env []string
+
+	repoFormat, env, _ := getProviderData(repository)
+	args = append(args, repoFormat...)
+	args = append(args, findCmd)
+	args = append(args, pattern)
+	args = append(args, "-s")
 	args = append(args, version)
 	args = append(args, jsonFormat)
 	return runRestic(args, env)

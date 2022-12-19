@@ -603,7 +603,7 @@ func RestoreSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/restore/{snapshotID} [get]
+// @Router /repositories/{id}/ls/{snapshotID} [get]
 func ListFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("ListFilesSnapshotRepository()")
 
@@ -613,9 +613,7 @@ func ListFilesSnapshotRepository(c *gin.Context) {
 		return
 	}
 	snapshotID := c.Param("snapshotID")
-	path := c.DefaultQuery("path", "")
 	log.Debug().Msgf("SnapshotID: %s", snapshotID)
-	log.Debug().Msgf("path: %s", path)
 
 	limit := 0
 	page := 0
@@ -684,6 +682,94 @@ func ListFilesSnapshotRepository(c *gin.Context) {
 		log.Debug().Msg("Files == nil")
 		log.Debug().Fields(stdout)
 		c.IndentedJSON(http.StatusOK, []Models.Files{})
+	}
+}
+
+// SearchFilesSnapshotRepository godoc
+// @Summary search for filename present in a snapshot from the repository
+// @Schemes
+// @Description search for filename present in a snapshot from the repository
+// @Param id path int true "Repository ID"
+// @Param snapshotID path string true "Snapshot ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/search/{snapshotID} [get]
+func SearchFilesSnapshotRepository(c *gin.Context) {
+	log.Debug().Msg("SearchFilesSnapshotRepository()")
+
+	ctx := context.Background()
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
+		return
+	}
+	snapshotID := c.Param("snapshotID")
+	pattern := c.DefaultQuery("pattern", "")
+	log.Debug().Msgf("SnapshotID: %s", snapshotID)
+	log.Debug().Msgf("pattern: %s", pattern)
+
+	limit := 0
+	page := 0
+	limitStr := c.DefaultQuery("limit", fmt.Sprint(limitAPI))
+	if utils.IsValidInt(limitStr) {
+		limit, _ = strconv.Atoi(limitStr)
+		limit = int(math.Abs(float64(limit)))
+	}
+	pageStr := c.DefaultQuery("page", "0")
+	if utils.IsValidInt(pageStr) {
+		page, _ = strconv.Atoi(pageStr)
+		page = int(math.Abs(float64(page)))
+	}
+
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+		return
+	}
+
+	r.Valid, err = backup.ValidRepository(*r)
+	if !r.Valid {
+		log.Debug().Msg(errRInvalid)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
+		return
+	}
+
+	stdout, _ := backup.SearchFilesSnapshotRepository(r, snapshotID, pattern)
+
+	var matches []Models.Matches
+	// var files []Models.Files
+	var filesExtract []Models.Files
+	err = json.Unmarshal([]byte(stdout), &matches)
+
+	if err == nil {
+		if limit != 0 && len(matches) > 0 {
+			offset := int(math.Min(float64(page*limit), float64(len(matches[0].Files))))
+			nextOffset := int(math.Min(float64((page+1)*limit), float64(len(matches[0].Files))))
+			for i := offset; i < nextOffset; i++ {
+				filesExtract = append(filesExtract, matches[0].Files[i])
+			}
+			if filesExtract == nil {
+				c.IndentedJSON(http.StatusOK, []Models.Files{})
+			} else {
+				c.IndentedJSON(http.StatusOK, filesExtract)
+			}
+		} else if len(matches) > 0 {
+			c.IndentedJSON(http.StatusOK, matches[0].Files)
+		} else {
+			c.IndentedJSON(http.StatusOK, []Models.Files{})
+		}
+	} else if matches == nil {
+		c.IndentedJSON(http.StatusOK, []Models.Files{})
+	} else {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": errSnapLogsNotJSON})
 	}
 }
 
