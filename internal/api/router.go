@@ -75,6 +75,7 @@ func SetupRouter() *gin.Engine {
 		grpRepositories.DELETE(":id/snapshots/:snapshotID", ForgetSnapshotRepository)
 		grpRepositories.GET(":id/restore/:snapshotID", RestoreSnapshotRepository)
 		grpRepositories.GET(":id/ls/:snapshotID", ListFilesSnapshotRepository)
+		grpRepositories.GET(":id/search/:snapshotID", SearchFilesSnapshotRepository)
 		grpRepositories.GET(":id/valid", ValidRepository)
 	}
 

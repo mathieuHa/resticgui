@@ -8,14 +8,17 @@
   import Trash from '../Icon/Trash.svelte';
   import Restore from '../Icon/Restore.svelte';
   import List from '../Icon/List.svelte';
+  import Search from '../Icon/Search.svelte';
   import RestoreModal from './RestoreModal.svelte';
   import ListFilesModal from './ListFilesModal.svelte';
+  import SearchFilesModal from './SearchFilesModal.svelte';
   export let snapshots: any = [];
 
   let visible: any = null;
   let removeId: string | null = null;
   let restoreId: string | null = null;
   let snapshotId: string | null = null;
+  let searchId: string | null = null;
   const dispatch = createEventDispatcher();
 
   const deleteSnapshot = async (snapshotId: string) => {
@@ -60,6 +63,8 @@
   <RestoreModal {restoreId} on:close={() => (restoreId = null)} />
 {:else if snapshotId !== null}
   <ListFilesModal {snapshotId} on:close={() => (snapshotId = null)} />
+{:else if searchId !== null}
+  <SearchFilesModal {searchId} on:close={() => (searchId = null)} />
 {/if}
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each snapshots as snapshot}
@@ -95,6 +100,13 @@
           on:click|preventDefault|stopPropagation={() => (snapshotId = snapshot.short_id)}
         >
           <List />
+        </button>
+        <button
+          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
+          title="search snapshot files"
+          on:click|preventDefault|stopPropagation={() => (searchId = snapshot.short_id)}
+        >
+          <Search />
         </button>
       </div>
     </div>
