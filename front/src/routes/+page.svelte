@@ -1,13 +1,11 @@
 <script lang="ts">
   import dayjs from 'dayjs';
-  import { onMount } from 'svelte';
 
   import agent from '$utils/api';
   import Eye from '$lib/Icon/Eye.svelte';
   import Logs from '$lib/Icon/Logs.svelte';
   import Pen from '$lib/Icon/Pen.svelte';
   import Trash from '$lib/Icon/Trash.svelte';
-  import Stats from '$lib/Icon/Stats.svelte';
   import RepositoryModal from '$lib/RepositoryModal.svelte';
   import Modal from '$lib/Modal.svelte';
   import Snapshot from '$lib/Icon/Snapshot.svelte';
@@ -15,24 +13,20 @@
 
   let repos = [];
   let step = 0;
-  let initialValues = null;
+  let initialValues: any = null;
   let removeId: number | null = null;
-  let loading = true;
 
   const onRefresh = async () => {
-    try {
-      repos = await agent.get('/repositories');
-      initialValues = repos.find((repo) => repo.id === initialValues.id);
-    } catch (err) {
-      // Pass
-    }
-    loading = false;
+    repos = await agent.get('/repositories');
+    initialValues = repos.find((repo: any) => repo.id === initialValues?.id);
+    return repos;
   };
+  let reposPromise = onRefresh()
 
   const onRemove = async (repoId: number) => {
     try {
       await agent.delete(`/repositories/${repoId}`);
-      await onRefresh();
+      reposPromise = onRefresh();
       removeId = null;
     } catch (err) {
       console.log(err);
@@ -42,7 +36,6 @@
   $: if (initialValues === null) step = 0;
   $: values = Object.assign({}, initialValues) || step;
 
-  onMount(onRefresh);
 </script>
 
 {#if removeId}
@@ -72,14 +65,27 @@
     on:close={() => {
       initialValues = null;
     }}
-    on:refresh={onRefresh}
+    on:refresh={() => (reposPromise = onRefresh())}
   />
 {/if}
 
 <div class="w-full flex flex-col gap-3 mb-6">
-  {#if loading}
-    <Loader />
-  {:else}
+  {#await reposPromise}
+    <div class="p-3 flex flex-col bg-gray-200 dark:bg-gray-800 rounded shadow-lg h-24 animate-pulse">
+      <div class="flex justify-between gap-2">
+        <div class="w-36 bg-gray-600 dark:bg-gray-400 h-7 rounded-md " />
+        <div class="w-24 bg-gray-600 dark:bg-gray-400 h-7 rounded-md " />
+      </div>
+      <div class="flex flex-wrap gap-2 mt-5 mb-1">
+        <div class="rounded h-6 w-6 p-1 transition bg-yellow-500" />
+        <div class="rounded h-6 w-6 p-1 transition bg-blue-500" />
+        <div class="rounded h-6 w-6 p-1 transition bg-red-500" />
+        <div class="rounded h-6 w-6 p-1 transition bg-orange-500" />
+        <div class="rounded h-6 w-6 p-1 transition bg-purple-500" />
+      </div>
+    </div>
+    <div class="h-12 bg-gray-200 dark:bg-gray-800 rounded shadow-lg animate-pulse" />
+  {:then repos}
     {#each repos as repo, i}
       <div class="p-3 flex flex-col bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
         <div class="flex flex-wrap gap-2">
@@ -87,7 +93,7 @@
           <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm ')}</p>
         </div>
 
-        <div class="flex flex-wrap justify-between mt-5 mb-1 ">
+        <div class="flex flex-wrap justify-between mt-5 mb-1">
           <div class="flex flex-wrap gap-2 min-w-[200px]">
             <a href="/{repo.id}">
               <div
@@ -148,9 +154,9 @@
       on:click={() => {
         initialValues = {};
       }}
-      class="p-6 bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
+      class="h-12 bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
     >
       Add a repository
     </button>
-  {/if}
+  {/await}
 </div>
