@@ -7,12 +7,15 @@
   import Modal from '../Modal.svelte';
   import Trash from '../Icon/Trash.svelte';
   import Restore from '../Icon/Restore.svelte';
+  import List from '../Icon/List.svelte';
   import RestoreModal from './RestoreModal.svelte';
+  import ListFilesModal from './ListFilesModal.svelte';
   export let snapshots: any = [];
 
   let visible: any = null;
   let removeId: string | null = null;
   let restoreId: string | null = null;
+  let snapshotId: string | null = null;
   const dispatch = createEventDispatcher();
 
   const deleteSnapshot = async (snapshotId: string) => {
@@ -54,7 +57,9 @@
     </div>
   </Modal>
 {:else if restoreId !== null}
-  <RestoreModal {restoreId} on:close={() => (restoreId=null)} />
+  <RestoreModal {restoreId} on:close={() => (restoreId = null)} />
+{:else if snapshotId !== null}
+  <ListFilesModal {snapshotId} on:close={() => (snapshotId = null)} />
 {/if}
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each snapshots as snapshot}
@@ -83,6 +88,13 @@
           on:click|preventDefault|stopPropagation={() => (restoreId = snapshot.short_id)}
         >
           <Restore />
+        </button>
+        <button
+          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
+          title="list snapshot files"
+          on:click|preventDefault|stopPropagation={() => (snapshotId = snapshot.short_id)}
+        >
+          <List />
         </button>
       </div>
     </div>
