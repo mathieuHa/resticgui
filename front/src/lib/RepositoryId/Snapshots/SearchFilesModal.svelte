@@ -7,44 +7,39 @@
   import Input from '$lib/Input.svelte';
   import Search from '$lib/Icon/Search.svelte';
   import ListFiles from './ListFiles.svelte';
+    import Loader from '$lib/Loader.svelte';
 
-  export let snapshotId: string | null = null;
+  export let snapshotId: string;
   let files: any[] = []
   let pattern: string | null = null;
 
   const dispatch = createEventDispatcher();
-  const search = async () => {
-      try {
-        files = await agent.get(`/repositories/${$page.params.id}/search/${snapshotId}?pattern=${pattern}`);
-        toasts.addToast(`Search pattern of filenames of ${snapshotId} received`);
-      // dispatch('close');
-      } catch (err) {
-        toasts.addToast(err as string, 'failure');
-      }
-    }
-  
+  const search = async () => agent.get(`/repositories/${$page.params.id}/search/${snapshotId}?pattern=${pattern}`);
+  let searchPromise: Promise<any> | null;
 </script>
 
 <Modal title="Files found in snapshot #{snapshotId}" on:close={() => dispatch('close')}>
-  <div>
-    <div class="grid grid-flow-col">
-      <div class="col">
-        <Input
-          id="search"
-          label="search file"
-          type="text"
-          bind:value={pattern}
-        />
-      </div>
-      <div class="col">
-        <button
-          class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded transition text-right align-middle"
-          on:click={() => search()}>
-          <Search />
-        </button>
-      </div>
+  <div class="flex gap-2">
+    <div class="flex-1">
+      <Input
+        secondary
+        id="search"
+        label="search file"
+        type="text"
+        bind:value={pattern}
+      />
     </div>
-    
-    <ListFiles {snapshotId} {files} {pattern} />
+    <button
+      class="mt-auto mb-2 rounded h-8 w-8 text-gray-900 dark:text-gray-100 p-2 transition bg-blue-500 hover:bg-blue-600"
+      on:click={() => (searchPromise = search())}
+    >
+      <Search />
+    </button>
   </div>
+  
+  {#await searchPromise}
+    <Loader size={8} />
+  {:then files}
+    <ListFiles {snapshotId} {files} {pattern} />
+  {/await}
 </Modal>

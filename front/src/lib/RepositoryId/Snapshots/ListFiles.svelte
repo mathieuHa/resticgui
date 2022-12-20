@@ -11,19 +11,18 @@
 </script>
 
 {#if files && files.length > 0}
-  <div class="grid gap-2">
-    <table class="table-auto text-left">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Size</th>
-          <th>Mod Time</th>
-          <th>Path</th>
-          <th>Download</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each files as file}
+  <table class="table-auto gap-5 w-full text-center">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Size</th>
+        <th>Mod Time</th>
+        <th class="text-left">Path</th>
+        <th>Download</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each files as file}
         <tr>
           <td class="flex justify-center">
             {#if file.type == "dir" }
@@ -38,19 +37,18 @@
           <td>
             {file.mtime.split('.')[0].replace('T', ' ')}
           </td>
-          <td>
+          <td class="text-left">
             {file.path}
           </td>
-          <td>
-            <a class="inline mx-auto" href={`http://localhost:3001/api/v1/repositories/${$page.params.id}/download/${snapshotId}?path=${file.path}`}>
+          <td class="flex justify-center">
+            <a href={`http://localhost:3001/api/v1/repositories/${$page.params.id}/download/${snapshotId}?path=${file.path}`}>
               <Download />
             </a>
           </td>
         </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
+      {/each}
+    </tbody>
+  </table>
 {:else if pattern && pattern != ""}
   <p>
     No files in repository for pattern {pattern}

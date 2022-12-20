@@ -4,29 +4,19 @@
   import { page } from '$app/stores';
   import Modal from '$lib/Modal.svelte';
   import agent from '$utils/api';
-  import { toasts } from '$utils/stores';
   import ListFiles from './ListFiles.svelte';
+    import Loader from '$lib/Loader.svelte';
 
   export let snapshotId: string;
-  let files: any[] = []
 
   const dispatch = createEventDispatcher();
-  onMount(
-    async () => {
-      try {
-        files = await agent.get(`/repositories/${$page.params.id}/ls/${snapshotId}`);
-        toasts.addToast(`List files of ${snapshotId} received`);
-      // dispatch('close');
-      } catch (err) {
-        toasts.addToast(err as string, 'failure');
-      }
-    }
-  )
-  
+  const loadFiles = (async () => agent.get(`/repositories/${$page.params.id}/ls/${snapshotId}`))();
 </script>
 
 <Modal title="Files in snapshot #{snapshotId}" on:close={() => dispatch('close')}>
-  <div>
+  {#await loadFiles}
+    <Loader size={8} />
+  {:then files}
     <ListFiles {snapshotId} {files} />
-  </div>
+  {/await}
 </Modal>
