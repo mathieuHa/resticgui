@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/models"
 	"gitlab.com/resticgui/resticgui/internal/database"
+	Models "gitlab.com/resticgui/resticgui/internal/models"
 	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
@@ -92,10 +92,8 @@ func updatePaths(c *gin.Context) {
 	var paths []*ent.Path
 	var p []*ent.Path
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -105,9 +103,7 @@ func updatePaths(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	_, err = database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -119,13 +115,13 @@ func updatePaths(c *gin.Context) {
 		return
 	}
 
-	p, err = database.UpdatePathsDB(paths, newId, ctx)
+	p, err = database.UpdatePathsDB(paths, rID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, p)
 }
