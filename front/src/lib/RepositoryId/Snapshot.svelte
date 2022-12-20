@@ -32,7 +32,7 @@
   
 
 {#if visible}
-  <SeeModal snapshotId={visible.short_id} paths={visible.Paths} />
+  <SeeModal snapshotId={visible.short_id} paths={visible.Paths} on:close={() => (visible = null)}/>
 {:else if removeId !== null}
   <Modal title="Warning" on:close={() => (removeId = null)}>
     <div>
