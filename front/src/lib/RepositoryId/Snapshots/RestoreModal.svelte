@@ -7,12 +7,12 @@
   import Modal from "$lib/Modal.svelte";
   import Input from '$lib/Input.svelte';
 
-  export let restoreId: string | null = null;
+  export let snapshotId: string;
   let path: string | null = null;
 
   const dispatch = createEventDispatcher();
 
-  const restoreSnapshot = async (snapshotId: string) => {
+  const restoreSnapshot = async () => {
     const id = $page.params.id;
     try {
       await agent.get(`/repositories/${id}/restore/${snapshotId}?path=${path}`);
@@ -27,7 +27,7 @@
 
 <Modal title="Warning" on:close={() => dispatch('close')}>
   <div>
-    Do You really want to restore this snapshot #{restoreId}
+    Do You really want to restore this snapshot #{snapshotId}
     <Input
       secondary
       id="path"
@@ -38,13 +38,13 @@
     <div class="flex gap-2 justify-end">
       <button
         class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
-        on:click={() => dispatch('close')}
+        on:click|preventDefault|stopPropagation={() => dispatch('close')}
       >
         No
       </button>
       <button
         class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
-        on:click={() => restoreId && restoreSnapshot(restoreId)}
+        on:click|preventDefault|stopPropagation={restoreSnapshot}
       >
         Yes
       </button>

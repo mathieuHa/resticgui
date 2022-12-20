@@ -16,11 +16,8 @@
 
   export let snapshots: any = [];
 
-  let visible: any = null;
-  let removeId: string | null = null;
-  let restoreId: string | null = null;
-  let snapshotId: string | null = null;
-  let searchId: string | null = null;
+  let snapshot: any = null;
+  let modalOpened: string | null = null;
   const dispatch = createEventDispatcher();
 
   const deleteSnapshot = async (snapshotId: string) => {
@@ -28,39 +25,43 @@
     await agent.delete(`/repositories/${id}/snapshots/${snapshotId}`);
     dispatch('delete');
   };
-  
+  const setModalOpened = (rowSnapshot: any, toOpen: string) => {
+    snapshot = rowSnapshot;
+    modalOpened = toOpen;
+  };
 </script>
   
 
-{#if visible}
-  <SeeModal snapshotId={visible.short_id} paths={visible.Paths} on:close={() => (visible = null)}/>
-{:else if removeId !== null}
-  <Modal title="Warning" on:close={() => (removeId = null)}>
+{#if modalOpened === 'see'}
+  <SeeModal snapshotId={snapshot.short_id} paths={snapshot.Paths} on:close={() => (modalOpened = null)}/>
+{:else if modalOpened === 'remove'}
+  <Modal title="Warning" on:close={() => (modalOpened = null)}>
     <div>
-      Do you really want to delete this snapshot #{removeId}
+      Do you really want to delete this snapshot #{snapshot.short_id}
       <div class="flex gap-2 justify-end">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
-          on:click={() => (removeId = null)}
+          on:click={() => (modalOpened = null)}
         >
           No
         </button>
         <button
           class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
-          on:click={() => removeId && deleteSnapshot(removeId)}
+          on:click={() => snapshot && deleteSnapshot(snapshot.short_id)}
         >
           Yes
         </button>
       </div>
     </div>
   </Modal>
-{:else if restoreId !== null}
-  <RestoreModal {restoreId} on:close={() => (restoreId = null)} />
-{:else if snapshotId !== null}
-  <ListFilesModal {snapshotId} on:close={() => (snapshotId = null)} />
-{:else if searchId !== null}
-  <SearchFilesModal {searchId} on:close={() => (searchId = null)} />
+{:else if modalOpened === 'restore'}
+  <RestoreModal snapshotId={snapshot.short_id} on:close={() => (modalOpened = null)} />
+{:else if modalOpened === 'listFiles'}
+  <ListFilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
+{:else if modalOpened === 'search'}
+  <SearchFilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
 {/if}
+
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each snapshots as snapshot}
     <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
@@ -71,35 +72,35 @@
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
           title="See paths"
-          on:click|preventDefault|stopPropagation={() => (visible = snapshot)}
+          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'see')}
         >
           <Eye />
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
           title="Delete snapshot"
-          on:click|preventDefault|stopPropagation={() => (removeId = snapshot.short_id)}
+          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'delete')}
         >
           <Trash />
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-cyan-500 hover:bg-cyan-600"
           title="Restore snapshot"
-          on:click|preventDefault|stopPropagation={() => (restoreId = snapshot.short_id)}
+          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'restore')}
         >
           <Restore />
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
           title="list snapshot files"
-          on:click|preventDefault|stopPropagation={() => (snapshotId = snapshot.short_id)}
+          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'listFiles')}
         >
           <List />
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
           title="search snapshot files"
-          on:click|preventDefault|stopPropagation={() => (searchId = snapshot.short_id)}
+          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'search')}
         >
           <Search />
         </button>

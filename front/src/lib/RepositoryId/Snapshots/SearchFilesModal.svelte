@@ -3,23 +3,20 @@
   import { page } from '$app/stores';
   import { toasts } from '$utils/stores';
   import Modal from '$lib/Modal.svelte';
-  import Download from '$lib/Icon/Download.svelte';
-  import File from '$lib/Icon/File.svelte';
-  import Folder from '$lib/Icon/Folder.svelte';
   import agent from '$utils/api';
-  import Number from '$lib/Number.svelte';
   import Input from '$lib/Input.svelte';
   import Search from '$lib/Icon/Search.svelte';
+  import ListFiles from './ListFiles.svelte';
 
-  export let searchId: string | null = null;
+  export let snapshotId: string | null = null;
   let files: any[] = []
   let pattern: string | null = null;
 
   const dispatch = createEventDispatcher();
   const search = async () => {
       try {
-        files = await agent.get(`/repositories/${$page.params.id}/search/${searchId}?pattern=${pattern}`);
-        toasts.addToast(`Search pattern of filenames of ${searchId} received`);
+        files = await agent.get(`/repositories/${$page.params.id}/search/${snapshotId}?pattern=${pattern}`);
+        toasts.addToast(`Search pattern of filenames of ${snapshotId} received`);
       // dispatch('close');
       } catch (err) {
         toasts.addToast(err as string, 'failure');
@@ -28,7 +25,7 @@
   
 </script>
 
-<Modal title="Files found in snapshot #{searchId}" on:close={() => dispatch('close')}>
+<Modal title="Files found in snapshot #{snapshotId}" on:close={() => dispatch('close')}>
   <div>
     <div class="grid grid-flow-col">
       <div class="col">
@@ -48,40 +45,6 @@
       </div>
     </div>
     
-    
-    {#if files && files.length > 0}
-    <div class="grid">
-      <table class="table-auto">
-        <thead>
-          <tr>
-            <th class="text-left">Type</th>
-            <th class="text-left">Size</th>
-            <th class="text-left">Mod Time</th>
-            <th class="text-left">Path</th>
-            <th class="text-left">Download</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each files as f}
-          <tr>
-            <td>
-              {#if f.type == "dir" }
-                <Folder />
-              {:else}
-                <File />
-              {/if}
-            </td>
-            <td><Number number={f.size}/></td>
-            <td>{f.mtime.split('.')[0].replace('T', ' ')}</td>
-            <td class="text-left">{f.path}</td>
-            <td><a href={`http://localhost:3001/api/v1/repositories/${$page.params.id}/download/${searchId}?path=${f.path}`}><Download /></a></td>
-          </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-    {:else if pattern && pattern != ""}
-      No files in repository for pattern {pattern}
-    {/if}
+    <ListFiles {snapshotId} {files} {pattern} />
   </div>
 </Modal>
