@@ -7,12 +7,10 @@
   import Modal from '$lib/Modal.svelte';
   import Trash from '$lib/Icon/Trash.svelte';
   import Restore from '$lib/Icon/Restore.svelte';
-  import List from '$lib/Icon/List.svelte';
-  import Search from '$lib/Icon/Search.svelte';
   import RestoreModal from './RestoreModal.svelte';
   import SeeModal from './SeeModal.svelte';
-  import ListFilesModal from './ListFilesModal.svelte';
-  import SearchFilesModal from './SearchFilesModal.svelte';
+  import FilesModal from './FilesModal.svelte';
+  import List from '$lib/Icon/List.svelte';
 
   export let snapshots: any = [];
 
@@ -34,7 +32,7 @@
 
 {#if modalOpened === 'see'}
   <SeeModal snapshotId={snapshot.short_id} paths={snapshot.Paths} on:close={() => (modalOpened = null)}/>
-{:else if modalOpened === 'remove'}
+{:else if modalOpened === 'delete'}
   <Modal title="Warning" on:close={() => (modalOpened = null)}>
     <div>
       Do you really want to delete this snapshot #{snapshot.short_id}
@@ -56,10 +54,8 @@
   </Modal>
 {:else if modalOpened === 'restore'}
   <RestoreModal snapshotId={snapshot.short_id} on:close={() => (modalOpened = null)} />
-{:else if modalOpened === 'listFiles'}
-  <ListFilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
-{:else if modalOpened === 'search'}
-  <SearchFilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
+{:else if modalOpened === 'files'}
+  <FilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
 {/if}
 
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -91,18 +87,11 @@
           <Restore />
         </button>
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
-          title="list snapshot files"
-          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'listFiles')}
+          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
+          title="Snapshot files"
+          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'files')}
         >
           <List />
-        </button>
-        <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
-          title="search snapshot files"
-          on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'search')}
-        >
-          <Search />
         </button>
       </div>
     </div>
