@@ -1,5 +1,7 @@
 <script>
-    export let repo;
+  export let repo;
+  import Number from '../Number.svelte';
+
 </script>
 
 <div class="flex flex-wrap justify-between gap-2 mt-5">
@@ -116,7 +118,7 @@
 
 <p>
   Size:
-  <span class="ml-3">{repo.repositorySize || 0}</span>
+  <span class="ml-3"><Number number={repo.repositorySize || 0}/></span>
 </p>
 <p>
   Total file number:
