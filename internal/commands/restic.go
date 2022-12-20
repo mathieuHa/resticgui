@@ -23,7 +23,7 @@ func ResticInit() {
 	}
 }
 
-func runRestic(args []string, env []string) (string, string, error) {
+func runRestic(args []string, env []string, path string) (string, string, error) {
 	log.Debug().Msgf("args %v", args)
 	log.Debug().Msgf("env %v", env)
 
@@ -39,7 +39,18 @@ func runRestic(args []string, env []string) (string, string, error) {
 	if err != nil {
 		log.Error().Err(err).Msg("Error in cmd run")
 	}
-	log.Info().Msgf("output: %v", cmdOutput.String())
-	log.Info().Msgf("error: %v", cmdStderr.String())
+	log.Debug().Msgf("error: %v", cmdStderr.String())
+	if path != "" {
+		f, err := os.Create(path)
+		if err != nil {
+			log.Err(err).Msg("Could not open file dest")
+			return "", cmdStderr.String(), err
+		}
+		defer f.Close()
+		f.Write(cmdOutput.Bytes())
+		return "File written with success at " + path, cmdStderr.String(), err
+	}
+	log.Debug().Msgf("output: %v", cmdOutput.String())
+
 	return cmdOutput.String(), cmdStderr.String(), err
 }

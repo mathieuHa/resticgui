@@ -215,6 +215,14 @@ func SearchFilesSnapshotRepository(r *ent.Repository, version string, pattern st
 	return stdout, stderr
 }
 
+func DownloadFilesSnapshotRepository(r *ent.Repository, version string, path string, tmpPath string) (out string, stderr string) {
+	log.Debug().Msg("DownloadFilesSnapshotRepository()")
+	ctx := context.Background()
+	stdout, stderr, errCmd := commands.DownloadFilesSnapshot(r, version, path, tmpPath)
+	database.LogCommand(r.ID, "DownloadFiles", stdout, stderr, errCmd, ctx)
+	return stdout, stderr
+}
+
 func ValidRepository(repository ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("ValidRepository()")
 
