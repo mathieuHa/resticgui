@@ -73,6 +73,35 @@
     </p>
   </div>
   <br />
+  <h2 class="text-md font-bold">Prune schedule</h2>
+  {#if repo.edges.pruneSchedule.choice === "interval"}
+    <p>
+      Interval:
+      <span class="ml-3">{repo.edges.pruneSchedule.interval}</span>
+    </p>
+  {:else if repo.edges.pruneSchedule.choice === "cron"}
+    <p>
+      Cron:
+      <span class="ml-3">{repo.edges.pruneSchedule.cronSyntax}</span>
+    </p>
+  {:else}
+    <p>No planning set</p>
+  {/if}
+  <div class="flex flex-wrap gap-2 whitespace-nowrap">
+    <p class="flex-1">
+      Last:
+      <span class="ml-3">
+        {repo.edges.pruneSchedule?.lastRun?.replace('+0000 UTC', '') || ''}
+      </span>
+    </p>
+    <p class="flex-1">
+      Next:
+      <span class="ml-3">
+        {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}
+      </span>
+    </p>
+  </div>
+  <br />
 {/if}
 
 <h2 class="text-md font-bold">Paths</h2>
