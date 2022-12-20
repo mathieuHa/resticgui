@@ -105,8 +105,7 @@ func UpdateBackupSchedule(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
-
-	updateRepositoryRunning(r, rID)
+	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, backupSchedule)
 }

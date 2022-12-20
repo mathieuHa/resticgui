@@ -187,15 +187,7 @@ func EditRepository(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
 		return
 	}
-
-	updateRepositoryRunning(r, rID)
-
-	if r.Active && r.Valid {
-		backup.AddScheduledBackup(r, cr)
-	} else {
-		log.Debug().Msg("We may need to call backup.RemoveScheduledBackup(r)")
-		// backup.RemoveScheduledBackup(r)
-	}
+	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, r)
 }

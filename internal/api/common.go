@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/backup"
 	"gitlab.com/resticgui/resticgui/internal/database"
 )
@@ -78,7 +77,13 @@ const errPUpdate = p + errUpdate
 const errPCreate = p + errCreate
 const errPQuery = p + errQuery
 
-func updateRepositoryRunning(r *ent.Repository, id int) (err error) {
+func updateRepositoryRunning(id int) (err error) {
+	log.Debug().Msg("updateRepositoryRunning")
+
+	ctx := context.Background()
+
+	r, _ := database.GetRepositoryByIDDB(id, ctx)
+
 	r.Valid, err = backup.ValidRepository(*r)
 	if err != nil {
 		log.Debug().Msg(err.Error())

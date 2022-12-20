@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -75,10 +74,8 @@ func UpdateBackupPolicy(c *gin.Context) {
 	var b ent.BackupPolicy
 	var backupPolicy *ent.BackupPolicy
 
-	id := c.Param("id")
-
-	if !utils.IsValidInt(id) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errIDNotValid})
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
 		return
 	}
 
@@ -88,9 +85,7 @@ func UpdateBackupPolicy(c *gin.Context) {
 		return
 	}
 
-	newId, _ := strconv.Atoi(id)
-
-	r, err := database.GetRepositoryByIDDB(newId, ctx)
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
@@ -103,7 +98,7 @@ func UpdateBackupPolicy(c *gin.Context) {
 	}
 
 	if r.Edges.BackupPolicy == nil || r.Edges.BackupPolicy.ID == 0 {
-		backupPolicy, err = database.CreateBackupPolicyDB(b, newId, ctx)
+		backupPolicy, err = database.CreateBackupPolicyDB(b, rID, ctx)
 	} else {
 		backupPolicy, err = database.UpdateBackupPolicyDB(b, r.Edges.BackupPolicy.ID, ctx)
 	}
@@ -112,7 +107,7 @@ func UpdateBackupPolicy(c *gin.Context) {
 		return
 	}
 
-	updateRepositoryRunning(r, newId)
+	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, backupPolicy)
 }
