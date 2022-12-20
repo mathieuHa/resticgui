@@ -10,6 +10,7 @@ import (
 
 const backupCmd = "backup"
 const findCmd = "find"
+const dumpCmd = "dump"
 const initCmd = "init"
 const restoreCmd = "restore"
 const snapshotsCmd = "snapshots"
@@ -28,7 +29,7 @@ func GetResticVersion() (string, string, error) {
 	var args []string
 
 	args = append(args, "version")
-	return runRestic(args, getDefaultEnv())
+	return runRestic(args, getDefaultEnv(), "")
 }
 
 func GetResticHelp() (string, string, error) {
@@ -37,7 +38,7 @@ func GetResticHelp() (string, string, error) {
 	var args []string
 
 	args = append(args, "--help")
-	return runRestic(args, getDefaultEnv())
+	return runRestic(args, getDefaultEnv(), "")
 }
 
 func GetSnapshots(repository *ent.Repository) (string, string, error) {
@@ -51,7 +52,7 @@ func GetSnapshots(repository *ent.Repository) (string, string, error) {
 	args = append(args, snapshotsCmd)
 	args = append(args)
 	args = append(args, jsonFormat)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func InitRepository(repository *ent.Repository) (string, string, error) {
@@ -63,7 +64,7 @@ func InitRepository(repository *ent.Repository) (string, string, error) {
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, initCmd)
 	args = append(args, repoFormat...)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func ListFilesSnapshot(repository *ent.Repository, version string) (string, string, error) {
@@ -77,7 +78,7 @@ func ListFilesSnapshot(repository *ent.Repository, version string) (string, stri
 	args = append(args, repoFormat...)
 	args = append(args, version)
 	args = append(args, jsonFormat)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func SearchFilesSnapshot(repository *ent.Repository, version string, pattern string) (string, string, error) {
@@ -93,7 +94,23 @@ func SearchFilesSnapshot(repository *ent.Repository, version string, pattern str
 	args = append(args, "-s")
 	args = append(args, version)
 	args = append(args, jsonFormat)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
+}
+
+func DownloadFilesSnapshot(repository *ent.Repository, version string, path string, tmpPath string) (string, string, error) {
+	log.Debug().Msg("DownloadFilesSnapshot()")
+
+	var args []string
+	var env []string
+
+	repoFormat, env, _ := getProviderData(repository)
+	args = append(args, repoFormat...)
+	args = append(args, dumpCmd)
+	args = append(args, "-a")
+	args = append(args, "zip")
+	args = append(args, version)
+	args = append(args, path)
+	return runRestic(args, env, tmpPath)
 }
 
 func RestoreRepository(repository *ent.Repository, path string, version string) (string, string, error) {
@@ -108,7 +125,7 @@ func RestoreRepository(repository *ent.Repository, path string, version string) 
 	args = append(args, commonArgs...)
 	// does not support json format output
 	// args = append(args, jsonFormat)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func getRestoreCommonArgs(path string, version string) []string {
@@ -157,7 +174,7 @@ func ForgetSnapshots(repository *ent.Repository, version string) (string, string
 	args = append(args, forgetCmd)
 	args = append(args, repoFormat...)
 	args = append(args, version)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func PruneSnaphots(repository *ent.Repository) (string, string, error) {
@@ -175,7 +192,7 @@ func PruneSnaphots(repository *ent.Repository) (string, string, error) {
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, pruneCmd)
 	args = append(args, repoFormat...)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func BackupRepository(repository *ent.Repository, dryRun bool) (string, string, error) {
@@ -199,7 +216,7 @@ func BackupRepository(repository *ent.Repository, dryRun bool) (string, string, 
 	args = append(args, dryRunParameter)
 	args = append(args, jsonFormat)
 
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func StatsRepository(repository *ent.Repository, snapshotID string) (string, string, error) {
@@ -220,7 +237,7 @@ func StatsRepository(repository *ent.Repository, snapshotID string) (string, str
 		args = append(args, snapshotID)
 	}
 	args = append(args, jsonFormat)
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }
 
 func getBackupCommonArgs(repository ent.Repository) []string {
@@ -299,5 +316,5 @@ func CheckIntegrity(repository *ent.Repository, full bool, pourcentage float64) 
 	if pourcentage != 0 {
 		args = append(args, "--read-data-subset", fmt.Sprintf("%f", pourcentage))
 	}
-	return runRestic(args, env)
+	return runRestic(args, env, "")
 }

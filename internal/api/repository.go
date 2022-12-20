@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -771,6 +773,88 @@ func SearchFilesSnapshotRepository(c *gin.Context) {
 	} else {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": errSnapLogsNotJSON})
 	}
+}
+
+// DownloadFilesSnapshotRepository godoc
+// @Summary download files/folder present in a snapshot from the repository
+// @Schemes
+// @Description download files/folder present in a snapshot from the repository
+// @Param id path int true "Repository ID"
+// @Param snapshotID path string true "Snapshot ID"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {string} errIDNotValid
+// @Failure 404 {string} errNotFound
+// @Failure 500 {string} error
+// @Router /repositories/{id}/download/{snapshotID} [get]
+func DownloadFilesSnapshotRepository(c *gin.Context) {
+	log.Debug().Msg("DownloadFilesSnapshotRepository()")
+
+	ctx := context.Background()
+	rID, err := utils.ReturnValidID(c)
+	if err != nil {
+		return
+	}
+	snapshotID := c.Param("snapshotID")
+	path := c.DefaultQuery("path", "")
+	log.Debug().Msgf("SnapshotID: %s", snapshotID)
+	log.Debug().Msgf("path: %s", path)
+
+	r, err := database.GetRepositoryByIDDB(rID, ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
+			return
+		}
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+		return
+	}
+
+	r.Valid, err = backup.ValidRepository(*r)
+	if !r.Valid {
+		log.Debug().Msg(errRInvalid)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
+		return
+	}
+	filename := filepath.Base(path)
+	dir := "/tmp/download/" + fmt.Sprint(r.ID) + "/"
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		log.Err(err).Msgf("coud not create dir: %s", dir)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"err": "err creating directory"})
+		return
+	}
+	// Cannot check if file is dir or not
+	// if fileInfo.IsDir() {
+	// }
+	tmpPath := dir + filename
+	_, _ = backup.DownloadFilesSnapshotRepository(r, snapshotID, path, tmpPath)
+	buff := make([]byte, 512)
+	file, err := os.Open(tmpPath)
+
+	if err != nil {
+		log.Err(err).Msgf("coud not read file written: %s", tmpPath)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"err": "err coud not read file written"})
+		return
+	}
+
+	defer file.Close()
+	_, err = file.Read(buff)
+	if err != nil {
+		log.Err(err).Msgf("coud not read buff")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"err": "coud not read buff"})
+		return
+	}
+	filetype := http.DetectContentType(buff)
+	log.Debug().Msgf("filetype: %s", filetype)
+
+	if filetype == "application/zip" {
+		filename = filename + ".zip"
+	}
+
+	c.FileAttachment(tmpPath, filename)
 }
 
 // ValidRepository godoc

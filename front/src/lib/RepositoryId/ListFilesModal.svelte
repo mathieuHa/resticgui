@@ -56,7 +56,7 @@
             <td><Number number={f.size}/></td>
             <td>{f.mtime.split('.')[0].replace('T', ' ')}</td>
             <td class="text-left">{f.path}</td>
-            <td><button><Download /></button></td>
+            <td><a href={`http://localhost:3001/api/v1/repositories/${$page.params.id}/download/${snapshotId}?path=${f.path}`}><Download /></a></td>
           </tr>
           {/each}
         </tbody>
