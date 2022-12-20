@@ -8,7 +8,7 @@
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
   import { each, mount_component, onMount } from 'svelte/internal';
-  import Number from './Number.svelte';
+  import Number from '../Number.svelte';
   import Input from '../Input.svelte';
   import Search from '../Icon/Search.svelte';
 

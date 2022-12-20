@@ -10,6 +10,7 @@
   import List from '../Icon/List.svelte';
   import Search from '../Icon/Search.svelte';
   import RestoreModal from './RestoreModal.svelte';
+  import SeeModal from '../Snapshots/SeeModal.svelte';
   import ListFilesModal from './ListFilesModal.svelte';
   import SearchFilesModal from './SearchFilesModal.svelte';
   export let snapshots: any = [];
@@ -31,14 +32,7 @@
   
 
 {#if visible}
-  <Modal
-    title="Paths of {visible.short_id} at {dayjs(visible.time).format('DD/MM/YYYY HH:mm ')}"
-    on:close={() => { visible = null; }}
-  >
-    {#each visible.Paths as path}
-      <p>{path}</p>
-    {/each}
-  </Modal>
+  <SeeModal snapshotId={visible.short_id} paths={visible.Paths} />
 {:else if removeId !== null}
   <Modal title="Warning" on:close={() => (removeId = null)}>
     <div>
