@@ -1,15 +1,11 @@
 
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
-    import Modal from "$lib/Modal.svelte";
-    import Download from '../Icon/Download.svelte';
-    import File from '../Icon/File.svelte';
-    import Folder from '../Icon/Folder.svelte';
-    import {page} from '$app/stores';
-    import agent from '$utils/api';
+    import { createEventDispatcher, onMount } from 'svelte';
+    import { page } from '$app/stores';
     import { toasts } from '$utils/stores';
-    import { each, mount_component, onMount } from 'svelte/internal';
-    import Number from '../Number.svelte';
+    import agent from '$utils/api';
+    import Modal from '$lib/Modal.svelte';
+    import Number from '$lib/Number.svelte';
   
     export let snapshotId: string | null = null;
     export let paths: string[] = [];

@@ -1,7 +1,7 @@
-<script>
-  export let repo;
+<script lang="ts">
   import Number from '../Number.svelte';
 
+  export let repo;
 </script>
 
 <div class="flex flex-wrap justify-between gap-2 mt-5">

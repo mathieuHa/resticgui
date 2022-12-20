@@ -4,7 +4,7 @@
   import { page } from '$app/stores';
 
   import Log from '$lib/RepositoryId/Log.svelte';
-  import Snapshot from '$lib/RepositoryId/Snapshot.svelte';
+  import Snapshot from '$lib/RepositoryId/Snapshots/Snapshot.svelte';
   import General from '$lib/RepositoryId/General.svelte';
   import Loader from '$lib/Loader.svelte';
   import agent from '$utils/api';

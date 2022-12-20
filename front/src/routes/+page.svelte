@@ -9,7 +9,6 @@
   import RepositoryModal from '$lib/RepositoryModal.svelte';
   import Modal from '$lib/Modal.svelte';
   import Snapshot from '$lib/Icon/Snapshot.svelte';
-    import Loader from '$lib/Loader.svelte';
 
   let repos = [];
   let step = 0;

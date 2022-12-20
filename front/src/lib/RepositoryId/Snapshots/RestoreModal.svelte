@@ -1,11 +1,11 @@
 
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Modal from "$lib/Modal.svelte";
-  import Input from '../Input.svelte';
-  import {page} from '$app/stores';
+  import { page } from '$app/stores';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
+  import Modal from "$lib/Modal.svelte";
+  import Input from '$lib/Input.svelte';
 
   export let restoreId: string | null = null;
   let path: string | null = null;
@@ -29,6 +29,7 @@
   <div>
     Do You really want to restore this snapshot #{restoreId}
     <Input
+      secondary
       id="path"
       label="Path to restore to"
       type="text"

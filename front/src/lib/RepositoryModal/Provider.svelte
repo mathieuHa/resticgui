@@ -15,9 +15,8 @@
   let provider = initialProvider.provider || null;
   let values = { edges: {}, provider };
   Object.keys(providers).forEach((backupProvider) => {
-    values.edges[backupProvider] = (initialProvider.edges && initialProvider.edges[backupProvider]) || {};
+    values.edges[backupProvider] = initialProvider.edges && initialProvider.edges[backupProvider] || {};
   });
-
 
   $: dispatch('update', { provider, edges: { [provider]: values.edges[provider] } });
 </script>

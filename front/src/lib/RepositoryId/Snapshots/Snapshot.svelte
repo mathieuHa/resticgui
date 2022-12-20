@@ -1,18 +1,19 @@
 <script lang="ts">
   import dayjs from 'dayjs';
   import { createEventDispatcher } from 'svelte';
-  import {page} from '$app/stores';
+  import { page } from '$app/stores';
   import agent from '$utils/api';
-  import Eye from '../Icon/Eye.svelte';
-  import Modal from '../Modal.svelte';
-  import Trash from '../Icon/Trash.svelte';
-  import Restore from '../Icon/Restore.svelte';
-  import List from '../Icon/List.svelte';
-  import Search from '../Icon/Search.svelte';
+  import Eye from '$lib/Icon/Eye.svelte';
+  import Modal from '$lib/Modal.svelte';
+  import Trash from '$lib/Icon/Trash.svelte';
+  import Restore from '$lib/Icon/Restore.svelte';
+  import List from '$lib/Icon/List.svelte';
+  import Search from '$lib/Icon/Search.svelte';
   import RestoreModal from './RestoreModal.svelte';
-  import SeeModal from '../Snapshots/SeeModal.svelte';
+  import SeeModal from './SeeModal.svelte';
   import ListFilesModal from './ListFilesModal.svelte';
   import SearchFilesModal from './SearchFilesModal.svelte';
+
   export let snapshots: any = [];
 
   let visible: any = null;
@@ -76,14 +77,14 @@
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
-          title="delete snapshot"
+          title="Delete snapshot"
           on:click|preventDefault|stopPropagation={() => (removeId = snapshot.short_id)}
         >
           <Trash />
         </button>
         <button
           class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-cyan-500 hover:bg-cyan-600"
-          title="restore snapshot"
+          title="Restore snapshot"
           on:click|preventDefault|stopPropagation={() => (restoreId = snapshot.short_id)}
         >
           <Restore />

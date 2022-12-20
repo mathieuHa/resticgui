@@ -8,6 +8,7 @@
   export let type = 'text';
   export let options = [];
   export let selected: string | null = '';
+  export let secondary = false;
 
   let idCheckbox = id;
   let idNumber = id;
@@ -25,7 +26,9 @@
   <div class="flex flex-col mb-2">
     <label for={id}>{label}</label>
     <input
-      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded bg-gray-200 dark:bg-gray-700 disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
+      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded
+        bg-gray-{secondary ? 300 : 200} dark:bg-gray-{secondary ? 800 : 700}
+        disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
       id={id}
       type="text"
       bind:value={val}
@@ -37,7 +40,9 @@
   <div class="flex flex-col mb-2">
     <label for={idPassword}>{label}</label>
     <input
-      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded bg-gray-200 dark:bg-gray-700 disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
+      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded
+        bg-gray-{secondary ? 300 : 200} dark:bg-gray-{secondary ? 800 : 700}
+        disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
       id={idPassword}
       type="password"
       bind:value={val}
@@ -49,7 +54,9 @@
   <div class="flex flex-col mb-2">
     <label for="select">{label}</label>
     <select
-      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded bg-gray-200 dark:bg-gray-700 disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
+      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded
+        bg-gray-{secondary ? 300 : 200} dark:bg-gray-{secondary ? 800 : 700}
+        disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
       id="select" 
       bind:value={select}
       on:change={() => { selected = select; dispatch('change'); }}
@@ -64,7 +71,9 @@
   <div class="flex flex-col mb-2">
     <label for={idNumber}>{label}</label>
     <input
-      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded bg-gray-200 dark:bg-gray-700 disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
+      class="px-2 py-1 focus:shadow-sm shadow-gray-300 rounded
+        bg-gray-{secondary ? 300 : 200} dark:bg-gray-{secondary ? 800 : 700}
+        disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
       id={idNumber}
       type="number"
       min="0"
