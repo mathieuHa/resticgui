@@ -429,11 +429,16 @@ func TestValidRepository(t *testing.T) {
 		lProvider := ent.LocalProvider{RepoPath: lPath}
 		sc := ent.BackupSchedule{Interval: "1m", Choice: "interval"}
 		repository := ent.Repository{Name: rName, Password: rPassword}
+		path := ent.Path{AbsPath: "/home/path", RelPath: "/home/path", Included: true, Name: "path"}
+		var paths []*ent.Path
+		paths = append(paths, &path)
 		r, err := database.CreateRepositoryDB(repository, context.Background())
 		assert.Nil(t, err)
 		_, err = database.CreateLocalProviderDB(lProvider, r.ID, context.Background())
 		assert.Nil(t, err)
 		_, err = database.CreateBackupScheduleDB(sc, r.ID, context.Background())
+		assert.Nil(t, err)
+		_, err = database.CreatePathsDB(paths, r.ID, context.Background())
 		assert.Nil(t, err)
 
 		id := r.ID

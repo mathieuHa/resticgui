@@ -97,7 +97,11 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	}
 	// TODO Check the validity of the provider and repository in general
 
-	// Check path len here
+	// Check path len > 0
+	if r.Edges.Paths == nil || len(r.Edges.Paths) == 0 {
+		log.Info().Msg("Path list is empty, nothing to backup")
+		return
+	}
 
 	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
 	stdout, stderr, errCmd := commands.GetSnapshots(r)
@@ -249,6 +253,14 @@ func ValidRepository(repository ent.Repository) (valid bool, err error) {
 		return false, err
 	}
 	if !valid { // If schedule is not valid, repository cannot be valid
+		return false, nil
+	}
+	valid, err = validPaths(repository.Edges.Paths)
+	if err != nil {
+		log.Err(err).Msg(utils.ErrMsgREmpty_Paths)
+		return false, err
+	}
+	if !valid { // If path is not valid, repository cannot be valid
 		return false, nil
 	}
 	return valid, err
