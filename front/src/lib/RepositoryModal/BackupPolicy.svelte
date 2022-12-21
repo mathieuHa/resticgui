@@ -1,14 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import Input from '../Input.svelte';
+  import type { BackupPolicy } from '$utils/types';
 
-  export let initialBackupPolicy: {
-    nbLastBackup?: number,
-    oneByHour?: number,
-    oneByDay?: number,
-    oneByMonth?: number,
-    keepAll?: boolean,
-  } = {};
+  export let initialBackupPolicy: BackupPolicy;
   let values = initialBackupPolicy;
 
   const dispatch = createEventDispatcher();
@@ -18,7 +13,6 @@
     keepAll: values.nbLastBackup === 0,
     nbLastBackup: values.nbLastBackup && values.nbLastBackup > 0 ? values.nbLastBackup : null,
   });
-  $:console.log(values)
 </script>
 
 <Input

@@ -55,10 +55,10 @@
     }
   };
 
-  const onDirClick = (root: string, fetched: boolean, visible: boolean) => {
+  const onDirClick = async (root: string, fetched: boolean, visible: boolean) => {
     const rootArray = root.split('/').filter((path) => !!path);
     if (fetched) tree = populateTree(tree, [...rootArray, '__visible'], !visible);
-    else onLoad(root);
+    else await onLoad(root);
   };
 
   onMount(() => onLoad('/'));

@@ -1,10 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Input from '../Input.svelte';
+  import Input from '$lib/Input.svelte';
 
-  export let initialProvider = {};
+  export let initialValues: any;
 
-  const dispatch = createEventDispatcher();
   const providers = {
     localProvider: ['repoPath'],
     MinioS3Provider: ['accessKeyID', 'bucketName', 'port', 'secretAccessKey', 'scheme'],
@@ -12,13 +11,15 @@
     AWSS3Provider: ['accessKeyID', 'secretAccessKey', 'bucketName', 'defaultRegion'],
   }
 
-  let provider = initialProvider.provider || null;
-  let values = { edges: {}, provider };
+  let provider = initialValues.provider || 'localProvider';
+  let values = JSON.parse(JSON.stringify(initialValues));
   Object.keys(providers).forEach((backupProvider) => {
-    values.edges[backupProvider] = initialProvider.edges && initialProvider.edges[backupProvider] || {};
+    values[backupProvider] = initialValues[backupProvider] || {};
   });
 
-  $: dispatch('update', { provider, edges: { [provider]: values.edges[provider] } });
+  const dispatch = createEventDispatcher();
+
+  $: dispatch('update', { provider, [provider]: values[provider] });
 </script>
 
 <div class="flex justify-between">
@@ -45,7 +46,7 @@
       name={input}
       label={input}
       type="text"
-      bind:value={values.edges[provider][input]}
+      bind:value={values[provider][input]}
     />
   {/each}
 {/if}

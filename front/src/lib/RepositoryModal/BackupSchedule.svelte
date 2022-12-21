@@ -6,7 +6,7 @@
   let values = initialBackupSchedule;
 
   const dispatch = createEventDispatcher();
-  console.log(values);
+
   $:dispatch('update', values);
 </script>
 

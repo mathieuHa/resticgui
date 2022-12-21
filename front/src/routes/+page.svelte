@@ -40,9 +40,7 @@
 {#if removeId}
   <Modal
     title="Warning"
-    on:close={() => {
-      removeId = null;
-    }}
+    on:close={() => (removeId = null)}
   >
     <div>
       You really want to delete repository #{removeId}
@@ -61,9 +59,7 @@
 {:else if initialValues}
   <RepositoryModal
     repository={initialValues}
-    on:close={() => {
-      initialValues = null;
-    }}
+    on:close={() => (initialValues = null)}
     on:refresh={() => (reposPromise = onRefresh())}
   />
 {/if}

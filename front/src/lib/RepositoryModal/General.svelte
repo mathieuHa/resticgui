@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import Input from '../Input.svelte';
+  import type { Repository } from '$utils/types';
 
-  export let initialValues = {};
-
+  export let initialValues: Repository;
   let values = initialValues;
 
   const dispatch = createEventDispatcher();

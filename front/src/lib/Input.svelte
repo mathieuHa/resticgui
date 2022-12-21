@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  export let value: string | null = '';
-  export let checked: boolean | null = false;
+  export let value: string | null | undefined = '';
+  export let checked: boolean | null | undefined = false;
   export let id = '';
   export let label = '';
   export let type = 'text';

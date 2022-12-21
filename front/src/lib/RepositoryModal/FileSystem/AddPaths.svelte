@@ -1,12 +1,11 @@
 <script lang="ts">
-  import AddPaths from './AddPaths.svelte';
-  import Arrow from '../../Icon/Arrow.svelte';
+  import Arrow from '$lib/Icon/Arrow.svelte';
 
   export let tree = {};
   export let path = '';
   export let paths: string[] = [];
   export let onTogglePaths: (path: string, include: boolean) => void;
-  export let onDirClick: (root: string, fetched: boolean, visible: boolean) => void;
+  export let onDirClick: (root: string, fetched: boolean, visible: boolean) => Promise<void>;
 
 
   const isIncluded = (pathsCopy: string[]) => {
@@ -21,6 +20,7 @@
     }
     return deepInclude.included;
   }
+  let loading = false;
   let included = false;
   $:included = isIncluded(paths)
 </script>
@@ -41,7 +41,11 @@
       <div class="flex items-center">
         <button
           class="w-3 h-3 mr-2 cursor-pointer {tree[key].__visible ? 'rotate-180' : 'rotate-90'} transition"
-          on:click|preventDefault|stopPropagation={async () => onDirClick(`${path}/${key}/`, tree[key].__fetched, tree[key].__visible)}
+          on:click|preventDefault|stopPropagation={async () => {
+            loading = true;
+            await onDirClick(`${path}/${key}/`, tree[key].__fetched, tree[key].__visible);
+            loading = false;
+          }}
         >
           <Arrow />
         </button>
@@ -55,7 +59,7 @@
         </p>
       </div>
       <div class={`pl-5 ${tree[key].__visible ? '' : 'hidden'}`}>
-        <AddPaths path={`${path}/${key}`} tree={tree[key]} {paths} {onTogglePaths} {onDirClick} />
+        <svelte:self path={`${path}/${key}`} tree={tree[key]} {paths} {onTogglePaths} {onDirClick} />
       </div>
     {/if}
   {/each}

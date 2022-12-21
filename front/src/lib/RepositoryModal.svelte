@@ -13,20 +13,71 @@
 
   export let repository: any;
 
+  const dispatch = createEventDispatcher();
   const stepper = [
-    { name: 'General', link:  `/repositories/${repository.id}` },
-    { name: 'Paths', link:  `/repositories/${repository.id}/paths` },
-    { name: 'Schedule', link:  `/repositories/${repository.id}/backupschedule` },
-    { name: 'Policy', link:  `/repositories/${repository.id}/backuppolicy` },
-    { name: 'Provider', link:  `/repositories/${repository.id}` },
-    { name: 'Prune', link:  `/repositories/${repository.id}/pruneschedule` },
+    {
+      name: 'General',
+      link:  `/repositories/${repository.id}`,
+      defaultValues: (repo) => ({
+        id: repo.id,
+        name: repo.name,
+        password: repo.password,
+        active: repo.active,
+      }),
+    },
+    {
+      name: 'Paths',
+      link:  `/repositories/${repository.id}/paths`,
+      defaultValues: (repo) => repo.edges?.paths?.map(
+        ({ relPath = '/root', included }) => included ? relPath : `!${relPath}`,
+      ) || [],
+    },
+    {
+      name: 'Schedule',
+      link:  `/repositories/${repository.id}/backupschedule`,
+      defaultValues: (repo) => ({
+        choice: repo.edges?.backupSchedule?.choice,
+        cronSyntax: repo.edges?.backupSchedule?.cronSyntax,
+        interval: repo.edges?.backupSchedule?.interval,
+      }),
+    },
+    {
+      name: 'Policy',
+      link:  `/repositories/${repository.id}/backuppolicy`,
+      defaultValues: (repo) => ({
+        keepAll: repo.edges?.backupPolicy?.keepAll,
+        nbLastBackup: repo.edges?.backupPolicy?.nbLastBackup || 0,
+        oneByHour: repo.edges?.backupPolicy?.oneByHour || 0,
+        oneByDay: repo.edges?.backupPolicy?.oneByDay || 0,
+        oneByMonth: repo.edges?.backupPolicy?.oneByMonth || 0,
+      }),
+    },
+    {
+      name: 'Provider',
+      link:  `/repositories/${repository.id}/provider`,
+      defaultValues: (repo) => ({
+        provider: repo.provider,
+        localProvider: repo.edges?.localProvider,
+        MinioS3Provider: repo.edges?.MinioS3Provider,
+        B2Provider: repo.edges?.B2Provider,
+        AWSS3Provider: repo.edges?.AWSS3Provider,
+      }),
+    },
+    {
+      name: 'Prune',
+      link:  `/repositories/${repository.id}/pruneschedule`,
+      defaultValues: (repo) => ({
+        choice: repo.edges?.pruneSchedule?.choice,
+        cronSyntax: repo.edges?.pruneSchedule?.cronSyntax,
+        interval: repo.edges?.pruneSchedule?.interval,
+      }),
+    },
   ];
   let step = stepper[0].name;
-  let values = null;
-  let link: string = `/repositories/${repository.id}`;
+  let link = `/repositories/${repository.id}`;
 
-  const dispatch = createEventDispatcher();
   
+  let values = stepper[0]?.defaultValues(repository);
   const onCheck = async (id: number) => {
     if (!id) return;
     try {
@@ -37,20 +88,15 @@
     }
   }
   const onSubmit = async () => {
-    console.log(link, values);
     try {
-      await agent[repository?.id ? 'patch' : 'post'](link, values);
+      await agent[repository?.id ? 'patch' : 'post'](repository.id ? link : '/repositories', values);
       toasts.addToast('Repository updated !');
       dispatch('refresh');
     } catch (err) {
-      console.log(err);
       toasts.addToast(err, 'failure');
       console.log(err);
     }
   }
-
-  $:if (repository === null) step = 0;
-  $:values = Object.assign({}, repository) || step;
 </script>
 
 <Modal on:close={() => dispatch('close')} title="Repository">
@@ -65,6 +111,7 @@
           on:click|preventDefault|stopPropagation={() => {
             step = stepped.name;
             link = stepped.link;
+            values = stepped.defaultValues(repository);
           }}
         >
           <span class="rounded-xl">{stepped.name}</span>
@@ -72,43 +119,38 @@
       {/each}
     </div>
     <div class="overflow-y-auto relative flex-1 flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
-      {#if step === stepper[1].name}
+      {#if step === stepper[1]?.name}
         <Paths
-          initialPaths={values.edges && values.edges.paths
-            ? values.edges.paths.map(({ relPath = '/root', included }) => included ? relPath : `!${relPath}`)
-            : []}
+          initialPaths={stepper[1]?.defaultValues(repository)}
           on:update={({ detail: paths }) => (values = paths)}
         />
-      {:else if step === stepper[2].name}
+      {:else if step === stepper[2]?.name}
         <BackupSchedule
-          initialBackupSchedule={(values.edges?.backupSchedule) || {}}
-          on:update={({ detail: backupSchedule }) => {
-            values = backupSchedule;
-            link = `/repositories/${repository.id}/backupschedule`;
-          }}
+          initialBackupSchedule={stepper[2]?.defaultValues(repository)}
+          on:update={({ detail }) => (values = detail)}
         />
-      {:else if step === stepper[3].name}
+      {:else if step === stepper[3]?.name}
         <BackupPolicy
-          initialBackupPolicy={(values.edges?.backupPolicy) || {}}
-          on:update={({ detail: backupPolicy }) => (values = backupPolicy)}
+          initialBackupPolicy={stepper[3]?.defaultValues(repository)}
+          on:update={({ detail }) => (values = detail)}
         />
-      {:else if step === stepper[4].name}
+      {:else if step === stepper[4]?.name}
         <Provider
-          initialProvider={values}
+          initialValues={stepper[4]?.defaultValues(repository)}
           on:update={({ detail: providers }) => {
-            values = providers.edges[providers.provider];
+            values = providers;
             link = `/repositories/${repository.id}/${providers.provider.toLowerCase()}`;
           }}
         />
-      {:else if step === stepper[5].name}
+      {:else if step === stepper[5]?.name}
         <PruneSchedule
-          initialPruneSchedule={(values.edges?.pruneSchedule) || {}}
-          on:update={({ detail: pruneSchedule }) => (values = pruneSchedule)}
+          initialPruneSchedule={stepper[5]?.defaultValues(repository)}
+          on:update={({ detail }) => (values = detail)}
         />
       {:else}
         <General
-          initialValues={values}
-          on:update={({ detail: general }) => (values = { ...repository, ...general })}
+          initialValues={stepper[0]?.defaultValues(repository)}
+          on:update={({ detail }) => (values = detail)}
         />
       {/if}
     </div>
