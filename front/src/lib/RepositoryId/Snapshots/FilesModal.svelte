@@ -43,8 +43,8 @@
     <Loader size={8} />
   {:then files}
     {#if files && files.length > 0}
-      <div class="relative overflow-y-scroll flex flex-col gap-1 custom-max-height pr-1 sm:text-center">
-        <div class="sticky top-0 sm:flex bg-gray-200 dark:bg-gray-700 border border-x-0 border-t-0 border-stone-500">
+      <div class="overflow-y-auto relative flex flex-col gap-1 pr-2 sm:text-center">
+        <div class="sticky top-0 pb-1 sm:flex bg-gray-200 dark:bg-gray-700 border border-x-0 border-t-0 border-stone-500">
           <p class="flex-1 font-bold">Type</p>
           <p class="flex-1 font-bold">Size</p>
           <p class="flex-initial w-48 font-bold">Mod.Time</p>
@@ -93,9 +93,3 @@
     <pre>{err}</pre>
   {/await}
 </Modal>
-
-<style>
-  .custom-max-height {
-    max-height: calc(100vh - 200px);
-  }
-</style>

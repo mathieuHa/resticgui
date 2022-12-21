@@ -54,7 +54,7 @@
 </script>
 
 <Modal on:close={() => dispatch('close')} title="Repository">
-  <form on:submit|preventDefault|stopPropagation={onSubmit}>
+  <form class="max-h-full flex flex-col overflow-hidden" on:submit|preventDefault|stopPropagation={onSubmit}>
     <div
       title={!repository.id ? 'Give to repository a name' : null}
       class="flex justify-between flex-wrap {!repository.id ? 'cursor-not-allowed' : ''}"
@@ -71,7 +71,7 @@
         </button>
       {/each}
     </div>
-    <div class="flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
+    <div class="overflow-y-auto relative flex-1 flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
       {#if step === stepper[1].name}
         <Paths
           initialPaths={values.edges && values.edges.paths

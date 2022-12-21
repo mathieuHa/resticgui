@@ -67,15 +67,15 @@
     : { ...leaves[relPath], included: true, relPath }));
 </script>
 
-<p>Paths</p>
-<p class="my-2">
+<p class="font-bold">Paths to backup</p>
+<p class="py-2 bg-white dark:bg-gray-800 border border-x-0 border-t-0 border-stone-500">
   [
   {#each paths as path, i}
     "<span class={path[0] === '!' ? 'text-orange-500' : ''}>{path[0] === '!' ? path.slice(1) : path}</span>"{i !== paths.length - 1 ? ', ' : ''}
   {/each}
   ]
 </p>
-<div class="relative overflow-y-scroll custom-max-height">
+<div class="overflow-y-auto">
   <AddPaths
     path=""
     tree={tree}
@@ -84,9 +84,3 @@
     {onDirClick}
   />
 </div>
-
-<style>
-  .custom-max-height {
-    max-height: calc(100vh - 300px);
-  }
-</style>

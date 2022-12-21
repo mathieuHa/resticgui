@@ -20,21 +20,24 @@
   class="p-6 fixed top-0 left-0 right-0 bottom-0 bg-gray-200/[.5] dark:bg-gray-900/[.5]"
   on:click|self={onClose}
 >
-  <div class="custom-max-height overflow-y-auto relative max-w-xl bg-gray-200 dark:bg-gray-700 rounded-md m-auto shadow-lg shadow-gray-400 dark:shadow-black">
+  <div class="custom-max-width overflow-hidden relative max-w-xl bg-gray-200 dark:bg-gray-700 rounded-md m-auto shadow-lg shadow-gray-400 dark:shadow-black">
     <div class="flex bg-white dark:bg-gray-800">
       <p class="flex-1 px-2 py-1">{title}</p>
       <button on:click|preventDefault|stopPropagation={onClose} class="hover:bg-red-600 p-2 cursor-pointer transition-all">
         <Cross />
       </button>
     </div>
-    <div class="p-2">
+    <div class="p-2 custom-max-height overflow-y-auto flex flex-col">
       <slot />
     </div>
   </div>
 </div>
 
 <style>
-  .custom-max-height {
+  .custom-max-width{
     max-width: 700px;
+  }
+  .custom-max-height {
+    max-height: calc(100vh - 3rem - 36px);
   }
 </style>
