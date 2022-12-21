@@ -6,7 +6,6 @@
   let values = initialPruneSchedule;
 
   const dispatch = createEventDispatcher();
-
   $:dispatch('update', values);
 </script>
 
@@ -16,7 +15,7 @@
   label="Cron syntax"
   placeholder="*/30 * * * *"
   bind:value={values.cronSyntax}
-  on:change={() => { values = { choice: 'cron', cronSyntax: values.cronSyntax, interval: '' }; }}
+  on:change={() => (values = { choice: 'cron', cronSyntax: values.cronSyntax, interval: '' })}
 />
 <Input
   id="interval"
@@ -24,5 +23,5 @@
   label="Interval"
   placeholder="1h30"
   bind:value={values.interval}
-  on:change={() => { values = { choice: 'interval', interval: values.interval, cronSyntax: '' }; }}
+  on:change={() => (values = { choice: 'interval', cronSyntax: '', interval: values.interval })}
 />

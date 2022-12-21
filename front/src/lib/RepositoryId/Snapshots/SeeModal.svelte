@@ -20,7 +20,7 @@
   
 <Modal title="Stats and path saved in snapshot #{snapshotId}" on:close={() => dispatch('close')}>
   {#await loadStats}
-  <Loader size={8} />
+    <Loader size={8} />
   {:then stats}
     <div>
       <p>
@@ -37,5 +37,7 @@
         <p>{path}</p>
       {/each}
     </div>
+  {:catch err}
+    <pre>{err}</pre>
   {/await}
 </Modal>

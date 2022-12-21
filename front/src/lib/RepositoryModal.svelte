@@ -11,11 +11,19 @@
   import Provider from './RepositoryModal/Provider.svelte';
   import Paths from './RepositoryModal/FileSystem/Paths.svelte';
 
-  export let repository = null;
+  export let repository: any;
 
-  let step = 0;
+  const stepper = [
+    { name: 'General', link:  `/repositories/${repository.id}` },
+    { name: 'Paths', link:  `/repositories/${repository.id}/paths` },
+    { name: 'Schedule', link:  `/repositories/${repository.id}/backupschedule` },
+    { name: 'Policy', link:  `/repositories/${repository.id}/backuppolicy` },
+    { name: 'Provider', link:  `/repositories/${repository.id}` },
+    { name: 'Prune', link:  `/repositories/${repository.id}/pruneschedule` },
+  ];
+  let step = stepper[0].name;
   let values = null;
-  let link: string = '';
+  let link: string = `/repositories/${repository.id}`;
 
   const dispatch = createEventDispatcher();
   
@@ -29,7 +37,7 @@
     }
   }
   const onSubmit = async () => {
-    console.log(values);
+    console.log(link, values);
     try {
       await agent[repository?.id ? 'patch' : 'post'](link, values);
       toasts.addToast('Repository updated !');
@@ -51,51 +59,40 @@
       title={!repository.id ? 'Give to repository a name' : null}
       class="flex justify-between flex-wrap {!repository.id ? 'cursor-not-allowed' : ''}"
     >
-      {#each ['General', 'Paths', 'Schedule', 'Policy', 'Provider', 'Prune'] as stepped, i}
+      {#each stepper as stepped, i}
         <button
-          class="flex-1 pb-1 px-4 rounded-t border border-gray-500 {!repository.id ? 'pointer-events-none' : ''} {step === i ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === i ? 'bg-white-500/[.5]' : ''}"
-          on:click|preventDefault|stopPropagation={() => { step = i; }}
+          class="flex-1 pb-1 px-4 rounded-t border border-gray-500 {!repository.id ? 'pointer-events-none' : ''} {step === stepped.name ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === stepped.name ? 'bg-white-500/[.5]' : ''}"
+          on:click|preventDefault|stopPropagation={() => {
+            step = stepped.name;
+            link = stepped.link;
+          }}
         >
-          <span class="rounded-xl">{stepped}</span>
+          <span class="rounded-xl">{stepped.name}</span>
         </button>
       {/each}
     </div>
     <div class="flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
-      {#if step === 0}
-        <General
-          initialValues={values}
-          on:update={({ detail: general }) => {
-            values = { ...repository, ...general };
-            link = `/repositories/${repository.id || ''}`;
-          }}
-        />
-      {:else if step === 1}
+      {#if step === stepper[1].name}
         <Paths
           initialPaths={values.edges && values.edges.paths
             ? values.edges.paths.map(({ relPath = '/root', included }) => included ? relPath : `!${relPath}`)
             : []}
-          on:update={({ detail: paths }) => {
-            values = paths;
-            link = `/repositories/${repository.id}/paths`;
-          }}
+          on:update={({ detail: paths }) => (values = paths)}
         />
-      {:else if step === 2}
+      {:else if step === stepper[2].name}
         <BackupSchedule
-          initialBackupSchedule={(values.edges && values.edges.backupSchedule) || {}}
+          initialBackupSchedule={(values.edges?.backupSchedule) || {}}
           on:update={({ detail: backupSchedule }) => {
             values = backupSchedule;
             link = `/repositories/${repository.id}/backupschedule`;
           }}
         />
-      {:else if step === 3}
+      {:else if step === stepper[3].name}
         <BackupPolicy
-          initialBackupPolicy={(values.edges && values.edges.backupPolicy) || {}}
-          on:update={({ detail: backupPolicy }) => {
-            values = backupPolicy;
-            link = `/repositories/${repository.id}/backuppolicy`;
-          }}
+          initialBackupPolicy={(values.edges?.backupPolicy) || {}}
+          on:update={({ detail: backupPolicy }) => (values = backupPolicy)}
         />
-      {:else if step === 4}
+      {:else if step === stepper[4].name}
         <Provider
           initialProvider={values}
           on:update={({ detail: providers }) => {
@@ -103,13 +100,15 @@
             link = `/repositories/${repository.id}/${providers.provider.toLowerCase()}`;
           }}
         />
-      {:else if step === 5}
+      {:else if step === stepper[5].name}
         <PruneSchedule
-          initialPruneSchedule={(values.edges && values.edges.pruneSchedule) || {}}
-          on:update={({ detail: pruneSchedule }) => {
-            values = pruneSchedule;
-            link = `/repositories/${repository.id}/pruneschedule`;
-          }}
+          initialPruneSchedule={(values.edges?.pruneSchedule) || {}}
+          on:update={({ detail: pruneSchedule }) => (values = pruneSchedule)}
+        />
+      {:else}
+        <General
+          initialValues={values}
+          on:update={({ detail: general }) => (values = { ...repository, ...general })}
         />
       {/if}
     </div>
