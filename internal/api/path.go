@@ -28,7 +28,7 @@ import (
 // @Failure 400 {string} errNameUsed
 // @Failure 500 {string} errCreate
 // @Router /repositories/{id}/paths [post]
-func createPaths(c *gin.Context) {
+func CreatePaths(c *gin.Context) {
 	log.Debug().Msg("CreatePaths()")
 
 	ctx := context.Background()
@@ -85,7 +85,7 @@ func createPaths(c *gin.Context) {
 // @Failure 400 {string} errNotBind
 // @Failure 500 {string} errCreate
 // @Router /repositories/{id}/paths [patch]
-func updatePaths(c *gin.Context) {
+func UpdatePaths(c *gin.Context) {
 	log.Debug().Msg("UpdatePaths()")
 
 	ctx := context.Background()
