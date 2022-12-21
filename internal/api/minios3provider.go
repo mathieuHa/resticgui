@@ -8,45 +8,18 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/database"
-	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
-// CreateMinioS3Provider godoc
-// @Summary create backup local provider
-// @Schemes
-// @Description create a minios3provider
-// @Accept json
-// @Param id path int true "Repository ID"
-// @Param minios3provider body ent.MinioS3Provider true "Create minios3provider"
-// @Produce json
-// @Success 201 {object} ent.MinioS3Provider
-// @Failure 400 {string} errNameUsed
-// @Failure 500 {string} errCreate
-// @Router /repositories/{id}/minios3provider [post]
-func CreateMinioS3Provider(c *gin.Context) {
-	log.Debug().Msg("CreateMinioS3Provider()")
+// createMinioS3Provider godoc
+func createMinioS3Provider(c *gin.Context, r *ent.Repository, p ent.MinioS3Provider) {
+	log.Debug().Msg("createMinioS3Provider()")
 
 	ctx := context.Background()
-	var p ent.MinioS3Provider
-
-	rID, err := utils.ReturnValidID(c)
-	if err != nil {
-		return
-	}
-
-	if err := c.BindJSON(&p); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
-
-	if err := checkRepositoryByID(rID, ctx, c); err != nil {
-		return
-	}
+	var err error
 
 	// create minios3provider
 	log.Debug().Msg("create minios3provider")
-	ms3p, err := database.CreateMinioS3ProviderDB(p, rID, ctx)
+	ms3p, err := database.CreateMinioS3ProviderDB(p, r.ID, ctx)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
@@ -55,63 +28,25 @@ func CreateMinioS3Provider(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, ms3p)
 }
 
-// UpdateMinioS3Provider godoc
-// @Summary update local provider
-// @Schemes
-// @Description update a minios3provider
-// @Accept json
-// @Param id path int true "Repository ID"
-// @Param minios3provider body ent.MinioS3Provider true "Update minios3provider"
-// @Produce json
-// @Success 200 {object} ent.MinioS3Provider
-// @Failure 400 {string} errNotBind
-// @Failure 500 {string} errCreate
-// @Router /repositories/{id}/minios3provider [patch]
-func UpdateMinioS3Provider(c *gin.Context) {
-	log.Debug().Msg("UpdateMinioS3Provider()")
+// updateMinioS3Provider godoc
+func updateMinioS3Provider(c *gin.Context, r *ent.Repository, p ent.MinioS3Provider) {
+	log.Debug().Msg("updateMinioS3Provider()")
 
 	ctx := context.Background()
-	var p ent.MinioS3Provider
 	var ms3p *ent.MinioS3Provider
-
-	rID, err := utils.ReturnValidID(c)
-	if err != nil {
-		return
-	}
-
-	if err := c.BindJSON(&p); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		log.Info().Err(err).Msg(errNotBind)
-		return
-	}
-
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRNotFound})
-		} else if ent.IsConstraintError(err) {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errRConstraint})
-		} else {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-		}
-		return
-	}
+	var err error
 
 	if r.Edges.MinioS3Provider == nil || r.Edges.MinioS3Provider.ID == 0 {
-		ms3p, err = database.CreateMinioS3ProviderDB(p, rID, ctx)
+		ms3p, err = database.CreateMinioS3ProviderDB(p, r.ID, ctx)
 	} else {
 		ms3p, err = database.UpdateMinioS3ProviderDB(p, r.Edges.MinioS3Provider.ID, ctx)
-	}
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errUpdate, "message": err.Error()})
-		return
 	}
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": err.Error()})
 		return
 	}
 
-	updateRepositoryRunning(rID)
+	updateRepositoryRunning(r.ID)
 
 	c.IndentedJSON(http.StatusOK, ms3p)
 }
