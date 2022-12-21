@@ -84,3 +84,13 @@ func validRestorePath(path string) (valid bool, err error) {
 
 	return false, nil
 }
+
+func validPaths(paths []*ent.Path) (valid bool, err error) {
+	log.Debug().Msg("validPaths()")
+	// Check path len > 0
+	if len(paths) == 0 {
+		log.Info().Msg("Path list is empty, nothing to backup")
+		return false, errors.New("Path list is empty, nothing to backup")
+	}
+	return true, nil
+}
