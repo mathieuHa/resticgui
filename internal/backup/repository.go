@@ -84,7 +84,7 @@ func RestoreRepository(r *ent.Repository, path string, snapshotID string) (out s
 func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	log.Debug().Msg("BackupRepository()")
 
-	log.Info().Msgf("JOB HAS STARTED %v", r.ID)
+	log.Info().Msgf("JOB B HAS STARTED %v", r.ID)
 
 	ctx := context.Background()
 
@@ -96,6 +96,8 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 		log.Error().Msg("Not cron entry")
 	}
 	// TODO Check the validity of the provider and repository in general
+
+	// Check path len here
 
 	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
 	stdout, stderr, errCmd := commands.GetSnapshots(r)
@@ -110,13 +112,14 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	}
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
 
-	if errCmd != nil {
+	// condition for uninitialized repository
+	if len(snapshots) == 0 {
 		stdout, stderr, errCmd = commands.InitRepository(r)
 		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
 		// set intiated to true
 		// how to check it succeded
-		database.SetRepositoryInitiatedDB(r.ID, ctx)
 	}
+	database.SetRepositoryInitiatedDB(r.ID, ctx)
 
 	// set backup running
 	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
@@ -130,7 +133,7 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	// set backup running ended
 	_, _ = database.SetRepositoryRunningDB(r.ID, false, ctx)
 
-	log.Info().Msgf("JOB HAS ENDED %v", r.ID)
+	log.Info().Msgf("JOB B HAS ENDED %v", r.ID)
 
 	return stdout
 }
