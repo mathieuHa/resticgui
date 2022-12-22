@@ -8,9 +8,9 @@
   import PruneSchedule from './RepositoryModal/PruneSchedule.svelte';
   import General from './RepositoryModal/General.svelte';
   import Modal from './Modal.svelte';
-  import Provider from './RepositoryModal/Provider.svelte';
+  import BackupProvider from './RepositoryModal/BackupProvider.svelte';
   import Paths from './RepositoryModal/FileSystem/Paths.svelte';
-  import type { Repository } from '$utils/types';
+  import { Provider, type Repository } from '$utils/types';
 
   export let repository: any;
 
@@ -19,6 +19,7 @@
     {
       name: 'General',
       link:  `/repositories/${repository.id}`,
+      component: General,
       defaultValues: (repo: Repository) => ({
         id: repo.id,
         name: repo.name,
@@ -29,11 +30,13 @@
     {
       name: 'Paths',
       link:  `/repositories/${repository.id}/paths`,
+      component: Paths,
       defaultValues: (repo: Repository) => repo.edges?.paths || [],
     },
     {
       name: 'Schedule',
       link:  `/repositories/${repository.id}/backupschedule`,
+      component: BackupSchedule,
       defaultValues: (repo: Repository) => ({
         choice: repo.edges?.backupSchedule?.choice,
         cronSyntax: repo.edges?.backupSchedule?.cronSyntax,
@@ -43,6 +46,7 @@
     {
       name: 'Policy',
       link:  `/repositories/${repository.id}/backuppolicy`,
+      component: BackupPolicy,
       defaultValues: (repo: Repository) => ({
         keepAll: repo.edges?.backupPolicy?.keepAll,
         nbLastBackup: repo.edges?.backupPolicy?.nbLastBackup || 0,
@@ -54,17 +58,19 @@
     {
       name: 'Provider',
       link:  `/repositories/${repository.id}/provider`,
+      component: BackupProvider,
       defaultValues: (repo: Repository) => ({
         provider: repo.provider,
-        localProvider: repo.edges?.localProvider,
-        MinioS3Provider: repo.edges?.MinioS3Provider,
-        B2Provider: repo.edges?.B2Provider,
-        AWSS3Provider: repo.edges?.AWSS3Provider,
+        [Provider.LocalProvider]: repo.edges?.[Provider.LocalProvider],
+        [Provider.MinioS3Provider]: repo.edges?.[Provider.MinioS3Provider],
+        [Provider.B2Provider]: repo.edges?.[Provider.B2Provider],
+        [Provider.AWSS3Provider]: repo.edges?.[Provider.AWSS3Provider],
       }),
     },
     {
       name: 'Prune',
       link:  `/repositories/${repository.id}/pruneschedule`,
+      component: PruneSchedule,
       defaultValues: (repo: Repository) => ({
         choice: repo.edges?.pruneSchedule?.choice,
         cronSyntax: repo.edges?.pruneSchedule?.cronSyntax,
@@ -87,8 +93,9 @@
     }
   }
   const onSubmit = async () => {
+    let isPatch = !!repository?.id
     try {
-      await agent[repository?.id ? 'patch' : 'post'](repository.id ? link : '/repositories', values);
+      await agent[isPatch ? 'patch' : 'post'](isPatch ? link : '/repositories', values);
       toasts.addToast('Repository updated !');
       dispatch('refresh');
     } catch (err) {
@@ -118,37 +125,15 @@
       {/each}
     </div>
     <div class="overflow-y-auto relative flex-1 flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
-      {#if step === stepper[1]?.name}
-        <Paths
-          initialValues={stepper[1]?.defaultValues(repository)}
-          on:update={({ detail: paths }) => (values = paths)}
-        />
-      {:else if step === stepper[2]?.name}
-        <BackupSchedule
-          initialValues={stepper[2]?.defaultValues(repository)}
-          on:update={({ detail }) => (values = detail)}
-        />
-      {:else if step === stepper[3]?.name}
-        <BackupPolicy
-          initialValues={stepper[3]?.defaultValues(repository)}
-          on:update={({ detail }) => (values = detail)}
-        />
-      {:else if step === stepper[4]?.name}
-        <Provider
-          initialValues={stepper[4]?.defaultValues(repository)}
-          on:update={({ detail: providers }) => (values = providers)}
-        />
-      {:else if step === stepper[5]?.name}
-        <PruneSchedule
-          initialValues={stepper[5]?.defaultValues(repository)}
-          on:update={({ detail }) => (values = detail)}
-        />
-      {:else}
-        <General
-          initialValues={stepper[0]?.defaultValues(repository)}
-          on:update={({ detail }) => (values = detail)}
-        />
-      {/if}
+      {#each stepper as stepped}
+        {#if step === stepped.name}
+          <svelte:component
+            this={stepped.component}
+            initialValues={stepped.defaultValues(repository)}
+            on:update={({ detail }) => (values = detail)}
+          />
+        {/if}
+      {/each}
     </div>
     <div class="flex mt-2">
       <div class="flex-1"></div>

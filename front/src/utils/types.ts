@@ -1,3 +1,10 @@
+export enum Provider {
+  LocalProvider = 'localProvider',
+  MinioS3Provider = 'MinioS3Provider',
+  B2Provider = 'B2Provider',
+  AWSS3Provider ='AWSS3Provider',
+}
+
 export interface Repository {
   id: number
   name?: string
@@ -5,13 +12,14 @@ export interface Repository {
   active?: boolean
   provider?: string
   edges?: {
+    [Provider.LocalProvider]?: LocalProvider
+    [Provider.MinioS3Provider]?: MinioS3Provider
+    [Provider.B2Provider]?: B2Provider
+    [Provider.AWSS3Provider]?: AWSS3Provider
     backupPolicy?: BackupPolicy
     backupSchedule?: BackupSchedule
     pruneSchedule?: PruneSchedule
-    localProvider?: LocalProvider
-    MinioS3Provider?: MinioS3Provider
-    B2Provider?: B2Provider
-    AWSS3Provider?: AWSS3Provider
+    paths: Path[]
   }
 }
 
@@ -59,4 +67,11 @@ export interface AWSS3Provider {
   secretAccessKey?: string
   bucketName?: string
   defaultRegion?: string
+}
+
+export interface Path {
+  name?: string
+  absPath?: string
+  relPath?: string
+  included?: boolean
 }

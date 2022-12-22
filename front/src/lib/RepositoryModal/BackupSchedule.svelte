@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import Input from '$lib/Input.svelte';
   import type { BackupSchedule } from '$utils/types';
-  import Input from '../Input.svelte';
 
   export let initialValues: BackupSchedule;
   let values = initialValues;

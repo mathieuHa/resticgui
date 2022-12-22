@@ -9,10 +9,6 @@
 
   export let snapshotId: string | null = null;
   export let paths: string[] = [];
-  let stats: any = {
-    total_file_count: 0,
-    total_size: 0,
-  }
 
   const dispatch = createEventDispatcher();
   const loadStats = (async () => agent.get(`/repositories/${$page.params.id}/stats?snapshotID=${snapshotId}`))();

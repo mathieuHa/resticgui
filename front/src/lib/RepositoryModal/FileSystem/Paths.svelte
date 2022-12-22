@@ -1,15 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-
   import agent from '$utils/api';
-
   import AddPaths from './AddPaths.svelte';
+  import type { Path } from '$utils/types';
   
   interface Tree {
     [key: string]: Tree | boolean
   }
 
-  export let initialValues = [];
+  export let initialValues: Path[] = [];
   let tree: Tree = {};
   let paths: string[] = initialValues?.map(
     ({ relPath = '/root', included }) => included ? relPath : `!${relPath}`,
