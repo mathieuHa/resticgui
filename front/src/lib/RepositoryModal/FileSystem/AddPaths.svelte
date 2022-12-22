@@ -1,7 +1,8 @@
 <script lang="ts">
   import Arrow from '$lib/Icon/Arrow.svelte';
+  import type { Tree } from '$utils/types';
 
-  export let tree = {};
+  export let tree: Tree;
   export let path = '';
   export let paths: string[] = [];
   export let onTogglePaths: (path: string, include: boolean) => void;
@@ -10,14 +11,14 @@
 
   const isIncluded = (pathsCopy: string[]) => {
     let deepInclude = { name: '', included: false };
-    for (let i = 0; i < pathsCopy.length; i += 1) {
-      if (deepInclude.name.length < pathsCopy[i].length
-        && (`${path}/`.startsWith(`${pathsCopy[i]}/`) || `!${path}/`.startsWith(`${pathsCopy[i]}/`))) {
-        deepInclude = pathsCopy[i][0] !== '!'
-          ? { included: true, name: pathsCopy[i] }
-          : { included: false, name: pathsCopy[i].slice(1) };
+    pathsCopy.forEach((pathCopy) => {
+      if (deepInclude.name.length < pathCopy.length
+        && (`${path}/`.startsWith(`${pathCopy}/`) || `!${path}/`.startsWith(`${pathCopy}/`))) {
+        deepInclude = pathCopy[0] !== '!'
+          ? { included: true, name: pathCopy }
+          : { included: false, name: pathCopy.slice(1) };
       }
-    }
+    });
     return deepInclude.included;
   }
   let loading = false;

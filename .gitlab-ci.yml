@@ -69,13 +69,13 @@ test:go:coverage:
         coverage_format: cobertura
         path: coverage.xml
 
-# test:web:
-#   image: trion/ng-cli-karma
-#   variables:
-#     FF_USE_FASTZIP: "true"
-#   stage: test
-#   script:
-#     - make testweb
+test:web:
+  image: node:16.18.1-alpine3.16
+  variables:
+    FF_USE_FASTZIP: "true"
+  stage: test
+  script:
+    - make testweb
 
 # build:go:
 #   variables:

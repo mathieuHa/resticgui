@@ -2,11 +2,11 @@ export enum Provider {
   LocalProvider = 'localProvider',
   MinioS3Provider = 'MinioS3Provider',
   B2Provider = 'B2Provider',
-  AWSS3Provider ='AWSS3Provider',
+  AWSS3Provider = 'AWSS3Provider',
 }
 
 export interface Repository {
-  id: number
+  id?: number
   name?: string
   password?: string
   active?: boolean
@@ -74,4 +74,11 @@ export interface Path {
   absPath?: string
   relPath?: string
   included?: boolean
+  isDir?: boolean
+}
+
+export interface Tree {
+  __fetched: boolean
+  __visible: boolean
+  [key: string]: Tree | string | boolean
 }

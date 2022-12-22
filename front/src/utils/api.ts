@@ -4,8 +4,8 @@ async function call(method: string, url: string, options: any = {}, data?: any) 
     method,
     ...data ? { body: JSON.stringify(data) } : {},
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   });
 
   let body: any;
@@ -15,7 +15,7 @@ async function call(method: string, url: string, options: any = {}, data?: any) 
     body = {};
   }
   if (response.status >= 400) {
-    throw new Error(body.error ? `${body.error}: ${body.message}` : '' + response.status);
+    throw new Error(`${body.error ? `${body.error}: ${body.message}` : ''} ${response.status}`);
   }
   return body;
 }

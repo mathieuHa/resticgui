@@ -1,18 +1,19 @@
 {
 	"root": true,
 	"parser": "@typescript-eslint/parser",
-	"extends": [
-		"eslint:recommended",
-    // "plugin:@typescript-eslint/recommended",  // todo: https://stackoverflow.com/questions/57597142/how-to-run-typescript-eslint-on-ts-files-and-eslint-on-js-files-in-the-same-pr
-		"prettier"
+  "extends": [
+    "airbnb-base",
+    "airbnb-typescript/base"
   ],
-	"plugins": ["svelte3", "@typescript-eslint"
+	"plugins": [
+    "svelte3",
+    "@typescript-eslint"
   ],
-	"ignorePatterns": ["*.cjs", "build"
-  ],
+	"ignorePatterns": ["*.cjs", "build", "*.config.ts", "*.config.js"],
 	"overrides": [
-    { "files": ["*.svelte"
-      ], "processor": "svelte3/svelte3"
+    {
+      "files": ["*.svelte"],
+      "processor": "svelte3/svelte3"
     }
   ],
 	"settings": {
@@ -20,11 +21,19 @@
   },
 	"parserOptions": {
 		"sourceType": "module",
-		"ecmaVersion": 2019
+		"ecmaVersion": 2019,
+    "project": "./tsconfig.json"
   },
 	"env": {
 		"browser": true,
 		"es2017": true,
 		"node": true
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
+    "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": "warn",
+    "linebreak-style": "off"
   }
 }

@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
+  import { Provider, type Repository } from '$utils/types';
 
   import BackupPolicy from './RepositoryModal/BackupPolicy.svelte';
   import BackupSchedule from './RepositoryModal/BackupSchedule.svelte';
@@ -10,9 +11,8 @@
   import Modal from './Modal.svelte';
   import BackupProvider from './RepositoryModal/BackupProvider.svelte';
   import Paths from './RepositoryModal/FileSystem/Paths.svelte';
-  import { Provider, type Repository } from '$utils/types';
 
-  export let repository: any;
+  export let repository: Repository;
 
   const dispatch = createEventDispatcher();
   const stepper = [
@@ -84,7 +84,7 @@
 
   
   let values = stepper[0]?.defaultValues(repository);
-  const onCheck = async (id: number) => {
+  const onCheck = async (id?: number) => {
     if (!id) return;
     try {
       await agent.get(`/${id}/valid`);

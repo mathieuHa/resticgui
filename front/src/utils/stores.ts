@@ -1,6 +1,5 @@
 import { writable } from 'svelte/store';
 
-
 interface Toast {
   id: number
   type: string
@@ -18,15 +17,15 @@ const toasts = (() => {
         id: Math.round(Math.random() * 1000),
         type,
         value,
-        timeout: setTimeout(() => update((array: Toast[]) => {
-          array.shift();
-          return array;
+        timeout: setTimeout(() => update((array2: Toast[]) => {
+          array2.shift();
+          return array2;
         }), 5000),
       });
 
       return array;
     }),
-  }
+  };
 })();
 
 const refresh = (() => {
@@ -34,7 +33,7 @@ const refresh = (() => {
   return {
     subscribe,
     update: () => update((data) => data + 1),
-  }
+  };
 })();
 
 export { toasts, refresh };

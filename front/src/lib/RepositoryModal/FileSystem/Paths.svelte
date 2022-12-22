@@ -2,44 +2,46 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import agent from '$utils/api';
   import AddPaths from './AddPaths.svelte';
-  import type { Path } from '$utils/types';
-  
-  interface Tree {
-    [key: string]: Tree | boolean
-  }
+  import type { Path, Tree } from '$utils/types';
+  import { toasts } from '$utils/stores';
 
-  export let initialValues: Path[] = [];
-  let tree: Tree = {};
+  export let initialValues: Path[];
+  let tree: Tree = { __fetched: true, __visible: true };
   let paths: string[] = initialValues?.map(
     ({ relPath = '/root', included }) => included ? relPath : `!${relPath}`,
   );
 
-  const leaves = {};
+  const leaves: Record<string, Path> = {};
   const dispatch = createEventDispatcher();
 
-  const populateTree = (treeCopy?: Tree, root?: string[], leaf?: Tree | boolean): Tree | undefined => {
-    if (!treeCopy || !root || leaf === undefined) throw new Error()
+  const populateTree = (treeCopy: Tree, root: string[], leaf: Tree | boolean): Tree | boolean => {
     if (root.length === 0) return leaf;
     const path = root.shift() ?? '';
     if (root.length === 0) return { ...treeCopy, [path]: leaf };
-    return { ...treeCopy, [path]: { __visible: true, __fetched: true, ...populateTree(treeCopy[path], root, leaf) } };
+    return { ...treeCopy, [path]: {
+      ...populateTree(treeCopy[path] as Tree, root, leaf) as Tree },
+      __visible: true,
+      __fetched: true,
+    };
   }
 
   const onLoad = async (root: string): Promise<void> => {
     const rootArray = root.split('/').filter((path) => !!path);
-    let result;
+    let result: Path[];
     try {
       result = await agent.post('/paths', { name: root }) || [];
     } catch (err) {
+      toasts.addToast(err, 'failure');
       result = [];
     }
-    const leaf = { __fetched: true, __visible: true };
-    for (let value of result) {
+    const leaf: Tree = { __fetched: true, __visible: true };
+    result.forEach((value) => {
+      if (!value.name) return;
       leaves[`${root}${value.name}`] = value;
-      if (value.isDir) leaf[value.name] = { __fetched: false, __visible: false };
-      else leaf[value.name] = value.name;
-    }
-    tree = populateTree(tree, rootArray, leaf);
+      if (value.isDir) leaf[value.name as string] = { __fetched: false, __visible: false };
+      else leaf[value.name as string] = value.name;
+    });
+    tree = populateTree(tree, rootArray, leaf) as Tree;
   }
 
   const onTogglePaths = (path: string, include = true) => {
@@ -49,7 +51,7 @@
 
     for (let i = paths.length - 1; i >= 0; i -= 1) {
       if (paths[i] !== path && paths[i] !== `!${path}`
-        && ((paths[i][0] === '!' && `${paths[i]}/`.slice(1).startsWith(`${path}/`))
+        && ((paths[i]?.[0] === '!' && `${paths[i]}/`.slice(1).startsWith(`${path}/`))
         || (`${paths[i]}/`.startsWith(`${path}/`)))) {
         paths = [...paths.slice(0, i), ...paths.slice(i + 1)];
       }
@@ -58,10 +60,11 @@
 
   const onDirClick = async (root: string, fetched: boolean, visible: boolean) => {
     const rootArray = root.split('/').filter((path) => !!path);
-    if (fetched) tree = populateTree(tree, [...rootArray, '__visible'], !visible);
+    if (fetched) tree = populateTree(tree, [...rootArray, '__visible'], !visible) as Tree;
     else await onLoad(root);
   };
 
+  $: console.log(tree)
   onMount(() => onLoad('/'));
   $:dispatch('update', paths.map((relPath) => relPath[0] === '!'
     ? {
