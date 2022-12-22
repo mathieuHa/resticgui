@@ -4,13 +4,13 @@
   import { toasts } from '$utils/stores';
   import { Provider, type Repository } from '$utils/types';
 
-  import BackupPolicy from './RepositoryModal/BackupPolicy.svelte';
-  import BackupSchedule from './RepositoryModal/BackupSchedule.svelte';
-  import PruneSchedule from './RepositoryModal/PruneSchedule.svelte';
-  import General from './RepositoryModal/General.svelte';
-  import Modal from './Modal.svelte';
-  import BackupProvider from './RepositoryModal/BackupProvider.svelte';
-  import Paths from './RepositoryModal/FileSystem/Paths.svelte';
+  import BackupPolicy from './BackupPolicy.svelte';
+  import BackupSchedule from './BackupSchedule.svelte';
+  import PruneSchedule from './PruneSchedule.svelte';
+  import General from './General.svelte';
+  import Modal from '../Modal.svelte';
+  import BackupProvider from './BackupProvider.svelte';
+  import Paths from './FileSystem/Paths.svelte';
 
   export let repository: Repository;
 

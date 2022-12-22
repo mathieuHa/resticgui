@@ -12,9 +12,15 @@
   import FilesModal from './FilesModal.svelte';
   import List from '$lib/Icon/List.svelte';
 
-  export let snapshots: any = [];
+  interface Snapshot {
+    short_id: string
+    username: string
+    time: string
+    Paths: string[]
+  }
+  export let snapshots: Snapshot[] = [];
 
-  let snapshot: any = null;
+  let snapshot: Snapshot | null = null;
   let modalOpened: string | null = null;
   const dispatch = createEventDispatcher();
 
@@ -29,33 +35,34 @@
   };
 </script>
   
-
-{#if modalOpened === 'see'}
-  <SeeModal snapshotId={snapshot.short_id} paths={snapshot.Paths} on:close={() => (modalOpened = null)}/>
-{:else if modalOpened === 'delete'}
-  <Modal title="Warning" on:close={() => (modalOpened = null)}>
-    <div>
-      Do you really want to delete this snapshot #{snapshot.short_id}
-      <div class="flex gap-2 justify-end">
-        <button
-          class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
-          on:click={() => (modalOpened = null)}
-        >
-          No
-        </button>
-        <button
-          class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
-          on:click={() => snapshot && deleteSnapshot(snapshot.short_id)}
-        >
-          Yes
-        </button>
+{#if snapshot}
+  {#if modalOpened === 'see'}
+    <SeeModal snapshotId={snapshot.short_id} paths={snapshot.Paths} on:close={() => (modalOpened = null)}/>
+  {:else if modalOpened === 'delete'}
+    <Modal title="Warning" on:close={() => (modalOpened = null)}>
+      <div>
+        Do you really want to delete this snapshot #{snapshot.short_id}
+        <div class="flex gap-2 justify-end">
+          <button
+            class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
+            on:click={() => (modalOpened = null)}
+          >
+            No
+          </button>
+          <button
+            class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
+            on:click={() => snapshot && deleteSnapshot(snapshot.short_id)}
+          >
+            Yes
+          </button>
+        </div>
       </div>
-    </div>
-  </Modal>
-{:else if modalOpened === 'restore'}
-  <RestoreModal snapshotId={snapshot.short_id} on:close={() => (modalOpened = null)} />
-{:else if modalOpened === 'files'}
-  <FilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
+    </Modal>
+  {:else if modalOpened === 'restore'}
+    <RestoreModal snapshotId={snapshot.short_id} on:close={() => (modalOpened = null)} />
+  {:else if modalOpened === 'files'}
+    <FilesModal snapshotId={snapshot.short_id}  on:close={() => (modalOpened = null)} />
+  {/if}
 {/if}
 
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">

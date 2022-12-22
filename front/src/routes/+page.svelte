@@ -6,7 +6,7 @@
   import Logs from '$lib/Icon/Logs.svelte';
   import Pen from '$lib/Icon/Pen.svelte';
   import Trash from '$lib/Icon/Trash.svelte';
-  import RepositoryModal from '$lib/RepositoryModal.svelte';
+  import RepositoryModal from '$lib/RepositoryModal/RepositoryModal.svelte';
   import Modal from '$lib/Modal.svelte';
   import Snapshot from '$lib/Icon/Snapshot.svelte';
 

@@ -58,7 +58,7 @@
             {#if log.stdout.length > 100}
               <span>
                 <button
-                  class="bg-blue-500 px-1 inline rounded mt-1"
+                  class="bg-blue-500 hover:bg-blue-600 px-1 inline rounded mt-1"
                   on:click={() => (seeMore[log.id] = true)}
                 >
                   See more
