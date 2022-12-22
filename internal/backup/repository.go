@@ -172,13 +172,9 @@ func PruneRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	}
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
 
-	if errCmd != nil {
-		stdout, stderr, errCmd = commands.InitRepository(r)
-		database.LogCommand(r.ID, "InitRepository", stdout, stderr, errCmd, ctx)
-		// set intiated to true
-		// how to check it succeded
+	if len(snapshots) == 0 {
+		return "no snapshot, no need to prune"
 	}
-	database.SetRepositoryInitiatedDB(r.ID, ctx)
 
 	// set prune running
 	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
@@ -186,7 +182,10 @@ func PruneRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	_ = database.UpdatePruneCronLastRun(*r.Edges.PruneSchedule, cronEntry.Prev.String())
 	_ = database.UpdatePruneCronNextRun(*r.Edges.PruneSchedule, cronEntry.Next.String())
 
-	stdout, stderr, errCmd = commands.ForgetSnapshots(r, "")
+	stdout, stderr, errCmd = commands.ForgetSnapshotsPolicy(r)
+	database.LogCommand(r.ID, "ForgetSnapshotsPolicy", stdout, stderr, errCmd, ctx)
+
+	stdout, stderr, errCmd = commands.PruneSnaphots(r)
 	database.LogCommand(r.ID, "PruneRepository", stdout, stderr, errCmd, ctx)
 
 	// set prune running ended

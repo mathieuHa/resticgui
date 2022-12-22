@@ -77,6 +77,20 @@ func (rc *RepositoryCreate) SetNillableActive(b *bool) *RepositoryCreate {
 	return rc
 }
 
+// SetPruneActive sets the "pruneActive" field.
+func (rc *RepositoryCreate) SetPruneActive(b bool) *RepositoryCreate {
+	rc.mutation.SetPruneActive(b)
+	return rc
+}
+
+// SetNillablePruneActive sets the "pruneActive" field if the given value is not nil.
+func (rc *RepositoryCreate) SetNillablePruneActive(b *bool) *RepositoryCreate {
+	if b != nil {
+		rc.SetPruneActive(*b)
+	}
+	return rc
+}
+
 // SetRunning sets the "running" field.
 func (rc *RepositoryCreate) SetRunning(b bool) *RepositoryCreate {
 	rc.mutation.SetRunning(b)
@@ -483,6 +497,10 @@ func (rc *RepositoryCreate) defaults() {
 		v := repository.DefaultActive
 		rc.mutation.SetActive(v)
 	}
+	if _, ok := rc.mutation.PruneActive(); !ok {
+		v := repository.DefaultPruneActive
+		rc.mutation.SetPruneActive(v)
+	}
 	if _, ok := rc.mutation.Running(); !ok {
 		v := repository.DefaultRunning
 		rc.mutation.SetRunning(v)
@@ -521,6 +539,9 @@ func (rc *RepositoryCreate) check() error {
 	}
 	if _, ok := rc.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Repository.active"`)}
+	}
+	if _, ok := rc.mutation.PruneActive(); !ok {
+		return &ValidationError{Name: "pruneActive", err: errors.New(`ent: missing required field "Repository.pruneActive"`)}
 	}
 	if _, ok := rc.mutation.Running(); !ok {
 		return &ValidationError{Name: "running", err: errors.New(`ent: missing required field "Repository.running"`)}
@@ -578,6 +599,10 @@ func (rc *RepositoryCreate) createSpec() (*Repository, *sqlgraph.CreateSpec) {
 	if value, ok := rc.mutation.Active(); ok {
 		_spec.SetField(repository.FieldActive, field.TypeBool, value)
 		_node.Active = value
+	}
+	if value, ok := rc.mutation.PruneActive(); ok {
+		_spec.SetField(repository.FieldPruneActive, field.TypeBool, value)
+		_node.PruneActive = value
 	}
 	if value, ok := rc.mutation.Running(); ok {
 		_spec.SetField(repository.FieldRunning, field.TypeBool, value)

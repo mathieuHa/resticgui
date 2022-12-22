@@ -50,7 +50,6 @@ func GetSnapshots(repository *ent.Repository) (string, string, error) {
 	repoFormat, env, _ := getProviderData(repository)
 	args = append(args, repoFormat...)
 	args = append(args, snapshotsCmd)
-	args = append(args)
 	args = append(args, jsonFormat)
 	return runRestic(args, env, "")
 }
@@ -177,11 +176,10 @@ func ForgetSnapshots(repository *ent.Repository, version string) (string, string
 	return runRestic(args, env, "")
 }
 
-func PruneSnaphots(repository *ent.Repository) (string, string, error) {
+func ForgetSnapshotsPolicy(r *ent.Repository) (string, string, error) {
+	log.Debug().Msg("ForgetSnapshotsPolicy()")
 
-	log.Debug().Msg("PruneSnaphots()")
-
-	if repository == nil {
+	if r == nil {
 		err := errors.New("repository is nil")
 		return "", "", err
 	}
@@ -189,9 +187,31 @@ func PruneSnaphots(repository *ent.Repository) (string, string, error) {
 	var args []string
 	var env []string
 
-	repoFormat, env, _ := getProviderData(repository)
+	repoFormat, env, _ := getProviderData(r)
+	commonArgs := getPruneCommonArgs(r)
+	args = append(args, forgetCmd)
+	args = append(args, repoFormat...)
+	args = append(args, commonArgs...)
+	args = append(args, jsonFormat)
+	return runRestic(args, env, "")
+}
+
+func PruneSnaphots(r *ent.Repository) (string, string, error) {
+	log.Debug().Msg("PruneSnaphots()")
+
+	if r == nil {
+		err := errors.New("repository is nil")
+		return "", "", err
+	}
+
+	var args []string
+	var env []string
+
+	repoFormat, env, _ := getProviderData(r)
 	args = append(args, pruneCmd)
 	args = append(args, repoFormat...)
+	// does not support json output
+	// args = append(args, jsonFormat)
 	return runRestic(args, env, "")
 }
 
@@ -278,7 +298,7 @@ func getIncludedAndExludedFiles(repository ent.Repository) []string {
 	var files []string
 	var included []string
 	var excluded []string
-	log.Debug().Msgf("len(path): %v", repository.Edges.Paths)
+	log.Debug().Msgf("len(path): %d", len(repository.Edges.Paths))
 	for _, path := range repository.Edges.Paths {
 		log.Debug().Msgf("path.included: %v", path.Included)
 		if path.Included { // change to abspath when front is fixed

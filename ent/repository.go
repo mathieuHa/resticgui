@@ -31,6 +31,8 @@ type Repository struct {
 	Provider repository.Provider `json:"provider,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active"`
+	// PruneActive holds the value of the "pruneActive" field.
+	PruneActive bool `json:"pruneActive"`
 	// Running holds the value of the "running" field.
 	Running bool `json:"running"`
 	// Initiated holds the value of the "initiated" field.
@@ -197,7 +199,7 @@ func (*Repository) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case repository.FieldActive, repository.FieldRunning, repository.FieldInitiated, repository.FieldValid:
+		case repository.FieldActive, repository.FieldPruneActive, repository.FieldRunning, repository.FieldInitiated, repository.FieldValid:
 			values[i] = new(sql.NullBool)
 		case repository.FieldID, repository.FieldSnapshotCount:
 			values[i] = new(sql.NullInt64)
@@ -249,6 +251,12 @@ func (r *Repository) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
 			} else if value.Valid {
 				r.Active = value.Bool
+			}
+		case repository.FieldPruneActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field pruneActive", values[i])
+			} else if value.Valid {
+				r.PruneActive = value.Bool
 			}
 		case repository.FieldRunning:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -400,6 +408,9 @@ func (r *Repository) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", r.Active))
+	builder.WriteString(", ")
+	builder.WriteString("pruneActive=")
+	builder.WriteString(fmt.Sprintf("%v", r.PruneActive))
 	builder.WriteString(", ")
 	builder.WriteString("running=")
 	builder.WriteString(fmt.Sprintf("%v", r.Running))

@@ -76,6 +76,20 @@ func (ru *RepositoryUpdate) SetNillableActive(b *bool) *RepositoryUpdate {
 	return ru
 }
 
+// SetPruneActive sets the "pruneActive" field.
+func (ru *RepositoryUpdate) SetPruneActive(b bool) *RepositoryUpdate {
+	ru.mutation.SetPruneActive(b)
+	return ru
+}
+
+// SetNillablePruneActive sets the "pruneActive" field if the given value is not nil.
+func (ru *RepositoryUpdate) SetNillablePruneActive(b *bool) *RepositoryUpdate {
+	if b != nil {
+		ru.SetPruneActive(*b)
+	}
+	return ru
+}
+
 // SetRunning sets the "running" field.
 func (ru *RepositoryUpdate) SetRunning(b bool) *RepositoryUpdate {
 	ru.mutation.SetRunning(b)
@@ -647,6 +661,9 @@ func (ru *RepositoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ru.mutation.Active(); ok {
 		_spec.SetField(repository.FieldActive, field.TypeBool, value)
 	}
+	if value, ok := ru.mutation.PruneActive(); ok {
+		_spec.SetField(repository.FieldPruneActive, field.TypeBool, value)
+	}
 	if value, ok := ru.mutation.Running(); ok {
 		_spec.SetField(repository.FieldRunning, field.TypeBool, value)
 	}
@@ -1115,6 +1132,20 @@ func (ruo *RepositoryUpdateOne) SetActive(b bool) *RepositoryUpdateOne {
 func (ruo *RepositoryUpdateOne) SetNillableActive(b *bool) *RepositoryUpdateOne {
 	if b != nil {
 		ruo.SetActive(*b)
+	}
+	return ruo
+}
+
+// SetPruneActive sets the "pruneActive" field.
+func (ruo *RepositoryUpdateOne) SetPruneActive(b bool) *RepositoryUpdateOne {
+	ruo.mutation.SetPruneActive(b)
+	return ruo
+}
+
+// SetNillablePruneActive sets the "pruneActive" field if the given value is not nil.
+func (ruo *RepositoryUpdateOne) SetNillablePruneActive(b *bool) *RepositoryUpdateOne {
+	if b != nil {
+		ruo.SetPruneActive(*b)
 	}
 	return ruo
 }
@@ -1719,6 +1750,9 @@ func (ruo *RepositoryUpdateOne) sqlSave(ctx context.Context) (_node *Repository,
 	}
 	if value, ok := ruo.mutation.Active(); ok {
 		_spec.SetField(repository.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := ruo.mutation.PruneActive(); ok {
+		_spec.SetField(repository.FieldPruneActive, field.TypeBool, value)
 	}
 	if value, ok := ruo.mutation.Running(); ok {
 		_spec.SetField(repository.FieldRunning, field.TypeBool, value)

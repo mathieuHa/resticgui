@@ -271,6 +271,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "provider", Type: field.TypeEnum, Nullable: true, Enums: []string{"localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"}, Default: "localProvider"},
 		{Name: "active", Type: field.TypeBool, Default: false},
+		{Name: "prune_active", Type: field.TypeBool, Default: false},
 		{Name: "running", Type: field.TypeBool, Default: false},
 		{Name: "initiated", Type: field.TypeBool, Default: false},
 		{Name: "valid", Type: field.TypeBool, Default: false},

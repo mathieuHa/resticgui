@@ -96,9 +96,12 @@ func updateRepositoryRunning(id int) (err error) {
 		log.Err(err)
 		return err
 	}
-
+	// we need to know last status to see if anything has changed and function must be called
 	if r.Active && r.Valid {
 		backup.AddScheduledBackup(r, cr)
+	}
+	if r.PruneActive && r.Valid {
+		backup.AddScheduledPrune(r, cr)
 	}
 
 	return nil
