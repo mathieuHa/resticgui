@@ -140,8 +140,8 @@ rundevweb: installwebdev ## Run dev web listening on localhost:3000
 	cd $(WEBDIR) && npm run dev
     
 
-testweb: installweb
-	npm run lint
+# testweb: installweb
+# 	npm run lint
 
 testgo: ## Run the go Tests
 	go test ./internal/... -cover 

@@ -75,7 +75,7 @@ test:web:
     FF_USE_FASTZIP: "true"
   stage: test
   script:
-    - make testweb
+    - cd front && npm ci && npm run lint
 
 # build:go:
 #   variables:
