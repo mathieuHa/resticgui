@@ -10,6 +10,7 @@
   import Modal from './Modal.svelte';
   import Provider from './RepositoryModal/Provider.svelte';
   import Paths from './RepositoryModal/FileSystem/Paths.svelte';
+  import type { Repository } from '$utils/types';
 
   export let repository: any;
 
@@ -18,7 +19,7 @@
     {
       name: 'General',
       link:  `/repositories/${repository.id}`,
-      defaultValues: (repo) => ({
+      defaultValues: (repo: Repository) => ({
         id: repo.id,
         name: repo.name,
         password: repo.password,
@@ -28,14 +29,12 @@
     {
       name: 'Paths',
       link:  `/repositories/${repository.id}/paths`,
-      defaultValues: (repo) => repo.edges?.paths?.map(
-        ({ relPath = '/root', included }) => included ? relPath : `!${relPath}`,
-      ) || [],
+      defaultValues: (repo: Repository) => repo.edges?.paths || [],
     },
     {
       name: 'Schedule',
       link:  `/repositories/${repository.id}/backupschedule`,
-      defaultValues: (repo) => ({
+      defaultValues: (repo: Repository) => ({
         choice: repo.edges?.backupSchedule?.choice,
         cronSyntax: repo.edges?.backupSchedule?.cronSyntax,
         interval: repo.edges?.backupSchedule?.interval,
@@ -44,7 +43,7 @@
     {
       name: 'Policy',
       link:  `/repositories/${repository.id}/backuppolicy`,
-      defaultValues: (repo) => ({
+      defaultValues: (repo: Repository) => ({
         keepAll: repo.edges?.backupPolicy?.keepAll,
         nbLastBackup: repo.edges?.backupPolicy?.nbLastBackup || 0,
         oneByHour: repo.edges?.backupPolicy?.oneByHour || 0,
@@ -55,7 +54,7 @@
     {
       name: 'Provider',
       link:  `/repositories/${repository.id}/provider`,
-      defaultValues: (repo) => ({
+      defaultValues: (repo: Repository) => ({
         provider: repo.provider,
         localProvider: repo.edges?.localProvider,
         MinioS3Provider: repo.edges?.MinioS3Provider,
@@ -66,14 +65,14 @@
     {
       name: 'Prune',
       link:  `/repositories/${repository.id}/pruneschedule`,
-      defaultValues: (repo) => ({
+      defaultValues: (repo: Repository) => ({
         choice: repo.edges?.pruneSchedule?.choice,
         cronSyntax: repo.edges?.pruneSchedule?.cronSyntax,
         interval: repo.edges?.pruneSchedule?.interval,
       }),
     },
   ];
-  let step = stepper[0].name;
+  let step = stepper[0]?.name;
   let link = `/repositories/${repository.id}`;
 
   
@@ -121,30 +120,27 @@
     <div class="overflow-y-auto relative flex-1 flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
       {#if step === stepper[1]?.name}
         <Paths
-          initialPaths={stepper[1]?.defaultValues(repository)}
+          initialValues={stepper[1]?.defaultValues(repository)}
           on:update={({ detail: paths }) => (values = paths)}
         />
       {:else if step === stepper[2]?.name}
         <BackupSchedule
-          initialBackupSchedule={stepper[2]?.defaultValues(repository)}
+          initialValues={stepper[2]?.defaultValues(repository)}
           on:update={({ detail }) => (values = detail)}
         />
       {:else if step === stepper[3]?.name}
         <BackupPolicy
-          initialBackupPolicy={stepper[3]?.defaultValues(repository)}
+          initialValues={stepper[3]?.defaultValues(repository)}
           on:update={({ detail }) => (values = detail)}
         />
       {:else if step === stepper[4]?.name}
         <Provider
           initialValues={stepper[4]?.defaultValues(repository)}
-          on:update={({ detail: providers }) => {
-            values = providers;
-            link = `/repositories/${repository.id}/${providers.provider.toLowerCase()}`;
-          }}
+          on:update={({ detail: providers }) => (values = providers)}
         />
       {:else if step === stepper[5]?.name}
         <PruneSchedule
-          initialPruneSchedule={stepper[5]?.defaultValues(repository)}
+          initialValues={stepper[5]?.defaultValues(repository)}
           on:update={({ detail }) => (values = detail)}
         />
       {:else}

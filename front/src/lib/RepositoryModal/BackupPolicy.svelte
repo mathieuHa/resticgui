@@ -3,8 +3,8 @@
   import Input from '../Input.svelte';
   import type { BackupPolicy } from '$utils/types';
 
-  export let initialBackupPolicy: BackupPolicy;
-  let values = initialBackupPolicy;
+  export let initialValues: BackupPolicy;
+  let values = initialValues;
 
   const dispatch = createEventDispatcher();
 

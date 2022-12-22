@@ -1,9 +1,10 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Input from '../Input.svelte';
+  import Input from '$lib/Input.svelte';
+  import type { PruneSchedule } from '$utils/types';
 
-  export let initialPruneSchedule = {};
-  let values = initialPruneSchedule;
+  export let initialValues: PruneSchedule;
+  let values = initialValues;
 
   const dispatch = createEventDispatcher();
   $:dispatch('update', values);

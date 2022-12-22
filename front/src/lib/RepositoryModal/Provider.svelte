@@ -1,10 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import Input from '$lib/Input.svelte';
+  import type { Repository } from '$utils/types';
 
-  export let initialValues: any;
+  export let initialValues: Repository;
 
-  const providers = {
+  const providers: Record<string, string[]> = {
     localProvider: ['repoPath'],
     MinioS3Provider: ['accessKeyID', 'bucketName', 'port', 'secretAccessKey', 'scheme'],
     B2Provider: ['accountID', 'accountKey', 'bucketName', 'repoName'],
@@ -40,7 +41,7 @@
 </div>
 <p class="my-2">{provider.replace('provider')}</p>
 {#if provider}
-  {#each providers[provider] as input}
+  {#each providers[provider] ?? [] as input}
     <Input
       id={input}
       name={input}

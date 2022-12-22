@@ -1,12 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  export let value: string | null | undefined = '';
+  export let value: string | number | null | undefined = '';
   export let checked: boolean | null | undefined = false;
   export let id = '';
   export let label = '';
   export let type = 'text';
-  export let options = [];
+  export let options: string[] = [];
   export let selected: string | null = '';
   export let secondary = false;
 

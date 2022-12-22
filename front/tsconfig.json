@@ -18,7 +18,6 @@
     "checkJs": true,
     "strict": true,
     "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": true,
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,

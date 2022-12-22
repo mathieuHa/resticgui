@@ -9,9 +9,11 @@
     [key: string]: Tree | boolean
   }
 
-  export let initialPaths: string[] = [];
+  export let initialValues = [];
   let tree: Tree = {};
-  let paths: string[] = initialPaths;
+  let paths: string[] = initialValues?.map(
+    ({ relPath = '/root', included }) => included ? relPath : `!${relPath}`,
+  );
 
   const leaves = {};
   const dispatch = createEventDispatcher();
@@ -63,8 +65,15 @@
 
   onMount(() => onLoad('/'));
   $:dispatch('update', paths.map((relPath) => relPath[0] === '!'
-    ? { ...leaves[relPath.slice(1)], included: false, relPath: relPath.slice(1) }
-    : { ...leaves[relPath], included: true, relPath }));
+    ? {
+      ...leaves[relPath.slice(1)] ?? initialValues.find((val) => val.relPath === relPath.slice(1)),
+      included: false,
+      relPath: relPath.slice(1),
+    } : {
+      ...leaves[relPath] ?? initialValues.find((val) => val.relPath === relPath),
+      included: true,
+      relPath,
+    }));
 </script>
 
 <p class="font-bold">Paths to backup</p>
