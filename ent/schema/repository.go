@@ -22,6 +22,7 @@ func (Repository) Fields() []ent.Field {
 			Default(time.Now).Immutable(),
 		field.Enum("provider").Optional().Default("localProvider").Values("localProvider", "AWSS3Provider", "B2Provider", "MinioS3Provider"),
 		field.Bool("active").Default(false).StructTag(`json:"active"`),
+		field.Bool("pruneActive").Default(false).StructTag(`json:"pruneActive"`),
 		field.Bool("running").Default(false).StructTag(`json:"running"`),
 		field.Bool("initiated").Default(false).StructTag(`json:"initiated"`),
 		field.Bool("valid").Default(false).StructTag(`json:"valid"`),

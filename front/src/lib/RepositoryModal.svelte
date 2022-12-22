@@ -25,6 +25,7 @@
         name: repo.name,
         password: repo.password,
         active: repo.active,
+        pruneActive: repo.pruneActive,
       }),
     },
     {

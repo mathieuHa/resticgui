@@ -106,7 +106,7 @@ func UpdatePruneSchedule(c *gin.Context) {
 		return
 	}
 
-	// updateRepositoryRunning(r, rID)
+	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, pruneSchedule)
 }

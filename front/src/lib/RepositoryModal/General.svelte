@@ -29,3 +29,9 @@
   type="checkbox"
   bind:checked={values.active}
 />
+<Input
+  id="pruneActive"
+  label="Enable prune"
+  type="checkbox"
+  bind:checked={values.pruneActive}
+/>

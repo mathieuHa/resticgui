@@ -158,12 +158,15 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 		return false
 	}
 
-	// we check if the repository is valid
+	// we check if the repository is valid and enabled
 	if !repo.Valid {
 		log.Debug().Msg("repository is not valid")
 		return false
+	} else if !repo.Active {
+		log.Debug().Msg("repository backup is not enabled")
+		return false
 	} else {
-		log.Debug().Msg("repository is valid")
+		log.Debug().Msg("repository is valid and backup is enabled")
 
 		// First we remove the previous job launched for this repository
 		log.Debug().Msg("remove previous job for the repository")
@@ -208,12 +211,15 @@ func AddScheduledPrune(repo *ent.Repository, cr *cron.Cron) bool {
 		return false
 	}
 
-	// we check if the repository is valid
+	// we check if the repository is valid and enabled
 	if !repo.Valid {
 		log.Debug().Msg("repository is not valid")
 		return false
+	} else if !repo.PruneActive {
+		log.Debug().Msg("repository prune is not enabled")
+		return false
 	} else {
-		log.Debug().Msg("repository is valid")
+		log.Debug().Msg("repository is valid and prune is enabled")
 
 		// First we remove the previous job launched for this repository
 		log.Debug().Msg("remove previous job for the repository")

@@ -90,7 +90,8 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 		UpdateOneID(id).
 		SetName(repo.Name).
 		SetActive(repo.Active).
-		SetRunning(false).
+		SetPruneActive(repo.PruneActive).
+		SetRunning(repo.Running).
 		SetPassword(repo.Password).
 		SetProvider(repo.Provider).
 		SetMaxSize(repo.MaxSize).

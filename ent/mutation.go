@@ -7733,6 +7733,7 @@ type RepositoryMutation struct {
 	createdAt               *time.Time
 	provider                *repository.Provider
 	active                  *bool
+	pruneActive             *bool
 	running                 *bool
 	initiated               *bool
 	valid                   *bool
@@ -8024,6 +8025,42 @@ func (m *RepositoryMutation) OldActive(ctx context.Context) (v bool, err error) 
 // ResetActive resets all changes to the "active" field.
 func (m *RepositoryMutation) ResetActive() {
 	m.active = nil
+}
+
+// SetPruneActive sets the "pruneActive" field.
+func (m *RepositoryMutation) SetPruneActive(b bool) {
+	m.pruneActive = &b
+}
+
+// PruneActive returns the value of the "pruneActive" field in the mutation.
+func (m *RepositoryMutation) PruneActive() (r bool, exists bool) {
+	v := m.pruneActive
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPruneActive returns the old "pruneActive" field's value of the Repository entity.
+// If the Repository object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RepositoryMutation) OldPruneActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPruneActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPruneActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPruneActive: %w", err)
+	}
+	return oldValue.PruneActive, nil
+}
+
+// ResetPruneActive resets all changes to the "pruneActive" field.
+func (m *RepositoryMutation) ResetPruneActive() {
+	m.pruneActive = nil
 }
 
 // SetRunning sets the "running" field.
@@ -8947,7 +8984,7 @@ func (m *RepositoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RepositoryMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.name != nil {
 		fields = append(fields, repository.FieldName)
 	}
@@ -8959,6 +8996,9 @@ func (m *RepositoryMutation) Fields() []string {
 	}
 	if m.active != nil {
 		fields = append(fields, repository.FieldActive)
+	}
+	if m.pruneActive != nil {
+		fields = append(fields, repository.FieldPruneActive)
 	}
 	if m.running != nil {
 		fields = append(fields, repository.FieldRunning)
@@ -9009,6 +9049,8 @@ func (m *RepositoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Provider()
 	case repository.FieldActive:
 		return m.Active()
+	case repository.FieldPruneActive:
+		return m.PruneActive()
 	case repository.FieldRunning:
 		return m.Running()
 	case repository.FieldInitiated:
@@ -9048,6 +9090,8 @@ func (m *RepositoryMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldProvider(ctx)
 	case repository.FieldActive:
 		return m.OldActive(ctx)
+	case repository.FieldPruneActive:
+		return m.OldPruneActive(ctx)
 	case repository.FieldRunning:
 		return m.OldRunning(ctx)
 	case repository.FieldInitiated:
@@ -9106,6 +9150,13 @@ func (m *RepositoryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetActive(v)
+		return nil
+	case repository.FieldPruneActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPruneActive(v)
 		return nil
 	case repository.FieldRunning:
 		v, ok := value.(bool)
@@ -9316,6 +9367,9 @@ func (m *RepositoryMutation) ResetField(name string) error {
 		return nil
 	case repository.FieldActive:
 		m.ResetActive()
+		return nil
+	case repository.FieldPruneActive:
+		m.ResetPruneActive()
 		return nil
 	case repository.FieldRunning:
 		m.ResetRunning()

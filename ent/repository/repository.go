@@ -20,6 +20,8 @@ const (
 	FieldProvider = "provider"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
+	// FieldPruneActive holds the string denoting the pruneactive field in the database.
+	FieldPruneActive = "prune_active"
 	// FieldRunning holds the string denoting the running field in the database.
 	FieldRunning = "running"
 	// FieldInitiated holds the string denoting the initiated field in the database.
@@ -134,6 +136,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldProvider,
 	FieldActive,
+	FieldPruneActive,
 	FieldRunning,
 	FieldInitiated,
 	FieldValid,
@@ -164,6 +167,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
+	// DefaultPruneActive holds the default value on creation for the "pruneActive" field.
+	DefaultPruneActive bool
 	// DefaultRunning holds the default value on creation for the "running" field.
 	DefaultRunning bool
 	// DefaultInitiated holds the default value on creation for the "initiated" field.

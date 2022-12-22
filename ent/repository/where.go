@@ -102,6 +102,13 @@ func Active(v bool) predicate.Repository {
 	})
 }
 
+// PruneActive applies equality check predicate on the "pruneActive" field. It's identical to PruneActiveEQ.
+func PruneActive(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPruneActive), v))
+	})
+}
+
 // Running applies equality check predicate on the "running" field. It's identical to RunningEQ.
 func Running(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
@@ -396,6 +403,20 @@ func ActiveEQ(v bool) predicate.Repository {
 func ActiveNEQ(v bool) predicate.Repository {
 	return predicate.Repository(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldActive), v))
+	})
+}
+
+// PruneActiveEQ applies the EQ predicate on the "pruneActive" field.
+func PruneActiveEQ(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPruneActive), v))
+	})
+}
+
+// PruneActiveNEQ applies the NEQ predicate on the "pruneActive" field.
+func PruneActiveNEQ(v bool) predicate.Repository {
+	return predicate.Repository(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPruneActive), v))
 	})
 }
 
