@@ -8,6 +8,17 @@
   const SITE_TITLE = 'ResticGui';
   const SITE_DESCRIPTION = 'Simplify usage of Restic with an Go executable to run it everywhere you want, the repository is open source.';
   const DEFAULT_OG_IMAGE = '/resticLogo.png';
+
+  console.log(`
+██████╗ ███████╗███████╗████████╗██╗ ██████╗ ██████╗ ██╗   ██╗██╗
+██╔══██╗██╔════╝██╔════╝╚══██╔══╝██║██╔════╝██╔════╝ ██║   ██║██║
+██████╔╝█████╗  ███████╗   ██║   ██║██║     ██║  ███╗██║   ██║██║
+██╔══██╗██╔══╝  ╚════██║   ██║   ██║██║     ██║   ██║██║   ██║██║
+██║  ██║███████╗███████║   ██║   ██║╚██████╗╚██████╔╝╚██████╔╝██║
+╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝
+
+Don't hesitate to put us a star on our github
+  `);
 </script>
 
 <svelte:head>

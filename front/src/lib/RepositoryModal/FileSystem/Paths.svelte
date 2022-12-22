@@ -64,7 +64,6 @@
     else await onLoad(root);
   };
 
-  $: console.log(tree)
   onMount(() => onLoad('/'));
   $:dispatch('update', paths.map((relPath) => relPath[0] === '!'
     ? {

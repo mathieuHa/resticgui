@@ -12,9 +12,6 @@
 
   let tab = new URLSearchParams($page.url.search).get('tab') || 'general';
 
-  const fetch = async (path: string) => {
-    return await agent.get(path);
-  };
 
   const replaceStateWithQuery = (value: string) => {
     const url = new URL(window.location.toString());
@@ -23,15 +20,15 @@
     tab = value;
   };
 
+  const fetch = async (path: string) => agent.get(path);
   let repoPromise = fetch(`/repositories/${$page.params.id}`);
   let logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
   let snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
-  const unsuscribe = refresh.subscribe(() => {
+  onDestroy(refresh.subscribe(() => {
     repoPromise = fetch(`/repositories/${$page.params.id}`);
     logsPromise = fetch(`/repositories/${$page.params.id}/logs`);
     snapshotsPromise = fetch(`/repositories/${$page.params.id}/snapshots`);
-  });
-  onDestroy(unsuscribe);
+  }));
 </script>
 
 <div class="mt-2 mb-10 w-full max-w-full">
