@@ -6,6 +6,11 @@ This resticGUI version works with restic version 0.12.0 or more
 
 # Documentation
 
+# License
+
+ResticGUI is licensed under [GPL 3.0 License](https://www.gnu.org/licenses/gpl-3.0.txt). You can find the
+complete text in [``COPYING``](COPYING).
+
 ### Dev tools
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/resticgui/resticgui)
