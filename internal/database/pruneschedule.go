@@ -104,6 +104,7 @@ func UpdatePruneCronLastRun(schedule ent.PruneSchedule, lastRun string) (err err
 	db := Connect()
 	defer db.Close()
 
+	log.Debug().Msgf("Last Run %s", lastRun)
 	_, err = db.PruneSchedule.
 		UpdateOneID(schedule.ID).
 		SetLastRun(lastRun).
