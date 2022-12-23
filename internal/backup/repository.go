@@ -81,12 +81,23 @@ func RestoreRepository(r *ent.Repository, path string, snapshotID string) (out s
 	return stdout, stderr
 }
 
-func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
+func BackupRepository(id int, cr *cron.Cron) (out string) {
 	log.Debug().Msg("BackupRepository()")
 
-	log.Info().Msgf("JOB B HAS STARTED %v", r.ID)
+	log.Info().Msgf("JOB B HAS STARTED %v", id)
 
 	ctx := context.Background()
+
+	r, _ := database.GetRepositoryByIDDB(id, ctx)
+
+	if !r.Valid {
+		log.Debug().Msg("repository is not valid")
+		return "repository is not valid"
+	} else if !r.Active {
+		log.Debug().Msg("repository backup is not enabled")
+		return "repository backup is not enabled"
+	}
+	log.Debug().Msg("repository is valid and backup is enabled")
 
 	var cronEntry cron.Entry
 	if r.Edges.BackupSchedule != nil && r.Edges.BackupSchedule.CronID != nil {
@@ -103,7 +114,6 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 		return
 	}
 
-	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
 	stdout, stderr, errCmd := commands.GetSnapshots(r)
 	var snapshots []Models.Snapshot
 	err := json.Unmarshal([]byte(stdout), &snapshots)
@@ -128,11 +138,11 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	// set backup running
 	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
 
-	err = database.UpdateCronLastRun(*r.Edges.BackupSchedule, cronEntry.Prev.String())
+	err = database.UpdateBackupCronLastRun(*r.Edges.BackupSchedule, cronEntry.Prev.String())
 	if err != nil {
 		log.Err(err).Msg("backup err update cron last run")
 	}
-	err = database.UpdateCronNextRun(*r.Edges.BackupSchedule, cronEntry.Next.String())
+	err = database.UpdateBackupCronNextRun(*r.Edges.BackupSchedule, cronEntry.Next.String())
 	if err != nil {
 		log.Err(err).Msg("backup err update cron next run")
 	}
@@ -147,13 +157,24 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	return stdout
 }
 
-func PruneRepository(r *ent.Repository, cr *cron.Cron) (out string) {
+func PruneRepository(id int, cr *cron.Cron) (out string) {
 	// It is advisable to run restic check after pruning, to make sure you are alerted, should the internal data structures of the repository be damaged.
 	log.Debug().Msg("PruneRepository()")
 
-	log.Info().Msgf("JOB HAS STARTED %v", r.ID)
+	log.Info().Msgf("JOB HAS STARTED %v", id)
 
 	ctx := context.Background()
+
+	r, _ := database.GetRepositoryByIDDB(id, ctx)
+
+	if !r.Valid {
+		log.Debug().Msg("repository is not valid")
+		return "repository is not valid"
+	} else if !r.PruneActive {
+		log.Debug().Msg("repository prune is not enabled")
+		return "repository prune is not enabled"
+	}
+	log.Debug().Msg("repository is valid and prune is enabled")
 
 	var cronEntry cron.Entry
 	if r.Edges.PruneSchedule != nil && r.Edges.PruneSchedule.CronID != nil {
@@ -164,7 +185,6 @@ func PruneRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	}
 	// TODO Check the validity of the provider and repository in general
 
-	r, _ = database.GetRepositoryByIDDB(r.ID, ctx)
 	stdout, stderr, errCmd := commands.GetSnapshots(r)
 	var snapshots []Models.Snapshot
 	err := json.Unmarshal([]byte(stdout), &snapshots)
