@@ -10,6 +10,7 @@ export interface Repository {
   name?: string
   password?: string
   active?: boolean
+  pruneActive?: boolean
   provider?: string
   edges?: {
     [Provider.LocalProvider]?: LocalProvider
