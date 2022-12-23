@@ -178,7 +178,7 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
 			log.Debug().Msg("Add Backup Job")
 			cronID, err := cr.AddFunc(timing, func() {
-				BackupRepository(repo, cr)
+				BackupRepository(repo.ID, cr)
 			})
 
 			if err != nil {
@@ -192,7 +192,7 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 				return false
 			}
 			if len(cr.Entries()) > 0 {
-				err = database.UpdateCronNextRun(*repo.Edges.BackupSchedule, cr.Entries()[0].Next.String())
+				err = database.UpdateBackupCronNextRun(*repo.Edges.BackupSchedule, cr.Entries()[0].Next.String())
 				if err != nil {
 					log.Err(err).Msgf("error: repository %v", "")
 					return false
@@ -236,7 +236,7 @@ func AddScheduledPrune(repo *ent.Repository, cr *cron.Cron) bool {
 			timing := getPruneScheduleStringSyntax(*repo.Edges.PruneSchedule)
 			log.Debug().Msg("Add Prune Job")
 			cronID, err := cr.AddFunc(timing, func() {
-				PruneRepository(repo, cr)
+				PruneRepository(repo.ID, cr)
 			})
 
 			if err != nil {
@@ -276,6 +276,14 @@ func CreateAllScheduledBackup(cr *cron.Cron) {
 		for _, repo := range repositories {
 			log.Debug().Msgf("start repos %v", repo.ID)
 			AddScheduledBackup(repo, cr)
+		}
+	}
+	repositories, err = database.QueryPruneActiveRWithBackupSchedule()
+	if err != nil {
+		log.Err(err).Msgf("error quering active prune")
+	} else {
+		for _, repo := range repositories {
+			log.Debug().Msgf("start repos %v", repo.ID)
 			AddScheduledPrune(repo, cr)
 		}
 	}

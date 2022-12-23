@@ -82,8 +82,8 @@ func UpdateCronID(backupSchedule ent.BackupSchedule, newCronID int) (err error) 
 	return err
 }
 
-func UpdateCronNextRun(backupSchedule ent.BackupSchedule, nextRun string) (err error) {
-	log.Debug().Msg("UpdateCronNextRun()")
+func UpdateBackupCronNextRun(backupSchedule ent.BackupSchedule, nextRun string) (err error) {
+	log.Debug().Msg("UpdateBackupCronNextRun()")
 
 	ctx := context.Background()
 	db := Connect()
@@ -100,8 +100,8 @@ func UpdateCronNextRun(backupSchedule ent.BackupSchedule, nextRun string) (err e
 	return err
 }
 
-func UpdateCronLastRun(backupSchedule ent.BackupSchedule, lastRun string) (err error) {
-	log.Debug().Msg("UpdateCronLastRun()")
+func UpdateBackupCronLastRun(backupSchedule ent.BackupSchedule, lastRun string) (err error) {
+	log.Debug().Msg("UpdateBackupCronLastRun()")
 
 	ctx := context.Background()
 	db := Connect()
@@ -125,6 +125,19 @@ func QueryActiveRWithBackupSchedule() (r []*ent.Repository, err error) {
 	defer db.Close()
 	// Check the validity of the provider and repository in general
 	r, err = db.Repository.Query().WithBackupSchedule().WithPruneSchedule().Where(repository.Active(true)).All(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error quering active backups")
+	}
+	return r, err
+}
+
+func QueryPruneActiveRWithBackupSchedule() (r []*ent.Repository, err error) {
+	ctx := context.Background()
+
+	db := Connect()
+	defer db.Close()
+	// Check the validity of the provider and repository in general
+	r, err = db.Repository.Query().WithPruneSchedule().Where(repository.PruneActive(true)).All(ctx)
 	if err != nil {
 		log.Err(err).Msgf("error quering active backups")
 	}
