@@ -1,7 +1,8 @@
 <script lang="ts">
+    import type { Repository } from '$utils/types';
   import Number from '../Number.svelte';
 
-  export let repo;
+  export let repo: Repository;
 </script>
 
 <div class="flex flex-wrap justify-between gap-2 mt-5">
@@ -13,10 +14,6 @@
 <br />
 
 <div class="flex flex-wrap gap-2">
-  <p class="flex items-center">
-    active:
-    <span class="ml-2 block bg-{repo.active ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
-  </p>
   <p class="flex items-center">
     initiated:
     <span class="ml-2 block bg-{repo.initiated ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
@@ -69,9 +66,11 @@
     </p>
     <p class="flex-1">
       Next:
-      <span class="ml-3">
-        {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}
-      </span>
+        {#if repo.active}
+          {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}<span class="ml-2 block bg-green-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+        {:else}
+          Backup disabled <span class="ml-2 block bg-red-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+        {/if}
     </p>
   </div>
   <br />
@@ -99,7 +98,11 @@
     <p class="flex-1">
       Next:
       <span class="ml-3">
-        {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}
+        {#if repo.pruneActive}
+         {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}<span class="ml-2 block bg-green-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+        {:else}
+          Prune disabled <span class="ml-2 block bg-red-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+        {/if}
       </span>
     </p>
   </div>
@@ -107,13 +110,13 @@
 {/if}
 
 <h2 class="text-md font-bold">Paths</h2>
-<ul class="list-disc ml-5">
-  {#if repo.edges?.paths && repo.edges?.paths.length > 0}
-    {#each repo.edges?.paths as path, i}
-      <li class="text-{!path.included ? 'orange' : 'green'}-500">{path.absPath}</li>
-    {/each}
-  {/if}
-</ul>
+  <ul class="list-disc ml-5">
+    {#if repo.edges?.paths && repo.edges?.paths.length > 0}
+      {#each repo.edges?.paths as path, i}
+        <li class="text-{!path.included ? 'orange' : 'green'}-500">{path.absPath}</li>
+      {/each}
+    {/if}
+  </ul>
 <br />
 
 <p>
