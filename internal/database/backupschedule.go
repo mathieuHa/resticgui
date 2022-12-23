@@ -124,7 +124,7 @@ func QueryActiveRWithBackupSchedule() (r []*ent.Repository, err error) {
 	db := Connect()
 	defer db.Close()
 	// Check the validity of the provider and repository in general
-	r, err = db.Repository.Query().WithBackupSchedule().Where(repository.Active(true)).All(ctx)
+	r, err = db.Repository.Query().WithBackupSchedule().WithPruneSchedule().Where(repository.Active(true)).All(ctx)
 	if err != nil {
 		log.Err(err).Msgf("error quering active backups")
 	}
@@ -137,7 +137,7 @@ func QueryAllRWithBackupSchedule() (r []*ent.Repository, err error) {
 	db := Connect()
 	defer db.Close()
 	// Check the validity of the provider and repository in general
-	r, err = db.Repository.Query().WithBackupSchedule().All(ctx)
+	r, err = db.Repository.Query().WithBackupSchedule().WithPruneSchedule().All(ctx)
 	if err != nil {
 		log.Err(err).Msgf("error quering active backups")
 	}

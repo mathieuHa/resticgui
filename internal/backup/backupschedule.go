@@ -176,12 +176,13 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 			}
 			// Then we had the new job to be run and register it
 			timing := getScheduleStringSyntax(*repo.Edges.BackupSchedule)
+			log.Debug().Msg("Add Backup Job")
 			cronID, err := cr.AddFunc(timing, func() {
 				BackupRepository(repo, cr)
 			})
 
 			if err != nil {
-				log.Error().Err(err)
+				log.Error().Err(err).Msg("err adding cron for backup")
 				return false
 			}
 
@@ -195,8 +196,12 @@ func AddScheduledBackup(repo *ent.Repository, cr *cron.Cron) bool {
 				if err != nil {
 					log.Err(err).Msgf("error: repository %v", "")
 					return false
+				} else {
+					log.Debug().Msg("Backup next schedule updated")
 				}
 			}
+		} else {
+			log.Debug().Msg("Backup schedule is nil")
 		}
 		return true
 	}
@@ -229,12 +234,13 @@ func AddScheduledPrune(repo *ent.Repository, cr *cron.Cron) bool {
 			}
 			// Then we had the new job to be run and register it
 			timing := getPruneScheduleStringSyntax(*repo.Edges.PruneSchedule)
+			log.Debug().Msg("Add Prune Job")
 			cronID, err := cr.AddFunc(timing, func() {
 				PruneRepository(repo, cr)
 			})
 
 			if err != nil {
-				log.Error().Err(err)
+				log.Error().Err(err).Msg("err adding cron for prune")
 				return false
 			}
 
@@ -248,8 +254,12 @@ func AddScheduledPrune(repo *ent.Repository, cr *cron.Cron) bool {
 				if err != nil {
 					log.Err(err).Msgf("error: repository %v", "")
 					return false
+				} else {
+					log.Debug().Msg("Prune next schedule updated")
 				}
 			}
+		} else {
+			log.Debug().Msg("Prune schedule is nil")
 		}
 		return true
 	}

@@ -128,9 +128,14 @@ func BackupRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	// set backup running
 	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
 
-	_ = database.UpdateCronLastRun(*r.Edges.BackupSchedule, cronEntry.Prev.String())
-	_ = database.UpdateCronNextRun(*r.Edges.BackupSchedule, cronEntry.Next.String())
-
+	err = database.UpdateCronLastRun(*r.Edges.BackupSchedule, cronEntry.Prev.String())
+	if err != nil {
+		log.Err(err).Msg("backup err update cron last run")
+	}
+	err = database.UpdateCronNextRun(*r.Edges.BackupSchedule, cronEntry.Next.String())
+	if err != nil {
+		log.Err(err).Msg("backup err update cron next run")
+	}
 	stdout, stderr, errCmd = commands.BackupRepository(r, false)
 	database.LogCommand(r.ID, "BackupRepository", stdout, stderr, errCmd, ctx)
 
@@ -179,8 +184,14 @@ func PruneRepository(r *ent.Repository, cr *cron.Cron) (out string) {
 	// set prune running
 	_, _ = database.SetRepositoryRunningDB(r.ID, true, ctx)
 
-	_ = database.UpdatePruneCronLastRun(*r.Edges.PruneSchedule, cronEntry.Prev.String())
-	_ = database.UpdatePruneCronNextRun(*r.Edges.PruneSchedule, cronEntry.Next.String())
+	err = database.UpdatePruneCronLastRun(*r.Edges.PruneSchedule, cronEntry.Prev.String())
+	if err != nil {
+		log.Err(err).Msg("prune err update cron last run")
+	}
+	err = database.UpdatePruneCronNextRun(*r.Edges.PruneSchedule, cronEntry.Next.String())
+	if err != nil {
+		log.Err(err).Msg("prune err update cron next run")
+	}
 
 	stdout, stderr, errCmd = commands.ForgetSnapshotsPolicy(r)
 	database.LogCommand(r.ID, "ForgetSnapshotsPolicy", stdout, stderr, errCmd, ctx)
