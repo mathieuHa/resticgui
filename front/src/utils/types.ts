@@ -28,6 +28,7 @@ export interface BackupPolicy {
   nbLastBackup?: number
   oneByHour?: number
   oneByDay?: number
+  oneByWeek?: number
   oneByMonth?: number
   keepAll?: boolean
 }
