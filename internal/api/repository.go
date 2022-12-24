@@ -125,10 +125,6 @@ func CreateRepository(c *gin.Context) {
 		log.Err(err).Msgf("error: %v", errQuery)
 	}
 
-	// if r.Active && r.Valid {
-	// 	bs.AddScheduledBackup(r)
-	// }
-
 	c.IndentedJSON(http.StatusCreated, r)
 }
 
