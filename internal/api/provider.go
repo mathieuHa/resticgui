@@ -56,8 +56,12 @@ func CreateProvider(c *gin.Context) {
 	default:
 		err = errors.New("provider does not exist")
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
-
+	_, err = database.SetRepositoryProviderDB(rID, p.Provider, ctx)
+	if err != nil {
+		log.Error().Err(err).Msg("Error setting provider for repository")
+	}
 }
 
 // UpdateProvider godoc
@@ -106,5 +110,10 @@ func UpdateProvider(c *gin.Context) {
 	default:
 		err = errors.New("provider does not exist")
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	_, err = database.SetRepositoryProviderDB(rID, p.Provider, ctx)
+	if err != nil {
+		log.Error().Err(err).Msg("Error setting provider for repository")
 	}
 }
