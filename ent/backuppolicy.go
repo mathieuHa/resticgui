@@ -16,16 +16,18 @@ type BackupPolicy struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// NbLastBackup holds the value of the "nbLastBackup" field.
-	NbLastBackup uint `json:"nbLastBackup,omitempty"`
-	// OneByHour holds the value of the "oneByHour" field.
-	OneByHour uint `json:"oneByHour,omitempty"`
-	// OneByDay holds the value of the "oneByDay" field.
-	OneByDay uint `json:"oneByDay,omitempty"`
-	// OneByMonth holds the value of the "oneByMonth" field.
-	OneByMonth uint `json:"oneByMonth,omitempty"`
+	// NbKeepLast holds the value of the "nbKeepLast" field.
+	NbKeepLast uint `json:"nbKeepLast"`
+	// NbKeepHours holds the value of the "nbKeepHours" field.
+	NbKeepHours uint `json:"nbKeepHours"`
+	// NbKeepDays holds the value of the "nbKeepDays" field.
+	NbKeepDays uint `json:"nbKeepDays"`
+	// NbKeepWeeks holds the value of the "nbKeepWeeks" field.
+	NbKeepWeeks uint `json:"nbKeepWeeks"`
+	// NbKeepMonths holds the value of the "nbKeepMonths" field.
+	NbKeepMonths uint `json:"nbKeepMonths"`
 	// KeepAll holds the value of the "keepAll" field.
-	KeepAll bool `json:"keepAll,omitempty"`
+	KeepAll bool `json:"keepAll"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BackupPolicyQuery when eager-loading is set.
 	Edges                    BackupPolicyEdges `json:"edges"`
@@ -61,7 +63,7 @@ func (*BackupPolicy) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case backuppolicy.FieldKeepAll:
 			values[i] = new(sql.NullBool)
-		case backuppolicy.FieldID, backuppolicy.FieldNbLastBackup, backuppolicy.FieldOneByHour, backuppolicy.FieldOneByDay, backuppolicy.FieldOneByMonth:
+		case backuppolicy.FieldID, backuppolicy.FieldNbKeepLast, backuppolicy.FieldNbKeepHours, backuppolicy.FieldNbKeepDays, backuppolicy.FieldNbKeepWeeks, backuppolicy.FieldNbKeepMonths:
 			values[i] = new(sql.NullInt64)
 		case backuppolicy.ForeignKeys[0]: // repository_backup_policy
 			values[i] = new(sql.NullInt64)
@@ -86,29 +88,35 @@ func (bp *BackupPolicy) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			bp.ID = int(value.Int64)
-		case backuppolicy.FieldNbLastBackup:
+		case backuppolicy.FieldNbKeepLast:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field nbLastBackup", values[i])
+				return fmt.Errorf("unexpected type %T for field nbKeepLast", values[i])
 			} else if value.Valid {
-				bp.NbLastBackup = uint(value.Int64)
+				bp.NbKeepLast = uint(value.Int64)
 			}
-		case backuppolicy.FieldOneByHour:
+		case backuppolicy.FieldNbKeepHours:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field oneByHour", values[i])
+				return fmt.Errorf("unexpected type %T for field nbKeepHours", values[i])
 			} else if value.Valid {
-				bp.OneByHour = uint(value.Int64)
+				bp.NbKeepHours = uint(value.Int64)
 			}
-		case backuppolicy.FieldOneByDay:
+		case backuppolicy.FieldNbKeepDays:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field oneByDay", values[i])
+				return fmt.Errorf("unexpected type %T for field nbKeepDays", values[i])
 			} else if value.Valid {
-				bp.OneByDay = uint(value.Int64)
+				bp.NbKeepDays = uint(value.Int64)
 			}
-		case backuppolicy.FieldOneByMonth:
+		case backuppolicy.FieldNbKeepWeeks:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field oneByMonth", values[i])
+				return fmt.Errorf("unexpected type %T for field nbKeepWeeks", values[i])
 			} else if value.Valid {
-				bp.OneByMonth = uint(value.Int64)
+				bp.NbKeepWeeks = uint(value.Int64)
+			}
+		case backuppolicy.FieldNbKeepMonths:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nbKeepMonths", values[i])
+			} else if value.Valid {
+				bp.NbKeepMonths = uint(value.Int64)
 			}
 		case backuppolicy.FieldKeepAll:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -156,17 +164,20 @@ func (bp *BackupPolicy) String() string {
 	var builder strings.Builder
 	builder.WriteString("BackupPolicy(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", bp.ID))
-	builder.WriteString("nbLastBackup=")
-	builder.WriteString(fmt.Sprintf("%v", bp.NbLastBackup))
+	builder.WriteString("nbKeepLast=")
+	builder.WriteString(fmt.Sprintf("%v", bp.NbKeepLast))
 	builder.WriteString(", ")
-	builder.WriteString("oneByHour=")
-	builder.WriteString(fmt.Sprintf("%v", bp.OneByHour))
+	builder.WriteString("nbKeepHours=")
+	builder.WriteString(fmt.Sprintf("%v", bp.NbKeepHours))
 	builder.WriteString(", ")
-	builder.WriteString("oneByDay=")
-	builder.WriteString(fmt.Sprintf("%v", bp.OneByDay))
+	builder.WriteString("nbKeepDays=")
+	builder.WriteString(fmt.Sprintf("%v", bp.NbKeepDays))
 	builder.WriteString(", ")
-	builder.WriteString("oneByMonth=")
-	builder.WriteString(fmt.Sprintf("%v", bp.OneByMonth))
+	builder.WriteString("nbKeepWeeks=")
+	builder.WriteString(fmt.Sprintf("%v", bp.NbKeepWeeks))
+	builder.WriteString(", ")
+	builder.WriteString("nbKeepMonths=")
+	builder.WriteString(fmt.Sprintf("%v", bp.NbKeepMonths))
 	builder.WriteString(", ")
 	builder.WriteString("keepAll=")
 	builder.WriteString(fmt.Sprintf("%v", bp.KeepAll))

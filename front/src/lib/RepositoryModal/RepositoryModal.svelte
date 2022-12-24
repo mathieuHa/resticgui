@@ -50,10 +50,11 @@
       component: BackupPolicy,
       defaultValues: (repo: Repository) => ({
         keepAll: repo.edges?.backupPolicy?.keepAll,
-        nbLastBackup: repo.edges?.backupPolicy?.nbLastBackup || 0,
-        oneByHour: repo.edges?.backupPolicy?.oneByHour || 0,
-        oneByDay: repo.edges?.backupPolicy?.oneByDay || 0,
-        oneByMonth: repo.edges?.backupPolicy?.oneByMonth || 0,
+        nbKeepLast: repo.edges?.backupPolicy?.nbKeepLast || 0,
+        nbKeepHours: repo.edges?.backupPolicy?.nbKeepHours || 0,
+        nbKeepDays: repo.edges?.backupPolicy?.nbKeepDays || 0,
+        nbKeepWeeks: repo.edges?.backupPolicy?.nbKeepWeeks || 0,
+        nbKeepMonths: repo.edges?.backupPolicy?.nbKeepMonths || 0,
       }),
     },
     {

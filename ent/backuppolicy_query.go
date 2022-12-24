@@ -290,12 +290,12 @@ func (bpq *BackupPolicyQuery) WithRepository(opts ...func(*RepositoryQuery)) *Ba
 // Example:
 //
 //	var v []struct {
-//		NbLastBackup uint `json:"nbLastBackup,omitempty"`
+//		NbKeepLast uint `json:"nbKeepLast"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.BackupPolicy.Query().
-//		GroupBy(backuppolicy.FieldNbLastBackup).
+//		GroupBy(backuppolicy.FieldNbKeepLast).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bpq *BackupPolicyQuery) GroupBy(field string, fields ...string) *BackupPolicyGroupBy {
@@ -318,11 +318,11 @@ func (bpq *BackupPolicyQuery) GroupBy(field string, fields ...string) *BackupPol
 // Example:
 //
 //	var v []struct {
-//		NbLastBackup uint `json:"nbLastBackup,omitempty"`
+//		NbKeepLast uint `json:"nbKeepLast"`
 //	}
 //
 //	client.BackupPolicy.Query().
-//		Select(backuppolicy.FieldNbLastBackup).
+//		Select(backuppolicy.FieldNbKeepLast).
 //		Scan(ctx, &v)
 func (bpq *BackupPolicyQuery) Select(fields ...string) *BackupPolicySelect {
 	bpq.fields = append(bpq.fields, fields...)

@@ -25,11 +25,11 @@ export interface Repository {
 }
 
 export interface BackupPolicy {
-  nbLastBackup?: number
-  oneByHour?: number
-  oneByDay?: number
-  oneByWeek?: number
-  oneByMonth?: number
+  nbKeepLast?: number
+  nbKeepHours?: number
+  nbKeepDays?: number
+  nbKeepWeeks?: number
+  nbKeepMonths?: number
   keepAll?: boolean
 }
 

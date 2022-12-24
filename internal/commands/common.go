@@ -139,21 +139,25 @@ func getRestoreCommonArgs(path string, version string) []string {
 
 func getPruneCommonArgs(r *ent.Repository) []string {
 	var args []string
-	if r.Edges.BackupPolicy.NbLastBackup != 0 {
+	if r.Edges.BackupPolicy.NbKeepLast != 0 {
 		args = append(args, "--keep-last")
-		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbLastBackup))
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepLast))
 	}
-	if r.Edges.BackupPolicy.OneByHour != 0 {
+	if r.Edges.BackupPolicy.NbKeepHours != 0 {
 		args = append(args, "--keep-hourly")
-		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.OneByHour != 0))
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepHours != 0))
 	}
-	if r.Edges.BackupPolicy.OneByDay != 0 {
+	if r.Edges.BackupPolicy.NbKeepDays != 0 {
 		args = append(args, "--keep-daily")
-		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.OneByDay))
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepDays))
 	}
-	if r.Edges.BackupPolicy.OneByMonth != 0 {
+	if r.Edges.BackupPolicy.NbKeepWeeks != 0 {
+		args = append(args, "--keep-weekly")
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepWeeks))
+	}
+	if r.Edges.BackupPolicy.NbKeepMonths != 0 {
 		args = append(args, "--keep-monthly")
-		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.OneByMonth))
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepMonths))
 	}
 
 	return args

@@ -60,10 +60,11 @@ var (
 	// BackupPolicyColumns holds the columns for the "BackupPolicy" table.
 	BackupPolicyColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "nb_last_backup", Type: field.TypeUint, Default: 10},
-		{Name: "one_by_hour", Type: field.TypeUint, Default: 1},
-		{Name: "one_by_day", Type: field.TypeUint, Default: 1},
-		{Name: "one_by_month", Type: field.TypeUint, Default: 1},
+		{Name: "nb_keep_last", Type: field.TypeUint, Default: 10},
+		{Name: "nb_keep_hours", Type: field.TypeUint, Default: 1},
+		{Name: "nb_keep_days", Type: field.TypeUint, Default: 1},
+		{Name: "nb_keep_weeks", Type: field.TypeUint, Default: 1},
+		{Name: "nb_keep_months", Type: field.TypeUint, Default: 1},
 		{Name: "keep_all", Type: field.TypeBool, Default: true},
 		{Name: "repository_backup_policy", Type: field.TypeInt, Unique: true},
 	}
@@ -75,7 +76,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "BackupPolicy_repositories_backupPolicy",
-				Columns:    []*schema.Column{BackupPolicyColumns[6]},
+				Columns:    []*schema.Column{BackupPolicyColumns[7]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

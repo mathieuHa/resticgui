@@ -58,7 +58,7 @@ func TestCreateBackupPolicy(t *testing.T) {
 		url := fmt.Sprintf(apiURL, id)
 		w := httptest.NewRecorder()
 
-		obj := ent.BackupPolicy{NbLastBackup: 1}
+		obj := ent.BackupPolicy{NbKeepLast: 1}
 		l, _ := json.Marshal(obj)
 		requestBody := bytes.NewBuffer(l)
 
