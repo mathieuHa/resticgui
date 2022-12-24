@@ -13,10 +13,11 @@ func CreateBackupPolicyDB(backupPolicy ent.BackupPolicy, repoID int, ctx context
 	b, err = db.BackupPolicy.
 		Create().
 		SetKeepAll(backupPolicy.KeepAll).
-		SetNbLastBackup(backupPolicy.NbLastBackup).
-		SetOneByDay(backupPolicy.OneByDay).
-		SetOneByHour(backupPolicy.OneByHour).
-		SetOneByMonth(backupPolicy.OneByMonth).
+		SetNbKeepDays(backupPolicy.NbKeepDays).
+		SetNbKeepHours(backupPolicy.NbKeepHours).
+		SetNbKeepLast(backupPolicy.NbKeepLast).
+		SetNbKeepMonths(backupPolicy.NbKeepMonths).
+		SetNbKeepWeeks(backupPolicy.NbKeepWeeks).
 		SetRepositoryID(repoID).
 		Save(ctx)
 	if err != nil {
@@ -32,10 +33,11 @@ func UpdateBackupPolicyDB(backupPolicy ent.BackupPolicy, id int, ctx context.Con
 	b, err = db.BackupPolicy.
 		UpdateOneID(id).
 		SetKeepAll(backupPolicy.KeepAll).
-		SetNbLastBackup(backupPolicy.NbLastBackup).
-		SetOneByDay(backupPolicy.OneByDay).
-		SetOneByHour(backupPolicy.OneByHour).
-		SetOneByMonth(backupPolicy.OneByMonth).
+		SetNbKeepDays(backupPolicy.NbKeepDays).
+		SetNbKeepHours(backupPolicy.NbKeepHours).
+		SetNbKeepLast(backupPolicy.NbKeepLast).
+		SetNbKeepMonths(backupPolicy.NbKeepMonths).
+		SetNbKeepWeeks(backupPolicy.NbKeepWeeks).
 		Save(ctx)
 
 	if err != nil {

@@ -67,24 +67,28 @@ func init() {
 	b2provider.DefaultValid = b2providerDescValid.Default.(bool)
 	backuppolicyFields := schema.BackupPolicy{}.Fields()
 	_ = backuppolicyFields
-	// backuppolicyDescNbLastBackup is the schema descriptor for nbLastBackup field.
-	backuppolicyDescNbLastBackup := backuppolicyFields[0].Descriptor()
-	// backuppolicy.DefaultNbLastBackup holds the default value on creation for the nbLastBackup field.
-	backuppolicy.DefaultNbLastBackup = backuppolicyDescNbLastBackup.Default.(uint)
-	// backuppolicyDescOneByHour is the schema descriptor for oneByHour field.
-	backuppolicyDescOneByHour := backuppolicyFields[1].Descriptor()
-	// backuppolicy.DefaultOneByHour holds the default value on creation for the oneByHour field.
-	backuppolicy.DefaultOneByHour = backuppolicyDescOneByHour.Default.(uint)
-	// backuppolicyDescOneByDay is the schema descriptor for oneByDay field.
-	backuppolicyDescOneByDay := backuppolicyFields[2].Descriptor()
-	// backuppolicy.DefaultOneByDay holds the default value on creation for the oneByDay field.
-	backuppolicy.DefaultOneByDay = backuppolicyDescOneByDay.Default.(uint)
-	// backuppolicyDescOneByMonth is the schema descriptor for oneByMonth field.
-	backuppolicyDescOneByMonth := backuppolicyFields[3].Descriptor()
-	// backuppolicy.DefaultOneByMonth holds the default value on creation for the oneByMonth field.
-	backuppolicy.DefaultOneByMonth = backuppolicyDescOneByMonth.Default.(uint)
+	// backuppolicyDescNbKeepLast is the schema descriptor for nbKeepLast field.
+	backuppolicyDescNbKeepLast := backuppolicyFields[0].Descriptor()
+	// backuppolicy.DefaultNbKeepLast holds the default value on creation for the nbKeepLast field.
+	backuppolicy.DefaultNbKeepLast = backuppolicyDescNbKeepLast.Default.(uint)
+	// backuppolicyDescNbKeepHours is the schema descriptor for nbKeepHours field.
+	backuppolicyDescNbKeepHours := backuppolicyFields[1].Descriptor()
+	// backuppolicy.DefaultNbKeepHours holds the default value on creation for the nbKeepHours field.
+	backuppolicy.DefaultNbKeepHours = backuppolicyDescNbKeepHours.Default.(uint)
+	// backuppolicyDescNbKeepDays is the schema descriptor for nbKeepDays field.
+	backuppolicyDescNbKeepDays := backuppolicyFields[2].Descriptor()
+	// backuppolicy.DefaultNbKeepDays holds the default value on creation for the nbKeepDays field.
+	backuppolicy.DefaultNbKeepDays = backuppolicyDescNbKeepDays.Default.(uint)
+	// backuppolicyDescNbKeepWeeks is the schema descriptor for nbKeepWeeks field.
+	backuppolicyDescNbKeepWeeks := backuppolicyFields[3].Descriptor()
+	// backuppolicy.DefaultNbKeepWeeks holds the default value on creation for the nbKeepWeeks field.
+	backuppolicy.DefaultNbKeepWeeks = backuppolicyDescNbKeepWeeks.Default.(uint)
+	// backuppolicyDescNbKeepMonths is the schema descriptor for nbKeepMonths field.
+	backuppolicyDescNbKeepMonths := backuppolicyFields[4].Descriptor()
+	// backuppolicy.DefaultNbKeepMonths holds the default value on creation for the nbKeepMonths field.
+	backuppolicy.DefaultNbKeepMonths = backuppolicyDescNbKeepMonths.Default.(uint)
 	// backuppolicyDescKeepAll is the schema descriptor for keepAll field.
-	backuppolicyDescKeepAll := backuppolicyFields[4].Descriptor()
+	backuppolicyDescKeepAll := backuppolicyFields[5].Descriptor()
 	// backuppolicy.DefaultKeepAll holds the default value on creation for the keepAll field.
 	backuppolicy.DefaultKeepAll = backuppolicyDescKeepAll.Default.(bool)
 	backupscheduleFields := schema.BackupSchedule{}.Fields()

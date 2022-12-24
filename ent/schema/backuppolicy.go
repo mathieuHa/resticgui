@@ -23,11 +23,12 @@ func (BackupPolicy) Annotations() []schema.Annotation {
 // Fields of the BackupPolicy.
 func (BackupPolicy) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint("nbLastBackup").Default(10),
-		field.Uint("oneByHour").Default(1),
-		field.Uint("oneByDay").Default(1),
-		field.Uint("oneByMonth").Default(1),
-		field.Bool("keepAll").Default(true),
+		field.Uint("nbKeepLast").Default(10).StructTag(`json:"nbKeepLast"`),
+		field.Uint("nbKeepHours").Default(1).StructTag(`json:"nbKeepHours"`),
+		field.Uint("nbKeepDays").Default(1).StructTag(`json:"nbKeepDays"`),
+		field.Uint("nbKeepWeeks").Default(1).StructTag(`json:"nbKeepWeeks"`),
+		field.Uint("nbKeepMonths").Default(1).StructTag(`json:"nbKeepMonths"`),
+		field.Bool("keepAll").Default(true).StructTag(`json:"keepAll"`),
 	}
 }
 

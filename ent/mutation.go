@@ -1267,14 +1267,16 @@ type BackupPolicyMutation struct {
 	op                Op
 	typ               string
 	id                *int
-	nbLastBackup      *uint
-	addnbLastBackup   *int
-	oneByHour         *uint
-	addoneByHour      *int
-	oneByDay          *uint
-	addoneByDay       *int
-	oneByMonth        *uint
-	addoneByMonth     *int
+	nbKeepLast        *uint
+	addnbKeepLast     *int
+	nbKeepHours       *uint
+	addnbKeepHours    *int
+	nbKeepDays        *uint
+	addnbKeepDays     *int
+	nbKeepWeeks       *uint
+	addnbKeepWeeks    *int
+	nbKeepMonths      *uint
+	addnbKeepMonths   *int
 	keepAll           *bool
 	clearedFields     map[string]struct{}
 	repository        *int
@@ -1382,228 +1384,284 @@ func (m *BackupPolicyMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetNbLastBackup sets the "nbLastBackup" field.
-func (m *BackupPolicyMutation) SetNbLastBackup(u uint) {
-	m.nbLastBackup = &u
-	m.addnbLastBackup = nil
+// SetNbKeepLast sets the "nbKeepLast" field.
+func (m *BackupPolicyMutation) SetNbKeepLast(u uint) {
+	m.nbKeepLast = &u
+	m.addnbKeepLast = nil
 }
 
-// NbLastBackup returns the value of the "nbLastBackup" field in the mutation.
-func (m *BackupPolicyMutation) NbLastBackup() (r uint, exists bool) {
-	v := m.nbLastBackup
+// NbKeepLast returns the value of the "nbKeepLast" field in the mutation.
+func (m *BackupPolicyMutation) NbKeepLast() (r uint, exists bool) {
+	v := m.nbKeepLast
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldNbLastBackup returns the old "nbLastBackup" field's value of the BackupPolicy entity.
+// OldNbKeepLast returns the old "nbKeepLast" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldNbLastBackup(ctx context.Context) (v uint, err error) {
+func (m *BackupPolicyMutation) OldNbKeepLast(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNbLastBackup is only allowed on UpdateOne operations")
+		return v, errors.New("OldNbKeepLast is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNbLastBackup requires an ID field in the mutation")
+		return v, errors.New("OldNbKeepLast requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNbLastBackup: %w", err)
+		return v, fmt.Errorf("querying old value for OldNbKeepLast: %w", err)
 	}
-	return oldValue.NbLastBackup, nil
+	return oldValue.NbKeepLast, nil
 }
 
-// AddNbLastBackup adds u to the "nbLastBackup" field.
-func (m *BackupPolicyMutation) AddNbLastBackup(u int) {
-	if m.addnbLastBackup != nil {
-		*m.addnbLastBackup += u
+// AddNbKeepLast adds u to the "nbKeepLast" field.
+func (m *BackupPolicyMutation) AddNbKeepLast(u int) {
+	if m.addnbKeepLast != nil {
+		*m.addnbKeepLast += u
 	} else {
-		m.addnbLastBackup = &u
+		m.addnbKeepLast = &u
 	}
 }
 
-// AddedNbLastBackup returns the value that was added to the "nbLastBackup" field in this mutation.
-func (m *BackupPolicyMutation) AddedNbLastBackup() (r int, exists bool) {
-	v := m.addnbLastBackup
+// AddedNbKeepLast returns the value that was added to the "nbKeepLast" field in this mutation.
+func (m *BackupPolicyMutation) AddedNbKeepLast() (r int, exists bool) {
+	v := m.addnbKeepLast
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetNbLastBackup resets all changes to the "nbLastBackup" field.
-func (m *BackupPolicyMutation) ResetNbLastBackup() {
-	m.nbLastBackup = nil
-	m.addnbLastBackup = nil
+// ResetNbKeepLast resets all changes to the "nbKeepLast" field.
+func (m *BackupPolicyMutation) ResetNbKeepLast() {
+	m.nbKeepLast = nil
+	m.addnbKeepLast = nil
 }
 
-// SetOneByHour sets the "oneByHour" field.
-func (m *BackupPolicyMutation) SetOneByHour(u uint) {
-	m.oneByHour = &u
-	m.addoneByHour = nil
+// SetNbKeepHours sets the "nbKeepHours" field.
+func (m *BackupPolicyMutation) SetNbKeepHours(u uint) {
+	m.nbKeepHours = &u
+	m.addnbKeepHours = nil
 }
 
-// OneByHour returns the value of the "oneByHour" field in the mutation.
-func (m *BackupPolicyMutation) OneByHour() (r uint, exists bool) {
-	v := m.oneByHour
+// NbKeepHours returns the value of the "nbKeepHours" field in the mutation.
+func (m *BackupPolicyMutation) NbKeepHours() (r uint, exists bool) {
+	v := m.nbKeepHours
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOneByHour returns the old "oneByHour" field's value of the BackupPolicy entity.
+// OldNbKeepHours returns the old "nbKeepHours" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldOneByHour(ctx context.Context) (v uint, err error) {
+func (m *BackupPolicyMutation) OldNbKeepHours(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOneByHour is only allowed on UpdateOne operations")
+		return v, errors.New("OldNbKeepHours is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOneByHour requires an ID field in the mutation")
+		return v, errors.New("OldNbKeepHours requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOneByHour: %w", err)
+		return v, fmt.Errorf("querying old value for OldNbKeepHours: %w", err)
 	}
-	return oldValue.OneByHour, nil
+	return oldValue.NbKeepHours, nil
 }
 
-// AddOneByHour adds u to the "oneByHour" field.
-func (m *BackupPolicyMutation) AddOneByHour(u int) {
-	if m.addoneByHour != nil {
-		*m.addoneByHour += u
+// AddNbKeepHours adds u to the "nbKeepHours" field.
+func (m *BackupPolicyMutation) AddNbKeepHours(u int) {
+	if m.addnbKeepHours != nil {
+		*m.addnbKeepHours += u
 	} else {
-		m.addoneByHour = &u
+		m.addnbKeepHours = &u
 	}
 }
 
-// AddedOneByHour returns the value that was added to the "oneByHour" field in this mutation.
-func (m *BackupPolicyMutation) AddedOneByHour() (r int, exists bool) {
-	v := m.addoneByHour
+// AddedNbKeepHours returns the value that was added to the "nbKeepHours" field in this mutation.
+func (m *BackupPolicyMutation) AddedNbKeepHours() (r int, exists bool) {
+	v := m.addnbKeepHours
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOneByHour resets all changes to the "oneByHour" field.
-func (m *BackupPolicyMutation) ResetOneByHour() {
-	m.oneByHour = nil
-	m.addoneByHour = nil
+// ResetNbKeepHours resets all changes to the "nbKeepHours" field.
+func (m *BackupPolicyMutation) ResetNbKeepHours() {
+	m.nbKeepHours = nil
+	m.addnbKeepHours = nil
 }
 
-// SetOneByDay sets the "oneByDay" field.
-func (m *BackupPolicyMutation) SetOneByDay(u uint) {
-	m.oneByDay = &u
-	m.addoneByDay = nil
+// SetNbKeepDays sets the "nbKeepDays" field.
+func (m *BackupPolicyMutation) SetNbKeepDays(u uint) {
+	m.nbKeepDays = &u
+	m.addnbKeepDays = nil
 }
 
-// OneByDay returns the value of the "oneByDay" field in the mutation.
-func (m *BackupPolicyMutation) OneByDay() (r uint, exists bool) {
-	v := m.oneByDay
+// NbKeepDays returns the value of the "nbKeepDays" field in the mutation.
+func (m *BackupPolicyMutation) NbKeepDays() (r uint, exists bool) {
+	v := m.nbKeepDays
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOneByDay returns the old "oneByDay" field's value of the BackupPolicy entity.
+// OldNbKeepDays returns the old "nbKeepDays" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldOneByDay(ctx context.Context) (v uint, err error) {
+func (m *BackupPolicyMutation) OldNbKeepDays(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOneByDay is only allowed on UpdateOne operations")
+		return v, errors.New("OldNbKeepDays is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOneByDay requires an ID field in the mutation")
+		return v, errors.New("OldNbKeepDays requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOneByDay: %w", err)
+		return v, fmt.Errorf("querying old value for OldNbKeepDays: %w", err)
 	}
-	return oldValue.OneByDay, nil
+	return oldValue.NbKeepDays, nil
 }
 
-// AddOneByDay adds u to the "oneByDay" field.
-func (m *BackupPolicyMutation) AddOneByDay(u int) {
-	if m.addoneByDay != nil {
-		*m.addoneByDay += u
+// AddNbKeepDays adds u to the "nbKeepDays" field.
+func (m *BackupPolicyMutation) AddNbKeepDays(u int) {
+	if m.addnbKeepDays != nil {
+		*m.addnbKeepDays += u
 	} else {
-		m.addoneByDay = &u
+		m.addnbKeepDays = &u
 	}
 }
 
-// AddedOneByDay returns the value that was added to the "oneByDay" field in this mutation.
-func (m *BackupPolicyMutation) AddedOneByDay() (r int, exists bool) {
-	v := m.addoneByDay
+// AddedNbKeepDays returns the value that was added to the "nbKeepDays" field in this mutation.
+func (m *BackupPolicyMutation) AddedNbKeepDays() (r int, exists bool) {
+	v := m.addnbKeepDays
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOneByDay resets all changes to the "oneByDay" field.
-func (m *BackupPolicyMutation) ResetOneByDay() {
-	m.oneByDay = nil
-	m.addoneByDay = nil
+// ResetNbKeepDays resets all changes to the "nbKeepDays" field.
+func (m *BackupPolicyMutation) ResetNbKeepDays() {
+	m.nbKeepDays = nil
+	m.addnbKeepDays = nil
 }
 
-// SetOneByMonth sets the "oneByMonth" field.
-func (m *BackupPolicyMutation) SetOneByMonth(u uint) {
-	m.oneByMonth = &u
-	m.addoneByMonth = nil
+// SetNbKeepWeeks sets the "nbKeepWeeks" field.
+func (m *BackupPolicyMutation) SetNbKeepWeeks(u uint) {
+	m.nbKeepWeeks = &u
+	m.addnbKeepWeeks = nil
 }
 
-// OneByMonth returns the value of the "oneByMonth" field in the mutation.
-func (m *BackupPolicyMutation) OneByMonth() (r uint, exists bool) {
-	v := m.oneByMonth
+// NbKeepWeeks returns the value of the "nbKeepWeeks" field in the mutation.
+func (m *BackupPolicyMutation) NbKeepWeeks() (r uint, exists bool) {
+	v := m.nbKeepWeeks
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOneByMonth returns the old "oneByMonth" field's value of the BackupPolicy entity.
+// OldNbKeepWeeks returns the old "nbKeepWeeks" field's value of the BackupPolicy entity.
 // If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BackupPolicyMutation) OldOneByMonth(ctx context.Context) (v uint, err error) {
+func (m *BackupPolicyMutation) OldNbKeepWeeks(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOneByMonth is only allowed on UpdateOne operations")
+		return v, errors.New("OldNbKeepWeeks is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOneByMonth requires an ID field in the mutation")
+		return v, errors.New("OldNbKeepWeeks requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOneByMonth: %w", err)
+		return v, fmt.Errorf("querying old value for OldNbKeepWeeks: %w", err)
 	}
-	return oldValue.OneByMonth, nil
+	return oldValue.NbKeepWeeks, nil
 }
 
-// AddOneByMonth adds u to the "oneByMonth" field.
-func (m *BackupPolicyMutation) AddOneByMonth(u int) {
-	if m.addoneByMonth != nil {
-		*m.addoneByMonth += u
+// AddNbKeepWeeks adds u to the "nbKeepWeeks" field.
+func (m *BackupPolicyMutation) AddNbKeepWeeks(u int) {
+	if m.addnbKeepWeeks != nil {
+		*m.addnbKeepWeeks += u
 	} else {
-		m.addoneByMonth = &u
+		m.addnbKeepWeeks = &u
 	}
 }
 
-// AddedOneByMonth returns the value that was added to the "oneByMonth" field in this mutation.
-func (m *BackupPolicyMutation) AddedOneByMonth() (r int, exists bool) {
-	v := m.addoneByMonth
+// AddedNbKeepWeeks returns the value that was added to the "nbKeepWeeks" field in this mutation.
+func (m *BackupPolicyMutation) AddedNbKeepWeeks() (r int, exists bool) {
+	v := m.addnbKeepWeeks
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOneByMonth resets all changes to the "oneByMonth" field.
-func (m *BackupPolicyMutation) ResetOneByMonth() {
-	m.oneByMonth = nil
-	m.addoneByMonth = nil
+// ResetNbKeepWeeks resets all changes to the "nbKeepWeeks" field.
+func (m *BackupPolicyMutation) ResetNbKeepWeeks() {
+	m.nbKeepWeeks = nil
+	m.addnbKeepWeeks = nil
+}
+
+// SetNbKeepMonths sets the "nbKeepMonths" field.
+func (m *BackupPolicyMutation) SetNbKeepMonths(u uint) {
+	m.nbKeepMonths = &u
+	m.addnbKeepMonths = nil
+}
+
+// NbKeepMonths returns the value of the "nbKeepMonths" field in the mutation.
+func (m *BackupPolicyMutation) NbKeepMonths() (r uint, exists bool) {
+	v := m.nbKeepMonths
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNbKeepMonths returns the old "nbKeepMonths" field's value of the BackupPolicy entity.
+// If the BackupPolicy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BackupPolicyMutation) OldNbKeepMonths(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNbKeepMonths is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNbKeepMonths requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNbKeepMonths: %w", err)
+	}
+	return oldValue.NbKeepMonths, nil
+}
+
+// AddNbKeepMonths adds u to the "nbKeepMonths" field.
+func (m *BackupPolicyMutation) AddNbKeepMonths(u int) {
+	if m.addnbKeepMonths != nil {
+		*m.addnbKeepMonths += u
+	} else {
+		m.addnbKeepMonths = &u
+	}
+}
+
+// AddedNbKeepMonths returns the value that was added to the "nbKeepMonths" field in this mutation.
+func (m *BackupPolicyMutation) AddedNbKeepMonths() (r int, exists bool) {
+	v := m.addnbKeepMonths
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNbKeepMonths resets all changes to the "nbKeepMonths" field.
+func (m *BackupPolicyMutation) ResetNbKeepMonths() {
+	m.nbKeepMonths = nil
+	m.addnbKeepMonths = nil
 }
 
 // SetKeepAll sets the "keepAll" field.
@@ -1700,18 +1758,21 @@ func (m *BackupPolicyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BackupPolicyMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.nbLastBackup != nil {
-		fields = append(fields, backuppolicy.FieldNbLastBackup)
+	fields := make([]string, 0, 6)
+	if m.nbKeepLast != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepLast)
 	}
-	if m.oneByHour != nil {
-		fields = append(fields, backuppolicy.FieldOneByHour)
+	if m.nbKeepHours != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepHours)
 	}
-	if m.oneByDay != nil {
-		fields = append(fields, backuppolicy.FieldOneByDay)
+	if m.nbKeepDays != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepDays)
 	}
-	if m.oneByMonth != nil {
-		fields = append(fields, backuppolicy.FieldOneByMonth)
+	if m.nbKeepWeeks != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepWeeks)
+	}
+	if m.nbKeepMonths != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepMonths)
 	}
 	if m.keepAll != nil {
 		fields = append(fields, backuppolicy.FieldKeepAll)
@@ -1724,14 +1785,16 @@ func (m *BackupPolicyMutation) Fields() []string {
 // schema.
 func (m *BackupPolicyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case backuppolicy.FieldNbLastBackup:
-		return m.NbLastBackup()
-	case backuppolicy.FieldOneByHour:
-		return m.OneByHour()
-	case backuppolicy.FieldOneByDay:
-		return m.OneByDay()
-	case backuppolicy.FieldOneByMonth:
-		return m.OneByMonth()
+	case backuppolicy.FieldNbKeepLast:
+		return m.NbKeepLast()
+	case backuppolicy.FieldNbKeepHours:
+		return m.NbKeepHours()
+	case backuppolicy.FieldNbKeepDays:
+		return m.NbKeepDays()
+	case backuppolicy.FieldNbKeepWeeks:
+		return m.NbKeepWeeks()
+	case backuppolicy.FieldNbKeepMonths:
+		return m.NbKeepMonths()
 	case backuppolicy.FieldKeepAll:
 		return m.KeepAll()
 	}
@@ -1743,14 +1806,16 @@ func (m *BackupPolicyMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *BackupPolicyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case backuppolicy.FieldNbLastBackup:
-		return m.OldNbLastBackup(ctx)
-	case backuppolicy.FieldOneByHour:
-		return m.OldOneByHour(ctx)
-	case backuppolicy.FieldOneByDay:
-		return m.OldOneByDay(ctx)
-	case backuppolicy.FieldOneByMonth:
-		return m.OldOneByMonth(ctx)
+	case backuppolicy.FieldNbKeepLast:
+		return m.OldNbKeepLast(ctx)
+	case backuppolicy.FieldNbKeepHours:
+		return m.OldNbKeepHours(ctx)
+	case backuppolicy.FieldNbKeepDays:
+		return m.OldNbKeepDays(ctx)
+	case backuppolicy.FieldNbKeepWeeks:
+		return m.OldNbKeepWeeks(ctx)
+	case backuppolicy.FieldNbKeepMonths:
+		return m.OldNbKeepMonths(ctx)
 	case backuppolicy.FieldKeepAll:
 		return m.OldKeepAll(ctx)
 	}
@@ -1762,33 +1827,40 @@ func (m *BackupPolicyMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *BackupPolicyMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case backuppolicy.FieldNbLastBackup:
+	case backuppolicy.FieldNbKeepLast:
 		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetNbLastBackup(v)
+		m.SetNbKeepLast(v)
 		return nil
-	case backuppolicy.FieldOneByHour:
+	case backuppolicy.FieldNbKeepHours:
 		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOneByHour(v)
+		m.SetNbKeepHours(v)
 		return nil
-	case backuppolicy.FieldOneByDay:
+	case backuppolicy.FieldNbKeepDays:
 		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOneByDay(v)
+		m.SetNbKeepDays(v)
 		return nil
-	case backuppolicy.FieldOneByMonth:
+	case backuppolicy.FieldNbKeepWeeks:
 		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOneByMonth(v)
+		m.SetNbKeepWeeks(v)
+		return nil
+	case backuppolicy.FieldNbKeepMonths:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNbKeepMonths(v)
 		return nil
 	case backuppolicy.FieldKeepAll:
 		v, ok := value.(bool)
@@ -1805,17 +1877,20 @@ func (m *BackupPolicyMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *BackupPolicyMutation) AddedFields() []string {
 	var fields []string
-	if m.addnbLastBackup != nil {
-		fields = append(fields, backuppolicy.FieldNbLastBackup)
+	if m.addnbKeepLast != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepLast)
 	}
-	if m.addoneByHour != nil {
-		fields = append(fields, backuppolicy.FieldOneByHour)
+	if m.addnbKeepHours != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepHours)
 	}
-	if m.addoneByDay != nil {
-		fields = append(fields, backuppolicy.FieldOneByDay)
+	if m.addnbKeepDays != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepDays)
 	}
-	if m.addoneByMonth != nil {
-		fields = append(fields, backuppolicy.FieldOneByMonth)
+	if m.addnbKeepWeeks != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepWeeks)
+	}
+	if m.addnbKeepMonths != nil {
+		fields = append(fields, backuppolicy.FieldNbKeepMonths)
 	}
 	return fields
 }
@@ -1825,14 +1900,16 @@ func (m *BackupPolicyMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *BackupPolicyMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case backuppolicy.FieldNbLastBackup:
-		return m.AddedNbLastBackup()
-	case backuppolicy.FieldOneByHour:
-		return m.AddedOneByHour()
-	case backuppolicy.FieldOneByDay:
-		return m.AddedOneByDay()
-	case backuppolicy.FieldOneByMonth:
-		return m.AddedOneByMonth()
+	case backuppolicy.FieldNbKeepLast:
+		return m.AddedNbKeepLast()
+	case backuppolicy.FieldNbKeepHours:
+		return m.AddedNbKeepHours()
+	case backuppolicy.FieldNbKeepDays:
+		return m.AddedNbKeepDays()
+	case backuppolicy.FieldNbKeepWeeks:
+		return m.AddedNbKeepWeeks()
+	case backuppolicy.FieldNbKeepMonths:
+		return m.AddedNbKeepMonths()
 	}
 	return nil, false
 }
@@ -1842,33 +1919,40 @@ func (m *BackupPolicyMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *BackupPolicyMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case backuppolicy.FieldNbLastBackup:
+	case backuppolicy.FieldNbKeepLast:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddNbLastBackup(v)
+		m.AddNbKeepLast(v)
 		return nil
-	case backuppolicy.FieldOneByHour:
+	case backuppolicy.FieldNbKeepHours:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOneByHour(v)
+		m.AddNbKeepHours(v)
 		return nil
-	case backuppolicy.FieldOneByDay:
+	case backuppolicy.FieldNbKeepDays:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOneByDay(v)
+		m.AddNbKeepDays(v)
 		return nil
-	case backuppolicy.FieldOneByMonth:
+	case backuppolicy.FieldNbKeepWeeks:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOneByMonth(v)
+		m.AddNbKeepWeeks(v)
+		return nil
+	case backuppolicy.FieldNbKeepMonths:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNbKeepMonths(v)
 		return nil
 	}
 	return fmt.Errorf("unknown BackupPolicy numeric field %s", name)
@@ -1897,17 +1981,20 @@ func (m *BackupPolicyMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *BackupPolicyMutation) ResetField(name string) error {
 	switch name {
-	case backuppolicy.FieldNbLastBackup:
-		m.ResetNbLastBackup()
+	case backuppolicy.FieldNbKeepLast:
+		m.ResetNbKeepLast()
 		return nil
-	case backuppolicy.FieldOneByHour:
-		m.ResetOneByHour()
+	case backuppolicy.FieldNbKeepHours:
+		m.ResetNbKeepHours()
 		return nil
-	case backuppolicy.FieldOneByDay:
-		m.ResetOneByDay()
+	case backuppolicy.FieldNbKeepDays:
+		m.ResetNbKeepDays()
 		return nil
-	case backuppolicy.FieldOneByMonth:
-		m.ResetOneByMonth()
+	case backuppolicy.FieldNbKeepWeeks:
+		m.ResetNbKeepWeeks()
+		return nil
+	case backuppolicy.FieldNbKeepMonths:
+		m.ResetNbKeepMonths()
 		return nil
 	case backuppolicy.FieldKeepAll:
 		m.ResetKeepAll()

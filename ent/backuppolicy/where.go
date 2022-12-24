@@ -79,31 +79,38 @@ func IDLTE(id int) predicate.BackupPolicy {
 	})
 }
 
-// NbLastBackup applies equality check predicate on the "nbLastBackup" field. It's identical to NbLastBackupEQ.
-func NbLastBackup(v uint) predicate.BackupPolicy {
+// NbKeepLast applies equality check predicate on the "nbKeepLast" field. It's identical to NbKeepLastEQ.
+func NbKeepLast(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNbLastBackup), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// OneByHour applies equality check predicate on the "oneByHour" field. It's identical to OneByHourEQ.
-func OneByHour(v uint) predicate.BackupPolicy {
+// NbKeepHours applies equality check predicate on the "nbKeepHours" field. It's identical to NbKeepHoursEQ.
+func NbKeepHours(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOneByHour), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByDay applies equality check predicate on the "oneByDay" field. It's identical to OneByDayEQ.
-func OneByDay(v uint) predicate.BackupPolicy {
+// NbKeepDays applies equality check predicate on the "nbKeepDays" field. It's identical to NbKeepDaysEQ.
+func NbKeepDays(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOneByDay), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByMonth applies equality check predicate on the "oneByMonth" field. It's identical to OneByMonthEQ.
-func OneByMonth(v uint) predicate.BackupPolicy {
+// NbKeepWeeks applies equality check predicate on the "nbKeepWeeks" field. It's identical to NbKeepWeeksEQ.
+func NbKeepWeeks(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOneByMonth), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepWeeks), v))
+	})
+}
+
+// NbKeepMonths applies equality check predicate on the "nbKeepMonths" field. It's identical to NbKeepMonthsEQ.
+func NbKeepMonths(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNbKeepMonths), v))
 	})
 }
 
@@ -114,259 +121,323 @@ func KeepAll(v bool) predicate.BackupPolicy {
 	})
 }
 
-// NbLastBackupEQ applies the EQ predicate on the "nbLastBackup" field.
-func NbLastBackupEQ(v uint) predicate.BackupPolicy {
+// NbKeepLastEQ applies the EQ predicate on the "nbKeepLast" field.
+func NbKeepLastEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNbLastBackup), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// NbLastBackupNEQ applies the NEQ predicate on the "nbLastBackup" field.
-func NbLastBackupNEQ(v uint) predicate.BackupPolicy {
+// NbKeepLastNEQ applies the NEQ predicate on the "nbKeepLast" field.
+func NbKeepLastNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNbLastBackup), v))
+		s.Where(sql.NEQ(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// NbLastBackupIn applies the In predicate on the "nbLastBackup" field.
-func NbLastBackupIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepLastIn applies the In predicate on the "nbKeepLast" field.
+func NbKeepLastIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldNbLastBackup), v...))
+		s.Where(sql.In(s.C(FieldNbKeepLast), v...))
 	})
 }
 
-// NbLastBackupNotIn applies the NotIn predicate on the "nbLastBackup" field.
-func NbLastBackupNotIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepLastNotIn applies the NotIn predicate on the "nbKeepLast" field.
+func NbKeepLastNotIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldNbLastBackup), v...))
+		s.Where(sql.NotIn(s.C(FieldNbKeepLast), v...))
 	})
 }
 
-// NbLastBackupGT applies the GT predicate on the "nbLastBackup" field.
-func NbLastBackupGT(v uint) predicate.BackupPolicy {
+// NbKeepLastGT applies the GT predicate on the "nbKeepLast" field.
+func NbKeepLastGT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldNbLastBackup), v))
+		s.Where(sql.GT(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// NbLastBackupGTE applies the GTE predicate on the "nbLastBackup" field.
-func NbLastBackupGTE(v uint) predicate.BackupPolicy {
+// NbKeepLastGTE applies the GTE predicate on the "nbKeepLast" field.
+func NbKeepLastGTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldNbLastBackup), v))
+		s.Where(sql.GTE(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// NbLastBackupLT applies the LT predicate on the "nbLastBackup" field.
-func NbLastBackupLT(v uint) predicate.BackupPolicy {
+// NbKeepLastLT applies the LT predicate on the "nbKeepLast" field.
+func NbKeepLastLT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldNbLastBackup), v))
+		s.Where(sql.LT(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// NbLastBackupLTE applies the LTE predicate on the "nbLastBackup" field.
-func NbLastBackupLTE(v uint) predicate.BackupPolicy {
+// NbKeepLastLTE applies the LTE predicate on the "nbKeepLast" field.
+func NbKeepLastLTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldNbLastBackup), v))
+		s.Where(sql.LTE(s.C(FieldNbKeepLast), v))
 	})
 }
 
-// OneByHourEQ applies the EQ predicate on the "oneByHour" field.
-func OneByHourEQ(v uint) predicate.BackupPolicy {
+// NbKeepHoursEQ applies the EQ predicate on the "nbKeepHours" field.
+func NbKeepHoursEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOneByHour), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByHourNEQ applies the NEQ predicate on the "oneByHour" field.
-func OneByHourNEQ(v uint) predicate.BackupPolicy {
+// NbKeepHoursNEQ applies the NEQ predicate on the "nbKeepHours" field.
+func NbKeepHoursNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOneByHour), v))
+		s.Where(sql.NEQ(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByHourIn applies the In predicate on the "oneByHour" field.
-func OneByHourIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepHoursIn applies the In predicate on the "nbKeepHours" field.
+func NbKeepHoursIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldOneByHour), v...))
+		s.Where(sql.In(s.C(FieldNbKeepHours), v...))
 	})
 }
 
-// OneByHourNotIn applies the NotIn predicate on the "oneByHour" field.
-func OneByHourNotIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepHoursNotIn applies the NotIn predicate on the "nbKeepHours" field.
+func NbKeepHoursNotIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldOneByHour), v...))
+		s.Where(sql.NotIn(s.C(FieldNbKeepHours), v...))
 	})
 }
 
-// OneByHourGT applies the GT predicate on the "oneByHour" field.
-func OneByHourGT(v uint) predicate.BackupPolicy {
+// NbKeepHoursGT applies the GT predicate on the "nbKeepHours" field.
+func NbKeepHoursGT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOneByHour), v))
+		s.Where(sql.GT(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByHourGTE applies the GTE predicate on the "oneByHour" field.
-func OneByHourGTE(v uint) predicate.BackupPolicy {
+// NbKeepHoursGTE applies the GTE predicate on the "nbKeepHours" field.
+func NbKeepHoursGTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOneByHour), v))
+		s.Where(sql.GTE(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByHourLT applies the LT predicate on the "oneByHour" field.
-func OneByHourLT(v uint) predicate.BackupPolicy {
+// NbKeepHoursLT applies the LT predicate on the "nbKeepHours" field.
+func NbKeepHoursLT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOneByHour), v))
+		s.Where(sql.LT(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByHourLTE applies the LTE predicate on the "oneByHour" field.
-func OneByHourLTE(v uint) predicate.BackupPolicy {
+// NbKeepHoursLTE applies the LTE predicate on the "nbKeepHours" field.
+func NbKeepHoursLTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOneByHour), v))
+		s.Where(sql.LTE(s.C(FieldNbKeepHours), v))
 	})
 }
 
-// OneByDayEQ applies the EQ predicate on the "oneByDay" field.
-func OneByDayEQ(v uint) predicate.BackupPolicy {
+// NbKeepDaysEQ applies the EQ predicate on the "nbKeepDays" field.
+func NbKeepDaysEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOneByDay), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByDayNEQ applies the NEQ predicate on the "oneByDay" field.
-func OneByDayNEQ(v uint) predicate.BackupPolicy {
+// NbKeepDaysNEQ applies the NEQ predicate on the "nbKeepDays" field.
+func NbKeepDaysNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOneByDay), v))
+		s.Where(sql.NEQ(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByDayIn applies the In predicate on the "oneByDay" field.
-func OneByDayIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepDaysIn applies the In predicate on the "nbKeepDays" field.
+func NbKeepDaysIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldOneByDay), v...))
+		s.Where(sql.In(s.C(FieldNbKeepDays), v...))
 	})
 }
 
-// OneByDayNotIn applies the NotIn predicate on the "oneByDay" field.
-func OneByDayNotIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepDaysNotIn applies the NotIn predicate on the "nbKeepDays" field.
+func NbKeepDaysNotIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldOneByDay), v...))
+		s.Where(sql.NotIn(s.C(FieldNbKeepDays), v...))
 	})
 }
 
-// OneByDayGT applies the GT predicate on the "oneByDay" field.
-func OneByDayGT(v uint) predicate.BackupPolicy {
+// NbKeepDaysGT applies the GT predicate on the "nbKeepDays" field.
+func NbKeepDaysGT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOneByDay), v))
+		s.Where(sql.GT(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByDayGTE applies the GTE predicate on the "oneByDay" field.
-func OneByDayGTE(v uint) predicate.BackupPolicy {
+// NbKeepDaysGTE applies the GTE predicate on the "nbKeepDays" field.
+func NbKeepDaysGTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOneByDay), v))
+		s.Where(sql.GTE(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByDayLT applies the LT predicate on the "oneByDay" field.
-func OneByDayLT(v uint) predicate.BackupPolicy {
+// NbKeepDaysLT applies the LT predicate on the "nbKeepDays" field.
+func NbKeepDaysLT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOneByDay), v))
+		s.Where(sql.LT(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByDayLTE applies the LTE predicate on the "oneByDay" field.
-func OneByDayLTE(v uint) predicate.BackupPolicy {
+// NbKeepDaysLTE applies the LTE predicate on the "nbKeepDays" field.
+func NbKeepDaysLTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOneByDay), v))
+		s.Where(sql.LTE(s.C(FieldNbKeepDays), v))
 	})
 }
 
-// OneByMonthEQ applies the EQ predicate on the "oneByMonth" field.
-func OneByMonthEQ(v uint) predicate.BackupPolicy {
+// NbKeepWeeksEQ applies the EQ predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOneByMonth), v))
+		s.Where(sql.EQ(s.C(FieldNbKeepWeeks), v))
 	})
 }
 
-// OneByMonthNEQ applies the NEQ predicate on the "oneByMonth" field.
-func OneByMonthNEQ(v uint) predicate.BackupPolicy {
+// NbKeepWeeksNEQ applies the NEQ predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksNEQ(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOneByMonth), v))
+		s.Where(sql.NEQ(s.C(FieldNbKeepWeeks), v))
 	})
 }
 
-// OneByMonthIn applies the In predicate on the "oneByMonth" field.
-func OneByMonthIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepWeeksIn applies the In predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldOneByMonth), v...))
+		s.Where(sql.In(s.C(FieldNbKeepWeeks), v...))
 	})
 }
 
-// OneByMonthNotIn applies the NotIn predicate on the "oneByMonth" field.
-func OneByMonthNotIn(vs ...uint) predicate.BackupPolicy {
+// NbKeepWeeksNotIn applies the NotIn predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksNotIn(vs ...uint) predicate.BackupPolicy {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldOneByMonth), v...))
+		s.Where(sql.NotIn(s.C(FieldNbKeepWeeks), v...))
 	})
 }
 
-// OneByMonthGT applies the GT predicate on the "oneByMonth" field.
-func OneByMonthGT(v uint) predicate.BackupPolicy {
+// NbKeepWeeksGT applies the GT predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksGT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOneByMonth), v))
+		s.Where(sql.GT(s.C(FieldNbKeepWeeks), v))
 	})
 }
 
-// OneByMonthGTE applies the GTE predicate on the "oneByMonth" field.
-func OneByMonthGTE(v uint) predicate.BackupPolicy {
+// NbKeepWeeksGTE applies the GTE predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksGTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOneByMonth), v))
+		s.Where(sql.GTE(s.C(FieldNbKeepWeeks), v))
 	})
 }
 
-// OneByMonthLT applies the LT predicate on the "oneByMonth" field.
-func OneByMonthLT(v uint) predicate.BackupPolicy {
+// NbKeepWeeksLT applies the LT predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksLT(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOneByMonth), v))
+		s.Where(sql.LT(s.C(FieldNbKeepWeeks), v))
 	})
 }
 
-// OneByMonthLTE applies the LTE predicate on the "oneByMonth" field.
-func OneByMonthLTE(v uint) predicate.BackupPolicy {
+// NbKeepWeeksLTE applies the LTE predicate on the "nbKeepWeeks" field.
+func NbKeepWeeksLTE(v uint) predicate.BackupPolicy {
 	return predicate.BackupPolicy(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOneByMonth), v))
+		s.Where(sql.LTE(s.C(FieldNbKeepWeeks), v))
+	})
+}
+
+// NbKeepMonthsEQ applies the EQ predicate on the "nbKeepMonths" field.
+func NbKeepMonthsEQ(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNbKeepMonths), v))
+	})
+}
+
+// NbKeepMonthsNEQ applies the NEQ predicate on the "nbKeepMonths" field.
+func NbKeepMonthsNEQ(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNbKeepMonths), v))
+	})
+}
+
+// NbKeepMonthsIn applies the In predicate on the "nbKeepMonths" field.
+func NbKeepMonthsIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldNbKeepMonths), v...))
+	})
+}
+
+// NbKeepMonthsNotIn applies the NotIn predicate on the "nbKeepMonths" field.
+func NbKeepMonthsNotIn(vs ...uint) predicate.BackupPolicy {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldNbKeepMonths), v...))
+	})
+}
+
+// NbKeepMonthsGT applies the GT predicate on the "nbKeepMonths" field.
+func NbKeepMonthsGT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNbKeepMonths), v))
+	})
+}
+
+// NbKeepMonthsGTE applies the GTE predicate on the "nbKeepMonths" field.
+func NbKeepMonthsGTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNbKeepMonths), v))
+	})
+}
+
+// NbKeepMonthsLT applies the LT predicate on the "nbKeepMonths" field.
+func NbKeepMonthsLT(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNbKeepMonths), v))
+	})
+}
+
+// NbKeepMonthsLTE applies the LTE predicate on the "nbKeepMonths" field.
+func NbKeepMonthsLTE(v uint) predicate.BackupPolicy {
+	return predicate.BackupPolicy(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNbKeepMonths), v))
 	})
 }
 

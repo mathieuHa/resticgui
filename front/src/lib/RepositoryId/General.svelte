@@ -110,15 +110,15 @@ import type { Repository } from '$utils/types';
   <br />
 
 <h2 class="text-md font-bold">Backup retention policy</h2>
-{#if repo.edges.backupPolicy?.keepAll === 0}
+{#if repo.edges.backupPolicy?.keepAll === true}
   Keep all Backups
 {:else}
   <ul class="list-disc ml-5">
-    <li>Keep the last {repo.edges.backupPolicy?.nbLastBackup} backups</li>
-    {#if repo.edges.backupPolicy?.oneByHour && repo.edges.backupPolicy?.oneByHour !== 0}<li>Keep a backup per hour for {repo.edges.backupPolicy?.oneByHour} hour(s)</li>{/if}
-    {#if repo.edges.backupPolicy?.oneByDay && repo.edges.backupPolicy?.oneByDay !== 0}<li>Keep a backup per day for {repo.edges.backupPolicy?.oneByDay} day(s)</li>{/if}
-    {#if repo.edges.backupPolicy?.oneByWeek && repo.edges.backupPolicy?.oneByWeek !== 0}<li>Keep a backup per week for {repo.edges.backupPolicy?.oneByWeek} week(s)</li>{/if}
-    {#if repo.edges.backupPolicy?.oneByMonth && repo.edges.backupPolicy?.oneByMonth !== 0}<li>Keep a backup per month for {repo.edges.backupPolicy?.oneByMonth} month(s)</li>{/if}
+    <li>Keep the last {repo.edges.backupPolicy?.nbKeepLast} backups</li>
+    {#if repo.edges.backupPolicy?.nbKeepHours && repo.edges.backupPolicy?.nbKeepHours !== 0}<li>Keep a backup per hour for {repo.edges.backupPolicy?.oneByHour} hour(s)</li>{/if}
+    {#if repo.edges.backupPolicy?.nbKeepDays && repo.edges.backupPolicy?.nbKeepDays !== 0}<li>Keep a backup per day for {repo.edges.backupPolicy?.oneByDay} day(s)</li>{/if}
+    {#if repo.edges.backupPolicy?.nbKeepWeeks && repo.edges.backupPolicy?.nbKeepWeeks !== 0}<li>Keep a backup per week for {repo.edges.backupPolicy?.oneByWeek} week(s)</li>{/if}
+    {#if repo.edges.backupPolicy?.nbKeepMonths && repo.edges.backupPolicy?.nbKeepMonths !== 0}<li>Keep a backup per month for {repo.edges.backupPolicy?.oneByMonth} month(s)</li>{/if}
   </ul>
 {/if}
 <br />

@@ -7,14 +7,16 @@ const (
 	Label = "backup_policy"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldNbLastBackup holds the string denoting the nblastbackup field in the database.
-	FieldNbLastBackup = "nb_last_backup"
-	// FieldOneByHour holds the string denoting the onebyhour field in the database.
-	FieldOneByHour = "one_by_hour"
-	// FieldOneByDay holds the string denoting the onebyday field in the database.
-	FieldOneByDay = "one_by_day"
-	// FieldOneByMonth holds the string denoting the onebymonth field in the database.
-	FieldOneByMonth = "one_by_month"
+	// FieldNbKeepLast holds the string denoting the nbkeeplast field in the database.
+	FieldNbKeepLast = "nb_keep_last"
+	// FieldNbKeepHours holds the string denoting the nbkeephours field in the database.
+	FieldNbKeepHours = "nb_keep_hours"
+	// FieldNbKeepDays holds the string denoting the nbkeepdays field in the database.
+	FieldNbKeepDays = "nb_keep_days"
+	// FieldNbKeepWeeks holds the string denoting the nbkeepweeks field in the database.
+	FieldNbKeepWeeks = "nb_keep_weeks"
+	// FieldNbKeepMonths holds the string denoting the nbkeepmonths field in the database.
+	FieldNbKeepMonths = "nb_keep_months"
 	// FieldKeepAll holds the string denoting the keepall field in the database.
 	FieldKeepAll = "keep_all"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
@@ -33,10 +35,11 @@ const (
 // Columns holds all SQL columns for backuppolicy fields.
 var Columns = []string{
 	FieldID,
-	FieldNbLastBackup,
-	FieldOneByHour,
-	FieldOneByDay,
-	FieldOneByMonth,
+	FieldNbKeepLast,
+	FieldNbKeepHours,
+	FieldNbKeepDays,
+	FieldNbKeepWeeks,
+	FieldNbKeepMonths,
 	FieldKeepAll,
 }
 
@@ -62,14 +65,16 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultNbLastBackup holds the default value on creation for the "nbLastBackup" field.
-	DefaultNbLastBackup uint
-	// DefaultOneByHour holds the default value on creation for the "oneByHour" field.
-	DefaultOneByHour uint
-	// DefaultOneByDay holds the default value on creation for the "oneByDay" field.
-	DefaultOneByDay uint
-	// DefaultOneByMonth holds the default value on creation for the "oneByMonth" field.
-	DefaultOneByMonth uint
+	// DefaultNbKeepLast holds the default value on creation for the "nbKeepLast" field.
+	DefaultNbKeepLast uint
+	// DefaultNbKeepHours holds the default value on creation for the "nbKeepHours" field.
+	DefaultNbKeepHours uint
+	// DefaultNbKeepDays holds the default value on creation for the "nbKeepDays" field.
+	DefaultNbKeepDays uint
+	// DefaultNbKeepWeeks holds the default value on creation for the "nbKeepWeeks" field.
+	DefaultNbKeepWeeks uint
+	// DefaultNbKeepMonths holds the default value on creation for the "nbKeepMonths" field.
+	DefaultNbKeepMonths uint
 	// DefaultKeepAll holds the default value on creation for the "keepAll" field.
 	DefaultKeepAll bool
 )

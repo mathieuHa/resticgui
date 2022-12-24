@@ -3,6 +3,7 @@
 
   export let value: string | number | null | undefined = '';
   export let checked: boolean | null | undefined = false;
+  export let disabled: boolean = true;
   export let id = '';
   export let label = '';
   export let type = 'text';
@@ -30,6 +31,7 @@
         bg-gray-{secondary ? 300 : 200} dark:bg-gray-{secondary ? 800 : 700}
         disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
       id={id}
+      disabled={disabled}
       type="text"
       bind:value={val}
       on:change={() => { value = val; dispatch('change'); }}
@@ -76,6 +78,7 @@
         disabled:bg-gray-700/[.5] dark:disabled:bg-gray-200/[.5] transition-all"
       id={idNumber}
       type="number"
+      disabled={disabled}
       min="0"
       bind:value={val}
       on:change={() => { value = val; dispatch('change'); }}

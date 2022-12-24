@@ -28,87 +28,108 @@ func (bpu *BackupPolicyUpdate) Where(ps ...predicate.BackupPolicy) *BackupPolicy
 	return bpu
 }
 
-// SetNbLastBackup sets the "nbLastBackup" field.
-func (bpu *BackupPolicyUpdate) SetNbLastBackup(u uint) *BackupPolicyUpdate {
-	bpu.mutation.ResetNbLastBackup()
-	bpu.mutation.SetNbLastBackup(u)
+// SetNbKeepLast sets the "nbKeepLast" field.
+func (bpu *BackupPolicyUpdate) SetNbKeepLast(u uint) *BackupPolicyUpdate {
+	bpu.mutation.ResetNbKeepLast()
+	bpu.mutation.SetNbKeepLast(u)
 	return bpu
 }
 
-// SetNillableNbLastBackup sets the "nbLastBackup" field if the given value is not nil.
-func (bpu *BackupPolicyUpdate) SetNillableNbLastBackup(u *uint) *BackupPolicyUpdate {
+// SetNillableNbKeepLast sets the "nbKeepLast" field if the given value is not nil.
+func (bpu *BackupPolicyUpdate) SetNillableNbKeepLast(u *uint) *BackupPolicyUpdate {
 	if u != nil {
-		bpu.SetNbLastBackup(*u)
+		bpu.SetNbKeepLast(*u)
 	}
 	return bpu
 }
 
-// AddNbLastBackup adds u to the "nbLastBackup" field.
-func (bpu *BackupPolicyUpdate) AddNbLastBackup(u int) *BackupPolicyUpdate {
-	bpu.mutation.AddNbLastBackup(u)
+// AddNbKeepLast adds u to the "nbKeepLast" field.
+func (bpu *BackupPolicyUpdate) AddNbKeepLast(u int) *BackupPolicyUpdate {
+	bpu.mutation.AddNbKeepLast(u)
 	return bpu
 }
 
-// SetOneByHour sets the "oneByHour" field.
-func (bpu *BackupPolicyUpdate) SetOneByHour(u uint) *BackupPolicyUpdate {
-	bpu.mutation.ResetOneByHour()
-	bpu.mutation.SetOneByHour(u)
+// SetNbKeepHours sets the "nbKeepHours" field.
+func (bpu *BackupPolicyUpdate) SetNbKeepHours(u uint) *BackupPolicyUpdate {
+	bpu.mutation.ResetNbKeepHours()
+	bpu.mutation.SetNbKeepHours(u)
 	return bpu
 }
 
-// SetNillableOneByHour sets the "oneByHour" field if the given value is not nil.
-func (bpu *BackupPolicyUpdate) SetNillableOneByHour(u *uint) *BackupPolicyUpdate {
+// SetNillableNbKeepHours sets the "nbKeepHours" field if the given value is not nil.
+func (bpu *BackupPolicyUpdate) SetNillableNbKeepHours(u *uint) *BackupPolicyUpdate {
 	if u != nil {
-		bpu.SetOneByHour(*u)
+		bpu.SetNbKeepHours(*u)
 	}
 	return bpu
 }
 
-// AddOneByHour adds u to the "oneByHour" field.
-func (bpu *BackupPolicyUpdate) AddOneByHour(u int) *BackupPolicyUpdate {
-	bpu.mutation.AddOneByHour(u)
+// AddNbKeepHours adds u to the "nbKeepHours" field.
+func (bpu *BackupPolicyUpdate) AddNbKeepHours(u int) *BackupPolicyUpdate {
+	bpu.mutation.AddNbKeepHours(u)
 	return bpu
 }
 
-// SetOneByDay sets the "oneByDay" field.
-func (bpu *BackupPolicyUpdate) SetOneByDay(u uint) *BackupPolicyUpdate {
-	bpu.mutation.ResetOneByDay()
-	bpu.mutation.SetOneByDay(u)
+// SetNbKeepDays sets the "nbKeepDays" field.
+func (bpu *BackupPolicyUpdate) SetNbKeepDays(u uint) *BackupPolicyUpdate {
+	bpu.mutation.ResetNbKeepDays()
+	bpu.mutation.SetNbKeepDays(u)
 	return bpu
 }
 
-// SetNillableOneByDay sets the "oneByDay" field if the given value is not nil.
-func (bpu *BackupPolicyUpdate) SetNillableOneByDay(u *uint) *BackupPolicyUpdate {
+// SetNillableNbKeepDays sets the "nbKeepDays" field if the given value is not nil.
+func (bpu *BackupPolicyUpdate) SetNillableNbKeepDays(u *uint) *BackupPolicyUpdate {
 	if u != nil {
-		bpu.SetOneByDay(*u)
+		bpu.SetNbKeepDays(*u)
 	}
 	return bpu
 }
 
-// AddOneByDay adds u to the "oneByDay" field.
-func (bpu *BackupPolicyUpdate) AddOneByDay(u int) *BackupPolicyUpdate {
-	bpu.mutation.AddOneByDay(u)
+// AddNbKeepDays adds u to the "nbKeepDays" field.
+func (bpu *BackupPolicyUpdate) AddNbKeepDays(u int) *BackupPolicyUpdate {
+	bpu.mutation.AddNbKeepDays(u)
 	return bpu
 }
 
-// SetOneByMonth sets the "oneByMonth" field.
-func (bpu *BackupPolicyUpdate) SetOneByMonth(u uint) *BackupPolicyUpdate {
-	bpu.mutation.ResetOneByMonth()
-	bpu.mutation.SetOneByMonth(u)
+// SetNbKeepWeeks sets the "nbKeepWeeks" field.
+func (bpu *BackupPolicyUpdate) SetNbKeepWeeks(u uint) *BackupPolicyUpdate {
+	bpu.mutation.ResetNbKeepWeeks()
+	bpu.mutation.SetNbKeepWeeks(u)
 	return bpu
 }
 
-// SetNillableOneByMonth sets the "oneByMonth" field if the given value is not nil.
-func (bpu *BackupPolicyUpdate) SetNillableOneByMonth(u *uint) *BackupPolicyUpdate {
+// SetNillableNbKeepWeeks sets the "nbKeepWeeks" field if the given value is not nil.
+func (bpu *BackupPolicyUpdate) SetNillableNbKeepWeeks(u *uint) *BackupPolicyUpdate {
 	if u != nil {
-		bpu.SetOneByMonth(*u)
+		bpu.SetNbKeepWeeks(*u)
 	}
 	return bpu
 }
 
-// AddOneByMonth adds u to the "oneByMonth" field.
-func (bpu *BackupPolicyUpdate) AddOneByMonth(u int) *BackupPolicyUpdate {
-	bpu.mutation.AddOneByMonth(u)
+// AddNbKeepWeeks adds u to the "nbKeepWeeks" field.
+func (bpu *BackupPolicyUpdate) AddNbKeepWeeks(u int) *BackupPolicyUpdate {
+	bpu.mutation.AddNbKeepWeeks(u)
+	return bpu
+}
+
+// SetNbKeepMonths sets the "nbKeepMonths" field.
+func (bpu *BackupPolicyUpdate) SetNbKeepMonths(u uint) *BackupPolicyUpdate {
+	bpu.mutation.ResetNbKeepMonths()
+	bpu.mutation.SetNbKeepMonths(u)
+	return bpu
+}
+
+// SetNillableNbKeepMonths sets the "nbKeepMonths" field if the given value is not nil.
+func (bpu *BackupPolicyUpdate) SetNillableNbKeepMonths(u *uint) *BackupPolicyUpdate {
+	if u != nil {
+		bpu.SetNbKeepMonths(*u)
+	}
+	return bpu
+}
+
+// AddNbKeepMonths adds u to the "nbKeepMonths" field.
+func (bpu *BackupPolicyUpdate) AddNbKeepMonths(u int) *BackupPolicyUpdate {
+	bpu.mutation.AddNbKeepMonths(u)
 	return bpu
 }
 
@@ -234,29 +255,35 @@ func (bpu *BackupPolicyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := bpu.mutation.NbLastBackup(); ok {
-		_spec.SetField(backuppolicy.FieldNbLastBackup, field.TypeUint, value)
+	if value, ok := bpu.mutation.NbKeepLast(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepLast, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.AddedNbLastBackup(); ok {
-		_spec.AddField(backuppolicy.FieldNbLastBackup, field.TypeUint, value)
+	if value, ok := bpu.mutation.AddedNbKeepLast(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepLast, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.OneByHour(); ok {
-		_spec.SetField(backuppolicy.FieldOneByHour, field.TypeUint, value)
+	if value, ok := bpu.mutation.NbKeepHours(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepHours, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.AddedOneByHour(); ok {
-		_spec.AddField(backuppolicy.FieldOneByHour, field.TypeUint, value)
+	if value, ok := bpu.mutation.AddedNbKeepHours(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepHours, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.OneByDay(); ok {
-		_spec.SetField(backuppolicy.FieldOneByDay, field.TypeUint, value)
+	if value, ok := bpu.mutation.NbKeepDays(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepDays, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.AddedOneByDay(); ok {
-		_spec.AddField(backuppolicy.FieldOneByDay, field.TypeUint, value)
+	if value, ok := bpu.mutation.AddedNbKeepDays(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepDays, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.OneByMonth(); ok {
-		_spec.SetField(backuppolicy.FieldOneByMonth, field.TypeUint, value)
+	if value, ok := bpu.mutation.NbKeepWeeks(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepWeeks, field.TypeUint, value)
 	}
-	if value, ok := bpu.mutation.AddedOneByMonth(); ok {
-		_spec.AddField(backuppolicy.FieldOneByMonth, field.TypeUint, value)
+	if value, ok := bpu.mutation.AddedNbKeepWeeks(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepWeeks, field.TypeUint, value)
+	}
+	if value, ok := bpu.mutation.NbKeepMonths(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepMonths, field.TypeUint, value)
+	}
+	if value, ok := bpu.mutation.AddedNbKeepMonths(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepMonths, field.TypeUint, value)
 	}
 	if value, ok := bpu.mutation.KeepAll(); ok {
 		_spec.SetField(backuppolicy.FieldKeepAll, field.TypeBool, value)
@@ -315,87 +342,108 @@ type BackupPolicyUpdateOne struct {
 	mutation *BackupPolicyMutation
 }
 
-// SetNbLastBackup sets the "nbLastBackup" field.
-func (bpuo *BackupPolicyUpdateOne) SetNbLastBackup(u uint) *BackupPolicyUpdateOne {
-	bpuo.mutation.ResetNbLastBackup()
-	bpuo.mutation.SetNbLastBackup(u)
+// SetNbKeepLast sets the "nbKeepLast" field.
+func (bpuo *BackupPolicyUpdateOne) SetNbKeepLast(u uint) *BackupPolicyUpdateOne {
+	bpuo.mutation.ResetNbKeepLast()
+	bpuo.mutation.SetNbKeepLast(u)
 	return bpuo
 }
 
-// SetNillableNbLastBackup sets the "nbLastBackup" field if the given value is not nil.
-func (bpuo *BackupPolicyUpdateOne) SetNillableNbLastBackup(u *uint) *BackupPolicyUpdateOne {
+// SetNillableNbKeepLast sets the "nbKeepLast" field if the given value is not nil.
+func (bpuo *BackupPolicyUpdateOne) SetNillableNbKeepLast(u *uint) *BackupPolicyUpdateOne {
 	if u != nil {
-		bpuo.SetNbLastBackup(*u)
+		bpuo.SetNbKeepLast(*u)
 	}
 	return bpuo
 }
 
-// AddNbLastBackup adds u to the "nbLastBackup" field.
-func (bpuo *BackupPolicyUpdateOne) AddNbLastBackup(u int) *BackupPolicyUpdateOne {
-	bpuo.mutation.AddNbLastBackup(u)
+// AddNbKeepLast adds u to the "nbKeepLast" field.
+func (bpuo *BackupPolicyUpdateOne) AddNbKeepLast(u int) *BackupPolicyUpdateOne {
+	bpuo.mutation.AddNbKeepLast(u)
 	return bpuo
 }
 
-// SetOneByHour sets the "oneByHour" field.
-func (bpuo *BackupPolicyUpdateOne) SetOneByHour(u uint) *BackupPolicyUpdateOne {
-	bpuo.mutation.ResetOneByHour()
-	bpuo.mutation.SetOneByHour(u)
+// SetNbKeepHours sets the "nbKeepHours" field.
+func (bpuo *BackupPolicyUpdateOne) SetNbKeepHours(u uint) *BackupPolicyUpdateOne {
+	bpuo.mutation.ResetNbKeepHours()
+	bpuo.mutation.SetNbKeepHours(u)
 	return bpuo
 }
 
-// SetNillableOneByHour sets the "oneByHour" field if the given value is not nil.
-func (bpuo *BackupPolicyUpdateOne) SetNillableOneByHour(u *uint) *BackupPolicyUpdateOne {
+// SetNillableNbKeepHours sets the "nbKeepHours" field if the given value is not nil.
+func (bpuo *BackupPolicyUpdateOne) SetNillableNbKeepHours(u *uint) *BackupPolicyUpdateOne {
 	if u != nil {
-		bpuo.SetOneByHour(*u)
+		bpuo.SetNbKeepHours(*u)
 	}
 	return bpuo
 }
 
-// AddOneByHour adds u to the "oneByHour" field.
-func (bpuo *BackupPolicyUpdateOne) AddOneByHour(u int) *BackupPolicyUpdateOne {
-	bpuo.mutation.AddOneByHour(u)
+// AddNbKeepHours adds u to the "nbKeepHours" field.
+func (bpuo *BackupPolicyUpdateOne) AddNbKeepHours(u int) *BackupPolicyUpdateOne {
+	bpuo.mutation.AddNbKeepHours(u)
 	return bpuo
 }
 
-// SetOneByDay sets the "oneByDay" field.
-func (bpuo *BackupPolicyUpdateOne) SetOneByDay(u uint) *BackupPolicyUpdateOne {
-	bpuo.mutation.ResetOneByDay()
-	bpuo.mutation.SetOneByDay(u)
+// SetNbKeepDays sets the "nbKeepDays" field.
+func (bpuo *BackupPolicyUpdateOne) SetNbKeepDays(u uint) *BackupPolicyUpdateOne {
+	bpuo.mutation.ResetNbKeepDays()
+	bpuo.mutation.SetNbKeepDays(u)
 	return bpuo
 }
 
-// SetNillableOneByDay sets the "oneByDay" field if the given value is not nil.
-func (bpuo *BackupPolicyUpdateOne) SetNillableOneByDay(u *uint) *BackupPolicyUpdateOne {
+// SetNillableNbKeepDays sets the "nbKeepDays" field if the given value is not nil.
+func (bpuo *BackupPolicyUpdateOne) SetNillableNbKeepDays(u *uint) *BackupPolicyUpdateOne {
 	if u != nil {
-		bpuo.SetOneByDay(*u)
+		bpuo.SetNbKeepDays(*u)
 	}
 	return bpuo
 }
 
-// AddOneByDay adds u to the "oneByDay" field.
-func (bpuo *BackupPolicyUpdateOne) AddOneByDay(u int) *BackupPolicyUpdateOne {
-	bpuo.mutation.AddOneByDay(u)
+// AddNbKeepDays adds u to the "nbKeepDays" field.
+func (bpuo *BackupPolicyUpdateOne) AddNbKeepDays(u int) *BackupPolicyUpdateOne {
+	bpuo.mutation.AddNbKeepDays(u)
 	return bpuo
 }
 
-// SetOneByMonth sets the "oneByMonth" field.
-func (bpuo *BackupPolicyUpdateOne) SetOneByMonth(u uint) *BackupPolicyUpdateOne {
-	bpuo.mutation.ResetOneByMonth()
-	bpuo.mutation.SetOneByMonth(u)
+// SetNbKeepWeeks sets the "nbKeepWeeks" field.
+func (bpuo *BackupPolicyUpdateOne) SetNbKeepWeeks(u uint) *BackupPolicyUpdateOne {
+	bpuo.mutation.ResetNbKeepWeeks()
+	bpuo.mutation.SetNbKeepWeeks(u)
 	return bpuo
 }
 
-// SetNillableOneByMonth sets the "oneByMonth" field if the given value is not nil.
-func (bpuo *BackupPolicyUpdateOne) SetNillableOneByMonth(u *uint) *BackupPolicyUpdateOne {
+// SetNillableNbKeepWeeks sets the "nbKeepWeeks" field if the given value is not nil.
+func (bpuo *BackupPolicyUpdateOne) SetNillableNbKeepWeeks(u *uint) *BackupPolicyUpdateOne {
 	if u != nil {
-		bpuo.SetOneByMonth(*u)
+		bpuo.SetNbKeepWeeks(*u)
 	}
 	return bpuo
 }
 
-// AddOneByMonth adds u to the "oneByMonth" field.
-func (bpuo *BackupPolicyUpdateOne) AddOneByMonth(u int) *BackupPolicyUpdateOne {
-	bpuo.mutation.AddOneByMonth(u)
+// AddNbKeepWeeks adds u to the "nbKeepWeeks" field.
+func (bpuo *BackupPolicyUpdateOne) AddNbKeepWeeks(u int) *BackupPolicyUpdateOne {
+	bpuo.mutation.AddNbKeepWeeks(u)
+	return bpuo
+}
+
+// SetNbKeepMonths sets the "nbKeepMonths" field.
+func (bpuo *BackupPolicyUpdateOne) SetNbKeepMonths(u uint) *BackupPolicyUpdateOne {
+	bpuo.mutation.ResetNbKeepMonths()
+	bpuo.mutation.SetNbKeepMonths(u)
+	return bpuo
+}
+
+// SetNillableNbKeepMonths sets the "nbKeepMonths" field if the given value is not nil.
+func (bpuo *BackupPolicyUpdateOne) SetNillableNbKeepMonths(u *uint) *BackupPolicyUpdateOne {
+	if u != nil {
+		bpuo.SetNbKeepMonths(*u)
+	}
+	return bpuo
+}
+
+// AddNbKeepMonths adds u to the "nbKeepMonths" field.
+func (bpuo *BackupPolicyUpdateOne) AddNbKeepMonths(u int) *BackupPolicyUpdateOne {
+	bpuo.mutation.AddNbKeepMonths(u)
 	return bpuo
 }
 
@@ -551,29 +599,35 @@ func (bpuo *BackupPolicyUpdateOne) sqlSave(ctx context.Context) (_node *BackupPo
 			}
 		}
 	}
-	if value, ok := bpuo.mutation.NbLastBackup(); ok {
-		_spec.SetField(backuppolicy.FieldNbLastBackup, field.TypeUint, value)
+	if value, ok := bpuo.mutation.NbKeepLast(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepLast, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.AddedNbLastBackup(); ok {
-		_spec.AddField(backuppolicy.FieldNbLastBackup, field.TypeUint, value)
+	if value, ok := bpuo.mutation.AddedNbKeepLast(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepLast, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.OneByHour(); ok {
-		_spec.SetField(backuppolicy.FieldOneByHour, field.TypeUint, value)
+	if value, ok := bpuo.mutation.NbKeepHours(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepHours, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.AddedOneByHour(); ok {
-		_spec.AddField(backuppolicy.FieldOneByHour, field.TypeUint, value)
+	if value, ok := bpuo.mutation.AddedNbKeepHours(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepHours, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.OneByDay(); ok {
-		_spec.SetField(backuppolicy.FieldOneByDay, field.TypeUint, value)
+	if value, ok := bpuo.mutation.NbKeepDays(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepDays, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.AddedOneByDay(); ok {
-		_spec.AddField(backuppolicy.FieldOneByDay, field.TypeUint, value)
+	if value, ok := bpuo.mutation.AddedNbKeepDays(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepDays, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.OneByMonth(); ok {
-		_spec.SetField(backuppolicy.FieldOneByMonth, field.TypeUint, value)
+	if value, ok := bpuo.mutation.NbKeepWeeks(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepWeeks, field.TypeUint, value)
 	}
-	if value, ok := bpuo.mutation.AddedOneByMonth(); ok {
-		_spec.AddField(backuppolicy.FieldOneByMonth, field.TypeUint, value)
+	if value, ok := bpuo.mutation.AddedNbKeepWeeks(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepWeeks, field.TypeUint, value)
+	}
+	if value, ok := bpuo.mutation.NbKeepMonths(); ok {
+		_spec.SetField(backuppolicy.FieldNbKeepMonths, field.TypeUint, value)
+	}
+	if value, ok := bpuo.mutation.AddedNbKeepMonths(); ok {
+		_spec.AddField(backuppolicy.FieldNbKeepMonths, field.TypeUint, value)
 	}
 	if value, ok := bpuo.mutation.KeepAll(); ok {
 		_spec.SetField(backuppolicy.FieldKeepAll, field.TypeBool, value)
