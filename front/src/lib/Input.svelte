@@ -3,7 +3,7 @@
 
   export let value: string | number | null | undefined = '';
   export let checked: boolean | null | undefined = false;
-  export let disabled: boolean = true;
+  export let disabled: boolean = false;
   export let id = '';
   export let label = '';
   export let type = 'text';

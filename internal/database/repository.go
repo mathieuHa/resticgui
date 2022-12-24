@@ -144,6 +144,23 @@ func SetRepositoryRunningDB(id int, running bool, ctx context.Context) (r *ent.R
 	return r, err
 }
 
+func SetRepositoryProviderDB(id int, provider string, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("SetRepositoryProviderDB()")
+
+	// update repository set provider
+	r, err = db.Repository.
+		UpdateOneID(id).
+		SetProvider(repository.Provider(provider)).
+		Save(ctx)
+
+	if err != nil {
+		log.Err(err).Msgf("error: %v", errUpdate)
+		return r, err
+	}
+
+	return r, err
+}
+
 func SetRepositoryValidDB(value bool, id int, ctx context.Context) (r *ent.Repository, err error) {
 	log.Debug().Msg("SetRepositoryValidDB()")
 
