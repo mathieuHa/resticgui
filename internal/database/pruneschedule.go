@@ -27,6 +27,7 @@ func CreatePruneScheduleDB(pruneSchedule ent.PruneSchedule, repoID int, ctx cont
 		SetEveryFriday(pruneSchedule.EveryFriday).
 		SetEverySaturday(pruneSchedule.EverySaturday).
 		SetEverySunday(pruneSchedule.EverySunday).
+		SetInterval(pruneSchedule.Interval).
 		SetRepositoryID(repoID).
 		Save(ctx)
 	if err != nil {

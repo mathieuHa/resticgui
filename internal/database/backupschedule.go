@@ -30,6 +30,7 @@ func CreateBackupScheduleDB(backupSchedule ent.BackupSchedule, repoID int, ctx c
 		SetEveryFriday(backupSchedule.EveryFriday).
 		SetEverySaturday(backupSchedule.EverySaturday).
 		SetEverySunday(backupSchedule.EverySunday).
+		SetInterval(backupSchedule.Interval).
 		SetRepositoryID(repoID).
 		Save(ctx)
 	if err != nil {
