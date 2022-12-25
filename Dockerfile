@@ -1,0 +1,68 @@
+FROM docker.io/node:16.18.1-alpine as BuilderWeb
+
+COPY front/ /front
+
+WORKDIR /front
+
+RUN npm ci
+
+RUN npm run build
+
+FROM docker.io/ubuntu:focal-20221130 as BuilderRestic
+
+ARG RESTICVERSION=0.12.1
+ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
+ARG BUILDDIR=./build
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    openssl
+
+RUN mkdir -p ${BUILDDIR}
+RUN curl \
+    --request GET -sL \
+    --url ${RESTICURL} \
+    --output ${BUILDDIR}/restic.bz2
+
+RUN bzip2 -d ${BUILDDIR}/restic.bz2
+
+RUN	cp "${BUILDDIR}/restic" /restic
+
+FROM docker.io/golang:1.19.4 as BuilderResticGui
+
+ARG BUILDDIR=./build
+
+RUN mkdir -p ${BUILDDIR}
+
+COPY . ${BUILDDIR}
+
+WORKDIR ${BUILDDIR}
+
+RUN cd cmd/resticgui && go build -o /resticgui
+
+FROM docker.io/ubuntu:focal-20221130
+
+LABEL "hanotaux.mathieu.vendor"="MHX"
+LABEL version="1.0"
+LABEL description="This image contain restic and resticgui webserver"
+
+EXPOSE 3030
+
+WORKDIR /opt
+
+ENV GIN_MODE=release
+
+RUN apt-get update && apt-get install -y \
+    net-tools \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY cmd/resticgui/config-docker.yaml ./config.yaml
+
+COPY --from=BuilderRestic --chmod=700 /restic /usr/bin/restic
+COPY --from=BuilderWeb /front/build front
+COPY --from=BuilderResticGui /resticgui resticgui
+
+RUN mkdir /opt/db
+
+CMD ["/opt/resticgui"]

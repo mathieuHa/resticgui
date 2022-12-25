@@ -1,0 +1,39 @@
+{
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb-base",
+    "airbnb-typescript/base"
+  ],
+	"plugins": [
+    "svelte3",
+    "@typescript-eslint"
+  ],
+	"ignorePatterns": ["*.cjs", "build", "*.config.ts", "*.config.js"],
+	"overrides": [
+    {
+      "files": ["*.svelte"],
+      "processor": "svelte3/svelte3"
+    }
+  ],
+	"settings": {
+		"svelte3/typescript": true
+  },
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaVersion": 2019,
+    "project": "./tsconfig.json"
+  },
+	"env": {
+		"browser": true,
+		"es2017": true,
+		"node": true
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
+    "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": "warn",
+    "linebreak-style": "off"
+  }
+}

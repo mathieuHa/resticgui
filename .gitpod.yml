@@ -1,0 +1,7 @@
+tasks:
+  - init: |
+      echo 'TODO: build project'
+      make buildgo
+      make installwebdev
+    command: |
+      echo 'TODO: start app'

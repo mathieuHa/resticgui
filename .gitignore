@@ -1,0 +1,8 @@
+dist/*
+build/*
+.gitignore
+.vscode
+testdata/resticgui.db
+front/node_modules
+front/.svelte-kit
+front/build

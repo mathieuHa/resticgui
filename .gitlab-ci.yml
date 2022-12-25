@@ -1,0 +1,225 @@
+.rule_build_deploy:
+  rules:  
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+
+.rule_build_release:
+  only:
+    - main
+
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  before_script:
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
+
+variables:
+  # Package version can only contain numbers (0-9), and dots (.).
+  # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
+  # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
+  PACKAGE_NAME: $CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA.tar.gz
+  PACKAGE_VERSION: 'v0.1.0'
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/release/${PACKAGE_VERSION}"
+
+stages:
+  - test
+  - build
+  - package
+  - upload
+  - release
+
+sonarqube-check:
+  image: 
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+    SONAR_SCANNER_OPTS: -Djavax.net.ssl.trustStore=/tmp/sonarqube-keystore.jks -Djavax.net.ssl.trustStorePassword=gitlabci
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  before_script:
+    - cat $HTTPSCA | keytool -import -noprompt -trustcacerts -alias sonarqube -storepass gitlabci -keystore /tmp/sonarqube-keystore.jks
+    - mkdir .scannerwork && chown 1000:1000 .scannerwork
+  script: 
+    - sonar-scanner
+  allow_failure: true
+  only:
+    - main
+    - dev
+    - production
+  needs: [test:go]
+  dependencies: 
+    - test:go
+
+test:go:
+  variables:
+    REPO_NAME: gitlab.com/resticgui/resticgui
+  extends: .go-cache
+  # before_script:
+  #   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+  #   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+  #   - cd $GOPATH/src/$REPO_NAME
+  image: golang:1.19.4
+  stage: test
+  script:
+    - make testgoci
+    - go test ./internal/... -json > test-report.out
+    #- go fmt $(go list ./... | grep -v /vendor/)
+    #- go vet $(go list ./... | grep -v /vendor/)
+    #- go test -race $(go list ./... | grep -v /vendor/)
+  artifacts:
+    paths:
+      - coverage.out
+      - test-report.out
+
+test:go:coverage:
+  stage: test
+  image: golang:1.19.4
+  script:
+    - go test ./internal/... -coverprofile=coverage.txt -covermode count
+    - go get github.com/boumenot/gocover-cobertura
+    - go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+  extends: .go-cache
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+test:web:
+  image: node:16.18.1-alpine3.16
+  variables:
+    FF_USE_FASTZIP: "true"
+  stage: test
+  script:
+    - cd front && npm ci && npm run lint
+
+build:docker:gitlab:
+  image: quay.io/buildah/stable:v1.28.0
+  stage: build
+  variables:
+    # Use vfs with buildah. Docker offers overlayfs as a default, but buildah
+    # cannot stack overlayfs on top of another overlayfs filesystem.
+    STORAGE_DRIVER: vfs
+    # Write all image metadata in the docker format, not the standard OCI format.
+    # Newer versions of docker can handle the OCI format, but older versions, like
+    # the one shipped with Fedora 30, cannot handle the format.
+    BUILDAH_FORMAT: docker
+    # You may need this workaround for some errors: https://stackoverflow.com/a/70438141/1233435
+    BUILDAH_ISOLATION: chroot
+    FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui:${PACKAGE_VERSION}"
+    FQ_IMAGE_NAME_LATEST: "${CI_REGISTRY_IMAGE}/resticgui:latest"
+  before_script:
+    # Log in to the GitLab container registry
+    - export REGISTRY_AUTH_FILE=${HOME}/auth.json
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - buildah build -t ${FQ_IMAGE_NAME}
+    - buildah push ${FQ_IMAGE_NAME}
+    - buildah tag ${FQ_IMAGE_NAME} ${FQ_IMAGE_NAME_LATEST}
+    - buildah push ${FQ_IMAGE_NAME_LATEST}
+  extends:
+    - .rule_build_release
+
+build:docker:hub:
+  image: quay.io/buildah/stable:v1.28.0
+  stage: build
+  variables:
+    # Use vfs with buildah. Docker offers overlayfs as a default, but buildah
+    # cannot stack overlayfs on top of another overlayfs filesystem.
+    STORAGE_DRIVER: vfs
+    # Write all image metadata in the docker format, not the standard OCI format.
+    # Newer versions of docker can handle the OCI format, but older versions, like
+    # the one shipped with Fedora 30, cannot handle the format.
+    BUILDAH_FORMAT: docker
+    # You may need this workaround for some errors: https://stackoverflow.com/a/70438141/1233435
+    BUILDAH_ISOLATION: chroot
+    FQ_IMAGE_NAME: "${CI_DOCKERHUB}/resticgui/resticgui:${PACKAGE_VERSION}"
+    FQ_IMAGE_NAME_LATEST: "${CI_DOCKERHUB}/resticgui/resticgui:latest"
+    CI_REGISTRY_PASSWORD: ${CI_DOCKERHUB_PASSWORD}
+    CI_REGISTRY_USER: ${CI_DOCKERHUB_USER}
+    CI_REGISTRY: ${CI_DOCKERHUB}
+  before_script:
+    # Log in to the GitLab container registry
+    - export REGISTRY_AUTH_FILE=${HOME}/auth.json
+    - echo "$CI_DOCKERHUB_PASSWORD" | buildah login -u "$CI_DOCKERHUB_USER" --password-stdin $CI_DOCKERHUB
+  script:
+    - buildah build -t ${FQ_IMAGE_NAME}
+    - buildah push ${FQ_IMAGE_NAME}
+    - buildah tag ${FQ_IMAGE_NAME} ${FQ_IMAGE_NAME_LATEST}
+    - buildah push ${FQ_IMAGE_NAME_LATEST}
+  extends:
+    - .rule_build_release
+
+build:package:go:
+  image: golang:1.19.4
+  stage: build
+  extends:
+    - .go-cache
+    - .rule_build_release
+  script:
+    - make buildgo
+  artifacts:
+    paths:
+      - dist/
+
+build:package:web:
+  image: node:16.18.1-alpine3.16
+  variables:
+    FF_USE_FASTZIP: "true"
+  stage: build
+  extends:
+    - .rule_build_release
+  before_script:
+    - apk add make --update
+  script:
+    - make buildweb
+  artifacts:
+    paths:
+      - dist/build/
+
+build:package:
+  image: busybox:1.34.1
+  stage: package
+  script:
+    - cd dist/ && tar -cvzf ${PACKAGE_NAME} *
+  extends:
+    - .rule_build_release
+  needs:
+    - job: build:package:web
+      artifacts: true
+    - job: build:package:go
+      artifacts: true
+  artifacts:
+    paths:
+      - dist/${PACKAGE_NAME}
+
+upload:
+  stage: upload
+  image: curlimages/curl:latest
+  extends:
+    - .rule_build_release
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist/${PACKAGE_NAME} "${PACKAGE_REGISTRY_URL}/${PACKAGE_NAME}"
+
+release_job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  extends:
+    - .rule_build_release
+  script:
+    - echo "running release_job for $TAG"
+  release:                                         # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
+    tag_name: '$PACKAGE_VERSION'                # The version is incremented per pipeline.
+    description: '$CI_PIPELINE_IID'
+    ref: '$CI_COMMIT_SHA' 
+    assets:
+      links:
+      - name: '${PACKAGE_NAME}'
+        url: '${PACKAGE_REGISTRY_URL}/${PACKAGE_NAME}'

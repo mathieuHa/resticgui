@@ -1,0 +1,13 @@
+logs:
+  debug: true
+  level: 1
+
+db:
+  name: /opt/db/resticgui.db
+
+server:
+  ip: "0.0.0.0"
+  port: 3030
+
+front:
+  path: ./front
