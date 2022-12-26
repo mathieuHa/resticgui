@@ -28,8 +28,8 @@ func (Repository) Fields() []ent.Field {
 		field.Bool("valid").Default(false).StructTag(`json:"valid"`),
 		field.Enum("version").Optional().Default("2").Values("1", "2"),
 		// Password should be set as sensitive, but should be accessible for backups
-		// field.String("password").Optional().Sensitive(),
-		field.String("password").Optional(),
+		field.String("password").Optional().Sensitive(),
+		// field.String("password").Optional(),
 		field.String("maxSize").Optional(),
 		field.String("repositorySize").Optional(),
 		field.String("repositoryFileCount").Optional(),

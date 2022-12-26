@@ -25,7 +25,6 @@ func ResticInit() {
 
 func runRestic(args []string, env []string, path string) (string, string, error) {
 	log.Debug().Msgf("args %v", args)
-	log.Debug().Msgf("env %v", env)
 
 	cmd := exec.Command(RESTIC_PATH, args...)
 	cmd.Env = os.Environ()
