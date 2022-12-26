@@ -12,6 +12,14 @@ export interface Repository {
   active?: boolean
   pruneActive?: boolean
   provider?: string
+  repositorySize?: number
+  repositoryFileCount?: string
+  snapshotCount?: string
+  version?: string
+  initiated?: boolean
+  valid?: boolean
+  running?: boolean
+  createdAt?: string
   edges?: {
     [Provider.LocalProvider]?: LocalProvider
     [Provider.MinioS3Provider]?: MinioS3Provider
@@ -37,12 +45,16 @@ export interface BackupSchedule {
   choice?: string
   interval?: string
   cronSyntax?: string
+  lastRun?: string
+  nextRun?: string
 }
 
 export interface PruneSchedule {
   choice?: string
   interval?: string
   cronSyntax?: string
+  lastRun?: string
+  nextRun?: string
 }
 
 export interface LocalProvider {
