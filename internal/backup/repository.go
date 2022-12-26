@@ -263,7 +263,7 @@ func DownloadFilesSnapshotRepository(r *ent.Repository, version string, path str
 func ValidRepository(repository ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("ValidRepository()")
 
-	valid = (repository.Password != "" && len(repository.Password) > 4)
+	valid = (repository.Password != "" && len(repository.Password) >= utils.PasswordMinLength)
 	if !valid { // If password is empty, repository cannot be valid
 		log.Debug().Msg(utils.ErrMsgRInvalid_Password)
 
