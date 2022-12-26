@@ -144,7 +144,7 @@ func TestCreateRepository(t *testing.T) {
 
 		rName := "myRepo"
 		rPassword := "myPasswd"
-		r, _ := json.Marshal(ent.Repository{Name: rName, Password: rPassword})
+		r, _ := json.Marshal(map[string]string{"name": rName, "password": rPassword})
 		responseBody := bytes.NewBuffer(r)
 
 		req, _ := http.NewRequest(httpMethod, url, responseBody)
@@ -155,8 +155,8 @@ func TestCreateRepository(t *testing.T) {
 		err := json.Unmarshal(w.Body.Bytes(), &repositoryReceived)
 		assert.Nil(t, err)
 		assert.GreaterOrEqual(t, repositoryReceived.ID, 0)
-		assert.Equal(t, repositoryReceived.Name, rName)
-		assert.Equal(t, repositoryReceived.Password, rPassword)
+		assert.Equal(t, rName, repositoryReceived.Name)
+		assert.Equal(t, "", repositoryReceived.Password)
 		assert.Equal(t, http.StatusCreated, w.Code)
 	})
 

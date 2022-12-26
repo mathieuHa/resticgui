@@ -42,7 +42,7 @@ type Repository struct {
 	// Version holds the value of the "version" field.
 	Version repository.Version `json:"version,omitempty"`
 	// Password holds the value of the "password" field.
-	Password string `json:"password,omitempty"`
+	Password string `json:"-"`
 	// MaxSize holds the value of the "maxSize" field.
 	MaxSize string `json:"maxSize,omitempty"`
 	// RepositorySize holds the value of the "repositorySize" field.
@@ -424,8 +424,7 @@ func (r *Repository) String() string {
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", r.Version))
 	builder.WriteString(", ")
-	builder.WriteString("password=")
-	builder.WriteString(r.Password)
+	builder.WriteString("password=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("maxSize=")
 	builder.WriteString(r.MaxSize)

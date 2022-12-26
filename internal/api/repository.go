@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/backup"
@@ -101,12 +102,27 @@ func CreateRepository(c *gin.Context) {
 	log.Debug().Msg("CreateRepository()")
 	ctx := context.Background()
 	var repo ent.Repository
+	var repoPassword Models.RepositoryPassword
 
-	if err := c.BindJSON(&repo); err != nil {
+	if c.Request.Body == nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid request", "message": "invalid request"})
+		log.Info().Msg(errNotBind)
+		return
+	}
+
+	if err := c.ShouldBindBodyWith(&repo, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": err.Error()})
 		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
+
+	if err := c.ShouldBindBodyWith(&repoPassword, binding.JSON); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+	// Needed because repo does not encode password (sensitive variable)
+	repo.Password = repoPassword.Password
 
 	if repo.Password == "" || len(repo.Password) < utils.PasswordMinLength {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": "Password length is too short"})
