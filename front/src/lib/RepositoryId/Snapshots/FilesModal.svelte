@@ -14,7 +14,7 @@
 
   const dispatch = createEventDispatcher();
   const search = async () => agent.get(
-    `/repositories/${$page.params.id}/search/${snapshotId}${pattern ? `?pattern=${pattern}` : ''}`,
+    `/repositories/${$page.params.id}/snapshots/${snapshotId}/search${pattern ? `?pattern=${pattern}` : ''}`,
   );
   let searchPromise = search();
 </script>
@@ -72,7 +72,7 @@
             <div class="flex-1 flex sm:justify-center my-1 sm:mt-0">
               <a
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
-                href="/api/v1/repositories/{$page.params.id}/download/{snapshotId}?path={file.path}"
+                href="/api/v1/repositories/{$page.params.id}/snapshots/{snapshotId}/download?path={file.path}"
               >
                 <Download />
               </a>

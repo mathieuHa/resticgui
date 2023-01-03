@@ -510,7 +510,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/snapshots/{snapshotID} [delete]
+// @Router /repositories/{id}/snapshots/{snapshotID}/forget [delete]
 func ForgetSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("ForgetSnapshotRepository()")
 
@@ -557,7 +557,7 @@ func ForgetSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/restore/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/restore [get]
 func RestoreSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("RestoreSnapshotRepository()")
 
@@ -609,7 +609,7 @@ func RestoreSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/ls/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/ls [get]
 func ListFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("ListFilesSnapshotRepository()")
 
@@ -703,7 +703,7 @@ func ListFilesSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/search/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/search [get]
 func SearchFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("SearchFilesSnapshotRepository()")
 
@@ -791,7 +791,7 @@ func SearchFilesSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/download/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/download [get]
 func DownloadFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("DownloadFilesSnapshotRepository()")
 

@@ -15,7 +15,7 @@
   const restoreSnapshot = async () => {
     const id = $page.params.id;
     try {
-      await agent.get(`/repositories/${id}/restore/${snapshotId}?path=${path}`);
+      await agent.get(`/repositories/${id}/snapshots/${snapshotId}/restore?path=${path}`);
       toasts.addToast(`Backup restore of ${snapshotId} in ${path} has started`);
       dispatch('close');
     } catch (err) {
