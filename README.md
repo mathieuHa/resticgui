@@ -96,6 +96,10 @@ The `config.yaml` must be place in the same directory as the resticgui binary.
   - string
   - default: `3001`
   - tcp port for the web server
+- `server.disable`
+  - bool
+  - default: `false`
+  - disable web server
 - `front.path`
   - string
   - default: `./build`
@@ -114,10 +118,14 @@ db:
 server:
   ip: "127.0.0.1"
   port: 3001
+  disable: false
 
 front:
   path: ./build
 ```
+
+When the backups have been configured and the webserver is not needed to be exposed even in localhost, you can turn off the server with `server.disable: true`. Restart ResticGui and backup will happen in the background while the webserver is not exposed.
+
 
 ### Demo environment
 
