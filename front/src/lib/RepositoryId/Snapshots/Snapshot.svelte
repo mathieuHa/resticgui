@@ -26,7 +26,7 @@
 
   const deleteSnapshot = async (snapshotId: string) => {
     const id = $page.params.id;
-    await agent.delete(`/repositories/${id}/snapshots/${snapshotId}`);
+    await agent.delete(`/repositories/${id}/snapshots/${snapshotId}/forget`);
     dispatch('delete');
   };
   const setModalOpened = (rowSnapshot: any, toOpen: string) => {
