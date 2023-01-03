@@ -13,11 +13,12 @@ RUN npm ci
 
 RUN npm run build
 
+ARG UBUNTUVERSION
+
 FROM docker.io/ubuntu:${UBUNTUVERSION} as BuilderRestic
 
 ARG TARGETARCH
 ARG RESTICVERSION=0.12.1
-#ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${TARGETARCH}.bz2
 ARG BUILDDIR=./build
 
@@ -36,6 +37,8 @@ RUN bzip2 -d ${BUILDDIR}/restic.bz2
 
 RUN	cp "${BUILDDIR}/restic" /restic
 
+ARG GOVERSION
+
 FROM docker.io/golang:${GOVERSION} as BuilderResticGui
 
 ARG BUILDDIR=./build
@@ -48,6 +51,7 @@ WORKDIR ${BUILDDIR}
 
 RUN cd cmd/resticgui && go build -o /resticgui
 
+ARG UBUNTURELEASEVERSION
 
 FROM docker.io/ubuntu:${UBUNTURELEASEVERSION}
 
