@@ -40,6 +40,7 @@ func main() {
 
 	// setting server information
 	serverIP := viper.GetString("server.ip")
+	serverDisable := viper.GetBool("server.disable")
 	serverPort := viper.GetInt("server.port")
 	serverAddr := fmt.Sprintf("%s:%d", serverIP, serverPort)
 
@@ -50,14 +51,16 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	// Run our server in a goroutine so that it doesn't block.
-	go func() {
-		if err := server.ListenAndServe(); err != nil {
-			log.Err(err).Msg("Error running server")
-		} else {
-			log.Info().Msgf("Start Server listen at %v", serverAddr)
-		}
-	}()
+	if !serverDisable {
+		// Run our server in a goroutine so that it doesn't block.
+		go func() {
+			if err := server.ListenAndServe(); err != nil {
+				log.Err(err).Msg("Error running server")
+			} else {
+				log.Info().Msgf("Start Server listen at %v", serverAddr)
+			}
+		}()
+	}
 
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
