@@ -7,6 +7,9 @@ RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION
 TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
 CI?=false
+BASEDOCKERIMAGE?=alpine:latest
+NODEVERSION?=18.12.1-alpine
+GOVERSION?=1.19.4
 
 # OS Detection
 ifeq ($(OS),Windows_NT)
@@ -118,7 +121,9 @@ builddocker: ## Build the docker image (needs auth for gitlab registry)
 ifeq ($(CI), true)
 	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
-	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) .
+	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) . \
+	--build-arg BASEDOCKERIMAGE=$(BASEOS) \
+	--build-arg GOVERSION=$(GOVERSION)
 
 builddoc: ## Build the swagger openapi documenation
 	swag init --parseInternal --parseDependency -g router.go  --dir internal/api

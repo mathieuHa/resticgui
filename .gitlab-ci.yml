@@ -24,6 +24,8 @@ variables:
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/release/${PACKAGE_VERSION}"
   GO_VERSION: "1.19.4"
   NODE_VERSION: "18.12.1-alpine"
+  UBUNTU_DOCKER_IMAGE: ubuntu:jammy-20221130
+  ALPINE_DOCKER_IMAGE: alpine:3.17.0
 
 stages:
   - test
@@ -121,10 +123,17 @@ build:docker:gitlab:
     - export REGISTRY_AUTH_FILE=${HOME}/auth.json
     - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
-    - buildah build -t ${FQ_IMAGE_NAME}
-    - buildah push ${FQ_IMAGE_NAME}
-    - buildah tag ${FQ_IMAGE_NAME} ${FQ_IMAGE_NAME_LATEST}
-    - buildah push ${FQ_IMAGE_NAME_LATEST}
+    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${UBUNTU_DOCKER_IMAGE}"
+    - buildah build -f Dockerfile -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${BUILDARGS}
+    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_IMAGE_NAME}:latest
+    - buildah push ${FQ_IMAGE_NAME}:latest
+
+    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${ALPINE_DOCKER_IMAGE}"
+    - buildah build -f Dockerfile.alpine -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-alpine ${BUILDARGS}
+    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-alpine
+    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_IMAGE_NAME}:alpine
+    - buildah push ${FQ_IMAGE_NAME}:alpine
   extends:
     - .rule_build_release
 
@@ -141,8 +150,7 @@ build:docker:hub:
     BUILDAH_FORMAT: docker
     # You may need this workaround for some errors: https://stackoverflow.com/a/70438141/1233435
     BUILDAH_ISOLATION: chroot
-    FQ_IMAGE_NAME: "${CI_DOCKERHUB}/resticgui/resticgui:${PACKAGE_VERSION}"
-    FQ_IMAGE_NAME_LATEST: "${CI_DOCKERHUB}/resticgui/resticgui:latest"
+    FQ_IMAGE_NAME: "${CI_DOCKERHUB}/resticgui/resticgui"
     CI_REGISTRY_PASSWORD: ${CI_DOCKERHUB_PASSWORD}
     CI_REGISTRY_USER: ${CI_DOCKERHUB_USER}
     CI_REGISTRY: ${CI_DOCKERHUB}
@@ -151,10 +159,17 @@ build:docker:hub:
     - export REGISTRY_AUTH_FILE=${HOME}/auth.json
     - echo "$CI_DOCKERHUB_PASSWORD" | buildah login -u "$CI_DOCKERHUB_USER" --password-stdin $CI_DOCKERHUB
   script:
-    - buildah build -t ${FQ_IMAGE_NAME}
-    - buildah push ${FQ_IMAGE_NAME}
-    - buildah tag ${FQ_IMAGE_NAME} ${FQ_IMAGE_NAME_LATEST}
-    - buildah push ${FQ_IMAGE_NAME_LATEST}
+    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${UBUNTU_DOCKER_IMAGE}"
+    - buildah build -f Dockerfile -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${BUILDARGS}
+    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_IMAGE_NAME}:latest
+    - buildah push ${FQ_IMAGE_NAME}:latest
+
+    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${ALPINE_DOCKER_IMAGE}"
+    - buildah build -f Dockerfile.alpine -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-alpine ${BUILDARGS}
+    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-alpine
+    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_IMAGE_NAME}:alpine
+    - buildah push ${FQ_IMAGE_NAME}:alpine
   extends:
     - .rule_build_release
 
