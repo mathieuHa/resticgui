@@ -9,8 +9,8 @@ const (
 	FieldID = "id"
 	// FieldBucketName holds the string denoting the bucketname field in the database.
 	FieldBucketName = "bucket_name"
-	// FieldIP holds the string denoting the ip field in the database.
-	FieldIP = "ip"
+	// FieldHostname holds the string denoting the hostname field in the database.
+	FieldHostname = "hostname"
 	// FieldPort holds the string denoting the port field in the database.
 	FieldPort = "port"
 	// FieldScheme holds the string denoting the scheme field in the database.
@@ -19,6 +19,8 @@ const (
 	FieldAccessKeyID = "access_key_id"
 	// FieldSecretAccessKey holds the string denoting the secretaccesskey field in the database.
 	FieldSecretAccessKey = "secret_access_key"
+	// FieldCertificateAuthority holds the string denoting the certificateauthority field in the database.
+	FieldCertificateAuthority = "certificate_authority"
 	// FieldValid holds the string denoting the valid field in the database.
 	FieldValid = "valid"
 	// EdgeRepository holds the string denoting the repository edge name in mutations.
@@ -38,11 +40,12 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldBucketName,
-	FieldIP,
+	FieldHostname,
 	FieldPort,
 	FieldScheme,
 	FieldAccessKeyID,
 	FieldSecretAccessKey,
+	FieldCertificateAuthority,
 	FieldValid,
 }
 

@@ -15,9 +15,10 @@ func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, id int, ctx co
 		SetAccessKeyID(minioS3Provider.AccessKeyID).
 		SetSecretAccessKey(minioS3Provider.SecretAccessKey).
 		SetBucketName(minioS3Provider.BucketName).
-		SetIP(minioS3Provider.IP).
+		SetHostname(minioS3Provider.Hostname).
 		SetPort(minioS3Provider.Port).
 		SetScheme(minioS3Provider.Scheme).
+		SetCertificateAuthority(minioS3Provider.CertificateAuthority).
 		Save(ctx)
 
 	if err != nil {
@@ -34,9 +35,10 @@ func CreateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, repoID int, ct
 		SetAccessKeyID(minioS3Provider.AccessKeyID).
 		SetSecretAccessKey(minioS3Provider.SecretAccessKey).
 		SetBucketName(minioS3Provider.BucketName).
-		SetIP(minioS3Provider.IP).
+		SetHostname(minioS3Provider.Hostname).
 		SetPort(minioS3Provider.Port).
 		SetScheme(minioS3Provider.Scheme).
+		SetCertificateAuthority(minioS3Provider.CertificateAuthority).
 		SetRepositoryID(repoID).
 		Save(ctx)
 

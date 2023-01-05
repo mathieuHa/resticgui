@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/resticgui/resticgui/ent"
 	"gitlab.com/resticgui/resticgui/internal/backup"
@@ -101,14 +102,29 @@ func CreateRepository(c *gin.Context) {
 	log.Debug().Msg("CreateRepository()")
 	ctx := context.Background()
 	var repo ent.Repository
+	var repoPassword Models.RepositoryPassword
 
-	if err := c.BindJSON(&repo); err != nil {
+	if c.Request.Body == nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid request", "message": "invalid request"})
+		log.Info().Msg(errNotBind)
+		return
+	}
+
+	if err := c.ShouldBindBodyWith(&repo, binding.JSON); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": err.Error()})
 		log.Info().Err(err).Msg(errNotBind)
 		return
 	}
 
-	if repo.Password == "" || len(repo.Password) < 4 {
+	if err := c.ShouldBindBodyWith(&repoPassword, binding.JSON); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": err.Error()})
+		log.Info().Err(err).Msg(errNotBind)
+		return
+	}
+	// Needed because repo does not encode password (sensitive variable)
+	repo.Password = repoPassword.Password
+
+	if repo.Password == "" || len(repo.Password) < utils.PasswordMinLength {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": errCreate, "message": "Password length is too short"})
 		return
 	}
@@ -120,7 +136,7 @@ func CreateRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if err != nil {
 		log.Err(err).Msgf("error: %v", errQuery)
 	}
@@ -171,18 +187,16 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, _ = backup.ValidRepository(*r)
-
-	// Update repository
-	r, err = database.UpdateRepositoryDB(*r, rID, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-			return
-		}
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
-		return
-	}
+	// // Update repository
+	// r, err = database.UpdateRepositoryDB(*r, rID, ctx)
+	// if err != nil {
+	// 	if ent.IsNotFound(err) {
+	// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+	// 		return
+	// 	}
+	// 	c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+	// 	return
+	// }
 	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, r)
@@ -299,7 +313,7 @@ func StatsRepository(c *gin.Context) {
 	snapshotID := c.DefaultQuery("snapshotID", "")
 	background := c.DefaultQuery("background", "false")
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -310,7 +324,7 @@ func StatsRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Repository is not valid", "message": err.Error()})
 		return
@@ -380,7 +394,7 @@ func CheckRepository(c *gin.Context) {
 		return
 	}
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -391,7 +405,7 @@ func CheckRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
 		return
@@ -436,7 +450,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 		page = int(math.Abs(float64(page)))
 	}
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -447,7 +461,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		log.Debug().Msg(errRInvalid)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
@@ -494,7 +508,7 @@ func GetSnapshotsRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/snapshots/{snapshotID} [delete]
+// @Router /repositories/{id}/snapshots/{snapshotID}/forget [delete]
 func ForgetSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("ForgetSnapshotRepository()")
 
@@ -506,7 +520,7 @@ func ForgetSnapshotRepository(c *gin.Context) {
 	snapshotID := c.Param("snapshotID")
 	log.Debug().Msgf("SnapshotID: %s", snapshotID)
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -517,7 +531,7 @@ func ForgetSnapshotRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		log.Debug().Msg(errRInvalid)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
@@ -541,7 +555,7 @@ func ForgetSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/restore/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/restore [get]
 func RestoreSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("RestoreSnapshotRepository()")
 
@@ -555,7 +569,7 @@ func RestoreSnapshotRepository(c *gin.Context) {
 	log.Debug().Msgf("SnapshotID: %s", snapshotID)
 	log.Debug().Msgf("path: %s", path)
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -566,7 +580,7 @@ func RestoreSnapshotRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		log.Debug().Msg(errRInvalid)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
@@ -593,7 +607,7 @@ func RestoreSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/ls/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/ls [get]
 func ListFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("ListFilesSnapshotRepository()")
 
@@ -618,7 +632,7 @@ func ListFilesSnapshotRepository(c *gin.Context) {
 		page = int(math.Abs(float64(page)))
 	}
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -629,7 +643,7 @@ func ListFilesSnapshotRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		log.Debug().Msg(errRInvalid)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
@@ -687,7 +701,7 @@ func ListFilesSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/search/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/search [get]
 func SearchFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("SearchFilesSnapshotRepository()")
 
@@ -714,7 +728,7 @@ func SearchFilesSnapshotRepository(c *gin.Context) {
 		page = int(math.Abs(float64(page)))
 	}
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -725,7 +739,7 @@ func SearchFilesSnapshotRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		log.Debug().Msg(errRInvalid)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
@@ -775,7 +789,7 @@ func SearchFilesSnapshotRepository(c *gin.Context) {
 // @Failure 400 {string} errIDNotValid
 // @Failure 404 {string} errNotFound
 // @Failure 500 {string} error
-// @Router /repositories/{id}/download/{snapshotID} [get]
+// @Router /repositories/{id}/snapshots/{snapshotID}/download [get]
 func DownloadFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msg("DownloadFilesSnapshotRepository()")
 
@@ -789,7 +803,7 @@ func DownloadFilesSnapshotRepository(c *gin.Context) {
 	log.Debug().Msgf("SnapshotID: %s", snapshotID)
 	log.Debug().Msgf("path: %s", path)
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -800,7 +814,7 @@ func DownloadFilesSnapshotRepository(c *gin.Context) {
 		return
 	}
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if !r.Valid {
 		log.Debug().Msg(errRInvalid)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errRInvalid, "message": err.Error()})
@@ -866,7 +880,7 @@ func ValidRepository(c *gin.Context) {
 		return
 	}
 
-	r, err := database.GetRepositoryByIDDB(rID, ctx)
+	r, err := database.GetRepositoryByIDSecretDB(rID, ctx)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -878,7 +892,7 @@ func ValidRepository(c *gin.Context) {
 	}
 
 	if r != nil {
-		r.Valid, err = backup.ValidRepository(*r)
+		r.Valid, err = backup.ValidRepository(r)
 		// Update repository
 		_, _ = database.UpdateRepositoryDB(*r, rID, ctx)
 		if !r.Valid {

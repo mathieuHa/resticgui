@@ -20,8 +20,10 @@ variables:
   # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
   # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
   PACKAGE_NAME: $CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA.tar.gz
-  PACKAGE_VERSION: 'v0.1.0'
+  PACKAGE_VERSION: 'v0.1.1'
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/release/${PACKAGE_VERSION}"
+  GO_VERSION: "1.19.4"
+  NODE_VERSION: "18.12.1-alpine"
 
 stages:
   - test
@@ -64,7 +66,7 @@ test:go:
   #   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
   #   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   #   - cd $GOPATH/src/$REPO_NAME
-  image: golang:1.19.4
+  image: golang:${GO_VERSION}
   stage: test
   script:
     - make testgoci
@@ -79,7 +81,7 @@ test:go:
 
 test:go:coverage:
   stage: test
-  image: golang:1.19.4
+  image: golang:${GO_VERSION}
   script:
     - go test ./internal/... -coverprofile=coverage.txt -covermode count
     - go get github.com/boumenot/gocover-cobertura
@@ -92,7 +94,7 @@ test:go:coverage:
         path: coverage.xml
 
 test:web:
-  image: node:16.18.1-alpine3.16
+  image: node:${NODE_VERSION}
   variables:
     FF_USE_FASTZIP: "true"
   stage: test
@@ -157,7 +159,7 @@ build:docker:hub:
     - .rule_build_release
 
 build:package:go:
-  image: golang:1.19.4
+  image: golang:${GO_VERSION}
   stage: build
   extends:
     - .go-cache
@@ -169,7 +171,7 @@ build:package:go:
       - dist/
 
 build:package:web:
-  image: node:16.18.1-alpine3.16
+  image: node:${NODE_VERSION}
   variables:
     FF_USE_FASTZIP: "true"
   stage: build

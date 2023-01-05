@@ -14,7 +14,7 @@
 
   const dispatch = createEventDispatcher();
   const search = async () => agent.get(
-    `/repositories/${$page.params.id}/search/${snapshotId}${pattern ? `?pattern=${pattern}` : ''}`,
+    `/repositories/${$page.params.id}/snapshots/${snapshotId}/search${pattern ? `?pattern=${pattern}` : ''}`,
   );
   let searchPromise = search();
 </script>
@@ -53,8 +53,8 @@
         </div>
         {#each files as file}
           <div class="sm:flex sm:text-center p-1 sm:p-0 border border-x-0 border-t-0 border-stone-500/75">
-            <p class="flex-1">
-              {file.type == "dir" ? '📂' : '📄'}
+            <p class="flex-1" title={file.type == 'dir' ? 'folder' : 'file'}>
+              {file.type == 'dir' ? '📂' : '📄'}
             </p>
             <p class="flex-1">
               {#if file.size}
@@ -72,7 +72,7 @@
             <div class="flex-1 flex sm:justify-center my-1 sm:mt-0">
               <a
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
-                href={`http://localhost:3001/api/v1/repositories/${$page.params.id}/download/${snapshotId}?path=${file.path}`}
+                href="/api/v1/repositories/{$page.params.id}/snapshots/{snapshotId}/download?path={file.path}"
               >
                 <Download />
               </a>

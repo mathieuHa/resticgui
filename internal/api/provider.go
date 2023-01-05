@@ -47,7 +47,7 @@ func CreateProvider(c *gin.Context) {
 	switch p.Provider {
 	case "localProvider":
 		createLocalProvider(c, r, p.LocalProvider)
-	case "minioS3Provider":
+	case "MinioS3Provider":
 		createMinioS3Provider(c, r, p.MinioS3Provider)
 	case "AWSS3Provider":
 		createAWSS3Provider(c, r, p.AWSS3Provider)
@@ -101,7 +101,7 @@ func UpdateProvider(c *gin.Context) {
 	switch p.Provider {
 	case "localProvider":
 		updateLocalProvider(c, r, p.LocalProvider)
-	case "minioS3Provider":
+	case "MinioS3Provider":
 		updateMinioS3Provider(c, r, p.MinioS3Provider)
 	case "AWSS3Provider":
 		updateAWSS3Provider(c, r, p.AWSS3Provider)

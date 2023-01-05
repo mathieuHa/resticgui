@@ -4683,22 +4683,23 @@ func (m *LogsMutation) ResetEdge(name string) error {
 // MinioS3ProviderMutation represents an operation that mutates the MinioS3Provider nodes in the graph.
 type MinioS3ProviderMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	bucketName        *string
-	_IP               *string
-	port              *string
-	scheme            *string
-	accessKeyID       *string
-	secretAccessKey   *string
-	valid             *bool
-	clearedFields     map[string]struct{}
-	repository        *int
-	clearedrepository bool
-	done              bool
-	oldValue          func(context.Context) (*MinioS3Provider, error)
-	predicates        []predicate.MinioS3Provider
+	op                   Op
+	typ                  string
+	id                   *int
+	bucketName           *string
+	hostname             *string
+	port                 *string
+	scheme               *string
+	accessKeyID          *string
+	secretAccessKey      *string
+	certificateAuthority *string
+	valid                *bool
+	clearedFields        map[string]struct{}
+	repository           *int
+	clearedrepository    bool
+	done                 bool
+	oldValue             func(context.Context) (*MinioS3Provider, error)
+	predicates           []predicate.MinioS3Provider
 }
 
 var _ ent.Mutation = (*MinioS3ProviderMutation)(nil)
@@ -4835,40 +4836,40 @@ func (m *MinioS3ProviderMutation) ResetBucketName() {
 	m.bucketName = nil
 }
 
-// SetIP sets the "IP" field.
-func (m *MinioS3ProviderMutation) SetIP(s string) {
-	m._IP = &s
+// SetHostname sets the "hostname" field.
+func (m *MinioS3ProviderMutation) SetHostname(s string) {
+	m.hostname = &s
 }
 
-// IP returns the value of the "IP" field in the mutation.
-func (m *MinioS3ProviderMutation) IP() (r string, exists bool) {
-	v := m._IP
+// Hostname returns the value of the "hostname" field in the mutation.
+func (m *MinioS3ProviderMutation) Hostname() (r string, exists bool) {
+	v := m.hostname
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIP returns the old "IP" field's value of the MinioS3Provider entity.
+// OldHostname returns the old "hostname" field's value of the MinioS3Provider entity.
 // If the MinioS3Provider object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MinioS3ProviderMutation) OldIP(ctx context.Context) (v string, err error) {
+func (m *MinioS3ProviderMutation) OldHostname(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIP is only allowed on UpdateOne operations")
+		return v, errors.New("OldHostname is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIP requires an ID field in the mutation")
+		return v, errors.New("OldHostname requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIP: %w", err)
+		return v, fmt.Errorf("querying old value for OldHostname: %w", err)
 	}
-	return oldValue.IP, nil
+	return oldValue.Hostname, nil
 }
 
-// ResetIP resets all changes to the "IP" field.
-func (m *MinioS3ProviderMutation) ResetIP() {
-	m._IP = nil
+// ResetHostname resets all changes to the "hostname" field.
+func (m *MinioS3ProviderMutation) ResetHostname() {
+	m.hostname = nil
 }
 
 // SetPort sets the "port" field.
@@ -5015,6 +5016,42 @@ func (m *MinioS3ProviderMutation) ResetSecretAccessKey() {
 	m.secretAccessKey = nil
 }
 
+// SetCertificateAuthority sets the "certificateAuthority" field.
+func (m *MinioS3ProviderMutation) SetCertificateAuthority(s string) {
+	m.certificateAuthority = &s
+}
+
+// CertificateAuthority returns the value of the "certificateAuthority" field in the mutation.
+func (m *MinioS3ProviderMutation) CertificateAuthority() (r string, exists bool) {
+	v := m.certificateAuthority
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCertificateAuthority returns the old "certificateAuthority" field's value of the MinioS3Provider entity.
+// If the MinioS3Provider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MinioS3ProviderMutation) OldCertificateAuthority(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCertificateAuthority is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCertificateAuthority requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCertificateAuthority: %w", err)
+	}
+	return oldValue.CertificateAuthority, nil
+}
+
+// ResetCertificateAuthority resets all changes to the "certificateAuthority" field.
+func (m *MinioS3ProviderMutation) ResetCertificateAuthority() {
+	m.certificateAuthority = nil
+}
+
 // SetValid sets the "valid" field.
 func (m *MinioS3ProviderMutation) SetValid(b bool) {
 	m.valid = &b
@@ -5109,12 +5146,12 @@ func (m *MinioS3ProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MinioS3ProviderMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.bucketName != nil {
 		fields = append(fields, minios3provider.FieldBucketName)
 	}
-	if m._IP != nil {
-		fields = append(fields, minios3provider.FieldIP)
+	if m.hostname != nil {
+		fields = append(fields, minios3provider.FieldHostname)
 	}
 	if m.port != nil {
 		fields = append(fields, minios3provider.FieldPort)
@@ -5127,6 +5164,9 @@ func (m *MinioS3ProviderMutation) Fields() []string {
 	}
 	if m.secretAccessKey != nil {
 		fields = append(fields, minios3provider.FieldSecretAccessKey)
+	}
+	if m.certificateAuthority != nil {
+		fields = append(fields, minios3provider.FieldCertificateAuthority)
 	}
 	if m.valid != nil {
 		fields = append(fields, minios3provider.FieldValid)
@@ -5141,8 +5181,8 @@ func (m *MinioS3ProviderMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case minios3provider.FieldBucketName:
 		return m.BucketName()
-	case minios3provider.FieldIP:
-		return m.IP()
+	case minios3provider.FieldHostname:
+		return m.Hostname()
 	case minios3provider.FieldPort:
 		return m.Port()
 	case minios3provider.FieldScheme:
@@ -5151,6 +5191,8 @@ func (m *MinioS3ProviderMutation) Field(name string) (ent.Value, bool) {
 		return m.AccessKeyID()
 	case minios3provider.FieldSecretAccessKey:
 		return m.SecretAccessKey()
+	case minios3provider.FieldCertificateAuthority:
+		return m.CertificateAuthority()
 	case minios3provider.FieldValid:
 		return m.Valid()
 	}
@@ -5164,8 +5206,8 @@ func (m *MinioS3ProviderMutation) OldField(ctx context.Context, name string) (en
 	switch name {
 	case minios3provider.FieldBucketName:
 		return m.OldBucketName(ctx)
-	case minios3provider.FieldIP:
-		return m.OldIP(ctx)
+	case minios3provider.FieldHostname:
+		return m.OldHostname(ctx)
 	case minios3provider.FieldPort:
 		return m.OldPort(ctx)
 	case minios3provider.FieldScheme:
@@ -5174,6 +5216,8 @@ func (m *MinioS3ProviderMutation) OldField(ctx context.Context, name string) (en
 		return m.OldAccessKeyID(ctx)
 	case minios3provider.FieldSecretAccessKey:
 		return m.OldSecretAccessKey(ctx)
+	case minios3provider.FieldCertificateAuthority:
+		return m.OldCertificateAuthority(ctx)
 	case minios3provider.FieldValid:
 		return m.OldValid(ctx)
 	}
@@ -5192,12 +5236,12 @@ func (m *MinioS3ProviderMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetBucketName(v)
 		return nil
-	case minios3provider.FieldIP:
+	case minios3provider.FieldHostname:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIP(v)
+		m.SetHostname(v)
 		return nil
 	case minios3provider.FieldPort:
 		v, ok := value.(string)
@@ -5226,6 +5270,13 @@ func (m *MinioS3ProviderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSecretAccessKey(v)
+		return nil
+	case minios3provider.FieldCertificateAuthority:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCertificateAuthority(v)
 		return nil
 	case minios3provider.FieldValid:
 		v, ok := value.(bool)
@@ -5286,8 +5337,8 @@ func (m *MinioS3ProviderMutation) ResetField(name string) error {
 	case minios3provider.FieldBucketName:
 		m.ResetBucketName()
 		return nil
-	case minios3provider.FieldIP:
-		m.ResetIP()
+	case minios3provider.FieldHostname:
+		m.ResetHostname()
 		return nil
 	case minios3provider.FieldPort:
 		m.ResetPort()
@@ -5300,6 +5351,9 @@ func (m *MinioS3ProviderMutation) ResetField(name string) error {
 		return nil
 	case minios3provider.FieldSecretAccessKey:
 		m.ResetSecretAccessKey()
+		return nil
+	case minios3provider.FieldCertificateAuthority:
+		m.ResetCertificateAuthority()
 		return nil
 	case minios3provider.FieldValid:
 		m.ResetValid()

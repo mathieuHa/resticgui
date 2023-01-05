@@ -26,13 +26,15 @@
 
   const deleteSnapshot = async (snapshotId: string) => {
     const id = $page.params.id;
-    await agent.delete(`/repositories/${id}/snapshots/${snapshotId}`);
+    await agent.delete(`/repositories/${id}/snapshots/${snapshotId}/forget`);
     dispatch('delete');
   };
   const setModalOpened = (rowSnapshot: any, toOpen: string) => {
     snapshot = rowSnapshot;
     modalOpened = toOpen;
   };
+
+  $: snapshotsList = snapshots.sort((a: Snapshot, b: Snapshot) => (dayjs(b.time).valueOf() - dayjs(a.time).valueOf()));
 </script>
   
 {#if snapshot}
@@ -66,7 +68,7 @@
 {/if}
 
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-  {#each snapshots as snapshot}
+  {#each snapshotsList as snapshot}
     <div class="p-3 flex flex-col max-w-sm bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
       <p class="truncate text-lg font-bold">#{snapshot.short_id}</p>
       <p class="truncate text-sm">{snapshot.username}</p>

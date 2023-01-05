@@ -31,8 +31,8 @@ func GetRepositoriesDB(ctx context.Context) (repositories []*ent.Repository, err
 	return repositories, err
 }
 
-func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err error) {
-	log.Debug().Msg("GetRepositoryByIDDB()")
+func GetRepositoryByIDSecretDB(id int, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("GetRepositoryByIDSecretDB()")
 
 	r, err = db.Repository.
 		Query().
@@ -50,6 +50,30 @@ func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err er
 	if err != nil {
 		log.Err(err).Msgf("error: %v", err)
 	}
+	return r, err
+}
+
+func GetRepositoryByIDDB(id int, ctx context.Context) (r *ent.Repository, err error) {
+	log.Debug().Msg("GetRepositoryByIDDB()")
+
+	r, err = db.Repository.
+		Query().
+		WithBackupSchedule().
+		WithBackupPolicy().
+		WithPruneSchedule().
+		WithAWSS3Provider().
+		WithB2Provider().
+		WithLocalProvider().
+		WithMinioS3Provider().
+		WithPaths().
+		Where(repository.ID(id)).
+		Only(ctx)
+	if err != nil {
+		log.Err(err).Msgf("error: %v", err)
+		return nil, err
+	}
+	r.Password = "*****************"
+
 	return r, err
 }
 
@@ -82,9 +106,9 @@ func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Reposi
 func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *ent.Repository, err error) {
 	log.Debug().Msg("UpdateRepositoryDB()")
 
-	if repo.Provider == "" {
-		repo.Provider = "localProvider"
-	}
+	// if repo.Provider == "" {
+	// 	repo.Provider = "localProvider"
+	// }
 	// update repository
 	r, err = db.Repository.
 		UpdateOneID(id).
@@ -92,8 +116,8 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 		SetActive(repo.Active).
 		SetPruneActive(repo.PruneActive).
 		SetRunning(repo.Running).
-		SetPassword(repo.Password).
-		SetProvider(repo.Provider).
+		// SetPassword(repo.Password).
+		// SetProvider(repo.Provider).
 		SetMaxSize(repo.MaxSize).
 		SetRepositorySize(repo.RepositorySize).
 		SetRepositoryFileCount(repo.RepositoryFileCount).
