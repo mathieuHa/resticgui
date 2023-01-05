@@ -106,9 +106,9 @@ func CreateRepositoryDB(repo ent.Repository, ctx context.Context) (r *ent.Reposi
 func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *ent.Repository, err error) {
 	log.Debug().Msg("UpdateRepositoryDB()")
 
-	if repo.Provider == "" {
-		repo.Provider = "localProvider"
-	}
+	// if repo.Provider == "" {
+	// 	repo.Provider = "localProvider"
+	// }
 	// update repository
 	r, err = db.Repository.
 		UpdateOneID(id).
@@ -117,7 +117,7 @@ func UpdateRepositoryDB(repo ent.Repository, id int, ctx context.Context) (r *en
 		SetPruneActive(repo.PruneActive).
 		SetRunning(repo.Running).
 		// SetPassword(repo.Password).
-		SetProvider(repo.Provider).
+		// SetProvider(repo.Provider).
 		SetMaxSize(repo.MaxSize).
 		SetRepositorySize(repo.RepositorySize).
 		SetRepositoryFileCount(repo.RepositoryFileCount).

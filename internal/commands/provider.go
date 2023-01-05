@@ -87,8 +87,8 @@ func getMinioS3RepositoryFormat(minio *ent.MinioS3Provider) []string {
 func getB2EnvFormat(b2 ent.B2Provider) []string {
 	var env []string
 
-	env = append(env, fmt.Sprintf("AWS_ACCESS_KEY_ID=%v", b2.AccountID))
-	env = append(env, fmt.Sprintf("AWS_SECRET_ACCESS_KEY=%v", b2.AccountKey))
+	env = append(env, fmt.Sprintf("B2_ACCOUNT_ID=%v", b2.AccountID))
+	env = append(env, fmt.Sprintf("B2_ACCOUNT_KEY=%v", b2.AccountKey))
 
 	return env
 }
