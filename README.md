@@ -16,10 +16,10 @@ The following actions are supported:
 - dowloading files or directories from a Snapshot
 
 The following storage providers are supported:
-- local
-- _AWS S3_ comming soon [#104](https://gitlab.com/resticgui/resticgui/-/issues/104)
-- _B2_ comming soon [#105](https://gitlab.com/resticgui/resticgui/-/issues/105)
-- _Minio S3_ comming soon [#106](https://gitlab.com/resticgui/resticgui/-/issues/106)
+- `local`
+- `AWS S3`
+- `B2`
+- `Minio S3`
 
 This ResticGUI version works with Restic version `0.12.1` or more.  
 Restic must be installed and present in the $PATH if run as a single binary.
@@ -27,19 +27,22 @@ Restic must be installed and present in the $PATH if run as a single binary.
 ## ScreenShots
 
 ### File Tree Navigation
-![file tree navigation](/images/resticgui-file-tree-navigation.png "File Tree Navigation")
+![file tree navigation](/images/resticgui-file-tree-navigation-v011.png "File Tree Navigation")
 
 ### Repository General View
-![general repository view](/images/resticgui-general-display.png "Repository General View")
+![general repository view](/images/resticgui-general-view-v011.png "Repository General View")
 
 ### Repository Snapshot List
 ![snapshot list view](/images/resticgui-snapshot-list.png "Snapshot List View")
+
+### Repository Snapshot Explore
+![snapshot files view](/images/resticgui-snapshot-file-view-v011.png "Snapshot Explore View")
 
 ## Install
 
 ### Run as binary
 
-Download the last stable release [0.0.1](https://gitlab.com/resticgui/resticgui/-/releases/v0.0.1)
+Download the last stable release [0.1.1](https://gitlab.com/resticgui/resticgui/-/releases/v0.1.1)
 
 > Uncompress  
 
@@ -63,11 +66,11 @@ Pull the latest stable image from dockerhub registry or gitlab registry:
 Example:
 
 ```bash
-docker pull resticgui/resticgui:8eb47db5
+docker pull resticgui/resticgui:v0.1.1
 ```
 > You can bind mount the directories you want to backup in the container
 ```bash
-docker run -d resticgui/resticgui:8eb47db5 -v /home/myuser:/backup
+docker run -d resticgui/resticgui:v0.1.1 -v /home/myuser:/backup
 ```  
 
 ## Configure
@@ -177,10 +180,10 @@ make rundocker
 
 ### Frontend
 
-#### Install node 16
+#### Install node 18
 
 ```
-curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_18.x | sudo bash -
 sudo apt -y install nodejs
 ```
 
