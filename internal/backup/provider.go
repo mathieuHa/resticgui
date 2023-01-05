@@ -15,6 +15,7 @@ func validProvider(repository *ent.Repository) (valid bool, err error) {
 		err = errors.New("repository is nil")
 		return valid, err
 	}
+	log.Debug().Msgf("Provider = %v", repository.Provider)
 	switch repository.Provider {
 	case "localProvider":
 		valid, err = validLocalProvider(repository.Edges.LocalProvider)

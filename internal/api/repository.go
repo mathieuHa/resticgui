@@ -187,16 +187,16 @@ func EditRepository(c *gin.Context) {
 		return
 	}
 
-	// Update repository
-	r, err = database.UpdateRepositoryDB(*r, rID, ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
-			return
-		}
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
-		return
-	}
+	// // Update repository
+	// r, err = database.UpdateRepositoryDB(*r, rID, ctx)
+	// if err != nil {
+	// 	if ent.IsNotFound(err) {
+	// 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": errUpdate, "message": err.Error()})
+	// 		return
+	// 	}
+	// 	c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": errUpdate, "message": err.Error()})
+	// 	return
+	// }
 	updateRepositoryRunning(rID)
 
 	c.IndentedJSON(http.StatusOK, r)
