@@ -20,7 +20,7 @@ func updateValidProvider(repository ent.Repository, valid bool) (err error) {
 		} else {
 			err = fmt.Errorf("%v is nil", repository.Provider)
 		}
-	case "minioS3Provider":
+	case "MinioS3Provider":
 		if repository.Edges.MinioS3Provider != nil {
 			_, err = db.MinioS3Provider.UpdateOneID(repository.Edges.MinioS3Provider.ID).SetValid(valid).Save(ctx)
 		} else {

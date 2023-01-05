@@ -88,7 +88,7 @@ func BackupRepository(id int, cr *cron.Cron) (out string) {
 
 	ctx := context.Background()
 
-	r, _ := database.GetRepositoryByIDDB(id, ctx)
+	r, _ := database.GetRepositoryByIDSecretDB(id, ctx)
 
 	if !r.Valid {
 		log.Debug().Msg("repository is not valid")
@@ -124,6 +124,7 @@ func BackupRepository(id int, cr *cron.Cron) (out string) {
 			log.Err(err).Msg("Error update db")
 		}
 	}
+	log.Debug().Msgf("pass = %v", r.Password)
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
 
 	// condition for uninitialized repository
@@ -260,7 +261,7 @@ func DownloadFilesSnapshotRepository(r *ent.Repository, version string, path str
 	return stdout, stderr
 }
 
-func ValidRepository(repository ent.Repository) (valid bool, err error) {
+func ValidRepository(repository *ent.Repository) (valid bool, err error) {
 	log.Debug().Msg("ValidRepository()")
 
 	valid = (repository.Password != "" && len(repository.Password) >= utils.PasswordMinLength)
@@ -269,7 +270,7 @@ func ValidRepository(repository ent.Repository) (valid bool, err error) {
 
 		return false, errors.New(utils.ErrMsgRInvalid_Password)
 	}
-	valid, err = validProvider(&repository)
+	valid, err = validProvider(repository)
 	if err != nil {
 		log.Err(err).Msg(utils.ErrMsgRInvalid_Provider)
 		return false, err

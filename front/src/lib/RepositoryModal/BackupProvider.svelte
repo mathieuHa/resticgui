@@ -13,7 +13,7 @@
 
   const providers: Record<Provider, string[]> = {
     [Provider.LocalProvider]: ['repoPath'],
-    [Provider.MinioS3Provider]: ['accessKeyID', 'bucketName', 'port', 'secretAccessKey', 'scheme'],
+    [Provider.MinioS3Provider]: ['accessKeyID', 'secretAccessKey','bucketName', 'hostname', 'port', 'scheme', 'certificateAuthority'],
     [Provider.B2Provider]: ['accountID', 'accountKey', 'bucketName', 'repoName'],
     [Provider.AWSS3Provider]: ['accessKeyID', 'secretAccessKey', 'bucketName', 'defaultRegion'],
   }

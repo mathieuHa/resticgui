@@ -26,9 +26,9 @@ func (msc *MinioS3ProviderCreate) SetBucketName(s string) *MinioS3ProviderCreate
 	return msc
 }
 
-// SetIP sets the "IP" field.
-func (msc *MinioS3ProviderCreate) SetIP(s string) *MinioS3ProviderCreate {
-	msc.mutation.SetIP(s)
+// SetHostname sets the "hostname" field.
+func (msc *MinioS3ProviderCreate) SetHostname(s string) *MinioS3ProviderCreate {
+	msc.mutation.SetHostname(s)
 	return msc
 }
 
@@ -53,6 +53,12 @@ func (msc *MinioS3ProviderCreate) SetAccessKeyID(s string) *MinioS3ProviderCreat
 // SetSecretAccessKey sets the "secretAccessKey" field.
 func (msc *MinioS3ProviderCreate) SetSecretAccessKey(s string) *MinioS3ProviderCreate {
 	msc.mutation.SetSecretAccessKey(s)
+	return msc
+}
+
+// SetCertificateAuthority sets the "certificateAuthority" field.
+func (msc *MinioS3ProviderCreate) SetCertificateAuthority(s string) *MinioS3ProviderCreate {
+	msc.mutation.SetCertificateAuthority(s)
 	return msc
 }
 
@@ -169,8 +175,8 @@ func (msc *MinioS3ProviderCreate) check() error {
 	if _, ok := msc.mutation.BucketName(); !ok {
 		return &ValidationError{Name: "bucketName", err: errors.New(`ent: missing required field "MinioS3Provider.bucketName"`)}
 	}
-	if _, ok := msc.mutation.IP(); !ok {
-		return &ValidationError{Name: "IP", err: errors.New(`ent: missing required field "MinioS3Provider.IP"`)}
+	if _, ok := msc.mutation.Hostname(); !ok {
+		return &ValidationError{Name: "hostname", err: errors.New(`ent: missing required field "MinioS3Provider.hostname"`)}
 	}
 	if _, ok := msc.mutation.Port(); !ok {
 		return &ValidationError{Name: "port", err: errors.New(`ent: missing required field "MinioS3Provider.port"`)}
@@ -183,6 +189,9 @@ func (msc *MinioS3ProviderCreate) check() error {
 	}
 	if _, ok := msc.mutation.SecretAccessKey(); !ok {
 		return &ValidationError{Name: "secretAccessKey", err: errors.New(`ent: missing required field "MinioS3Provider.secretAccessKey"`)}
+	}
+	if _, ok := msc.mutation.CertificateAuthority(); !ok {
+		return &ValidationError{Name: "certificateAuthority", err: errors.New(`ent: missing required field "MinioS3Provider.certificateAuthority"`)}
 	}
 	if _, ok := msc.mutation.Valid(); !ok {
 		return &ValidationError{Name: "valid", err: errors.New(`ent: missing required field "MinioS3Provider.valid"`)}
@@ -221,9 +230,9 @@ func (msc *MinioS3ProviderCreate) createSpec() (*MinioS3Provider, *sqlgraph.Crea
 		_spec.SetField(minios3provider.FieldBucketName, field.TypeString, value)
 		_node.BucketName = value
 	}
-	if value, ok := msc.mutation.IP(); ok {
-		_spec.SetField(minios3provider.FieldIP, field.TypeString, value)
-		_node.IP = value
+	if value, ok := msc.mutation.Hostname(); ok {
+		_spec.SetField(minios3provider.FieldHostname, field.TypeString, value)
+		_node.Hostname = value
 	}
 	if value, ok := msc.mutation.Port(); ok {
 		_spec.SetField(minios3provider.FieldPort, field.TypeString, value)
@@ -240,6 +249,10 @@ func (msc *MinioS3ProviderCreate) createSpec() (*MinioS3Provider, *sqlgraph.Crea
 	if value, ok := msc.mutation.SecretAccessKey(); ok {
 		_spec.SetField(minios3provider.FieldSecretAccessKey, field.TypeString, value)
 		_node.SecretAccessKey = value
+	}
+	if value, ok := msc.mutation.CertificateAuthority(); ok {
+		_spec.SetField(minios3provider.FieldCertificateAuthority, field.TypeString, value)
+		_node.CertificateAuthority = value
 	}
 	if value, ok := msc.mutation.Valid(); ok {
 		_spec.SetField(minios3provider.FieldValid, field.TypeBool, value)

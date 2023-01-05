@@ -170,11 +170,12 @@ var (
 	MinioS3ProviderColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "bucket_name", Type: field.TypeString},
-		{Name: "ip", Type: field.TypeString},
+		{Name: "hostname", Type: field.TypeString},
 		{Name: "port", Type: field.TypeString},
 		{Name: "scheme", Type: field.TypeString},
 		{Name: "access_key_id", Type: field.TypeString},
 		{Name: "secret_access_key", Type: field.TypeString},
+		{Name: "certificate_authority", Type: field.TypeString},
 		{Name: "valid", Type: field.TypeBool, Default: false},
 		{Name: "repository_minio_s3provider", Type: field.TypeInt, Unique: true},
 	}
@@ -186,7 +187,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "MinioS3Provider_repositories_MinioS3Provider",
-				Columns:    []*schema.Column{MinioS3ProviderColumns[8]},
+				Columns:    []*schema.Column{MinioS3ProviderColumns[9]},
 				RefColumns: []*schema.Column{RepositoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

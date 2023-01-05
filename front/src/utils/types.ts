@@ -67,6 +67,7 @@ export interface MinioS3Provider {
   port?: number
   secretAccessKey?: string
   scheme?: string
+  certificateAuthority?: string
 }
 
 export interface B2Provider {
