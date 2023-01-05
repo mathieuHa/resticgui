@@ -86,10 +86,10 @@ func BucketName(v string) predicate.MinioS3Provider {
 	})
 }
 
-// IP applies equality check predicate on the "IP" field. It's identical to IPEQ.
-func IP(v string) predicate.MinioS3Provider {
+// Hostname applies equality check predicate on the "hostname" field. It's identical to HostnameEQ.
+func Hostname(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIP), v))
+		s.Where(sql.EQ(s.C(FieldHostname), v))
 	})
 }
 
@@ -118,6 +118,13 @@ func AccessKeyID(v string) predicate.MinioS3Provider {
 func SecretAccessKey(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldSecretAccessKey), v))
+	})
+}
+
+// CertificateAuthority applies equality check predicate on the "certificateAuthority" field. It's identical to CertificateAuthorityEQ.
+func CertificateAuthority(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCertificateAuthority), v))
 	})
 }
 
@@ -227,102 +234,102 @@ func BucketNameContainsFold(v string) predicate.MinioS3Provider {
 	})
 }
 
-// IPEQ applies the EQ predicate on the "IP" field.
-func IPEQ(v string) predicate.MinioS3Provider {
+// HostnameEQ applies the EQ predicate on the "hostname" field.
+func HostnameEQ(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIP), v))
+		s.Where(sql.EQ(s.C(FieldHostname), v))
 	})
 }
 
-// IPNEQ applies the NEQ predicate on the "IP" field.
-func IPNEQ(v string) predicate.MinioS3Provider {
+// HostnameNEQ applies the NEQ predicate on the "hostname" field.
+func HostnameNEQ(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIP), v))
+		s.Where(sql.NEQ(s.C(FieldHostname), v))
 	})
 }
 
-// IPIn applies the In predicate on the "IP" field.
-func IPIn(vs ...string) predicate.MinioS3Provider {
+// HostnameIn applies the In predicate on the "hostname" field.
+func HostnameIn(vs ...string) predicate.MinioS3Provider {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIP), v...))
+		s.Where(sql.In(s.C(FieldHostname), v...))
 	})
 }
 
-// IPNotIn applies the NotIn predicate on the "IP" field.
-func IPNotIn(vs ...string) predicate.MinioS3Provider {
+// HostnameNotIn applies the NotIn predicate on the "hostname" field.
+func HostnameNotIn(vs ...string) predicate.MinioS3Provider {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIP), v...))
+		s.Where(sql.NotIn(s.C(FieldHostname), v...))
 	})
 }
 
-// IPGT applies the GT predicate on the "IP" field.
-func IPGT(v string) predicate.MinioS3Provider {
+// HostnameGT applies the GT predicate on the "hostname" field.
+func HostnameGT(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIP), v))
+		s.Where(sql.GT(s.C(FieldHostname), v))
 	})
 }
 
-// IPGTE applies the GTE predicate on the "IP" field.
-func IPGTE(v string) predicate.MinioS3Provider {
+// HostnameGTE applies the GTE predicate on the "hostname" field.
+func HostnameGTE(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIP), v))
+		s.Where(sql.GTE(s.C(FieldHostname), v))
 	})
 }
 
-// IPLT applies the LT predicate on the "IP" field.
-func IPLT(v string) predicate.MinioS3Provider {
+// HostnameLT applies the LT predicate on the "hostname" field.
+func HostnameLT(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIP), v))
+		s.Where(sql.LT(s.C(FieldHostname), v))
 	})
 }
 
-// IPLTE applies the LTE predicate on the "IP" field.
-func IPLTE(v string) predicate.MinioS3Provider {
+// HostnameLTE applies the LTE predicate on the "hostname" field.
+func HostnameLTE(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIP), v))
+		s.Where(sql.LTE(s.C(FieldHostname), v))
 	})
 }
 
-// IPContains applies the Contains predicate on the "IP" field.
-func IPContains(v string) predicate.MinioS3Provider {
+// HostnameContains applies the Contains predicate on the "hostname" field.
+func HostnameContains(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIP), v))
+		s.Where(sql.Contains(s.C(FieldHostname), v))
 	})
 }
 
-// IPHasPrefix applies the HasPrefix predicate on the "IP" field.
-func IPHasPrefix(v string) predicate.MinioS3Provider {
+// HostnameHasPrefix applies the HasPrefix predicate on the "hostname" field.
+func HostnameHasPrefix(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIP), v))
+		s.Where(sql.HasPrefix(s.C(FieldHostname), v))
 	})
 }
 
-// IPHasSuffix applies the HasSuffix predicate on the "IP" field.
-func IPHasSuffix(v string) predicate.MinioS3Provider {
+// HostnameHasSuffix applies the HasSuffix predicate on the "hostname" field.
+func HostnameHasSuffix(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIP), v))
+		s.Where(sql.HasSuffix(s.C(FieldHostname), v))
 	})
 }
 
-// IPEqualFold applies the EqualFold predicate on the "IP" field.
-func IPEqualFold(v string) predicate.MinioS3Provider {
+// HostnameEqualFold applies the EqualFold predicate on the "hostname" field.
+func HostnameEqualFold(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIP), v))
+		s.Where(sql.EqualFold(s.C(FieldHostname), v))
 	})
 }
 
-// IPContainsFold applies the ContainsFold predicate on the "IP" field.
-func IPContainsFold(v string) predicate.MinioS3Provider {
+// HostnameContainsFold applies the ContainsFold predicate on the "hostname" field.
+func HostnameContainsFold(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIP), v))
+		s.Where(sql.ContainsFold(s.C(FieldHostname), v))
 	})
 }
 
@@ -719,6 +726,105 @@ func SecretAccessKeyEqualFold(v string) predicate.MinioS3Provider {
 func SecretAccessKeyContainsFold(v string) predicate.MinioS3Provider {
 	return predicate.MinioS3Provider(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldSecretAccessKey), v))
+	})
+}
+
+// CertificateAuthorityEQ applies the EQ predicate on the "certificateAuthority" field.
+func CertificateAuthorityEQ(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityNEQ applies the NEQ predicate on the "certificateAuthority" field.
+func CertificateAuthorityNEQ(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityIn applies the In predicate on the "certificateAuthority" field.
+func CertificateAuthorityIn(vs ...string) predicate.MinioS3Provider {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldCertificateAuthority), v...))
+	})
+}
+
+// CertificateAuthorityNotIn applies the NotIn predicate on the "certificateAuthority" field.
+func CertificateAuthorityNotIn(vs ...string) predicate.MinioS3Provider {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldCertificateAuthority), v...))
+	})
+}
+
+// CertificateAuthorityGT applies the GT predicate on the "certificateAuthority" field.
+func CertificateAuthorityGT(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityGTE applies the GTE predicate on the "certificateAuthority" field.
+func CertificateAuthorityGTE(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityLT applies the LT predicate on the "certificateAuthority" field.
+func CertificateAuthorityLT(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityLTE applies the LTE predicate on the "certificateAuthority" field.
+func CertificateAuthorityLTE(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityContains applies the Contains predicate on the "certificateAuthority" field.
+func CertificateAuthorityContains(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityHasPrefix applies the HasPrefix predicate on the "certificateAuthority" field.
+func CertificateAuthorityHasPrefix(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityHasSuffix applies the HasSuffix predicate on the "certificateAuthority" field.
+func CertificateAuthorityHasSuffix(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityEqualFold applies the EqualFold predicate on the "certificateAuthority" field.
+func CertificateAuthorityEqualFold(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldCertificateAuthority), v))
+	})
+}
+
+// CertificateAuthorityContainsFold applies the ContainsFold predicate on the "certificateAuthority" field.
+func CertificateAuthorityContainsFold(v string) predicate.MinioS3Provider {
+	return predicate.MinioS3Provider(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldCertificateAuthority), v))
 	})
 }
 

@@ -156,7 +156,7 @@ func TestCreateRepository(t *testing.T) {
 		assert.Nil(t, err)
 		assert.GreaterOrEqual(t, repositoryReceived.ID, 0)
 		assert.Equal(t, rName, repositoryReceived.Name)
-		assert.Equal(t, "", repositoryReceived.Password)
+		assert.Equal(t, rPassword, repositoryReceived.Password)
 		assert.Equal(t, http.StatusCreated, w.Code)
 	})
 

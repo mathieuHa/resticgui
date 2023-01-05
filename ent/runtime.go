@@ -180,7 +180,7 @@ func init() {
 	minios3providerFields := schema.MinioS3Provider{}.Fields()
 	_ = minios3providerFields
 	// minios3providerDescValid is the schema descriptor for valid field.
-	minios3providerDescValid := minios3providerFields[6].Descriptor()
+	minios3providerDescValid := minios3providerFields[7].Descriptor()
 	// minios3provider.DefaultValid holds the default value on creation for the valid field.
 	minios3provider.DefaultValid = minios3providerDescValid.Default.(bool)
 	pathFields := schema.Path{}.Fields()

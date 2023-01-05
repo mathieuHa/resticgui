@@ -18,8 +18,8 @@ type MinioS3Provider struct {
 	ID int `json:"id,omitempty"`
 	// BucketName holds the value of the "bucketName" field.
 	BucketName string `json:"bucketName,omitempty"`
-	// IP holds the value of the "IP" field.
-	IP string `json:"IP,omitempty"`
+	// Hostname holds the value of the "hostname" field.
+	Hostname string `json:"hostname,omitempty"`
 	// Port holds the value of the "port" field.
 	Port string `json:"port,omitempty"`
 	// Scheme holds the value of the "scheme" field.
@@ -28,6 +28,8 @@ type MinioS3Provider struct {
 	AccessKeyID string `json:"accessKeyID,omitempty"`
 	// SecretAccessKey holds the value of the "secretAccessKey" field.
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
+	// CertificateAuthority holds the value of the "certificateAuthority" field.
+	CertificateAuthority string `json:"certificateAuthority,omitempty"`
 	// Valid holds the value of the "valid" field.
 	Valid bool `json:"valid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -67,7 +69,7 @@ func (*MinioS3Provider) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case minios3provider.FieldID:
 			values[i] = new(sql.NullInt64)
-		case minios3provider.FieldBucketName, minios3provider.FieldIP, minios3provider.FieldPort, minios3provider.FieldScheme, minios3provider.FieldAccessKeyID, minios3provider.FieldSecretAccessKey:
+		case minios3provider.FieldBucketName, minios3provider.FieldHostname, minios3provider.FieldPort, minios3provider.FieldScheme, minios3provider.FieldAccessKeyID, minios3provider.FieldSecretAccessKey, minios3provider.FieldCertificateAuthority:
 			values[i] = new(sql.NullString)
 		case minios3provider.ForeignKeys[0]: // repository_minio_s3provider
 			values[i] = new(sql.NullInt64)
@@ -98,11 +100,11 @@ func (ms *MinioS3Provider) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ms.BucketName = value.String
 			}
-		case minios3provider.FieldIP:
+		case minios3provider.FieldHostname:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field IP", values[i])
+				return fmt.Errorf("unexpected type %T for field hostname", values[i])
 			} else if value.Valid {
-				ms.IP = value.String
+				ms.Hostname = value.String
 			}
 		case minios3provider.FieldPort:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -127,6 +129,12 @@ func (ms *MinioS3Provider) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field secretAccessKey", values[i])
 			} else if value.Valid {
 				ms.SecretAccessKey = value.String
+			}
+		case minios3provider.FieldCertificateAuthority:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field certificateAuthority", values[i])
+			} else if value.Valid {
+				ms.CertificateAuthority = value.String
 			}
 		case minios3provider.FieldValid:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -177,8 +185,8 @@ func (ms *MinioS3Provider) String() string {
 	builder.WriteString("bucketName=")
 	builder.WriteString(ms.BucketName)
 	builder.WriteString(", ")
-	builder.WriteString("IP=")
-	builder.WriteString(ms.IP)
+	builder.WriteString("hostname=")
+	builder.WriteString(ms.Hostname)
 	builder.WriteString(", ")
 	builder.WriteString("port=")
 	builder.WriteString(ms.Port)
@@ -191,6 +199,9 @@ func (ms *MinioS3Provider) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("secretAccessKey=")
 	builder.WriteString(ms.SecretAccessKey)
+	builder.WriteString(", ")
+	builder.WriteString("certificateAuthority=")
+	builder.WriteString(ms.CertificateAuthority)
 	builder.WriteString(", ")
 	builder.WriteString("valid=")
 	builder.WriteString(fmt.Sprintf("%v", ms.Valid))

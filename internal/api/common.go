@@ -82,9 +82,9 @@ func updateRepositoryRunning(id int) (err error) {
 
 	ctx := context.Background()
 
-	r, _ := database.GetRepositoryByIDDB(id, ctx)
+	r, _ := database.GetRepositoryByIDSecretDB(id, ctx)
 
-	r.Valid, err = backup.ValidRepository(*r)
+	r.Valid, err = backup.ValidRepository(r)
 	if err != nil {
 		log.Debug().Msg(err.Error())
 	} else {

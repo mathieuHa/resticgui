@@ -18,7 +18,7 @@ func validProvider(repository *ent.Repository) (valid bool, err error) {
 	switch repository.Provider {
 	case "localProvider":
 		valid, err = validLocalProvider(repository.Edges.LocalProvider)
-	case "minioS3Provider":
+	case "MinioS3Provider":
 		valid, err = validMinioS3Provider(repository.Edges.MinioS3Provider)
 	case "AWSS3Provider":
 		valid, err = validAWSS3Provider(repository.Edges.AWSS3Provider)

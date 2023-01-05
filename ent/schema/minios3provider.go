@@ -24,11 +24,12 @@ func (MinioS3Provider) Annotations() []schema.Annotation {
 func (MinioS3Provider) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("bucketName"),
-		field.String("IP"),
+		field.String("hostname"),
 		field.String("port"),
 		field.String("scheme"),
 		field.String("accessKeyID"),
 		field.String("secretAccessKey"),
+		field.String("certificateAuthority"),
 		field.Bool("valid").Default(false),
 	}
 }

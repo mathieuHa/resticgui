@@ -34,9 +34,9 @@ func (msu *MinioS3ProviderUpdate) SetBucketName(s string) *MinioS3ProviderUpdate
 	return msu
 }
 
-// SetIP sets the "IP" field.
-func (msu *MinioS3ProviderUpdate) SetIP(s string) *MinioS3ProviderUpdate {
-	msu.mutation.SetIP(s)
+// SetHostname sets the "hostname" field.
+func (msu *MinioS3ProviderUpdate) SetHostname(s string) *MinioS3ProviderUpdate {
+	msu.mutation.SetHostname(s)
 	return msu
 }
 
@@ -61,6 +61,12 @@ func (msu *MinioS3ProviderUpdate) SetAccessKeyID(s string) *MinioS3ProviderUpdat
 // SetSecretAccessKey sets the "secretAccessKey" field.
 func (msu *MinioS3ProviderUpdate) SetSecretAccessKey(s string) *MinioS3ProviderUpdate {
 	msu.mutation.SetSecretAccessKey(s)
+	return msu
+}
+
+// SetCertificateAuthority sets the "certificateAuthority" field.
+func (msu *MinioS3ProviderUpdate) SetCertificateAuthority(s string) *MinioS3ProviderUpdate {
+	msu.mutation.SetCertificateAuthority(s)
 	return msu
 }
 
@@ -189,8 +195,8 @@ func (msu *MinioS3ProviderUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := msu.mutation.BucketName(); ok {
 		_spec.SetField(minios3provider.FieldBucketName, field.TypeString, value)
 	}
-	if value, ok := msu.mutation.IP(); ok {
-		_spec.SetField(minios3provider.FieldIP, field.TypeString, value)
+	if value, ok := msu.mutation.Hostname(); ok {
+		_spec.SetField(minios3provider.FieldHostname, field.TypeString, value)
 	}
 	if value, ok := msu.mutation.Port(); ok {
 		_spec.SetField(minios3provider.FieldPort, field.TypeString, value)
@@ -203,6 +209,9 @@ func (msu *MinioS3ProviderUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if value, ok := msu.mutation.SecretAccessKey(); ok {
 		_spec.SetField(minios3provider.FieldSecretAccessKey, field.TypeString, value)
+	}
+	if value, ok := msu.mutation.CertificateAuthority(); ok {
+		_spec.SetField(minios3provider.FieldCertificateAuthority, field.TypeString, value)
 	}
 	if value, ok := msu.mutation.Valid(); ok {
 		_spec.SetField(minios3provider.FieldValid, field.TypeBool, value)
@@ -267,9 +276,9 @@ func (msuo *MinioS3ProviderUpdateOne) SetBucketName(s string) *MinioS3ProviderUp
 	return msuo
 }
 
-// SetIP sets the "IP" field.
-func (msuo *MinioS3ProviderUpdateOne) SetIP(s string) *MinioS3ProviderUpdateOne {
-	msuo.mutation.SetIP(s)
+// SetHostname sets the "hostname" field.
+func (msuo *MinioS3ProviderUpdateOne) SetHostname(s string) *MinioS3ProviderUpdateOne {
+	msuo.mutation.SetHostname(s)
 	return msuo
 }
 
@@ -294,6 +303,12 @@ func (msuo *MinioS3ProviderUpdateOne) SetAccessKeyID(s string) *MinioS3ProviderU
 // SetSecretAccessKey sets the "secretAccessKey" field.
 func (msuo *MinioS3ProviderUpdateOne) SetSecretAccessKey(s string) *MinioS3ProviderUpdateOne {
 	msuo.mutation.SetSecretAccessKey(s)
+	return msuo
+}
+
+// SetCertificateAuthority sets the "certificateAuthority" field.
+func (msuo *MinioS3ProviderUpdateOne) SetCertificateAuthority(s string) *MinioS3ProviderUpdateOne {
+	msuo.mutation.SetCertificateAuthority(s)
 	return msuo
 }
 
@@ -452,8 +467,8 @@ func (msuo *MinioS3ProviderUpdateOne) sqlSave(ctx context.Context) (_node *Minio
 	if value, ok := msuo.mutation.BucketName(); ok {
 		_spec.SetField(minios3provider.FieldBucketName, field.TypeString, value)
 	}
-	if value, ok := msuo.mutation.IP(); ok {
-		_spec.SetField(minios3provider.FieldIP, field.TypeString, value)
+	if value, ok := msuo.mutation.Hostname(); ok {
+		_spec.SetField(minios3provider.FieldHostname, field.TypeString, value)
 	}
 	if value, ok := msuo.mutation.Port(); ok {
 		_spec.SetField(minios3provider.FieldPort, field.TypeString, value)
@@ -466,6 +481,9 @@ func (msuo *MinioS3ProviderUpdateOne) sqlSave(ctx context.Context) (_node *Minio
 	}
 	if value, ok := msuo.mutation.SecretAccessKey(); ok {
 		_spec.SetField(minios3provider.FieldSecretAccessKey, field.TypeString, value)
+	}
+	if value, ok := msuo.mutation.CertificateAuthority(); ok {
+		_spec.SetField(minios3provider.FieldCertificateAuthority, field.TypeString, value)
 	}
 	if value, ok := msuo.mutation.Valid(); ok {
 		_spec.SetField(minios3provider.FieldValid, field.TypeBool, value)
