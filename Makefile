@@ -3,13 +3,15 @@ DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
 WEBDIR=front
 RESTICVERSION=0.12.1
-RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_amd64.bz2
+RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${GOARCH}.bz2
 TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
 CI?=false
 BASEDOCKERIMAGE?=alpine:latest
 NODEVERSION?=18.12.1-alpine
 GOVERSION?=1.19.4
+GOOS?=linux
+GOARCH?=amd64
 
 # OS Detection
 ifeq ($(OS),Windows_NT)
@@ -105,7 +107,7 @@ build: buildgo buildweb buildrestic ## Build go backend, Web and restic binary
 
 buildgo: createdir ## Build the go backend in dist dir
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
-	cd cmd/resticgui && go build -o ${DISTDIR}/resticgui${EXT}
+	GOOS=${GOOS} GOARCH=${GOARCH} cd cmd/resticgui && go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT}
 
 buildschema: ## Build the go ent schema backend
 	go generate ./ent
@@ -137,14 +139,13 @@ rundocker: ## Run the docker container locally
 	docker run --rm -d --name resticgui -p "8000:3030" $(CI_REGISTRY_IMAGE):$(TAG)
 
 run: ## Run resticgui binary listening on localhost:8080
-	cd ${DISTDIR}/ && ./resticgui${EXT}
+	cd ${DISTDIR}/ && ./resticgui-${GOARCH}${EXT}
 
 rundev: buildgo run ## Build and run resticgui binary listening on localhost:8080
 
 rundevweb: installwebdev ## Run dev web listening on localhost:3000
 	cd $(WEBDIR) && npm run dev
     
-
 # testweb: installweb
 # 	npm run lint
 
