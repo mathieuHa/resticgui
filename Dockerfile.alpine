@@ -16,7 +16,7 @@ ARG BASEDOCKERIMAGE
 
 FROM docker.io/${BASEDOCKERIMAGE} as BuilderRestic
 
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 ARG RESTICVERSION=0.12.1
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${TARGETARCH}.bz2
 ARG BUILDDIR=./build
@@ -72,7 +72,7 @@ RUN apk add --update --no-cache \
 
 COPY cmd/resticgui/config-docker.yaml ./config.yaml
 
-# COPY --from=BuilderRestic --chmod=700 /restic /usr/bin/restic
+COPY --from=BuilderRestic --chmod=700 /restic /usr/bin/restic
 COPY --from=BuilderWeb /front/build front
 COPY --from=BuilderResticGui /resticgui resticgui
 
