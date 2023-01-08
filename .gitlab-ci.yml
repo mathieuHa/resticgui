@@ -127,7 +127,8 @@ test:web:
     - docker buildx build -f ${DOCKERFILE} --push --platform linux/arm64/v8,linux/amd64 --tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${DOCKER_BUILD_DIR} ${BUILDARGS}
   after_script:
     - docker logout 
-
+  extends:
+    - .rule_build_release
 
 .push:dockerhub:multiarch:
   variables:
@@ -155,6 +156,7 @@ test:web:
     - docker logout 
   extends:
     - .auth:registry:dockerhub
+    - .rule_build_release
 
 push:dockerhub:ubuntu:
   extends:
