@@ -36,7 +36,7 @@ Restic must be installed and present in the $PATH if run as a single binary.
 ![snapshot list view](/images/resticgui-snapshot-list.png "Snapshot List View")
 
 ### Repository Snapshot Explore
-![snapshot files view](/images/resticgui-snapshot-file-view-v011.png "Snapshot Explore View")
+![snapshot files view](/images/resticgui-snapshot-files-view-v011.png "Snapshot Explore View")
 
 ## Install
 
@@ -48,7 +48,7 @@ Download the last stable release [0.1.2](https://gitlab.com/resticgui/resticgui/
 
 ```bash
 mkdir /opt
-tar -xvzf resticgui-ce54653c.tar.gz -C /opt/resticgui
+tar -xvzf resticgui-ce54653c-amd64.tar.gz -C /opt/resticgui
 ```
 
 > Run

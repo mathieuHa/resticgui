@@ -48,7 +48,6 @@ sonarqube-check:
   only:
     - main
     - dev
-    - production
   needs: [test:go]
   dependencies: 
     - test:go
@@ -59,9 +58,6 @@ test:go:
   script:
     - make testgoci
     - go test ./internal/... -json > test-report.out
-    #- go fmt $(go list ./... | grep -v /vendor/)
-    #- go vet $(go list ./... | grep -v /vendor/)
-    #- go test -race $(go list ./... | grep -v /vendor/)
   artifacts:
     paths:
       - coverage.out
@@ -88,28 +84,6 @@ test:web:
   script:
     - cd front && npm ci && npm run lint
 
-.build:docker:
-  image: quay.io/buildah/stable:v1.28.0
-  stage: docker
-  variables:
-    # Use vfs with buildah. Docker offers overlayfs as a default, but buildah
-    # cannot stack overlayfs on top of another overlayfs filesystem.
-    STORAGE_DRIVER: vfs
-    # Write all image metadata in the docker format, not the standard OCI format.
-    # Newer versions of docker can handle the OCI format, but older versions, like
-    # the one shipped with Fedora 30, cannot handle the format.
-    BUILDAH_FORMAT: docker
-    # You may need this workaround for some errors: https://stackoverflow.com/a/70438141/1233435
-    BUILDAH_ISOLATION: chroot
-  script:
-    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${BASE_DOCKER_IMAGE} --build-arg ARCH=${ARCH}"
-    - buildah build -f ${DOCKERFILE} -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-${ARCH} ${BUILDARGS} ${PLATFORMS_BUILD}
-    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-${ARCH}
-    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-${ARCH} ${FQ_IMAGE_NAME}:${VERSION}-${ARCH}
-    - buildah push ${FQ_IMAGE_NAME}:${VERSION}-${ARCH}
-  extends:
-    - .rule_build_release
-
 .build:docker:multiarch:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
@@ -121,10 +95,10 @@ test:web:
   services:
     - docker:20.10.22-dind
   script:
-    - echo ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - echo ${FQ_IMAGE_NAME}:${VERSION}
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes;docker context create ctx; docker buildx create ctx --use
-    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${BASE_DOCKER_IMAGE} --build-arg RESTICGUIVERSION=${VERSION}"
-    - docker buildx build -f ${DOCKERFILE} --push --platform linux/arm64/v8,linux/amd64 --tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${DOCKER_BUILD_DIR} ${BUILDARGS}
+    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${BASE_DOCKER_IMAGE} --build-arg RESTICGUIVERSION=${PACKAGE_VERSION}"
+    - docker buildx build -f ${DOCKERFILE} --push --platform linux/arm64/v8,linux/amd64 --tag ${FQ_IMAGE_NAME}:${VERSION} ${DOCKER_BUILD_DIR} ${BUILDARGS}
   after_script:
     - docker logout 
   extends:
@@ -142,16 +116,16 @@ test:web:
   services:
     - docker:20.10.22-dind
   script:
-    - echo ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
-    - echo ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}
-    - docker pull --platform linux/arm64 ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
-    - docker tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-arm64
-    - docker push ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-arm64
-    - docker pull --platform linux/amd64 ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
-    - docker tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-amd64
-    - docker push ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-amd64
-    - docker manifest create ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-amd64 ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-arm64
-    - docker manifest push --purge ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}
+    - echo ${FQ_IMAGE_NAME}:${VERSION}
+    - echo ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}
+    - docker pull --platform linux/arm64 ${FQ_IMAGE_NAME}:${VERSION}
+    - docker tag ${FQ_IMAGE_NAME}:${VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}-arm64
+    - docker push ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}-arm64
+    - docker pull --platform linux/amd64 ${FQ_IMAGE_NAME}:${VERSION}
+    - docker tag ${FQ_IMAGE_NAME}:${VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}-amd64
+    - docker push ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}-amd64
+    - docker manifest create ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}-amd64 ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}-arm64
+    - docker manifest push --purge ${FQ_DOCKERHUB_IMAGE_NAME}:${VERSION}
   after_script:
     - docker logout 
   extends:
@@ -213,32 +187,18 @@ push:dockerhub:alpine:
     - job: build:package:web
       artifacts: true
 
-# .build:docker:arm:
-#   variables:
-#     PLATFORMS_BUILD: --platform linux/arm64
-#     ARCH: arm64
-#   tags:
-#     # - saas-linux-large-amd64
-#     - arm
-#     # - docker
-#   needs:
-#     - job: download:restic:arm
-#       artifacts: true
-#     - job: build:package:go:arm
-#       artifacts: true
-#     - job: build:package:web
-#       artifacts: true
-
 .build:docker:ubuntu:
   variables:
     BASE_DOCKER_IMAGE: ${UBUNTU_DOCKER_IMAGE}
-    VERSION: latest
+    LAST_VERSION: latest
+    VERSION: ${PACKAGE_VERSION}
     DOCKERFILE: release-ubuntu.Dockerfile
 
 .build:docker:alpine:
   variables:
     BASE_DOCKER_IMAGE: ${ALPINE_DOCKER_IMAGE}
-    VERSION: alpine
+    LAST_VERSION: alpine
+    VERSION: ${PACKAGE_VERSION}-alpine
     DOCKERFILE: release-alpine.Dockerfile
 
 build:docker:gitlab:ubuntu:
@@ -258,20 +218,6 @@ build:docker:gitlab:alpine:
     - .build:docker:amd
     - .build:docker:alpine
     - .build:docker:multiarch
-
-# build:docker:dockerhub:amd:ubuntu:
-#   extends:
-#     - .auth:registry:dockerhub
-#     - .build:docker:amd
-#     - .build:docker:ubuntu
-#     # - .push:docker:multiarch
-
-# build:docker:dockerhub:amd:alpine:
-#   extends:
-#     - .auth:registry:dockerhub
-#     - .build:docker:amd
-#     - .build:docker:alpine
-#     # - .push:docker:multiarch
 
 .build:go:arm:
   variables:
@@ -352,7 +298,6 @@ download:restic:arm:
     - cd dist/ && tar -cvzf ${PACKAGE_NAME}-${ARCH}.tar.gz *
   extends:
     - .rule_build_release
-
   artifacts:
     paths:
       - dist/${PACKAGE_NAME}-${ARCH}.tar.gz
@@ -391,7 +336,7 @@ build:package:amd:
 upload:arm:
   extends: [.upload]
   variables:
-    ARCH: arm
+    ARCH: arm64
   needs:
     - job: build:package:arm
       artifacts: true
@@ -399,7 +344,7 @@ upload:arm:
 upload:amd:
   extends: [.upload]
   variables:
-    ARCH: amd
+    ARCH: amd64
   needs:
     - job: build:package:amd
       artifacts: true
@@ -421,3 +366,6 @@ release_job:
         url: '${PACKAGE_REGISTRY_URL}/${PACKAGE_NAME}-amd64.tar.gz'
       - name: '${PACKAGE_NAME}-arm64.tar.gz'
         url: '${PACKAGE_REGISTRY_URL}/${PACKAGE_NAME}-arm64.tar.gz'
+  needs:
+    - job: upload:amd
+    - job: upload:arm
