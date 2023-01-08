@@ -1,6 +1,6 @@
 .rule_build_deploy:
   rules:  
-    - if: $CI_COMMIT_BRANCH != "main" || $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
 
 .rule_build_release:
   only:
@@ -11,7 +11,7 @@ variables:
   # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
   # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
   PACKAGE_NAME: ${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}
-  PACKAGE_VERSION: 'v0.1.1'
+  PACKAGE_VERSION: 'v0.1.2'
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/release/${PACKAGE_VERSION}"
   GO_VERSION: "1.19.4"
   NODE_VERSION: "18.12.1-alpine"
@@ -54,12 +54,6 @@ sonarqube-check:
     - test:go
 
 test:go:
-  variables:
-    REPO_NAME: gitlab.com/resticgui/resticgui
-  # before_script:
-  #   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-  #   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-  #   - cd $GOPATH/src/$REPO_NAME
   image: golang:${GO_VERSION}
   stage: test
   script:
@@ -109,17 +103,78 @@ test:web:
     BUILDAH_ISOLATION: chroot
   script:
     - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${BASE_DOCKER_IMAGE} --build-arg ARCH=${ARCH}"
-    - buildah build -f ${DOCKERFILE} -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${BUILDARGS} ${PLATFORMS_BUILD}
-    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
-    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_IMAGE_NAME}:${VERSION}
-    - buildah push ${FQ_IMAGE_NAME}:${VERSION}
+    - buildah build -f ${DOCKERFILE} -t ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-${ARCH} ${BUILDARGS} ${PLATFORMS_BUILD}
+    - buildah push ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-${ARCH}
+    - buildah tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}-${ARCH} ${FQ_IMAGE_NAME}:${VERSION}-${ARCH}
+    - buildah push ${FQ_IMAGE_NAME}:${VERSION}-${ARCH}
   extends:
     - .rule_build_release
 
+.build:docker:multiarch:
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_BUILD_DIR: .
+    FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui"
+  stage: docker
+  image: guglio/dind-buildx:latest
+  services:
+    - docker:20.10.22-dind
+  script:
+    - echo ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes;docker context create ctx; docker buildx create ctx --use
+    - export BUILDARGS="--build-arg BASEDOCKERIMAGE=${BASE_DOCKER_IMAGE} --build-arg RESTICGUIVERSION=${VERSION}"
+    - docker buildx build -f ${DOCKERFILE} --push --platform linux/arm64/v8,linux/amd64 --tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${DOCKER_BUILD_DIR} ${BUILDARGS}
+  after_script:
+    - docker logout 
+
+
+.push:dockerhub:multiarch:
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_BUILD_DIR: .
+    FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui"
+    FQ_DOCKERHUB_IMAGE_NAME: "registry-1.docker.io/resticgui/resticgui"
+  stage: docker
+  image: docker:20.10.22
+  services:
+    - docker:20.10.22-dind
+  script:
+    - echo ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - echo ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}
+    - docker pull --platform linux/arm64 ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - docker tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-arm64
+    - docker push ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-arm64
+    - docker pull --platform linux/amd64 ${FQ_IMAGE_NAME}:${PACKAGE_VERSION}
+    - docker tag ${FQ_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-amd64
+    - docker push ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-amd64
+    - docker manifest create ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION} ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-amd64 ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}-arm64
+    - docker manifest push --purge ${FQ_DOCKERHUB_IMAGE_NAME}:${PACKAGE_VERSION}
+  after_script:
+    - docker logout 
+  extends:
+    - .auth:registry:dockerhub
+
+push:dockerhub:ubuntu:
+  extends:
+    - .push:dockerhub:multiarch
+    - .build:docker:ubuntu
+  needs:
+    - job: build:docker:gitlab:ubuntu
+
+push:dockerhub:alpine:
+  extends:
+    - .push:dockerhub:multiarch
+    - .build:docker:alpine
+  needs:
+    - job: build:docker:gitlab:alpine
+
+
 .auth:registry:
   before_script:
-    - export REGISTRY_AUTH_FILE=${HOME}/auth.json
-    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo $CI_REGISTRY
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 .auth:registry:gitlab:
   variables:
@@ -147,25 +202,30 @@ test:web:
   needs:
     - job: download:restic:amd
       artifacts: true
-    - job: build:package:go:amd
-      artifacts: true
-    - job: build:package:web
-      artifacts: true
-
-.build:docker:arm:
-  variables:
-    PLATFORMS_BUILD: --platform linux/arm64
-  tags:
-    - saas-linux-large-amd64
-    # - arm
-    # - docker
-  needs:
     - job: download:restic:arm
+      artifacts: true
+    - job: build:package:go:amd
       artifacts: true
     - job: build:package:go:arm
       artifacts: true
     - job: build:package:web
       artifacts: true
+
+# .build:docker:arm:
+#   variables:
+#     PLATFORMS_BUILD: --platform linux/arm64
+#     ARCH: arm64
+#   tags:
+#     # - saas-linux-large-amd64
+#     - arm
+#     # - docker
+#   needs:
+#     - job: download:restic:arm
+#       artifacts: true
+#     - job: build:package:go:arm
+#       artifacts: true
+#     - job: build:package:web
+#       artifacts: true
 
 .build:docker:ubuntu:
   variables:
@@ -179,61 +239,37 @@ test:web:
     VERSION: alpine
     DOCKERFILE: release-alpine.Dockerfile
 
-build:docker:gitlab:amd:ubuntu:
+build:docker:gitlab:ubuntu:
+  variables:
+    FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui"
   extends:
     - .auth:registry:gitlab
     - .build:docker:amd
     - .build:docker:ubuntu
-    - .build:docker
+    - .build:docker:multiarch
 
-# build:docker:gitlab:arm:ubuntu:
-#   extends:
-#     - .auth:registry:gitlab
-#     - .build:docker:arm
-#     - .build:docker:ubuntu
-#     - .build:docker
-
-build:docker:gitlab:amd:alpine:
+build:docker:gitlab:alpine:
+  variables:
+    FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui"
   extends:
     - .auth:registry:gitlab
     - .build:docker:amd
     - .build:docker:alpine
-    - .build:docker
+    - .build:docker:multiarch
 
-# build:docker:gitlab:arm:alpine:
-#   extends:
-#     - .auth:registry:gitlab
-#     - .build:docker:arm
-#     - .build:docker:alpine
-#     - .build:docker
-
-build:docker:dockerhub:amd:ubuntu:
-  extends:
-    - .auth:registry:dockerhub
-    - .build:docker:amd
-    - .build:docker:ubuntu
-    - .build:docker
-
-# build:docker:dockerhub:arm:ubuntu:
+# build:docker:dockerhub:amd:ubuntu:
 #   extends:
 #     - .auth:registry:dockerhub
-#     - .build:docker:arm
+#     - .build:docker:amd
 #     - .build:docker:ubuntu
-#     - .build:docker
+#     # - .push:docker:multiarch
 
-build:docker:dockerhub:amd:alpine:
-  extends:
-    - .auth:registry:dockerhub
-    - .build:docker:amd
-    - .build:docker:alpine
-    - .build:docker
-
-# build:docker:dockerhub:arm:alpine:
+# build:docker:dockerhub:amd:alpine:
 #   extends:
 #     - .auth:registry:dockerhub
-#     - .build:docker:arm
+#     - .build:docker:amd
 #     - .build:docker:alpine
-#     - .build:docker
+#     # - .push:docker:multiarch
 
 .build:go:arm:
   variables:
@@ -312,7 +348,6 @@ download:restic:arm:
   stage: package
   script:
     - cd dist/ && tar -cvzf ${PACKAGE_NAME}-${ARCH}.tar.gz *
-    # - cd dist/ && tar -cvzf ${PACKAGE_NAME}-${ARCH}.tar.gz build/ resticgui-${ARCH}
   extends:
     - .rule_build_release
 
@@ -355,11 +390,17 @@ upload:arm:
   extends: [.upload]
   variables:
     ARCH: arm
+  needs:
+    - job: build:package:arm
+      artifacts: true
 
 upload:amd:
   extends: [.upload]
   variables:
     ARCH: amd
+  needs:
+    - job: build:package:amd
+      artifacts: true
 
 release_job:
   stage: release
