@@ -42,7 +42,7 @@ Restic must be installed and present in the $PATH if run as a single binary.
 
 ### Run as binary
 
-Download the last stable release [0.1.1](https://gitlab.com/resticgui/resticgui/-/releases/v0.1.1)
+Download the last stable release [0.1.2](https://gitlab.com/resticgui/resticgui/-/releases/v0.1.2)
 
 > Uncompress  
 
@@ -66,11 +66,11 @@ Pull the latest stable image from dockerhub registry or gitlab registry:
 Example:
 
 ```bash
-docker pull resticgui/resticgui:v0.1.1
+docker pull resticgui/resticgui:v0.1.2
 ```
 > You can bind mount the directories you want to backup in the container
 ```bash
-docker run -d resticgui/resticgui:v0.1.1 -v /home/myuser:/backup
+docker run -d resticgui/resticgui:v0.1.2 -v /home/myuser:/backup
 ```  
 
 ## Configure
