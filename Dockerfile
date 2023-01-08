@@ -1,7 +1,6 @@
 ARG NODEVERSION=18.12.1-alpine
-ARG UBUNTUVERSION=jammy-20221130
+ARG BASEDOCKERIMAGE=ubuntu:jammy-20221130
 ARG GOVERSION=1.19.4
-ARG UBUNTURELEASEVERSION=jammy-20221130
 
 FROM docker.io/node:${NODEVERSION} as BuilderWeb
 
@@ -13,9 +12,9 @@ RUN npm ci
 
 RUN npm run build
 
-ARG UBUNTUVERSION
+ARG BASEDOCKERIMAGE
 
-FROM docker.io/ubuntu:${UBUNTUVERSION} as BuilderRestic
+FROM docker.io/${BASEDOCKERIMAGE} as BuilderRestic
 
 ARG TARGETARCH
 ARG RESTICVERSION=0.12.1
@@ -51,15 +50,15 @@ WORKDIR ${BUILDDIR}
 
 RUN cd cmd/resticgui && go build -o /resticgui
 
-ARG UBUNTURELEASEVERSION
+ARG BASEDOCKERIMAGE
 
-FROM docker.io/ubuntu:${UBUNTURELEASEVERSION}
+FROM docker.io/${BASEDOCKERIMAGE}
 
 ARG RESTICGUIVERSION="0.2.0"
 
 LABEL "hanotaux.mathieu.vendor"="MHX"
 LABEL version=${RESTICGUIVERSION}
-LABEL description="This image contain restic and resticgui webserver"
+LABEL description="This image contains Restic and Resticgui webserver"
 
 EXPOSE 3030
 
@@ -68,7 +67,7 @@ WORKDIR /opt
 ENV GIN_MODE=release
 
 RUN apt-get update && apt-get install -y \
-    net-tools \
+    # net-tools \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
