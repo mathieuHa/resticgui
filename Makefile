@@ -8,8 +8,10 @@ TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
 CI?=false
 BASEDOCKERIMAGE?=alpine:latest
+ALPINEDOCKERIMAGE?=alpine:latest
+UBUNTUDOCKERIMAGE?=ubuntu:latest
 NODEVERSION?=18.12.1-alpine
-GOVERSION?=1.19.4
+GOVERSION?=1.20.2
 GOOS?=linux
 GOARCH?=amd64
 
@@ -124,7 +126,7 @@ ifeq ($(CI), true)
 	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
 	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) . \
-	--build-arg BASEDOCKERIMAGE=$(BASEOS) \
+	--build-arg BASEDOCKERIMAGE=$(UBUNTUDOCKERIMAGE) \
 	--build-arg GOVERSION=$(GOVERSION)
 
 builddoc: ## Build the swagger openapi documenation
