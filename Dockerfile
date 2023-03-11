@@ -17,7 +17,7 @@ ARG BASEDOCKERIMAGE
 FROM docker.io/${BASEDOCKERIMAGE} as BuilderRestic
 
 ARG TARGETARCH
-ARG RESTICVERSION=0.12.1
+ARG RESTICVERSION=0.15.1
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${TARGETARCH}.bz2
 ARG BUILDDIR=./build
 
