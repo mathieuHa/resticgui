@@ -2,7 +2,7 @@
 DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
 WEBDIR=front
-RESTICVERSION=0.12.1
+RESTICVERSION=0.15.1
 RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${GOARCH}.bz2
 TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
