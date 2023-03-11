@@ -20,7 +20,7 @@ RUN apk add --update --no-cache \
 
 COPY cmd/resticgui/config-docker.yaml ./config.yaml
 
-COPY --chmod=700 dist/restic /usr/bin/restic
+COPY --chmod=700 dist/restic-$TARGETARCH /usr/bin/restic
 COPY dist/build front
 COPY dist/resticgui-$TARGETARCH resticgui
 
