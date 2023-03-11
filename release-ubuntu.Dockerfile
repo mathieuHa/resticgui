@@ -1,4 +1,4 @@
-ARG BASEDOCKERIMAGE=ubuntu:jammy-20220301
+ARG BASEDOCKERIMAGE=ubuntu:jammy-20230301
 
 FROM docker.io/${BASEDOCKERIMAGE}
 
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY cmd/resticgui/config-docker.yaml ./config.yaml
 
-COPY --chmod=700 dist/restic /usr/bin/restic
+COPY --chmod=700 dist/restic-$TARGETARCH /usr/bin/restic
 COPY dist/build front
 COPY dist/resticgui-$TARGETARCH resticgui
 
