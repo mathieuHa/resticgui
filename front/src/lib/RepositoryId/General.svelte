@@ -1,8 +1,6 @@
 <script lang="ts">
-    import BackupPolicy from '$lib/RepositoryModal/BackupPolicy.svelte';
-    import BackupSchedule from '$lib/RepositoryModal/BackupSchedule.svelte';
-import type { Repository } from '$utils/types';
-  import Number from '../Number.svelte';
+  import type { Repository } from '$utils/types';
+  import Number from '$lib/Number.svelte';
 
   export let repo: Repository;
 </script>
@@ -10,23 +8,24 @@ import type { Repository } from '$utils/types';
 <div class="flex flex-wrap justify-between gap-2 mt-5">
     <h1 class="text-xl font-bold leading-7 whitespace-nowrap">{repo.name}</h1>
     <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">
-      Created Date: {#if repo!==undefined && repo.createdAt!==undefined && (repo.createdAt.split('.').length) > 0 && repo.createdAt.split('.')[0]!==undefined}{repo.createdAt.split('.')[0].replace('T', ' ')}{/if}
+      Created Date:
+      {#if repo.createdAt?.split('.')[0]}{repo.createdAt?.split('.')[0]?.replace('T', ' ')}{/if}
     </p>
 </div>
 <br />
 
 <div class="flex flex-wrap gap-2">
-  <p class="flex items-center">
+  <p>
     initiated:
-    <span class="ml-2 block bg-{repo.initiated ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+    <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-{repo.initiated ? 'green' : 'red'}-500"/>
   </p>
-  <p class="flex items-center">
+  <p>
     valid:
-    <span class="ml-2 block bg-{repo.valid ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+    <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-{repo.valid ? 'green' : 'red'}-500"/>
   </p>
-  <p class="flex items-center">
+  <p>
     running:
-    <span class="ml-2 block bg-{repo.running ? 'green' : 'red'}-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+    <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-{repo.running ? 'green' : 'red'}-500"/>
   </p>
 </div>
 <br />
@@ -66,16 +65,16 @@ import type { Repository } from '$utils/types';
   <div class="flex flex-wrap gap-2 whitespace-nowrap">
   <p class="flex-1">
     Last:
-    <span class="ml-3">
-      {repo.edges.backupSchedule?.lastRun?.replace('+0000 UTC', '') || ''}
-    </span>
+    <span class="ml-3">{repo.edges.backupSchedule?.lastRun?.replace('+0000 UTC', '') || ''}</span>
   </p>
   <p class="flex-1">
     Next:
       {#if repo.active}
-        {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}<span class="ml-2 block bg-green-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+        {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}
+        <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-green-500"/>
       {:else}
-        Backup disabled <span class="ml-2 block bg-red-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+        Backup disabled
+        <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-red-500"/>
       {/if}
   </p>
   </div>
@@ -110,9 +109,9 @@ import type { Repository } from '$utils/types';
       Next:
       <span class="ml-3">
         {#if repo.pruneActive}
-         {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}<span class="ml-2 block bg-green-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+         {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}<span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-green-500"/>
         {:else}
-          Prune disabled <span class="ml-2 block bg-red-500 shadow rounded-full w-4 h-4 mr-5 mt-1"/>
+          Prune disabled <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-red-500"/>
         {/if}
       </span>
     </p>
@@ -129,10 +128,18 @@ import type { Repository } from '$utils/types';
 {:else if repo.edges && repo.edges.backupPolicy}
   <ul class="list-disc ml-5">
     <li>Keep the last {repo.edges.backupPolicy?.nbKeepLast} backups</li>
-    {#if repo.edges.backupPolicy?.nbKeepHours && repo.edges.backupPolicy?.nbKeepHours !== 0}<li>Keep a backup per hour for {repo.edges.backupPolicy?.nbKeepHours} hour(s)</li>{/if}
-    {#if repo.edges.backupPolicy?.nbKeepDays && repo.edges.backupPolicy?.nbKeepDays !== 0}<li>Keep a backup per day for {repo.edges.backupPolicy?.nbKeepDays} day(s)</li>{/if}
-    {#if repo.edges.backupPolicy?.nbKeepWeeks && repo.edges.backupPolicy?.nbKeepWeeks !== 0}<li>Keep a backup per week for {repo.edges.backupPolicy?.nbKeepWeeks} week(s)</li>{/if}
-    {#if repo.edges.backupPolicy?.nbKeepMonths && repo.edges.backupPolicy?.nbKeepMonths !== 0}<li>Keep a backup per month for {repo.edges.backupPolicy?.nbKeepMonths} month(s)</li>{/if}
+    {#if repo.edges.backupPolicy?.nbKeepHours && repo.edges.backupPolicy?.nbKeepHours !== 0}
+      <li>Keep a backup per hour for {repo.edges.backupPolicy?.nbKeepHours} hour(s)</li>
+    {/if}
+    {#if repo.edges.backupPolicy?.nbKeepDays && repo.edges.backupPolicy?.nbKeepDays !== 0}
+      <li>Keep a backup per day for {repo.edges.backupPolicy?.nbKeepDays} day(s)</li>
+    {/if}
+    {#if repo.edges.backupPolicy?.nbKeepWeeks && repo.edges.backupPolicy?.nbKeepWeeks !== 0}
+      <li>Keep a backup per week for {repo.edges.backupPolicy?.nbKeepWeeks} week(s)</li>
+    {/if}
+    {#if repo.edges.backupPolicy?.nbKeepMonths && repo.edges.backupPolicy?.nbKeepMonths !== 0}
+      <li>Keep a backup per month for {repo.edges.backupPolicy?.nbKeepMonths} month(s)</li>
+    {/if}
   </ul>
 {/if}
 <br />
