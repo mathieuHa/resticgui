@@ -7,7 +7,6 @@
   import Pen from '$lib/Icon/Pen.svelte';
   import Trash from '$lib/Icon/Trash.svelte';
   import RepositoryModal from '$lib/RepositoryModal/RepositoryModal.svelte';
-  import Modal from '$lib/Modal.svelte';
   import Snapshot from '$lib/Icon/Snapshot.svelte';
 
   let repos = [];
@@ -38,24 +37,20 @@
 </script>
 
 {#if removeId}
-  <Modal
-    title="Warning"
-    on:close={() => (removeId = null)}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div
+    class="modal modal-open"
+    on:click|preventDefault|stopPropagation={() => (removeId = null)}
   >
-    <div>
-      You really want to delete repository #{removeId}
-      <div class="flex gap-2 justify-end">
-        <button
-          class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
-          on:click={() => (removeId = null)}>No</button
-        >
-        <button
-          class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
-          on:click={() => removeId && onRemove(removeId)}>Yes</button
-        >
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">Warning</h3>
+      <p class="py-4">Do you want to delete repository #{removeId} ?</p>
+      <div class="modal-action">
+        <button class="btn btn-info" on:click={() => (removeId = null)}>No</button>
+        <button class="btn btn-error" on:click={() => removeId && onRemove(removeId)}>Yes</button>
       </div>
     </div>
-  </Modal>
+  </div>
 {:else if initialValues}
   <RepositoryModal
     repository={initialValues}
@@ -64,12 +59,12 @@
   />
 {/if}
 
-<div class="w-full flex flex-col gap-3 mb-6">
+<div class="w-full flex flex-col gap-5 mb-6">
   {#await reposPromise}
-    <div class="p-3 flex flex-col bg-gray-200 dark:bg-gray-800 rounded shadow-lg h-24 animate-pulse">
+    <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-lg h-24 animate-pulse">
       <div class="flex justify-between gap-2">
-        <div class="w-36 bg-gray-600 dark:bg-gray-400 h-7 rounded-md " />
-        <div class="w-24 bg-gray-600 dark:bg-gray-400 h-7 rounded-md " />
+        <div class="w-36 bg-base-50 h-7 rounded-md " />
+        <div class="w-24 bg-base-50 h-7 rounded-md " />
       </div>
       <div class="flex flex-wrap gap-2 mt-5 mb-1">
         <div class="rounded h-6 w-6 p-1 transition bg-yellow-500" />
@@ -79,12 +74,12 @@
         <div class="rounded h-6 w-6 p-1 transition bg-purple-500" />
       </div>
     </div>
-    <div class="h-12 bg-gray-200 dark:bg-gray-800 rounded shadow-lg animate-pulse" />
+    <div class="h-12 bg-base-100 rounded-xl shadow-lg animate-pulse" />
   {:then repos}
     {#each repos as repo, i}
-      <div class="p-3 flex flex-col bg-gray-200 dark:bg-gray-800 rounded shadow-lg">
+      <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-lg">
         <div class="flex flex-wrap gap-2">
-          <p class="text-lg font-bold leading-7 whitespace-nowrap {repo.active ? '' :'text-red-500'}">#{repo.id} - {repo.name}</p>
+          <p class="text-lg font-bold leading-7 whitespace-nowrap {repo.active ? '' :'text-error'}">#{repo.id} - {repo.name}</p>
           <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm ')}</p>
         </div>
 
@@ -130,14 +125,6 @@
                 <Snapshot />
               </div>
             </a>
-            <!-- <a href="/{repo.id}?tab=stats">
-              <div
-                class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
-                title="Stats"
-              >
-                <Stats />
-              </div>
-            </a> -->
           </div>
           <span class="text-{values.running ? 'green' : 'red'}-500 flex-1 pl-1 whitespace-nowrap text-right ">
             {values.running ? 'running' : 'not running'}
@@ -146,10 +133,8 @@
       </div>
     {/each}
     <button
-      on:click={() => {
-        initialValues = {};
-      }}
-      class="h-12 bg-gray-200 dark:bg-gray-800 rounded shadow-lg items-center flex justify-center cursor-pointer"
+      on:click={() => { initialValues = {}; }}
+      class="h-12 bg-base-100 rounded-xl shadow-lg items-center flex justify-center cursor-pointer"
     >
       Add a repository
     </button>

@@ -5,7 +5,7 @@
   export let repo: Repository;
 </script>
 
-<div class="flex flex-wrap justify-between gap-2 mt-5">
+<div class="flex flex-wrap justify-between gap-2">
     <h1 class="text-xl font-bold leading-7 whitespace-nowrap">{repo.name}</h1>
     <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">
       Created Date:
