@@ -43,15 +43,13 @@
 </script>
 
 <div class="mt-2 mb-10 w-full max-w-full">
-  <div class="flex justify-between flex-wrap mb-5">
+  <div class="tabs mb-5">
     {#each ["General", "Snapshots", "Logs"] as stepped, i}
       <button
         on:click={() => replaceStateWithQuery('tab', stepped.toLowerCase())}
-        class="flex-1 pb-2 px-4 {values.tab === stepped.toLowerCase()
-          ? 'border-b-2 border-gray-500 order-4 md:order-unset'
-          : 'cursor-pointer hover:border-b-2 hover:border-b-blue-500/[.5]'}"
+        class="tab tab-lg tab-lifted {values.tab === stepped.toLowerCase() && 'tab-active'}"
       >
-        <span class="rounded-xl">{stepped}</span>
+        {stepped}
       </button>
     {/each}
   </div>

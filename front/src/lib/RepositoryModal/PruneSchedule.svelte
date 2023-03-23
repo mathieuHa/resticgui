@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Input from '$lib/Input.svelte';
   import type { PruneSchedule } from '$utils/types';
 
   export let initialValues: PruneSchedule;
@@ -10,19 +9,29 @@
   $:dispatch('update', values);
 </script>
 
-<Input
-  id="cronSyntax"
-  type="text"
-  label="Cron syntax"
-  placeholder="*/30 * * * *"
-  bind:value={values.cronSyntax}
-  on:change={() => (values = { choice: 'cron', cronSyntax: values.cronSyntax, interval: '' })}
-/>
-<Input
-  id="interval"
-  type="text"
-  label="Interval"
-  placeholder="1h30"
-  bind:value={values.interval}
-  on:change={() => (values = { choice: 'interval', cronSyntax: '', interval: values.interval })}
-/>
+<div class="form-control">
+  <label for="cronSyntax" class="label">
+    <span class="label-text">Cron syntax</span> 
+  </label>
+  <input
+    id="cronSyntax"
+    type="text"
+    class="input input-bordered w-full"
+    placeholder="*/30 * * * *"
+    bind:value={values.cronSyntax}
+    on:change={() => { values = { choice: 'cron', cronSyntax: values.cronSyntax, interval: '' }; }}
+  />
+</div>
+<div class="form-control">
+  <label for="interval" class="label">
+    <span class="label-text">Interval</span> 
+  </label>
+  <input
+    id="interval"
+    type="text"
+    class="input input-bordered w-full"
+    placeholder="1h30"
+    bind:value={values.interval}
+    on:change={() => { values = { choice: 'interval', interval: values.interval, cronSyntax: '' }; }}
+  />
+</div>

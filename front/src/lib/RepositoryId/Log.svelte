@@ -1,6 +1,4 @@
 <script lang="ts">
-  import Input from '../Input.svelte';
-
   interface Log {
     __date?: string
     __time?: string
@@ -32,13 +30,12 @@
 </script>
 
 {#if displayedLogs.length > 0}
-  <Input
-    type="select"
-    label="Filter logs"
-    placeholder="All"
-    options={Object.keys(filters)}
-    bind:selected={filter}
-  />
+  <select class="select w-full mb-5" bind:value={filter}>
+    <option value="" selected>All</option>
+    {#each Object.keys(filters) as option}
+      <option>{option}</option>
+    {/each}
+  </select>
   {#each displayedLogs as log, i}
     {#if !filter || log.operation === filter}
       {#if i === 0 || log.__date === logs[i - 1]?.__date}
@@ -46,23 +43,18 @@
       {/if}
       <div class="pl-5 pt-2">
         <p><span class="underline">{log.__time?.slice(0, 8)}</span> - {log.operation}</p>
-        <div class="pt-1 pl-5 flex flex-col text-sm">
+        <div class="pt-1 pl-5 flex flex-col text-sm whitespace-normal">
           {#if log.error}
-            <pre><span class="text-red-500">err:</span> {log.error}</pre>
+            <pre class="inline break-words whitespace-normal"><span class="text-error">err:</span> {log.error}</pre>
           {/if}
           {#if log.stderr}
-            <pre><span class="text-red-500">stderr:</span> {log.stderr}</pre>
+            <pre class="inline break-words vwhitespace-normal"><span class="text-error">stderr:</span> {log.stderr}</pre>
           {/if}
           {#if log.stdout}
-            <pre><span class="text-blue-600 dark:text-blue-300">stdout:</span> {seeMore[log.id] ? log.stdout : `${log.stdout.substring(0, 100)}.....`}</pre>
-            {#if log.stdout.length > 100}
+            <pre class="inline break-words whitespace-normal"><span class="text-info">stdout:</span> {seeMore[log.id] ? log.stdout : `${log.stdout.substring(0, 100)}.....`}</pre>
+            {#if log.stdout.length > 100 && !seeMore[log.id]}
               <span>
-                <button
-                  class="bg-blue-500 hover:bg-blue-600 px-1 inline rounded mt-1"
-                  on:click={() => (seeMore[log.id] = true)}
-                >
-                  See more
-                </button>
+                <button class="btn btn-xs mt-1" on:click={() => (seeMore[log.id] = true)}>See more</button>
               </span>
             {/if}
           {/if}

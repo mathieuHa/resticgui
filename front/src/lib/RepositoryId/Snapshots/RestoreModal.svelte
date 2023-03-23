@@ -4,8 +4,6 @@
   import { page } from '$app/stores';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
-  import Modal from "$lib/Modal.svelte";
-  import Input from '$lib/Input.svelte';
 
   export let snapshotId: string;
   let path: string | null = null;
@@ -25,29 +23,35 @@
 
 </script>
 
-<Modal title="Warning" on:close={() => dispatch('close')}>
-  <div>
-    Do You really want to restore this snapshot #{snapshotId}
-    <Input
-      secondary
-      id="path"
-      label="Path to restore to"
-      type="text"
-      bind:value={path}
-    />
-    <div class="flex gap-2 justify-end">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div
+  class="modal modal-open"
+  on:click|preventDefault|stopPropagation={() => dispatch('close')}
+>
+  <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
+    <h3 class="font-bold text-lg mb-4">Restoration snapshot #{snapshotId}</h3>
+    <div class="form-control full-w">
+      <label class="label" for="path">
+        <span class="label-text">Where do you want restore files ?</span>
+      </label>
+      <label class="input-group" id="path">
+        <span>Destination</span>
+        <input type="text" placeholder="/home/restore" class="input input-bordered w-full" bind:value={path} />
+      </label>
+    </div>
+    <div class="modal-action">
       <button
-        class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
-        on:click|preventDefault|stopPropagation={() => dispatch('close')}
+        class="btn btn-info"
+        on:click={() => dispatch('close')}
       >
         No
       </button>
       <button
-        class="bg-red-400 hover:bg-red-600 text-white py-1 px-4 rounded transition"
-        on:click|preventDefault|stopPropagation={restoreSnapshot}
+        class="btn btn-error"
+        on:click={restoreSnapshot}
       >
         Yes
       </button>
     </div>
   </div>
-</Modal>
+</div>

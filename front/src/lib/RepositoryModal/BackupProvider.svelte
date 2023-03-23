@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Input from '$lib/Input.svelte';
   import { Provider, type AWSS3Provider, type B2Provider, type LocalProvider, type MinioS3Provider } from '$utils/types';
 
   export let initialValues: {
@@ -32,7 +31,7 @@
 <div class="flex justify-between">
   {#each Object.keys(providers) as backupProvider}
     <button
-      class=" mr-2"
+      class="mr-2"
       on:click|preventDefault|stopPropagation={() => (provider = backupProvider)}
     >
       <img
@@ -48,12 +47,16 @@
 <p class="my-2">{provider.replace('provider', '')}</p>
 {#if provider}
   {#each providers[provider] ?? [] as input}
-    <Input
-      id={input}
-      name={input}
-      label={input}
-      type="text"
-      bind:value={values[provider][input]}
-    />
+    <div class="form-control">
+      <label for="password" class="label">
+        <span class="label-text">{input}</span> 
+      </label>
+      <input 
+        id={input}
+        type="text"
+        bind:value={values[provider][input]}
+        class="input input-bordered w-full "
+      />
+    </div>
   {/each}
 {/if}

@@ -78,10 +78,10 @@
 </script>
 
 <p class="font-bold">Paths to backup</p>
-<p class="py-2 bg-white dark:bg-gray-800 border border-x-0 border-t-0 border-stone-500">
+<p class="py-2 bg-base-200 border border-x-0 border-t-0 border-stone-500">
   [
   {#each paths as path, i}
-    "<span class={path[0] === '!' ? 'text-orange-500' : ''}>{path[0] === '!' ? path.slice(1) : path}</span>"{i !== paths.length - 1 ? ', ' : ''}
+    "<span class={path[0] === '!' ? 'text-error' : ''}>{path[0] === '!' ? path.slice(1) : path}</span>"{i !== paths.length - 1 ? ', ' : ''}
   {/each}
   ]
 </p>

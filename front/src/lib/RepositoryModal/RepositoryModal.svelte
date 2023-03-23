@@ -8,7 +8,6 @@
   import BackupSchedule from './BackupSchedule.svelte';
   import PruneSchedule from './PruneSchedule.svelte';
   import General from './General.svelte';
-  import Modal from '../Modal.svelte';
   import BackupProvider from './BackupProvider.svelte';
   import Paths from './FileSystem/Paths.svelte';
 
@@ -82,10 +81,13 @@
   ];
   let step = stepper[0]?.name;
   let link = `/repositories/${repository.id}`;
+  let isCheckLoading = false;
+  let isSubmitLoading = false;
 
   
   let values = stepper[0]?.defaultValues(repository);
   const onCheck = async (id?: number) => {
+    isCheckLoading = true
     if (!id) return;
     try {
       await agent.get(`/${id}/valid`);
@@ -93,8 +95,10 @@
     } catch (err) {
       toasts.addToast(err?.message || 'Repository not valid', 'failure');
     }
+    isCheckLoading = false
   }
   const onSubmit = async () => {
+    isSubmitLoading = true
     let isPatch = !!repository?.id
     try {
       await agent[isPatch ? 'patch' : 'post'](isPatch ? link : '/repositories', values);
@@ -104,51 +108,61 @@
       toasts.addToast(err, 'failure');
       console.log(err);
     }
+    isSubmitLoading = false
   }
 </script>
-
-<Modal on:close={() => dispatch('close')} title="Repository">
-  <form class="max-h-full flex flex-col overflow-hidden" on:submit|preventDefault|stopPropagation={onSubmit}>
-    <div
-      title={!repository.id ? 'Give to repository a name' : null}
-      class="flex justify-between flex-wrap {!repository.id ? 'cursor-not-allowed' : ''}"
-    >
-      {#each stepper as stepped, i}
-        <button
-          class="flex-1 pb-1 px-4 rounded-t border border-gray-500 {!repository.id ? 'pointer-events-none' : ''} {step === stepped.name ? 'border-b-0 order-4 md:order-unset bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-blue-500/[.5]'} {step === stepped.name ? 'bg-white-500/[.5]' : ''}"
-          on:click|preventDefault|stopPropagation={() => {
-            step = stepped.name;
-            link = stepped.link;
-            values = stepped.defaultValues(repository);
-          }}
-        >
-          <span class="rounded-xl">{stepped.name}</span>
-        </button>
-      {/each}
-    </div>
-    <div class="overflow-y-auto relative flex-1 flex flex-col p-4 border border-t-0 border-gray-500 rounded-b bg-white dark:bg-gray-800">
-      {#each stepper as stepped}
-        {#if step === stepped.name}
-          <svelte:component
-            this={stepped.component}
-            initialValues={stepped.defaultValues(repository)}
-            on:update={({ detail }) => (values = detail)}
-          />
-        {/if}
-      {/each}
-    </div>
-    <div class="flex mt-2">
-      <div class="flex-1"></div>
-      <button
-        class="pb-1 px-5 mr-2 min-w-[100px] rounded transition bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500"
-        disabled={!repository.id}
-        on:click|preventDefault={() => onCheck(repository.id)}
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div
+  class="modal modal-open"
+  on:click|preventDefault|stopPropagation={() => dispatch('close')}
+>
+  <div class="modal-box" on:click|stopPropagation={() => {}}>
+    <form class="max-h-full flex flex-col overflow-hidden" on:submit|preventDefault|stopPropagation={onSubmit}>
+      <div
+        title={!repository.id ? 'Give to repository a name' : null}
+        class="tabs tabs-boxed rounded-t-xl rounded-b-none {!repository.id ? 'cursor-not-allowed' : ''}"
       >
-        Check
-      </button>
-      <button type="submit" class="pb-1 px-5 min-w-[100px] rounded transition bg-blue-500 hover:bg-blue-600">
-        Save
-      </button>
-    </div>
-  </form>
-</Modal>
+        {#each stepper as stepped, i}
+          <button
+            class="tab {!repository.id ? 'pointer-events-none' : ''} {step === stepped.name ? 'tab-active' : ''}"
+            on:click|preventDefault|stopPropagation={() => {
+              step = stepped.name;
+              link = stepped.link;
+              values = stepped.defaultValues(repository);
+            }}
+          >
+            {stepped.name}
+          </button>
+        {/each}
+      </div>
+      <div class="overflow-y-auto relative flex-1 flex flex-col p-4 rounded-b-xl bg-base-200">
+        {#each stepper as stepped}
+          {#if step === stepped.name}
+            <svelte:component
+              this={stepped.component}
+              initialValues={stepped.defaultValues(repository)}
+              on:update={({ detail }) => (values = detail)}
+            />
+          {/if}
+        {/each}
+      </div>
+      <div class="modal-action">
+        <button
+          class="btn btn-info {isCheckLoading ? 'loading' : ''}"
+          disabled={!repository.id || isCheckLoading}
+          on:click|preventDefault={() => onCheck(repository.id)}
+        >
+          Check
+        </button>
+        <button
+          type="submit"
+          class="btn btn-info {isSubmitLoading ? 'loading' : ''}"
+          disabled={isSubmitLoading}
+          on:click|preventDefault={() => onSubmit()}
+        >
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
