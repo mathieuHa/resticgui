@@ -1,7 +1,6 @@
 module.exports = {
 	content: [
 		'src/**/*.svelte',
-		// may also want to include HTML files
 		'src/**/*.html'
 	],
 	darkMode: 'class',
@@ -69,5 +68,8 @@ module.exports = {
 		}
 	},
 	variants: {},
-	plugins: [require('@tailwindcss/typography')]
+	plugins: [
+    require('@tailwindcss/typography'),
+    require('daisyui')
+  ]
 };
