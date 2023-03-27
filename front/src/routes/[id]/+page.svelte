@@ -3,11 +3,12 @@
 
   import { page } from '$app/stores';
 
+  import Loader from '$lib/Loader.svelte';
   import Pagination from '$lib/Pagination.svelte';
   import Log from '$lib/RepositoryId/Log.svelte';
-  import Snapshot from '$lib/RepositoryId/Snapshots/Snapshot.svelte';
+  import Snapshot from '$lib/RepositoryId/Snapshot.svelte';
   import General from '$lib/RepositoryId/General.svelte';
-  import Loader from '$lib/Loader.svelte';
+  import Toast from '$lib/Toast.svelte';
   import agent from '$utils/api';
   import { refresh } from '$utils/stores';
 
@@ -41,6 +42,8 @@
     }
   };
 </script>
+
+<Toast />
 
 <div class="mt-2 mb-10 w-full max-w-full">
   <div class="tabs mb-5">

@@ -2,6 +2,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { page } from '$app/stores';
+  import Toast from '$lib/Toast.svelte';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
 
@@ -17,7 +18,7 @@
       toasts.addToast(`Backup restore of ${snapshotId} in ${path} has started`);
       dispatch('close');
     } catch (err) {
-      toasts.addToast(err as string, 'failure');
+      toasts.addToast(err?.message, 'failure');
     }
   };
 
@@ -39,6 +40,7 @@
         <input type="text" placeholder="/home/restore" class="input input-bordered w-full" bind:value={path} />
       </label>
     </div>
+    <Toast />
     <div class="modal-action">
       <button
         class="btn btn-info"

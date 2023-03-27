@@ -2,27 +2,19 @@
   import { toasts } from '$utils/stores';
 </script>
 
-{#if $toasts.length}
-  <div class="p-6 fixed top-0 right-0 pointer-events-none max-w-[300px] flex flex-col justify-end">
-    {#each $toasts as toast}
-      <div id="toast_{toast.id}" class="relative toaster ml-auto inline-flex mb-2 bg-base-100 pointer-events-auto rounded-xl shadow-base-100">
-        <span class="flex items-center justify-center min-h-full w-8 rounded-l-xl pl-1 bg-{(toast.type === 'success' && 'blue') || (toast.type === 'failure' && 'orange') || 'red'}-500">
-          {(toast.type === 'success' && '🙂') || (toast.type === 'failure' && '☹') || '🤔'}
-        </span>
-        <p class="flex-1 px-2 py-1">{toast.value}</p>
+{#each $toasts as toast, i}
+  {#if i === $toasts.length - 1}
+    <div class="alert {toast.type === 'failure' ? 'alert-error' : 'alert-success'} mt-4">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          {#if toast.type === 'failure'}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          {:else}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          {/if}
+        </svg>
+        <span>{toast.value}</span>
       </div>
-    {/each}
-  </div>
-{/if}
-
-<style>
-  @keyframes translation {
-    0% { right: -100%; opacity: 0; }
-    10% { right: 0; opacity: 1; }
-    90% { right: 0; opacity: 1; }
-    100% { right: -100%; opacity: 0; }
-  }
-  .toaster {
-    animation: translation 5000ms;
-  }
-</style>
+    </div>
+  {/if}
+{/each}

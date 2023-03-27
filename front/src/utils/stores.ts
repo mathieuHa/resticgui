@@ -12,6 +12,7 @@ const toasts = (() => {
 
   return {
     subscribe,
+    clear: () => update(() => ([])),
     addToast: (value: string, type = 'success') => update((array: Toast[]) => {
       array.push({
         id: Math.round(Math.random() * 1000),
@@ -22,7 +23,6 @@ const toasts = (() => {
           return array2;
         }), 5000),
       });
-
       return array;
     }),
   };

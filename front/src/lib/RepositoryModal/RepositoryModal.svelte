@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import Toast from '$lib/Toast.svelte';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
   import { Provider, type Repository } from '$utils/types';
@@ -105,10 +106,16 @@
       toasts.addToast('Repository updated !');
       dispatch('refresh');
     } catch (err) {
-      toasts.addToast(err, 'failure');
+      toasts.addToast(err?.message || 'Error while updating repository', 'failure');
       console.log(err);
     }
     isSubmitLoading = false
+  }
+  const onTabChange = (stepped: typeof stepper[0]) => {
+    step = stepped.name;
+    link = stepped.link;
+    values = stepped.defaultValues(repository);
+    toasts.clear();
   }
 </script>
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -125,11 +132,7 @@
         {#each stepper as stepped, i}
           <button
             class="tab {!repository.id ? 'pointer-events-none' : ''} {step === stepped.name ? 'tab-active' : ''}"
-            on:click|preventDefault|stopPropagation={() => {
-              step = stepped.name;
-              link = stepped.link;
-              values = stepped.defaultValues(repository);
-            }}
+            on:click|preventDefault|stopPropagation={() => onTabChange(stepped)}
           >
             {stepped.name}
           </button>
@@ -146,6 +149,7 @@
           {/if}
         {/each}
       </div>
+      <Toast />
       <div class="modal-action">
         <button
           class="btn btn-info {isCheckLoading ? 'loading' : ''}"
