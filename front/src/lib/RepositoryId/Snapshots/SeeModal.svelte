@@ -12,7 +12,7 @@
   const dispatch = createEventDispatcher();
   const loadStats = (async () => agent.get(`/repositories/${$page.params.id}/stats?snapshotID=${snapshotId}`))();
 </script>
-  
+
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="modal modal-open"

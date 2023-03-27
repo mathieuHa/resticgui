@@ -42,6 +42,4 @@ Don't hesitate to put us a star on our gitlab repository
   <Nav />
 
 	<slot />
-	<div id="modals"></div>
-	<Toast />
 </main>
