@@ -1,6 +1,10 @@
 ARG NODEVERSION=18.16.0-alpine
 ARG BASEDOCKERIMAGE=alpine:3.17.4
 ARG GOVERSION=1.20.5-alpine
+<<<<<<< HEAD
+ARG TARGETARCH=amd64
+=======
+>>>>>>> origin
 
 FROM docker.io/node:${NODEVERSION} as BuilderWeb
 
@@ -37,6 +41,7 @@ RUN bzip2 -d ${BUILDDIR}/restic.bz2
 RUN	cp "${BUILDDIR}/restic" /restic
 
 ARG GOVERSION
+ARG TARGETARCH
 
 FROM docker.io/golang:${GOVERSION} as BuilderResticGui
 
@@ -52,7 +57,7 @@ COPY --from=BuilderWeb /front/build ${BUILDDIR}/internal/webui/ui
 
 WORKDIR ${BUILDDIR}
 
-RUN cd cmd/resticgui && CGO_ENABLED=1 go build -o /resticgui -ldflags '-w -s -extldflags "-static"'
+RUN cd cmd/resticgui && GOARCH=${TARGETARCH} CGO_ENABLED=1 go build -o /resticgui -ldflags '-w -s -extldflags "-static"'
 
 ARG BASEDOCKERIMAGE
 
