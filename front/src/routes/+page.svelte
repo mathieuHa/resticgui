@@ -83,7 +83,7 @@
 
         <div class="flex flex-wrap justify-between mt-5 mb-1">
           <div class="flex flex-wrap gap-2 min-w-[200px]">
-            <a href="/{repo.id}">
+            <a href="/ui/{repo.id}">
               <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
                 title="See"
@@ -107,7 +107,7 @@
             >
               <Trash />
             </button>
-            <a href="/{repo.id}?tab=logs">
+            <a href="/ui/{repo.id}?tab=logs">
               <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
                 title="Logs"
@@ -115,7 +115,7 @@
                 <Logs />
               </div>
             </a>
-            <a href="/{repo.id}?tab=snapshots">
+            <a href="/ui/{repo.id}?tab=snapshots">
               <div
                 class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-violet-500 hover:bg-violet-600"
                 title="Snapshots"

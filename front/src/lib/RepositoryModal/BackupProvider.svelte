@@ -36,7 +36,7 @@
     >
       <img
         class="h-10 w-10 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-all"
-        src="/{backupProvider}.svg"
+        src="/ui/{backupProvider}.svg"
         alt={backupProvider}
         
       />

@@ -19,7 +19,7 @@
 
 <nav class="navbar navbar-center bg-base-100 mb-5 rounded-xl">
 	<div class="navbar-start flex-1">
-		<a class="btn btn-ghost normal-case text-xl" href="/">ResticGUI</a>
+		<a class="btn btn-ghost normal-case text-xl" href="/ui">ResticGUI</a>
   </div>
 	<div class="navbar-end">
     {#if $page.params.id}

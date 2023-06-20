@@ -46,6 +46,8 @@ RUN mkdir -p ${BUILDDIR}
 
 COPY . ${BUILDDIR}
 
+COPY --from=BuilderWeb /front/build ${BUILDDIR}/internal/webui/ui
+
 WORKDIR ${BUILDDIR}
 
 RUN cd cmd/resticgui && go build -o /resticgui
@@ -74,7 +76,6 @@ RUN apt-get update && apt-get install -y \
 COPY cmd/resticgui/config-docker.yaml ./config.yaml
 
 COPY --from=BuilderRestic --chmod=700 /restic /usr/bin/restic
-COPY --from=BuilderWeb /front/build front
 COPY --from=BuilderResticGui /resticgui resticgui
 
 RUN mkdir /opt/db
