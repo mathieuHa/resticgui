@@ -5,6 +5,7 @@
   import Toast from '$lib/Toast.svelte';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
+    import Modal from '$lib/Modal.svelte';
 
   export let snapshotId: string;
   let path: string | null = null;
@@ -25,10 +26,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-  class="modal modal-open"
-  on:click|preventDefault|stopPropagation={() => dispatch('close')}
->
+<Modal on:close={() => dispatch('close')}>
   <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
     <h3 class="font-bold text-lg mb-4">Restoration snapshot #{snapshotId}</h3>
     <div class="form-control full-w">
@@ -56,4 +54,4 @@
       </button>
     </div>
   </div>
-</div>
+</Modal>

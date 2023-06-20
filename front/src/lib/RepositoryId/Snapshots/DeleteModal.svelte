@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import agent from '$utils/api';
   import { toasts } from '$utils/stores';
+    import Modal from '$lib/Modal.svelte';
 
   export let snapshotId: string;
 
@@ -23,10 +24,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-  class="modal modal-open"
-  on:click|preventDefault|stopPropagation={() => dispatch('close')}
->
+<Modal on:close={() => dispatch('close')}>
   <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
     <h3 class="font-bold text-lg">Warning</h3>
     <p class="py-4">Do you really want to delete this snapshot #{snapshotId} ?</p>
@@ -35,4 +33,4 @@
       <button class="btn btn-error" on:click={() => deleteSnapshot()}>Yes</button>
     </div>
   </div>
-</div>
+</Modal>

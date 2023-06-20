@@ -5,6 +5,7 @@
   import Loader from '$lib/Loader.svelte';
   import Number from '$lib/Number.svelte';
   import Download from '$lib/Icon/Download.svelte';
+    import Modal from '$lib/Modal.svelte';
 
   export let snapshotId: string;
   let pattern: string | null = null;
@@ -17,10 +18,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-  class="modal modal-open"
-  on:click|preventDefault|stopPropagation={() => dispatch('close')}
->
+<Modal on:close={() => dispatch('close')}>
   <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
     <h3 class="font-bold text-lg mb-4">Files snapshot #{snapshotId}</h3>
     <form class="form-control mb-4">
@@ -93,4 +91,4 @@
       <pre>{err}</pre>
     {/await}
   </div>
-</div>
+</Modal>

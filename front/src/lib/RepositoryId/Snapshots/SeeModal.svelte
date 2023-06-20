@@ -5,6 +5,7 @@
   import agent from '$utils/api';
   import Number from '$lib/Number.svelte';
   import Loader from '$lib/Loader.svelte';
+    import Modal from '$lib/Modal.svelte';
 
   export let snapshotId: string | null = null;
   export let paths: string[] = [];
@@ -14,10 +15,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-  class="modal modal-open"
-  on:click|preventDefault|stopPropagation={() => dispatch('close')}
->
+<Modal on:close={() => dispatch('close')}>
   <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
     {#await loadStats}
       <Loader size={8} />
@@ -44,4 +42,4 @@
       <pre>{err}</pre>
     {/await}
   </div>
-</div>
+</Modal>
