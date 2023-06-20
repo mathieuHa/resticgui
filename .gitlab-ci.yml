@@ -1,6 +1,7 @@
 .rule_build_release:
   rules:
     - if: $CI_COMMIT_TAG
+    - when: manual
 
 variables:
   # Package version can only contain numbers (0-9), and dots (.).
@@ -227,6 +228,11 @@ build:package:go:arm:
   variables:
     GOOS: linux
     GOARCH: arm64
+    CC: /opt/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
+  before_script:
+    - apk update && apk add make musl-dev gcc tar
+    - wget -P /opt https://musl.cc/aarch64-linux-musl-cross.tgz
+    - tar -xvf /opt/aarch64-linux-musl-cross.tgz -C /opt
   extends:
     - .build:package:go
 
