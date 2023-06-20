@@ -23,31 +23,6 @@ stages:
   - upload
   - release
 
-sonarqube-check:
-  image: 
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-    SONAR_SCANNER_OPTS: -Djavax.net.ssl.trustStore=/tmp/sonarqube-keystore.jks -Djavax.net.ssl.trustStorePassword=gitlabci
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  before_script:
-    - cat $HTTPSCA | keytool -import -noprompt -trustcacerts -alias sonarqube -storepass gitlabci -keystore /tmp/sonarqube-keystore.jks
-    - mkdir .scannerwork && chown 1000:1000 .scannerwork
-  script: 
-    - sonar-scanner
-  allow_failure: true
-  only:
-    - main
-    - dev
-  needs: [test:go]
-  dependencies: 
-    - test:go
-
 test:go:
   image: golang:${GO_VERSION}
   stage: test
