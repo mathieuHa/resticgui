@@ -126,11 +126,7 @@ ifeq ($(CI), true)
 	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
 	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) . \
-<<<<<<< Makefile
 	--build-arg BASEDOCKERIMAGE=$(BASEDOCKERIMAGE) \
-=======
-	--build-arg BASEDOCKERIMAGE=$(UBUNTUDOCKERIMAGE) \
->>>>>>> Makefile
 	--build-arg GOVERSION=$(GOVERSION)
 
 builddoc: ## Build the swagger openapi documenation
