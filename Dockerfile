@@ -1,6 +1,7 @@
 ARG NODEVERSION=18.15.0-alpine
 ARG BASEDOCKERIMAGE=ubuntu:jammy-20230301
-ARG GOVERSION=1.20.5-bullseye
+ARG GOVERSION=1.20.5-alpine
+ARG TARGETARCH=amd64
 
 FROM docker.io/node:${NODEVERSION} as BuilderWeb
 
@@ -37,8 +38,11 @@ RUN bzip2 -d ${BUILDDIR}/restic.bz2
 RUN	cp "${BUILDDIR}/restic" /restic
 
 ARG GOVERSION
+ARG TARGETARCH
 
 FROM docker.io/golang:${GOVERSION} as BuilderResticGui
+
+RUN apk update && apk add musl-dev gcc
 
 ARG BUILDDIR=./build
 
@@ -50,7 +54,7 @@ COPY --from=BuilderWeb /front/build ${BUILDDIR}/internal/webui/ui
 
 WORKDIR ${BUILDDIR}
 
-RUN cd cmd/resticgui && go build -o /resticgui
+RUN cd cmd/resticgui && GOARCH=${TARGETARCH} CGO_ENABLED=1 go build -o /resticgui -ldflags '-w -s -extldflags "-static"'
 
 ARG BASEDOCKERIMAGE
 
@@ -69,7 +73,6 @@ WORKDIR /opt
 ENV GIN_MODE=release
 
 RUN apt-get update && apt-get install -y \
-    # net-tools \
     curl \
     && rm -rf /var/lib/apt/lists/*
 

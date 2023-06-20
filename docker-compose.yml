@@ -4,7 +4,7 @@ services:
   resticgui:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.alpine
     restart: unless-stopped
     ports:
       - 3001:3030

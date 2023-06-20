@@ -2,7 +2,7 @@
 DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
 WEBDIR=front
-RESTICVERSION=0.15.1
+RESTICVERSION=0.15.2
 RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${GOARCH}.bz2
 TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
@@ -11,9 +11,11 @@ BASEDOCKERIMAGE?=alpine:latest
 NODEVERSION?=18.15.0-alpine
 ALPINEDOCKERIMAGE?=alpine:latest
 UBUNTUDOCKERIMAGE?=ubuntu:latest
-GOVERSION?=1.20.2
+GOVERSION?=1.20.5
 GOOS?=linux
 GOARCH?=amd64
+TARGETARCH?=amd64
+DOCKERFILE?=Dockerfile
 
 # OS Detection
 ifeq ($(OS),Windows_NT)
@@ -42,6 +44,9 @@ else
 			--url ${RESTICSRCURL} \
 			--output ${BUILDDIR}/restic.bz2
 	MKDIR= mkdir -p
+	ifeq ($(CI), true)
+		BUILDGOARG= -ldflags '-w -s -extldflags "-static"'
+	endif
 	ifeq ($(UNAME_S),Linux)
 		os="linux"
 	endif
@@ -108,8 +113,9 @@ buildrestic: createdir ## Download restic binary in build dir
 build: buildgo buildweb buildrestic ## Build go backend, Web and restic binary
 
 buildgo: createdir ## Build the go backend in dist dir
+	cp -r ${DISTDIR}/build/* ./internal/webui/ui/
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
-	GOOS=${GOOS} GOARCH=${GOARCH} cd cmd/resticgui && go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT}
+	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 cd cmd/resticgui && go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT} ${BUILDGOARG}
 
 buildschema: ## Build the go ent schema backend
 	go generate ./ent
@@ -126,8 +132,10 @@ ifeq ($(CI), true)
 	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
 endif
 	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) . \
-	--build-arg BASEDOCKERIMAGE=$(BASEDOCKERIMAGE) \
-	--build-arg GOVERSION=$(GOVERSION)
+	-f $(DOCKERFILE) \
+	--build-arg BASEDOCKERIMAGE=$(UBUNTUDOCKERIMAGE) \
+	--build-arg GOVERSION=$(GOVERSION) \
+	--build-arg TARGETARCH=$(TARGETARCH)
 
 builddoc: ## Build the swagger openapi documenation
 	swag init --parseInternal --parseDependency -g router.go  --dir internal/api

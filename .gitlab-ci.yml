@@ -9,10 +9,10 @@ variables:
   PACKAGE_NAME: ${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}
   PACKAGE_VERSION: $CI_COMMIT_TAG
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/release/${PACKAGE_VERSION}"
-  GO_VERSION: "1.20.2"
-  NODE_VERSION: "18.15.0-alpine"
-  UBUNTU_DOCKER_IMAGE: ubuntu:jammy-20230301
-  ALPINE_DOCKER_IMAGE: alpine:3.17.2
+  GO_VERSION: "1.20.5-alpine"
+  NODE_VERSION: "18.16.0-alpine"
+  UBUNTU_DOCKER_IMAGE: ubuntu:jammy-20230605
+  ALPINE_DOCKER_IMAGE: alpine:3.17.4
 
 stages:
   - test
@@ -23,9 +23,20 @@ stages:
   - upload
   - release
 
-test:go:
+.use:go:
   image: golang:${GO_VERSION}
+  before_script:
+    - apk update && apk add make musl-dev gcc
+
+.use:node:
+  image: node:${NODE_VERSION}
+  variables:
+    FF_USE_FASTZIP: "true"
+
+test:go:
   stage: test
+  extends:
+    - .use:go
   script:
     - make testgoci
     # - go test ./internal/... -json > test-report.out
@@ -36,7 +47,8 @@ test:go:
 
 test:go:coverage:
   stage: test
-  image: golang:${GO_VERSION}
+  extends:
+    - .use:go
   script:
     - go test ./internal/... -coverprofile=coverage.txt -covermode count
     - go get github.com/boumenot/gocover-cobertura
@@ -48,9 +60,8 @@ test:go:coverage:
         path: coverage.xml
 
 test:web:
-  image: node:${NODE_VERSION}
-  variables:
-    FF_USE_FASTZIP: "true"
+  extends:
+    - .use:node
   stage: test
   script:
     - cd front && npm ci && npm run lint
@@ -138,14 +149,12 @@ push:dockerhub:alpine:
   extends:
     - .auth:registry
 
-.build:docker:amd:
+.build:docker:
   variables:
     PLATFORMS_BUILD: --platform linux/amd64
     ARCH: amd64
   tags:
     - saas-linux-large-amd64
-    # - amd
-    # - docker
   needs:
     - job: download:restic:amd
       artifacts: true
@@ -177,7 +186,7 @@ build:docker:gitlab:ubuntu:
     FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui"
   extends:
     - .auth:registry:gitlab
-    - .build:docker:amd
+    - .build:docker
     - .build:docker:ubuntu
     - .build:docker:multiarch
 
@@ -186,47 +195,45 @@ build:docker:gitlab:alpine:
     FQ_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/resticgui"
   extends:
     - .auth:registry:gitlab
-    - .build:docker:amd
+    - .build:docker
     - .build:docker:alpine
     - .build:docker:multiarch
-
-.build:go:arm:
-  variables:
-    GOOS: linux
-    GOARCH: arm64
-
-.build:go:amd:
-  variables:
-    GOOS: linux
-    GOARCH: amd64
 
 .build:package:go:
   image: golang:${GO_VERSION}
   stage: build
   extends:
+    - .use:go
     - .rule_build_release
   script:
     - make buildgo
   artifacts:
     paths:
       - dist/
+  needs:
+    - job: build:package:web
+      artifacts: true
+  tags:
+    - saas-linux-large-amd64
 
 build:package:go:amd:
+  variables:
+    GOOS: linux
+    GOARCH: amd64
   extends:
     - .build:package:go
-    - .build:go:amd
 
 build:package:go:arm:
+  variables:
+    GOOS: linux
+    GOARCH: arm64
   extends:
     - .build:package:go
-    - .build:go:arm
 
 build:package:web:
-  image: node:${NODE_VERSION}
-  variables:
-    FF_USE_FASTZIP: "true"
   stage: build
   extends:
+    - .use:node
     - .rule_build_release
   before_script:
     - apk add make --update
@@ -235,6 +242,8 @@ build:package:web:
   artifacts:
     paths:
       - dist/build/
+  needs:
+    - job: test:web
 
 .download:restic:
   image: alpine:3.17.0
@@ -282,8 +291,6 @@ build:package:arm:
   needs:
     - job: build:package:go:arm
       artifacts: true
-    - job: build:package:web
-      artifacts: true
 
 build:package:amd:
   variables:
@@ -292,8 +299,6 @@ build:package:amd:
     - .build:package
   needs:
     - job: build:package:go:amd
-      artifacts: true
-    - job: build:package:web
       artifacts: true
 
 .upload:
