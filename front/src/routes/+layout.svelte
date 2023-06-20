@@ -21,10 +21,11 @@ Don't hesitate to put us a star on our repository ${REPO_URL}
 </script>
 
 <svelte:head>
-	<title>ResticGUI</title>
-	<meta name="theme-color" content="#facc15" media="(prefers-color-scheme: light)" />
-	<meta name="theme-color" content="#3730a3" media="(prefers-color-scheme: dark)" />
-  <link rel="canonical" href={SITE_URL} />
+  <base href="/ui">
+  <title>ResticGUI</title>
+  <meta name="theme-color" content="#facc15" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#3730a3" media="(prefers-color-scheme: dark)" />
+  <link rel="canonical" href="{SITE_URL}/ui" />
   <meta property="og:url" content={SITE_URL} />
   <meta property="og:type" content="article" />
   <meta property="og:title" content={SITE_TITLE} />

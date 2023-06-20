@@ -33,7 +33,7 @@
 <div>
   <img
     class="h-10 w-10 rounded bg-black transition-all"
-    src="/{repo.provider}.svg"
+    src="/ui/{repo.provider}.svg"
     alt={repo.provider}
   />
   <h2 class="text-md">

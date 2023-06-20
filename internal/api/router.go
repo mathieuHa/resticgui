@@ -1,17 +1,16 @@
 package api
 
 import (
-	"fmt"
+	"net/http"
 
-	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gitlab.com/resticgui/resticgui/docs"
 	"gitlab.com/resticgui/resticgui/internal/backup"
+	"gitlab.com/resticgui/resticgui/internal/webui"
 )
 
 var cr *cron.Cron
@@ -42,7 +41,13 @@ func SetupRouter() *gin.Engine {
 		}
 		backup.CreateAllScheduledBackup(cr)
 	}()
-	router.Use(static.Serve("/", static.LocalFile(viper.GetString("front.path"), true)))
+
+	router.StaticFS("/ui", http.FileSystem(http.FS(webui.UI)))
+
+	router.NoRoute(func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/ui")
+	})
+
 	router.POST(APIBasePath+"paths", GetPath)
 
 	grpRepositories := router.Group(APIBasePath + "repositories")
@@ -75,12 +80,6 @@ func SetupRouter() *gin.Engine {
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-
-	router.NoRoute(func(c *gin.Context) {
-		index := fmt.Sprintf("%s/index.html", viper.GetString("front.path"))
-		log.Debug().Msgf("Index= %v", index)
-		c.File(index)
-	})
 
 	return router
 }

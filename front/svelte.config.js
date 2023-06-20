@@ -12,6 +12,7 @@ const config = {
       pages: 'build',
       fallback: 'index.html',
     }),
+    paths: { base: '/ui' },
   },
 };
 
