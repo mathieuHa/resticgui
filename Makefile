@@ -115,7 +115,7 @@ build: buildgo buildweb buildrestic ## Build go backend, Web and restic binary
 buildgo: createdir ## Build the go backend in dist dir
 	cp -r ${DISTDIR}/build/* ./internal/webui/ui/
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
-	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 cd cmd/resticgui && go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT} ${BUILDGOARG}
+	cd cmd/resticgui && GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT} ${BUILDGOARG}
 
 buildschema: ## Build the go ent schema backend
 	go generate ./ent
