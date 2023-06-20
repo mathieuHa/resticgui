@@ -53,11 +53,11 @@ test:go:
   stage: test
   script:
     - make testgoci
-    - go test ./internal/... -json > test-report.out
+    # - go test ./internal/... -json > test-report.out
   artifacts:
     paths:
       - coverage.out
-      - test-report.out
+      # - test-report.out
 
 test:go:coverage:
   stage: test
