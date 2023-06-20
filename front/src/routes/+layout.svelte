@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '../tailwind.css';
 	import Nav from '$lib/Nav.svelte';
-	import Toast from '$lib/Toast.svelte';
 
   const SITE_URL = 'https://resticgui.io';
   const REPO_URL = 'https://gitlab.com/resticgui/resticgui'
@@ -17,7 +16,7 @@
 ██║  ██║███████╗███████║   ██║   ██║╚██████╗╚██████╔╝╚██████╔╝██║
 ╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝
 
-Don't hesitate to put us a star on our gitlab repository
+Don't hesitate to put us a star on our repository ${REPO_URL}
   `);
 </script>
 

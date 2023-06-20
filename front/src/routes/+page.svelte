@@ -8,6 +8,7 @@
   import Trash from '$lib/Icon/Trash.svelte';
   import RepositoryModal from '$lib/RepositoryModal/RepositoryModal.svelte';
   import Snapshot from '$lib/Icon/Snapshot.svelte';
+    import Modal from '$lib/Modal.svelte';
 
   let repos = [];
   let step = 0;
@@ -38,10 +39,7 @@
 
 {#if removeId}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div
-    class="modal modal-open"
-    on:click|preventDefault|stopPropagation={() => (removeId = null)}
-  >
+  <Modal on:close={() => (removeId = null)}>
     <div class="modal-box">
       <h3 class="font-bold text-lg">Warning</h3>
       <p class="py-4">Do you want to delete repository #{removeId} ?</p>
@@ -50,7 +48,7 @@
         <button class="btn btn-error" on:click={() => removeId && onRemove(removeId)}>Yes</button>
       </div>
     </div>
-  </div>
+  </Modal>
 {:else if initialValues}
   <RepositoryModal
     repository={initialValues}

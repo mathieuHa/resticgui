@@ -11,6 +11,7 @@
   import General from './General.svelte';
   import BackupProvider from './BackupProvider.svelte';
   import Paths from './FileSystem/Paths.svelte';
+  import Modal from '$lib/Modal.svelte';
 
   export let repository: Repository;
 
@@ -118,11 +119,9 @@
     toasts.clear();
   }
 </script>
+
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-  class="modal modal-open"
-  on:click|preventDefault|stopPropagation={() => dispatch('close')}
->
+<Modal on:close={() => dispatch('close')}>
   <div class="modal-box" on:click|stopPropagation={() => {}}>
     <form class="max-h-full flex flex-col overflow-hidden" on:submit|preventDefault|stopPropagation={onSubmit}>
       <div
@@ -169,4 +168,4 @@
       </div>
     </form>
   </div>
-</div>
+</Modal>

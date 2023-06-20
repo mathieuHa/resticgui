@@ -1,6 +1,6 @@
 ARG NODEVERSION=18.15.0-alpine
 ARG BASEDOCKERIMAGE=ubuntu:jammy-20230301
-ARG GOVERSION=1.20.2
+ARG GOVERSION=1.20.5-bullseye
 
 FROM docker.io/node:${NODEVERSION} as BuilderWeb
 
