@@ -1,10 +1,7 @@
 ARG NODEVERSION=18.16.0-alpine
 ARG BASEDOCKERIMAGE=alpine:3.17.4
 ARG GOVERSION=1.20.5-alpine
-<<<<<<< HEAD
 ARG TARGETARCH=amd64
-=======
->>>>>>> origin
 
 FROM docker.io/node:${NODEVERSION} as BuilderWeb
 
