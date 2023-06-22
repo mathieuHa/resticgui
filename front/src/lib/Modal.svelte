@@ -7,9 +7,12 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <dialog
   class="modal modal-open modal-top"
-  on:click|preventDefault|stopPropagation={() => dispatch('close')}
+  on:click|stopPropagation={() => dispatch('close')}
 >
-  <div class="mx-auto w-11/12 max-w-2xl px-8">
+  <div
+    class="mx-auto w-11/12 max-w-2xl sm:px-8"
+    on:click|stopPropagation={() => {}}
+  >
     <slot />
   </div>
   

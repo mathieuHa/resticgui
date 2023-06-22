@@ -122,7 +122,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <Modal on:close={() => dispatch('close')}>
-  <div class="modal-box" on:click|stopPropagation={() => {}}>
+  <div class="modal-box">
     <form class="max-h-full flex flex-col overflow-hidden" on:submit|preventDefault|stopPropagation={onSubmit}>
       <div
         title={!repository.id ? 'Give to repository a name' : null}

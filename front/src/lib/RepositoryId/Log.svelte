@@ -45,13 +45,13 @@
         <p><span class="underline">{log.__time?.slice(0, 8)}</span> - {log.operation}</p>
         <div class="pt-1 pl-5 flex flex-col text-sm whitespace-normal">
           {#if log.error}
-            <pre class="inline break-normal whitespace-pre-wrap"><span class="text-error">err:</span> {log.error}</pre>
+            <pre class="inline break-words whitespace-pre-wrap"><span class="text-error">err:</span> {log.error}</pre>
           {/if}
           {#if log.stderr}
-            <pre class="inline break-normal whitespace-pre-wrap"><span class="text-error">stderr:</span> {log.stderr}</pre>
+            <pre class="inline break-words whitespace-pre-wrap"><span class="text-error">stderr:</span> {log.stderr}</pre>
           {/if}
           {#if log.stdout}
-            <pre class="inline break-normal whitespace-pre-wrap"><span class="text-info">stdout:</span> {seeMore[log.id] ? log.stdout : `${log.stdout.substring(0, 100)}.....`}</pre>
+            <pre class="inline break-words whitespace-pre-wrap"><span class="text-info">stdout:</span> {seeMore[log.id] ? log.stdout : `${log.stdout.substring(0, 100)}.....`}</pre>
             {#if log.stdout.length > 100 && !seeMore[log.id]}
               <span>
                 <button class="btn btn-xs mt-1" on:click={() => (seeMore[log.id] = true)}>See more</button>
