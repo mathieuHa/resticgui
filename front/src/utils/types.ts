@@ -5,6 +5,11 @@ export enum Provider {
   AWSS3Provider = 'AWSS3Provider',
 }
 
+export enum Theme {
+  dark = 'dark',
+  light = 'light',
+}
+
 export interface Repository {
   id?: number
   name?: string

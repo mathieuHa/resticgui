@@ -132,7 +132,7 @@
     {/each}
     <button
       on:click={() => { initialValues = {}; }}
-      class="h-12 bg-base-100 rounded-xl shadow-lg items-center flex justify-center cursor-pointer"
+      class="btn btn-ghost h-12 bg-base-100 rounded-xl shadow-lg normal-case text-base"
     >
       Add a repository
     </button>

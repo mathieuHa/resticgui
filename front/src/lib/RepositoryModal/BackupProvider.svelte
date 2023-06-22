@@ -28,23 +28,24 @@
   $: dispatch('update', { provider, [provider]: values[provider] });
 </script>
 
-<div class="flex justify-between">
+<div class="my-2 flex gap-2 justify-between">
   {#each Object.keys(providers) as backupProvider}
     <button
-      class="mr-2"
+      class="avatar"
       on:click|preventDefault|stopPropagation={() => (provider = backupProvider)}
     >
-      <img
-        class="h-10 w-10 cursor-pointer rounded {backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-all"
-        src="/ui/{backupProvider}.svg"
-        alt={backupProvider}
-        
-      />
+      <div class="h-10 w-10 rounded">
+        <img
+          class="{backupProvider === provider ? 'bg-yellow-500' : 'bg-black'} transition-colors"
+          src="/ui/{backupProvider}.svg"
+          alt={backupProvider}
+        />
+      </div>
     </button>
    
   {/each}
 </div>
-<p class="my-2">{provider.replace('provider', '')}</p>
+<p class="my-2">{provider.replace('Provider', '')}</p>
 {#if provider}
   {#each providers[provider] ?? [] as input}
     <div class="form-control">
