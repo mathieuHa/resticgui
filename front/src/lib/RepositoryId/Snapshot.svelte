@@ -61,34 +61,34 @@
 
 <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
   {#each snapshotsList as snapshot}
-    <div class="p-3 flex flex-col max-w-sm bg-base-100 rounded-xl shadow-lg">
+    <div class="p-3 flex flex-col max-w-sm bg-base-100 rounded-xl shadow-md">
       <p class="truncate text-lg font-bold">#{snapshot.short_id}</p>
       <p class="truncate text-sm">{snapshot.username}</p>
-      <p class="truncate text-sm font-light my-2">{dayjs(snapshot.time).format('DD/MM/YYYY HH:mm ')}</p>
-      <div class="flex flex-wrap gap-2 mt-auto pt-2 min-h-8 mb-1">
+      <p class="truncate text-sm font-light my-2">{dayjs(snapshot.time).format('DD/MM/YYYY HH:mm')}</p>
+      <div class="flex flex-wrap gap-1 mt-auto pt-2 min-h-8 mb-1">
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
+          class="btn btn-circle btn-sm btn-warning"
           title="See paths"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'see')}
         >
           <Eye />
         </button>
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
+          class="btn btn-circle btn-sm btn btn-error"
           title="Delete snapshot"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'delete')}
         >
           <Trash />
         </button>
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-cyan-500 hover:bg-cyan-600"
+          class="btn btn-circle btn-sm btn btn-info"
           title="Restore snapshot"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'restore')}
         >
           <Restore />
         </button>
         <button
-          class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
+          class="btn btn-circle btn-sm btn btn-success"
           title="Snapshot files"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'files')}
         >

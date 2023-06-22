@@ -22,7 +22,7 @@
   }
 </script>
 
-<nav class="navbar navbar-center bg-base-100 mb-5 rounded-xl shadow-lg">
+<nav class="navbar navbar-center bg-base-100 mb-5 rounded-xl shadow-md">
 	<div class="navbar-start flex-1">
 		<a class="btn btn-ghost normal-case text-xl" href="/ui">ResticGUI</a>
   </div>
@@ -32,15 +32,7 @@
         class="btn btn-ghost btn-circle"
         on:click|preventDefault|stopPropagation={refresh.update}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 491.236 491.236" width="16" height="16" fill="currentColor" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  d="M55.89,262.818c-3-26-0.5-51.1,6.3-74.3c22.6-77.1,93.5-133.8,177.6-134.8v-50.4c0-2.8,3.5-4.3,5.8-2.6l103.7,76.2
-            c1.7,1.3,1.7,3.9,0,5.1l-103.6,76.2c-2.4,1.7-5.8,0.2-5.8-2.6v-50.3c-55.3,0.9-102.5,35-122.8,83.2c-7.7,18.2-11.6,38.3-10.5,59.4
-            c1.5,29,12.4,55.7,29.6,77.3c9.2,11.5,7,28.3-4.9,37c-11.3,8.3-27.1,6-35.8-5C74.19,330.618,59.99,298.218,55.89,262.818z
-            M355.29,166.018c17.3,21.5,28.2,48.3,29.6,77.3c1.1,21.2-2.9,41.3-10.5,59.4c-20.3,48.2-67.5,82.4-122.8,83.2v-50.3
-            c0-2.8-3.5-4.3-5.8-2.6l-103.7,76.2c-1.7,1.3-1.7,3.9,0,5.1l103.6,76.2c2.4,1.7,5.8,0.2,5.8-2.6v-50.4
-            c84.1-0.9,155.1-57.6,177.6-134.8c6.8-23.2,9.2-48.3,6.3-74.3c-4-35.4-18.2-67.8-39.5-94.4c-8.8-11-24.5-13.3-35.8-5
-            C348.29,137.718,346.09,154.518,355.29,166.018z"/>
-        </svg>
+        <svg width="17" height="17" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="currentColor"><path d="M12 2.181a.75.75 0 0 1 1.177-.616l4.432 3.068a.75.75 0 0 1 0 1.234l-4.432 3.068A.75.75 0 0 1 12 8.32V6a7 7 0 1 0 7 7 1 1 0 1 1 2 0 9 9 0 1 1-9-9V2.181z" /></svg>
       </button>
     {/if}
 		<a class="btn btn-ghost btn-circle" target="_blank" rel="noopener noreferrer" href="https://gitlab.com/resticgui/resticgui">

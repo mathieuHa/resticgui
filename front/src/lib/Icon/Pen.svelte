@@ -1,9 +1,7 @@
 <svg
-	class="text-gray-900 dark:text-gray-100"
 	viewBox="0 0 277.141 277.141"
-	xmlns="http://www.w3.org/2000/svg"
-	width="16px"
-	height="16px"
+	width="16"
+	height="16"
 	fill="currentColor"
 >
 	<path d="M274.804,58.127L219.013,2.335C217.507,0.829,215.498,0,213.356,0c-2.143,0-4.151,0.829-5.656,2.335L28.281,181.754

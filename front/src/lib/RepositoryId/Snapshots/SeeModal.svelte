@@ -16,7 +16,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <Modal on:close={() => dispatch('close')}>
-  <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
+  <div class="modal-box">
     {#await loadStats}
       <Loader size={8} />
     {:then stats}

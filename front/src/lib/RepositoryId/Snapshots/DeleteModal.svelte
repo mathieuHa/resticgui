@@ -25,7 +25,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <Modal on:close={() => dispatch('close')}>
-  <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
+  <div class="modal-box">
     <h3 class="font-bold text-lg">Warning</h3>
     <p class="py-4">Do you really want to delete this snapshot #{snapshotId} ?</p>
     <div class="modal-action">

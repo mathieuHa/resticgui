@@ -59,72 +59,57 @@
 
 <div class="w-full flex flex-col gap-5 mb-6">
   {#await reposPromise}
-    <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-lg h-24 animate-pulse">
+    <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md h-24 animate-pulse">
       <div class="flex justify-between gap-2">
         <div class="w-36 bg-base-50 h-7 rounded-md " />
         <div class="w-24 bg-base-50 h-7 rounded-md " />
       </div>
-      <div class="flex flex-wrap gap-2 mt-5 mb-1">
-        <div class="rounded h-6 w-6 p-1 transition bg-yellow-500" />
-        <div class="rounded h-6 w-6 p-1 transition bg-blue-500" />
-        <div class="rounded h-6 w-6 p-1 transition bg-red-500" />
-        <div class="rounded h-6 w-6 p-1 transition bg-orange-500" />
-        <div class="rounded h-6 w-6 p-1 transition bg-purple-500" />
+      <div class="flex flex-wrap gap-1 mt-5 mb-1">
+        <div class="btn btn-circle btn-sm btn-warning" />
+        <div class="btn btn-circle btn-sm btn-info" />
+        <div class="btn btn-circle btn-sm btn-error" />
+        <div class="btn btn-circle btn-sm btn-success" />
+        <div class="btn btn-circle btn-sm btn-primary" />
       </div>
     </div>
-    <div class="h-12 bg-base-100 rounded-xl shadow-lg animate-pulse" />
+    <div class="h-12 bg-base-100 rounded-xl shadow-md animate-pulse" />
   {:then repos}
     {#each repos as repo, i}
-      <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-lg">
+      <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md">
         <div class="flex flex-wrap gap-2">
           <p class="text-lg font-bold leading-7 whitespace-nowrap {repo.active ? '' :'text-error'}">#{repo.id} - {repo.name}</p>
-          <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm ')}</p>
+          <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm')}</p>
         </div>
 
         <div class="flex flex-wrap justify-between mt-5 mb-1">
-          <div class="flex flex-wrap gap-2 min-w-[200px]">
-            <a href="/ui/{repo.id}">
-              <div
-                class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-yellow-500 hover:bg-yellow-600"
-                title="See"
-              >
-                <Eye />
-              </div>
+          <div class="flex flex-wrap gap-1">
+            <a href="/ui/{repo.id}" class="btn btn-circle btn-sm btn-warning" title="See">
+              <Eye />
             </a>
             <button
-              class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-blue-500 hover:bg-blue-600"
+              class="btn btn-circle btn-sm btn-info"
               title="Update"
-              on:click|preventDefault|stopPropagation={() => {
+              on:click|stopPropagation={() => {
                 initialValues = Object.assign({}, repo);
               }}
             >
               <Pen />
             </button>
             <button
-              class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-red-500 hover:bg-red-600"
+              class="btn btn-circle btn-sm btn-error"
               title="Remove"
-              on:click|preventDefault|stopPropagation={() => (removeId = repo.id)}
+              on:click|stopPropagation={() => (removeId = repo.id)}
             >
               <Trash />
             </button>
-            <a href="/ui/{repo.id}?tab=logs">
-              <div
-                class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-orange-500 hover:bg-orange-600"
-                title="Logs"
-              >
-                <Logs />
-              </div>
+            <a href="/ui/{repo.id}?tab=logs" class="btn btn-circle btn-sm btn-success" title="Logs">
+              <Logs />
             </a>
-            <a href="/ui/{repo.id}?tab=snapshots">
-              <div
-                class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-violet-500 hover:bg-violet-600"
-                title="Snapshots"
-              >
-                <Snapshot />
-              </div>
+            <a href="/ui/{repo.id}?tab=snapshots" class="btn btn-circle btn-sm btn-primary" title="Snapshots">
+              <Snapshot />
             </a>
           </div>
-          <span class="text-{values.running ? 'green' : 'red'}-500 flex-1 pl-1 whitespace-nowrap text-right ">
+          <span class="{values.running ? '' : 'text-red-500'} flex-1 pl-1 whitespace-nowrap text-right ">
             {values.running ? 'running' : 'not running'}
           </span>
         </div>
@@ -132,7 +117,7 @@
     {/each}
     <button
       on:click={() => { initialValues = {}; }}
-      class="btn btn-ghost h-12 bg-base-100 rounded-xl shadow-lg normal-case text-base"
+      class="btn btn-ghost h-12 bg-base-100 rounded-xl shadow-md normal-case text-base"
     >
       Add a repository
     </button>

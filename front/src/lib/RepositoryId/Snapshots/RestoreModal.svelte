@@ -27,7 +27,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <Modal on:close={() => dispatch('close')}>
-  <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
+  <div class="modal-box">
     <h3 class="font-bold text-lg mb-4">Restoration snapshot #{snapshotId}</h3>
     <div class="form-control full-w">
       <label class="label" for="path">

@@ -1,11 +1,11 @@
 <script lang="ts">
+  import dayjs from 'dayjs';
   import { createEventDispatcher } from 'svelte';
   import { page } from '$app/stores';
   import agent from '$utils/api';
   import Loader from '$lib/Loader.svelte';
   import Number from '$lib/Number.svelte';
-  import Download from '$lib/Icon/Download.svelte';
-    import Modal from '$lib/Modal.svelte';
+  import Modal from '$lib/Modal.svelte';
 
   export let snapshotId: string;
   let pattern: string | null = null;
@@ -19,7 +19,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <Modal on:close={() => dispatch('close')}>
-  <div class="modal-box" on:click|preventDefault|stopPropagation={() => {}}>
+  <div class="modal-box">
     <h3 class="font-bold text-lg mb-4">Files snapshot #{snapshotId}</h3>
     <form class="form-control mb-4">
       <div class="input-group">
@@ -41,42 +41,47 @@
       <Loader size={8} />
     {:then files}
       {#if files && files.length > 0}
-        <div class="overflow-y-auto relative flex flex-col gap-1 sm:text-center">
-          <div class="sticky top-0 pb-1 sm:flex bg-base-200 border border-x-0 border-t-0 border-stone-500">
-            <p class="flex-1 font-bold">Type</p>
-            <p class="flex-1 font-bold">Size</p>
-            <p class="flex-initial w-48 font-bold">Mod.Time</p>
-            <p class="flex-initial w-64 text-left font-bold">Path</p>
-            <p class="flex-1 font-bold">Download</p>
-          </div>
-          {#each files as file}
-            <div class="sm:flex sm:text-center p-1 sm:p-0 border border-x-0 border-t-0 border-stone-500/75">
-              <p class="flex-1" title={file.type == 'dir' ? 'folder' : 'file'}>
-                {file.type == 'dir' ? '📂' : '📄'}
-              </p>
-              <p class="flex-1">
-                {#if file.size}
-                  <Number number={file.size}/>
-                {:else}
-                  <span>--</span>
-                {/if}
-              </p>
-              <p class="flex-initial w-48">
-                {file.mtime.split('.')[0].replace('T', ' ')}
-              </p>
-              <p class="flex-initial w-64 text-left">
-                {file.path}
-              </p>
-              <div class="flex-1 flex sm:justify-center my-1 sm:mt-0">
-                <a
-                  class="rounded h-6 w-6 text-gray-900 dark:text-gray-100 p-1 transition bg-green-500 hover:bg-green-600"
-                  href="/api/v1/repositories/{$page.params.id}/snapshots/{snapshotId}/download?path={file.path}"
-                >
-                  <Download />
-                </a>
-              </div>
-            </div>
-          {/each}
+        <div class="overflow-x-auto w-full">
+          <table class="table table-sm table-zebra table-pin-rows w-full">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th class="pl-0">Type</th>
+                <th class="pl-0">Size</th>
+                <th class="pl-0">Mod.Time</th>
+                <th class="pl-0">Path</th>
+                <th class="px-0 flex justify-end">Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each files as file}
+                <tr>
+                  <th class="pl-0">{file.type == 'dir' ? '📂' : '📄'}</th>
+                  <td class="pl-0">
+                    {#if file.size}
+                      <Number number={file.size}/>
+                    {:else}
+                      <span>--</span>
+                    {/if}
+                  </td>
+                  <td class="pl-0">{dayjs(file.mtime).format('DD/MM/YYYY HH:mm')}</td>
+                  <td class="pl-0">{file.path}</td>
+                  <td class="px-0 flex justify-end">
+                    <a
+                      class="btn btn-circle btn-xs btn btn-success"
+                      href="/api/v1/repositories/{$page.params.id}/snapshots/{snapshotId}/download?path={file.path}"
+                      download={file.path.split('/').pop()}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
         </div>
       {:else if pattern && pattern != ""}
         <p>
