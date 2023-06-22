@@ -46,11 +46,11 @@
 <Toast />
 
 <div class="mt-2 mb-10 w-full max-w-full">
-  <div class="tabs mb-5">
+  <div class="tabs tabs-boxed bg-base-100 mb-5 rounded-xl ">
     {#each ["General", "Snapshots", "Logs"] as stepped, i}
       <button
         on:click={() => replaceStateWithQuery('tab', stepped.toLowerCase())}
-        class="tab tab-lg tab-lifted {values.tab === stepped.toLowerCase() && 'tab-active'}"
+        class=" tab tab-lg {values.tab === stepped.toLowerCase() && 'tab-active'} shadow-transparent border-0 border-none"
       >
         {stepped}
       </button>

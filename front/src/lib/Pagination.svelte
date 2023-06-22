@@ -9,15 +9,15 @@
   const dispatch = createEventDispatcher();
 </script>
 
-<div class="flex justify-center gap-2">
+<div class="flex justify-center gap-2 mt-4">
   <button
-    class="{page < 1 && 'hidden'} bg-blue-500 hover:bg-blue-600 transition px-1 inline rounded"
+    class="btn btn-ghost {page < 1 && 'hidden'}"
     on:click={() => dispatch('change', page - 1)}
   >
     previous 
   </button>
   <button
-    class="{numberItem < itemPerPage && 'hidden'} bg-blue-500 hover:bg-blue-600 transition px-1 inline rounded"
+    class="btn btn-ghost {numberItem < itemPerPage && 'hidden'}"
     on:click={() => dispatch('change', page + 1)}
   >
     next

@@ -14,28 +14,26 @@
 </div>
 <br />
 
-<div class="flex flex-wrap gap-2">
-  <p>
-    initiated:
-    <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-{repo.initiated ? 'green' : 'red'}-500"/>
-  </p>
-  <p>
-    valid:
-    <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-{repo.valid ? 'green' : 'red'}-500"/>
-  </p>
-  <p>
-    running:
-    <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-{repo.running ? 'green' : 'red'}-500"/>
-  </p>
+<div class="stats auto-cols-fr shadow-xl w-full font-bold">
+  <div class="stat">
+    <p class="sm:text-xl {repo.initiated ? '' : 'text-red-500'}">initiated</p>
+  </div>
+  <div class="stat">
+    <p class="sm:text-xl {repo.valid ? '' : 'text-red-500'}">valid</p>
+  </div>
+  <div class="stat">
+    <p class="sm:text-xl {repo.running ? '' : 'text-red-500'}">running</p>
+  </div>
 </div>
+<br />
 <br />
 
 <div>
-  <img
-    class="h-10 w-10 rounded bg-black transition-all"
-    src="/ui/{repo.provider}.svg"
-    alt={repo.provider}
-  />
+  <div class="avatar rounded">
+    <div class="h-10 w-10 rounded bg-black">
+      <img src="/ui/{repo.provider}.svg" alt={repo.provider} />
+    </div>
+  </div>
   <h2 class="text-md">
     <span class="font-bold mr-3">Provider:</span>
     {#if repo.provider}
@@ -47,78 +45,42 @@
 </div>
 <br />
 
-<h2 class="text-md font-bold">Backup schedule</h2>
-{#if repo.edges && repo.edges.backupSchedule}
-  {#if repo.edges.backupSchedule.choice === "interval"}
-  <p>
-    Interval:
-    <span class="ml-3">{repo.edges.backupSchedule.interval}</span>
-  </p>
-  {:else if repo.edges.backupSchedule.choice === "cron"}
-  <p>
-    Cron:
-    <span class="ml-3">{repo.edges.backupSchedule.cronSyntax}</span>
-  </p>
-  {:else}
-  <p>No planning set</p>
-  {/if}
-  <div class="flex flex-wrap gap-2 whitespace-nowrap">
-  <p class="flex-1">
-    Last:
-    <span class="ml-3">{repo.edges.backupSchedule?.lastRun?.replace('+0000 UTC', '') || ''}</span>
-  </p>
-  <p class="flex-1">
-    Next:
-      {#if repo.active}
-        {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}
-        <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-green-500"/>
+<div class="stats stats-vertical sm:stats-horizontal auto-cols-fr shadow-xl w-full">
+  <div class="stat">
+    {#if repo.edges && repo.edges.backupSchedule}
+      {#if repo.edges.backupSchedule.choice === "interval"}
+          <p class="stat-title">Backup Interval</p>
+          <p class="stat-value {repo.pruneActive ? '' : 'text-red-500'}">{repo.edges.backupSchedule.interval}</p>
+      {:else if repo.edges.backupSchedule.choice === "cron"}
+        <p class="stat-title">Backup Cron</p>
+        <p class="stat-value {repo.pruneActive ? '' : 'text-red-500'}">{repo.edges.backupSchedule.cronSyntax}</p>
       {:else}
-        Backup disabled
-        <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-red-500"/>
+        <p>--</p>
       {/if}
-  </p>
+      <p class="stat-desc">Last: {repo.edges.backupSchedule?.lastRun?.replace('+0000 UTC', '') || ''}</p>
+      <p class="stat-desc">Next: {repo.edges.backupSchedule?.nextRun?.replace('+0000 UTC', '') || ''}</p>
+    {:else}
+    <p class="stat-title">Backup schedule not setup</p>
+    {/if}
   </div>
-{:else}
-  Schedule for backup is not setup
-{/if}
-  
-<br />
-<h2 class="text-md font-bold">Prune schedule</h2>
-{#if repo.edges && repo.edges.pruneSchedule} 
-  {#if repo.edges.pruneSchedule.choice === "interval"}
-    <p>
-      Interval:
-      <span class="ml-3">{repo.edges.pruneSchedule.interval}</span>
-    </p>
-  {:else if repo.edges.pruneSchedule.choice === "cron"}
-    <p>
-      Cron:
-      <span class="ml-3">{repo.edges.pruneSchedule.cronSyntax}</span>
-    </p>
-  {:else}
-    <p>No planning set</p>
-  {/if}
-  <div class="flex flex-wrap gap-2 whitespace-nowrap">
-    <p class="flex-1">
-      Last:
-      <span class="ml-3">
-        {repo.edges.pruneSchedule?.lastRun?.replace('+0000 UTC', '') || ''}
-      </span>
-    </p>
-    <p class="flex-1">
-      Next:
-      <span class="ml-3">
-        {#if repo.pruneActive}
-         {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}<span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-green-500"/>
-        {:else}
-          Prune disabled <span class="inline-block shadow rounded-full w-4 h-4 ml-2 mr-5 -mb-1 bg-red-500"/>
-        {/if}
-      </span>
-    </p>
+  <div class="stat">
+    {#if repo.edges && repo.edges.pruneSchedule}
+      {#if repo.edges.pruneSchedule.choice === "interval"}
+          <p class="stat-title">Prune Interval</p>
+          <p class="stat-value {repo.pruneActive ? '' : 'text-red-500'}">{repo.edges.pruneSchedule.interval}</p>
+      {:else if repo.edges.pruneSchedule.choice === "cron"}
+        <p class="stat-title">Prune Cron</p>
+        <p class="stat-value {repo.pruneActive ? '' : 'text-red-500'}">{repo.edges.pruneSchedule.cronSyntax}</p>
+      {:else}
+        <p>--</p>
+      {/if}
+      <p class="stat-desc">Last: {repo.edges.pruneSchedule?.lastRun?.replace('+0000 UTC', '') || ''}</p>
+      <p class="stat-desc">Next: {repo.edges.pruneSchedule?.nextRun?.replace('+0000 UTC', '') || ''}</p>
+    {:else}
+      <p class="stat-title">Prune schedule not setup</p>
+    {/if}
   </div>
-{:else}
-  Schedule for prune is not setup
-{/if}
+</div>
 <br />
 <br />
 

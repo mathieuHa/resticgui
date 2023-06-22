@@ -4,6 +4,6 @@
 
 @layer components {
   .input {
-    @apply placeholder:italic text-accent-content  
+    @apply placeholder:italic  
   }
 }
