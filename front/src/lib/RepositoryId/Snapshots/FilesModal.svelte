@@ -68,7 +68,7 @@
                   <td class="pl-0">{file.path}</td>
                   <td class="px-0 flex justify-end">
                     <a
-                      class="btn btn-circle btn-xs btn btn-success"
+                      class="btn btn-square btn-xs btn btn-success"
                       href="/api/v1/repositories/{$page.params.id}/snapshots/{snapshotId}/download?path={file.path}"
                       download={file.path.split('/').pop()}
                     >
