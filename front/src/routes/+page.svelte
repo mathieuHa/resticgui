@@ -59,53 +59,50 @@
 
 <div class="w-full flex flex-col gap-5 mb-6">
   {#await reposPromise}
-    <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md h-24 animate-pulse">
-      <div class="flex justify-between gap-2">
-        <div class="w-36 bg-base-50 h-7 rounded-md " />
-        <div class="w-24 bg-base-50 h-7 rounded-md " />
-      </div>
-      <div class="flex flex-wrap gap-1 mt-5 mb-1">
-        <div class="btn btn-circle btn-sm btn-warning" />
-        <div class="btn btn-circle btn-sm btn-info" />
-        <div class="btn btn-circle btn-sm btn-error" />
-        <div class="btn btn-circle btn-sm btn-success" />
-        <div class="btn btn-circle btn-sm btn-primary" />
+    <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md animate-pulse">
+      <div><div class="w-36 h-5 my-1 bg-neutral-content rounded-xl" /></div>
+      <div class="flex flex-wrap gap-2 mt-5 mb-1">
+        <div class="btn btn-square btn-sm btn-warning" />
+        <div class="btn btn-square btn-sm btn-info" />
+        <div class="btn btn-square btn-sm btn-error" />
+        <div class="btn btn-square btn-sm btn-success" />
+        <div class="btn btn-square btn-sm btn-primary" />
       </div>
     </div>
-    <div class="h-12 bg-base-100 rounded-xl shadow-md animate-pulse" />
+    <div class="btn btn-ghost bg-base-100 hover:bg-base-200 rounded-xl shadow-md animate-pulse" />
   {:then repos}
     {#each repos as repo, i}
       <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md">
-        <div class="flex flex-wrap gap-2">
-          <p class="text-lg font-bold leading-7 whitespace-nowrap {repo.active ? '' :'text-error'}">#{repo.id} - {repo.name}</p>
-          <p class="flex-1 text-sm font-light leading-7 text-right whitespace-nowrap">{dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm')}</p>
+        <div class="flex flex-wrap h-7 items-end gap-2">
+          <p class="text-lg font-bold whitespace-nowrap {repo.active ? '' :'text-error'}">#{repo.id} - {repo.name}</p>
+          <p class="flex-1 text-sm font-light text-right whitespace-nowrap">
+            {dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm')}
+          </p>
         </div>
 
         <div class="flex flex-wrap justify-between mt-5 mb-1">
-          <div class="flex flex-wrap gap-1">
-            <a href="/ui/{repo.id}" class="btn btn-circle btn-sm btn-warning" title="See">
+          <div class="flex flex-wrap gap-2">
+            <a href="/ui/{repo.id}" class="btn btn-square btn-sm btn-warning" title="See">
               <Eye />
             </a>
             <button
-              class="btn btn-circle btn-sm btn-info"
+              class="btn btn-square btn-sm btn-info"
               title="Update"
-              on:click|stopPropagation={() => {
-                initialValues = Object.assign({}, repo);
-              }}
+              on:click|stopPropagation={() => (initialValues = Object.assign({}, repo))}
             >
               <Pen />
             </button>
             <button
-              class="btn btn-circle btn-sm btn-error"
+              class="btn btn-square btn-sm btn-error"
               title="Remove"
               on:click|stopPropagation={() => (removeId = repo.id)}
             >
               <Trash />
             </button>
-            <a href="/ui/{repo.id}?tab=logs" class="btn btn-circle btn-sm btn-success" title="Logs">
+            <a href="/ui/{repo.id}?tab=logs" class="btn btn-square btn-sm btn-success" title="Logs">
               <Logs />
             </a>
-            <a href="/ui/{repo.id}?tab=snapshots" class="btn btn-circle btn-sm btn-primary" title="Snapshots">
+            <a href="/ui/{repo.id}?tab=snapshots" class="btn btn-square btn-sm btn-primary" title="Snapshots">
               <Snapshot />
             </a>
           </div>
@@ -117,7 +114,7 @@
     {/each}
     <button
       on:click={() => { initialValues = {}; }}
-      class="btn btn-ghost h-12 bg-base-100 rounded-xl shadow-md normal-case text-base"
+      class="btn btn-ghost bg-base-100 hover:bg-base-200 rounded-xl shadow-md normal-case text-base"
     >
       Add a repository
     </button>

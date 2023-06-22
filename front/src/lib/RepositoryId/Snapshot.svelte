@@ -65,30 +65,30 @@
       <p class="truncate text-lg font-bold">#{snapshot.short_id}</p>
       <p class="truncate text-sm">{snapshot.username}</p>
       <p class="truncate text-sm font-light my-2">{dayjs(snapshot.time).format('DD/MM/YYYY HH:mm')}</p>
-      <div class="flex flex-wrap gap-1 mt-auto pt-2 min-h-8 mb-1">
+      <div class="flex flex-wrap gap-2 mt-auto pt-2 min-h-8 mb-1">
         <button
-          class="btn btn-circle btn-sm btn-warning"
+          class="btn btn-square btn-sm btn-warning"
           title="See paths"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'see')}
         >
           <Eye />
         </button>
         <button
-          class="btn btn-circle btn-sm btn btn-error"
+          class="btn btn-square btn-sm btn btn-error"
           title="Delete snapshot"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'delete')}
         >
           <Trash />
         </button>
         <button
-          class="btn btn-circle btn-sm btn btn-info"
+          class="btn btn-square btn-sm btn btn-info"
           title="Restore snapshot"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'restore')}
         >
           <Restore />
         </button>
         <button
-          class="btn btn-circle btn-sm btn btn-success"
+          class="btn btn-square btn-sm btn btn-success"
           title="Snapshot files"
           on:click|preventDefault|stopPropagation={() => setModalOpened(snapshot, 'files')}
         >

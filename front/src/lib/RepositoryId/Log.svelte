@@ -51,7 +51,9 @@
             <pre class="inline break-words whitespace-pre-wrap"><span class="text-error">stderr:</span> {log.stderr}</pre>
           {/if}
           {#if log.stdout}
-            <pre class="inline break-words whitespace-pre-wrap"><span class="text-info">stdout:</span> {seeMore[log.id] ? log.stdout : `${log.stdout.substring(0, 100)}.....`}</pre>
+            <pre class="inline break-words whitespace-pre-wrap"><span class="text-info">stdout:</span> {
+              log.stdout.length <= 100 || seeMore[log.id] ? log.stdout : `${log.stdout.substring(0, 100)}......`
+            }</pre>
             {#if log.stdout.length > 100 && !seeMore[log.id]}
               <span>
                 <button class="btn btn-xs mt-1" on:click={() => (seeMore[log.id] = true)}>See more</button>
