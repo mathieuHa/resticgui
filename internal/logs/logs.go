@@ -9,8 +9,9 @@ import (
 func Initlogs() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	// Set log to debug
-	debug := viper.GetBool("log.debug")
-	level := viper.GetInt("log.level")
+	viper.SetDefault("logs.level", int(zerolog.InfoLevel))
+	debug := viper.GetBool("logs.debug")
+	level := viper.GetInt("logs.level")
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.Level(level))
 	if debug {

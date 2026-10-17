@@ -124,7 +124,6 @@ func BackupRepository(id int, cr *cron.Cron) (out string) {
 			log.Err(err).Msg("Error update db")
 		}
 	}
-	log.Debug().Msgf("pass = %v", r.Password)
 	database.LogCommand(r.ID, "GetSnapshots", stdout, stderr, errCmd, ctx)
 
 	// condition for uninitialized repository

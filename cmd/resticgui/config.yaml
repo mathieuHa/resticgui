@@ -1,5 +1,5 @@
 logs:
-  debug: true
+  debug: false
   level: 1
 
 db:

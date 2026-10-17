@@ -82,11 +82,11 @@ The `config.yaml` must be place in the same directory as the resticgui binary.
 
 - `logs.debug` 
   - bool
-  - default: true
-  - enable the debug logs
+  - default: false
+  - enable the debug logs (overrides `logs.level`)
 - `logs.level`
-  - string
-  - default: 1, expected values are: 1, 2
+  - int
+  - default: 1, zerolog levels: 0 debug, 1 info, 2 warn, 3 error
 - `db.name`
   - string
   - default: `resticgui.db`
@@ -112,7 +112,7 @@ The `config.yaml` must be place in the same directory as the resticgui binary.
 ```yaml
 # configuration
 logs:
-  debug: true
+  debug: false
   level: 1
 
 db:
