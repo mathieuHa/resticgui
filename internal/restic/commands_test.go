@@ -177,6 +177,12 @@ func TestForgetSnapshots(t *testing.T) {
 	require.NoError(t, f.runner.ForgetSnapshots(context.Background(), f.repo, []string{"f0feba17", "-not-a-flag"}, true))
 	assert.Equal(t, []string{"forget", "--json", "--prune", "--", "f0feba17", "-not-a-flag"}, f.invocation().Args)
 	assert.Error(t, f.runner.ForgetSnapshots(context.Background(), f.repo, nil, false))
+
+	missing := newFake(t, scenario{Stderr: []string{`Ignoring "deadbeef": no matching ID found for prefix "deadbeef"`}})
+	err := missing.runner.ForgetSnapshots(context.Background(), missing.repo, []string{"f0feba17", "deadbeef"}, false)
+	var notFound *SnapshotNotFoundError
+	require.ErrorAs(t, err, &notFound)
+	assert.Equal(t, []string{"deadbeef"}, notFound.IDs)
 }
 
 func TestCheck(t *testing.T) {

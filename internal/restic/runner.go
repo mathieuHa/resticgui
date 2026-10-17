@@ -141,6 +141,8 @@ type call struct {
 	stdout io.Writer
 	// onLine, when set, is called with every stdout line instead.
 	onLine func(line []byte)
+	// onStderr, when set, is called with every stderr line.
+	onStderr func(line string)
 }
 
 // run executes c and returns an *Error unless restic exits with code 0.
@@ -183,7 +185,7 @@ func (r *Runner) run(ctx context.Context, repo *Repo, c call) error {
 	if keep == 0 {
 		keep = 50
 	}
-	stderr := &stderrTail{max: keep}
+	stderr := &stderrTail{max: keep, onLine: c.onStderr}
 	cmd.Stderr = stderr
 
 	err := cmd.Run()
@@ -286,6 +288,7 @@ var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;?]*[A-Za-z]`)
 type stderrTail struct {
 	mu      sync.Mutex
 	max     int
+	onLine  func(string)
 	partial []byte
 	tail    []string
 }
@@ -309,6 +312,9 @@ func (s *stderrTail) add(line string) {
 	line = strings.TrimSpace(ansiEscape.ReplaceAllString(line, ""))
 	if line == "" {
 		return
+	}
+	if s.onLine != nil {
+		s.onLine(line)
 	}
 	s.tail = append(s.tail, line)
 	if len(s.tail) > s.max {

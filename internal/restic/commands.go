@@ -316,7 +316,30 @@ func (r *Runner) ForgetSnapshots(ctx context.Context, repo *Repo, ids []string, 
 	}
 	args = append(args, "--")
 	args = append(args, ids...)
-	return r.run(ctx, repo, call{command: "forget", args: args, stdout: io.Discard})
+	// restic exits 0 when an ID matches no snapshot, after printing
+	// `Ignoring "ID": no matching ID found for prefix "ID"`.
+	var ignored []string
+	err := r.run(ctx, repo, call{command: "forget", args: args, stdout: io.Discard, onStderr: func(line string) {
+		if m := ignoredSnapshot.FindStringSubmatch(line); m != nil {
+			ignored = append(ignored, m[1])
+		}
+	}})
+	if err == nil && len(ignored) > 0 {
+		return &SnapshotNotFoundError{IDs: ignored}
+	}
+	return err
+}
+
+var ignoredSnapshot = regexp.MustCompile(`^Ignoring "(.*)": no matching ID found`)
+
+// SnapshotNotFoundError lists the IDs ForgetSnapshots could not find. The
+// other snapshots were forgotten.
+type SnapshotNotFoundError struct {
+	IDs []string
+}
+
+func (e *SnapshotNotFoundError) Error() string {
+	return "restic forget: no snapshot matches " + strings.Join(e.IDs, ", ")
 }
 
 // Prune removes unreferenced data.
