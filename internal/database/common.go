@@ -7,8 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/spf13/viper"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 var db *ent.Client

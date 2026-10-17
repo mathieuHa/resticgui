@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/resticgui/resticgui/ent"
+	"github.com/mathieuHa/resticgui/ent"
 )
 
 // The AWSS3ProviderFunc type is an adapter to allow the use of ordinary

@@ -15,11 +15,16 @@ jobs:
           go-version-file: go.mod
       - name: Vet
         run: go vet ./...
+      - name: Format
+        run: test -z "$(gofmt -l cmd internal)" || (gofmt -l cmd internal && exit 1)
+      - uses: sqlc-dev/setup-sqlc@v4
+        with:
+          sqlc-version: "1.29.0"
+      - name: Generated queries are up to date
+        run: sqlc diff -f internal/store/sqlc.yaml
       # Packages share testdata/resticgui.db, so they must not run in parallel.
-      # -race is left out until the API test harness stops starting a scheduler
-      # goroutine per test (it races on viper config); see phase 1 of the plan.
       - name: Test
-        run: go test -p 1 ./internal/... -coverprofile=coverage.out
+        run: go test -p 1 -race ./internal/... -coverprofile=coverage.out
       - name: Coverage
         run: go tool cover -func=coverage.out | tail -1
 

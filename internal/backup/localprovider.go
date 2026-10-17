@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func validLocalProvider(provider *ent.LocalProvider) (valid bool, err error) {

@@ -13,12 +13,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/backup"
+	"github.com/mathieuHa/resticgui/internal/database"
+	Models "github.com/mathieuHa/resticgui/internal/models"
+	"github.com/mathieuHa/resticgui/internal/utils"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/backup"
-	"gitlab.com/resticgui/resticgui/internal/database"
-	Models "gitlab.com/resticgui/resticgui/internal/models"
-	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 func checkRepositoryByID(id int, ctx context.Context, c *gin.Context) (err error) {

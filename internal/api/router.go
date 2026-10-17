@@ -4,13 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mathieuHa/resticgui/docs"
+	"github.com/mathieuHa/resticgui/internal/backup"
+	"github.com/mathieuHa/resticgui/internal/webui"
 	"github.com/robfig/cron/v3"
-	"github.com/rs/zerolog/log"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"gitlab.com/resticgui/resticgui/docs"
-	"gitlab.com/resticgui/resticgui/internal/backup"
-	"gitlab.com/resticgui/resticgui/internal/webui"
 )
 
 var cr *cron.Cron
@@ -33,14 +32,10 @@ func SetupRouter() *gin.Engine {
 	// define router
 	router := gin.Default()
 
-	go func() {
-		cr = cron.New()
-		cr.Start()
-		for _, value := range cr.Entries() {
-			log.Info().Msgf("%v", value.ID)
-		}
-		backup.CreateAllScheduledBackup(cr)
-	}()
+	// The scheduler is created before the handlers can run, since they read cr.
+	cr = cron.New()
+	cr.Start()
+	go backup.CreateAllScheduledBackup(cr)
 
 	router.StaticFS("/ui", http.FileSystem(http.FS(webui.UI)))
 

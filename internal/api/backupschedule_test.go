@@ -9,11 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/ent/backupschedule"
+	"github.com/mathieuHa/resticgui/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/ent/backupschedule"
-	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 func TestCreateBackupSchedule(t *testing.T) {

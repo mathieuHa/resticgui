@@ -11,10 +11,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/database"
+	"github.com/mathieuHa/resticgui/internal/utils"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/database"
-	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 func TestQueryRepositories(t *testing.T) {

@@ -3,8 +3,8 @@ package backup
 import (
 	"errors"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func validAWSS3Provider(provider *ent.AWSS3Provider) (valid bool, err error) {

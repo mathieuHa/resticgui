@@ -3,8 +3,8 @@ package database
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func UpdateAWSS3ProviderDB(s3Provider ent.AWSS3Provider, id int, ctx context.Context) (s3 *ent.AWSS3Provider, err error) {

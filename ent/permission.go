@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/permission"
+	"github.com/mathieuHa/resticgui/ent/permission"
 )
 
 // Permission is the model entity for the Permission schema.

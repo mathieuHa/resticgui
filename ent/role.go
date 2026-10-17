@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/role"
+	"github.com/mathieuHa/resticgui/ent/role"
 )
 
 // Role is the model entity for the Role schema.

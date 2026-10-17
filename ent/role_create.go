@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/role"
+	"github.com/mathieuHa/resticgui/ent/role"
 )
 
 // RoleCreate is the builder for creating a Role entity.

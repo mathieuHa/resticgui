@@ -3,8 +3,8 @@ package database
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func UpdateLocalProviderDB(localProvider ent.LocalProvider, id int, ctx context.Context) (lp *ent.LocalProvider, err error) {

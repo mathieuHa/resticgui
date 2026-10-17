@@ -8,15 +8,16 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/mathieuHa/resticgui/internal/api"
+	"github.com/mathieuHa/resticgui/internal/backup"
+	"github.com/mathieuHa/resticgui/internal/commands"
+	Config "github.com/mathieuHa/resticgui/internal/config"
+	"github.com/mathieuHa/resticgui/internal/database"
+	"github.com/mathieuHa/resticgui/internal/legacy"
+	Logs "github.com/mathieuHa/resticgui/internal/logs"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"gitlab.com/resticgui/resticgui/internal/api"
-	"gitlab.com/resticgui/resticgui/internal/backup"
-	"gitlab.com/resticgui/resticgui/internal/commands"
-	Config "gitlab.com/resticgui/resticgui/internal/config"
-	"gitlab.com/resticgui/resticgui/internal/database"
-	Logs "gitlab.com/resticgui/resticgui/internal/logs"
 )
 
 var (
@@ -25,6 +26,10 @@ var (
 var cr *cron.Cron
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "migrate-legacy" {
+		os.Exit(legacy.Main(os.Args[2:], os.Stdout, os.Stderr))
+	}
+
 	Config.InitConfig()
 	Logs.Initlogs()
 

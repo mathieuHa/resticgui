@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/user"
+	"github.com/mathieuHa/resticgui/ent/user"
 )
 
 // User is the model entity for the User schema.

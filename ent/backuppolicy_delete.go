@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/backuppolicy"
+	"github.com/mathieuHa/resticgui/ent/predicate"
 )
 
 // BackupPolicyDelete is the builder for deleting a BackupPolicy entity.

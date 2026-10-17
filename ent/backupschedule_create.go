@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/backupschedule"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/backupschedule"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // BackupScheduleCreate is the builder for creating a BackupSchedule entity.

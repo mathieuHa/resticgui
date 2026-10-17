@@ -159,6 +159,9 @@ rundevweb: installwebdev ## Run dev web listening on localhost:3000
 # testweb: installweb
 # 	npm run lint
 
+generate: ## Regenerate the sqlc queries in internal/store/db
+	sqlc generate -f internal/store/sqlc.yaml
+
 testgo: ## Run the go Tests
 	go test -p 1 ./internal/... -cover
 

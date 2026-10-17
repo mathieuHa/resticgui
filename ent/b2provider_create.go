@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/b2provider"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/b2provider"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // B2ProviderCreate is the builder for creating a B2Provider entity.

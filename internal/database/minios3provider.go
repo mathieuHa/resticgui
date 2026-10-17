@@ -3,8 +3,8 @@ package database
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func UpdateMinioS3ProviderDB(minioS3Provider ent.MinioS3Provider, id int, ctx context.Context) (mS3p *ent.MinioS3Provider, err error) {

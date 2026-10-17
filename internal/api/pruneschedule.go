@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/database"
+	"github.com/mathieuHa/resticgui/internal/utils"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/database"
-	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 // CreatePruneSchedule godoc

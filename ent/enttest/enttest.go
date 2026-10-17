@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"gitlab.com/resticgui/resticgui/ent"
+	"github.com/mathieuHa/resticgui/ent"
 	// required by schema hooks.
-	_ "gitlab.com/resticgui/resticgui/ent/runtime"
+	_ "github.com/mathieuHa/resticgui/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"gitlab.com/resticgui/resticgui/ent/migrate"
+	"github.com/mathieuHa/resticgui/ent/migrate"
 )
 
 type (
