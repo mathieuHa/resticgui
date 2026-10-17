@@ -13,6 +13,7 @@ import (
 	"github.com/mathieuHa/resticgui/internal/commands"
 	Config "github.com/mathieuHa/resticgui/internal/config"
 	"github.com/mathieuHa/resticgui/internal/database"
+	"github.com/mathieuHa/resticgui/internal/legacy"
 	Logs "github.com/mathieuHa/resticgui/internal/logs"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
@@ -25,6 +26,10 @@ var (
 var cr *cron.Cron
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "migrate-legacy" {
+		os.Exit(legacy.Main(os.Args[2:], os.Stdout, os.Stderr))
+	}
+
 	Config.InitConfig()
 	Logs.Initlogs()
 
