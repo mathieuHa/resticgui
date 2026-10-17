@@ -1,0 +1,3 @@
+{"message_type":"status","percent_done":0.19999880000719997,"total_files":51,"files_done":8,"total_bytes":1000006,"bytes_done":200000,"current_files":["/src/a/f18"]}
+{"message_type":"status","percent_done":1,"total_files":51,"files_done":51,"total_bytes":1000006,"bytes_done":1000006}
+{"message_type":"summary","files_new":51,"files_changed":0,"files_unmodified":0,"dirs_new":3,"dirs_changed":0,"dirs_unmodified":0,"data_blobs":51,"tree_blobs":4,"data_added":1018580,"data_added_packed":1007933,"total_files_processed":51,"total_bytes_processed":1000006,"total_duration":0.732422449,"backup_start":"2026-10-17T21:08:40.61499168Z","backup_end":"2026-10-17T21:08:41.347414127Z","snapshot_id":"f0feba17d45589dc1082af60dd77a6cf55a7e4fdbcc4a0fcfcd0c06080b50f1e"}
