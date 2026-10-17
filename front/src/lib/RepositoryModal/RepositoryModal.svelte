@@ -89,10 +89,10 @@
   
   let values = stepper[0]?.defaultValues(repository);
   const onCheck = async (id?: number) => {
-    isCheckLoading = true
     if (!id) return;
+    isCheckLoading = true
     try {
-      await agent.get(`/${id}/valid`);
+      await agent.get(`/repositories/${id}/valid`);
       toasts.addToast('Repository valid');
     } catch (err) {
       toasts.addToast(err?.message || 'Repository not valid', 'failure');

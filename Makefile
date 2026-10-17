@@ -160,10 +160,10 @@ rundevweb: installwebdev ## Run dev web listening on localhost:3000
 # 	npm run lint
 
 testgo: ## Run the go Tests
-	go test ./internal/... -cover 
+	go test -p 1 ./internal/... -cover
 
 testgoci: ## Run the go Tests and export coverage
-	go test ./internal/... -cover -coverprofile=coverage.out
+	go test -p 1 ./internal/... -cover -coverprofile=coverage.out
 
 clean: ## Clean build and temporary directory
 	$(RM) ${DISTDIR}

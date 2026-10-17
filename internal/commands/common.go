@@ -145,7 +145,7 @@ func getPruneCommonArgs(r *ent.Repository) []string {
 	}
 	if r.Edges.BackupPolicy.NbKeepHours != 0 {
 		args = append(args, "--keep-hourly")
-		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepHours != 0))
+		args = append(args, fmt.Sprint(r.Edges.BackupPolicy.NbKeepHours))
 	}
 	if r.Edges.BackupPolicy.NbKeepDays != 0 {
 		args = append(args, "--keep-daily")
@@ -227,9 +227,11 @@ func BackupRepository(repository *ent.Repository, dryRun bool) (string, string, 
 		return "", "", err
 	}
 
-	var args []string
-	var env []string
+	args, env := getBackupArgs(repository, dryRun)
+	return runRestic(args, env, "")
+}
 
+func getBackupArgs(repository *ent.Repository, dryRun bool) (args []string, env []string) {
 	repoFormat, env, _ := getProviderData(repository)
 	commonArgs := getBackupCommonArgs(*repository)
 	dryRunParameter := getDryRunParameter(dryRun)
@@ -237,10 +239,9 @@ func BackupRepository(repository *ent.Repository, dryRun bool) (string, string, 
 	args = append(args, repoFormat...)
 	args = append(args, backupCmd)
 	args = append(args, commonArgs...)
-	args = append(args, dryRunParameter)
+	args = append(args, dryRunParameter...)
 	args = append(args, jsonFormat)
-
-	return runRestic(args, env, "")
+	return args, env
 }
 
 func StatsRepository(repository *ent.Repository, snapshotID string) (string, string, error) {
@@ -276,12 +277,11 @@ func getBackupCommonArgs(repository ent.Repository) []string {
 	return args
 }
 
-func getDryRunParameter(dryRun bool) string {
+func getDryRunParameter(dryRun bool) []string {
 	if dryRun {
-		return "--dry-run"
-	} else {
-		return ""
+		return []string{"--dry-run"}
 	}
+	return nil
 }
 
 func getMaxSizeParameter(repository ent.Repository) []string {
