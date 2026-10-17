@@ -1,6 +1,6 @@
 package Models
 
-import "gitlab.com/resticgui/resticgui/ent"
+import "github.com/mathieuHa/resticgui/ent"
 
 type Provider struct {
 	Provider        string              `json:"provider"`

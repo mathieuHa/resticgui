@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/awss3provider"
-	"gitlab.com/resticgui/resticgui/ent/b2provider"
-	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
-	"gitlab.com/resticgui/resticgui/ent/backupschedule"
-	"gitlab.com/resticgui/resticgui/ent/localprovider"
-	"gitlab.com/resticgui/resticgui/ent/minios3provider"
-	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/awss3provider"
+	"github.com/mathieuHa/resticgui/ent/b2provider"
+	"github.com/mathieuHa/resticgui/ent/backuppolicy"
+	"github.com/mathieuHa/resticgui/ent/backupschedule"
+	"github.com/mathieuHa/resticgui/ent/localprovider"
+	"github.com/mathieuHa/resticgui/ent/minios3provider"
+	"github.com/mathieuHa/resticgui/ent/pruneschedule"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // Repository is the model entity for the Repository schema.

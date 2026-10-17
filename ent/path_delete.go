@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/path"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/path"
+	"github.com/mathieuHa/resticgui/ent/predicate"
 )
 
 // PathDelete is the builder for deleting a Path entity.

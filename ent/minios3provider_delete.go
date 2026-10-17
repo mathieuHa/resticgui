@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/minios3provider"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/minios3provider"
+	"github.com/mathieuHa/resticgui/ent/predicate"
 )
 
 // MinioS3ProviderDelete is the builder for deleting a MinioS3Provider entity.

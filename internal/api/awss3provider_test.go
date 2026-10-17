@@ -11,8 +11,8 @@ package api
 
 // 	"github.com/rs/zerolog/log"
 // 	"github.com/stretchr/testify/assert"
-// 	"gitlab.com/resticgui/resticgui/ent"
-// 	"gitlab.com/resticgui/resticgui/internal/database"
+// 	"github.com/mathieuHa/resticgui/ent"
+// 	"github.com/mathieuHa/resticgui/internal/database"
 // )
 
 // func TestCreateAWSS3Provider(t *testing.T) {

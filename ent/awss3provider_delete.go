@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/awss3provider"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/awss3provider"
+	"github.com/mathieuHa/resticgui/ent/predicate"
 )
 
 // AWSS3ProviderDelete is the builder for deleting a AWSS3Provider entity.

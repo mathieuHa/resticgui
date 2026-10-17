@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func updateValidProvider(repository ent.Repository, valid bool) (err error) {

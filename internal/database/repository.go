@@ -3,11 +3,11 @@ package database
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/ent/logs"
+	"github.com/mathieuHa/resticgui/ent/path"
+	"github.com/mathieuHa/resticgui/ent/repository"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/ent/logs"
-	"gitlab.com/resticgui/resticgui/ent/path"
-	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 func GetRepositoriesDB(ctx context.Context) (repositories []*ent.Repository, err error) {

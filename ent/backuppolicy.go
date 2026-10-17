@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/backuppolicy"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/backuppolicy"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // BackupPolicy is the model entity for the BackupPolicy schema.

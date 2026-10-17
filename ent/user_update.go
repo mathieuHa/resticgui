@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
-	"gitlab.com/resticgui/resticgui/ent/user"
+	"github.com/mathieuHa/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/user"
 )
 
 // UserUpdate is the builder for updating User entities.

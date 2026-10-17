@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/logs"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/logs"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // Logs is the model entity for the Logs schema.

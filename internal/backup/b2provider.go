@@ -3,8 +3,8 @@ package backup
 import (
 	"errors"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func validB2Provider(provider *ent.B2Provider) (valid bool, err error) {

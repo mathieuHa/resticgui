@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/b2provider"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/b2provider"
+	"github.com/mathieuHa/resticgui/ent/predicate"
 )
 
 // B2ProviderDelete is the builder for deleting a B2Provider entity.

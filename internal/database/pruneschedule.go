@@ -3,9 +3,9 @@ package database
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/ent/repository"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/ent/repository"
 )
 
 func CreatePruneScheduleDB(pruneSchedule ent.PruneSchedule, repoID int, ctx context.Context) (b *ent.PruneSchedule, err error) {

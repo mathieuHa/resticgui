@@ -5,13 +5,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/config"
+	"github.com/mathieuHa/resticgui/internal/database"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/config"
-	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 func TestGetStatsRepository(t *testing.T) {

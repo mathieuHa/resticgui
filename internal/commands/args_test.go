@@ -3,8 +3,8 @@ package commands
 import (
 	"testing"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func Test_getPruneCommonArgs(t *testing.T) {

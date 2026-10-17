@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/permission"
+	"github.com/mathieuHa/resticgui/ent/permission"
 )
 
 // PermissionCreate is the builder for creating a Permission entity.

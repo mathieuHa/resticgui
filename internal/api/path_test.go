@@ -9,10 +9,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 func TestCreatePaths(t *testing.T) {

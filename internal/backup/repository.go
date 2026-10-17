@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/commands"
+	"github.com/mathieuHa/resticgui/internal/database"
+	Models "github.com/mathieuHa/resticgui/internal/models"
+	"github.com/mathieuHa/resticgui/internal/utils"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/commands"
-	"gitlab.com/resticgui/resticgui/internal/database"
-	Models "gitlab.com/resticgui/resticgui/internal/models"
-	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 func GetStatsRepository(r *ent.Repository, snapshotID string) (out string, err string) {

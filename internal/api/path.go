@@ -9,11 +9,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mathieuHa/resticgui/ent"
+	"github.com/mathieuHa/resticgui/internal/database"
+	Models "github.com/mathieuHa/resticgui/internal/models"
+	"github.com/mathieuHa/resticgui/internal/utils"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
-	"gitlab.com/resticgui/resticgui/internal/database"
-	Models "gitlab.com/resticgui/resticgui/internal/models"
-	"gitlab.com/resticgui/resticgui/internal/utils"
 )
 
 // CreatePaths godoc

@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/localprovider"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/localprovider"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // LocalProvider is the model entity for the LocalProvider schema.

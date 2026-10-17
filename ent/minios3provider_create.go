@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/minios3provider"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/minios3provider"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // MinioS3ProviderCreate is the builder for creating a MinioS3Provider entity.

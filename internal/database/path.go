@@ -3,8 +3,8 @@ package database
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func UpdatePathsDB(paths []*ent.Path, repoID int, ctx context.Context) (p []*ent.Path, err error) {

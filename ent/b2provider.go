@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/b2provider"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/b2provider"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // B2Provider is the model entity for the B2Provider schema.

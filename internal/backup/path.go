@@ -5,8 +5,8 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func checkFileExist(path string) bool {

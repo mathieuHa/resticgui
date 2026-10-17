@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/logs"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/logs"
+	"github.com/mathieuHa/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // LogsUpdate is the builder for updating Logs entities.

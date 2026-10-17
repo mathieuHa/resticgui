@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/permission"
-	"gitlab.com/resticgui/resticgui/ent/predicate"
+	"github.com/mathieuHa/resticgui/ent/permission"
+	"github.com/mathieuHa/resticgui/ent/predicate"
 )
 
 // PermissionDelete is the builder for deleting a Permission entity.

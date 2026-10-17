@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/backupschedule"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/backupschedule"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // BackupSchedule is the model entity for the BackupSchedule schema.

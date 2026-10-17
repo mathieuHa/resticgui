@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/mathieuHa/resticgui/ent"
+	Config "github.com/mathieuHa/resticgui/internal/config"
+	"github.com/mathieuHa/resticgui/internal/database"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/resticgui/resticgui/ent"
-	Config "gitlab.com/resticgui/resticgui/internal/config"
-	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 // func TestGetRestoreCommonArgs(t *testing.T) {

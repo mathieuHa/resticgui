@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/pruneschedule"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // PruneSchedule is the model entity for the PruneSchedule schema.

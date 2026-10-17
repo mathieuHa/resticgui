@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.com/resticgui/resticgui/ent/pruneschedule"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/pruneschedule"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // PruneScheduleCreate is the builder for creating a PruneSchedule entity.

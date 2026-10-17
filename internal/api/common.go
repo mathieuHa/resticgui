@@ -3,9 +3,9 @@ package api
 import (
 	"context"
 
+	"github.com/mathieuHa/resticgui/internal/backup"
+	"github.com/mathieuHa/resticgui/internal/database"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/internal/backup"
-	"gitlab.com/resticgui/resticgui/internal/database"
 )
 
 const limitAPI = 20

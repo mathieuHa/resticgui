@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/mathieuHa/resticgui/ent"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/resticgui/resticgui/ent"
 )
 
 func validMinioS3Provider(provider *ent.MinioS3Provider) (valid bool, err error) {

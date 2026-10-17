@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.com/resticgui/resticgui/ent/awss3provider"
-	"gitlab.com/resticgui/resticgui/ent/repository"
+	"github.com/mathieuHa/resticgui/ent/awss3provider"
+	"github.com/mathieuHa/resticgui/ent/repository"
 )
 
 // AWSS3Provider is the model entity for the AWSS3Provider schema.
