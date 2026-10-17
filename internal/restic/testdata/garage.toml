@@ -8,5 +8,6 @@ rpc_public_addr = "127.0.0.1:3901"
 rpc_secret = "0000000000000000000000000000000000000000000000000000000000000001"
 
 [s3_api]
-s3_region = "garage"
+# restic signs its first request for us-east-1 before it looks up the region
+s3_region = "us-east-1"
 api_bind_addr = "0.0.0.0:3900"

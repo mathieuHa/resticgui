@@ -102,12 +102,12 @@ func exercise(t *testing.T, r *Runner, repo *Repo) {
 		Tags:     []string{"resticgui:1"},
 		Host:     "integration",
 	}
-	var progress int
-	first, err := r.Backup(ctx, repo, backup, func(BackupStatus) { progress++ })
+	// This backup can finish before restic's first status tick, so live
+	// progress is checked by TestIntegrationCancelReleasesLock instead.
+	first, err := r.Backup(ctx, repo, backup, nil)
 	require.NoError(t, err)
 	assert.NotEmpty(t, first.Summary.SnapshotID)
 	assert.EqualValues(t, 3, first.Summary.FilesNew, "the excluded cache is not backed up")
-	assert.Positive(t, progress)
 
 	require.NoError(t, os.WriteFile(filepath.Join(src, "docs", "report.txt"), []byte("quarterly report v2"), 0o644))
 	second, err := r.Backup(ctx, repo, backup, nil)
@@ -222,14 +222,19 @@ func TestIntegrationCancelReleasesLock(t *testing.T) {
 	}
 	require.NoError(t, f.Close())
 
+	// cancel from the progress callback, which also proves status messages
+	// stream while the backup runs
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+	var progress int
 	_, err = r.Backup(cctx, repo, BackupOptions{Paths: []string{src}}, func(s BackupStatus) {
+		progress++
 		if s.BytesDone > 0 {
 			cancel()
 		}
 	})
 	require.ErrorIs(t, err, context.Canceled)
+	assert.Positive(t, progress)
 
 	snaps, err := r.Snapshots(ctx, repo, SnapshotFilter{})
 	require.NoError(t, err)
