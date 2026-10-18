@@ -43,3 +43,42 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      RESTIC_VERSION: "0.18.1"
+      RESTIC_BIN: ${{ github.workspace }}/bin/restic
+      RESTIC_TEST_S3_LOCATION: s3:http://127.0.0.1:3900/restic
+      AWS_ACCESS_KEY_ID: GK000000000000000000000001
+      AWS_SECRET_ACCESS_KEY: "0000000000000000000000000000000000000000000000000000000000000002"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install restic
+        run: |
+          mkdir -p bin
+          curl -fsSL "https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_amd64.bz2" | bunzip2 > bin/restic
+          chmod +x bin/restic
+          bin/restic version
+      - name: Start Garage
+        run: |
+          docker run -d --name garage --network host \
+            -v "$PWD/internal/restic/testdata/garage.toml:/etc/garage.toml:ro" \
+            -e GARAGE_DEFAULT_ACCESS_KEY="$AWS_ACCESS_KEY_ID" \
+            -e GARAGE_DEFAULT_SECRET_KEY="$AWS_SECRET_ACCESS_KEY" \
+            -e GARAGE_DEFAULT_BUCKET=restic \
+            dxflrs/garage:v2.3.0 /garage server --single-node --default-bucket
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://127.0.0.1:3900/ && docker logs garage 2>&1 | grep -q 'Creating default bucket' && exit 0
+            sleep 1
+          done
+          docker logs garage
+          exit 1
+      - name: Integration tests
+        run: go test -count=1 -tags integration -v ./internal/restic/
+      - name: Garage logs
+        if: failure()
+        run: docker logs garage
