@@ -14,6 +14,8 @@ test.describe.configure({ mode: 'serial' });
 test('create a repository with the wizard', async ({ page }) => {
   await page.goto('/ui/');
   await expect(page.getByRole('heading', { name: 'No repository yet' })).toBeVisible();
+  // a build without -X main.version reports dev
+  await expect(page.getByRole('contentinfo')).toHaveText('ResticGUI dev');
   await page.getByRole('link', { name: 'Add a repository' }).click();
 
   // storage: validation first

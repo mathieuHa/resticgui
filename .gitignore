@@ -7,3 +7,4 @@ front/build
 internal/webui/ui
 front/test-results
 front/playwright-report
+__pycache__

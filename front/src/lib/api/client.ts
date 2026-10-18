@@ -91,6 +91,7 @@ const snap = (id: number, snapshot: string) => `${repo(id)}/snapshots/${encodeUR
 
 export const api = {
   session: () => request<Session>('GET', '/auth/session'),
+  version: () => request<{ version: string }>('GET', '/version'),
   login: (username: string, password: string) => request<void>('POST', '/auth/login', { body: { username, password } }),
   logout: () => request<void>('POST', '/auth/logout'),
 

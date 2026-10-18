@@ -40,6 +40,8 @@ type Config struct {
 	// Username and PasswordHash (bcrypt) protect the API; no hash leaves it open.
 	Username     string
 	PasswordHash string
+	// Version is reported by GET /version.
+	Version string
 }
 
 // App is the running API: store, job manager and scheduler.
@@ -105,7 +107,7 @@ func Start(ctx context.Context, cfg Config, router gin.IRouter) (*App, error) {
 		}
 	}()
 
-	(&Server{Store: st, Box: box, Restic: runner, Jobs: manager, Scheduler: sched, Roots: roots, Auth: guard}).Register(router.Group(BasePath))
+	(&Server{Store: st, Box: box, Restic: runner, Jobs: manager, Scheduler: sched, Roots: roots, Auth: guard, Version: cfg.Version}).Register(router.Group(BasePath))
 	return app, nil
 }
 
