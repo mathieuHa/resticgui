@@ -153,3 +153,33 @@ type CheckSummary struct {
 	SuggestRepairIndex bool     `json:"suggest_repair_index"`
 	SuggestPrune       bool     `json:"suggest_prune"`
 }
+
+// DiffChange is one path that differs between two snapshots. Modifier is
+// "+" (added), "-" (removed), "M" (content changed), "T" (type changed) or
+// "U" (metadata changed, only with metadata). Directories end with "/".
+type DiffChange struct {
+	Path     string `json:"path"`
+	Modifier string `json:"modifier"`
+}
+
+// DiffCount is what one side of a diff holds that the other does not.
+type DiffCount struct {
+	Files int    `json:"files"`
+	Dirs  int    `json:"dirs"`
+	Bytes uint64 `json:"bytes"`
+}
+
+// DiffStats is the statistics message closing "restic diff --json".
+type DiffStats struct {
+	SourceSnapshot string    `json:"source_snapshot"`
+	TargetSnapshot string    `json:"target_snapshot"`
+	ChangedFiles   int       `json:"changed_files"`
+	Added          DiffCount `json:"added"`
+	Removed        DiffCount `json:"removed"`
+}
+
+// Diff is what changed from one snapshot to another.
+type Diff struct {
+	Changes []DiffChange `json:"changes"`
+	Stats   DiffStats    `json:"stats"`
+}

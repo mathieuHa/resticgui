@@ -120,6 +120,11 @@ func exercise(t *testing.T, r *Runner, repo *Repo) {
 	require.Len(t, snaps, 2)
 	assert.Equal(t, second.Summary.SnapshotID, snaps[1].ID)
 
+	diff, err := r.Diff(ctx, repo, first.Summary.SnapshotID, second.Summary.SnapshotID)
+	require.NoError(t, err)
+	assert.Equal(t, []DiffChange{{Path: filepath.ToSlash(filepath.Join(src, "docs", "report.txt")), Modifier: "M"}}, diff.Changes)
+	assert.Equal(t, 1, diff.Stats.ChangedFiles)
+
 	nodes, err := r.Ls(ctx, repo, "latest", filepath.Join(src, "docs"))
 	require.NoError(t, err)
 	var names []string

@@ -23,6 +23,8 @@ async function look(page: Page, name: string) {
   await expect(page).toHaveScreenshot(`${name}.png`, {
     fullPage: true,
     mask: dynamic(page),
+    // grey bars, not Playwright's magenta, where times, sizes and ids change
+    maskColor: '#9ca3af',
   });
 }
 
@@ -101,6 +103,20 @@ test('repository overview, runs and snapshots', async ({ page }) => {
   await page.getByRole('button', { name: 'Restore all…' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await look(page, 'restore-dialog');
+
+  await page.goto(`${base}?tab=snapshots`);
+  await page.getByTestId('snapshots').getByRole('button', { name: 'Changes' }).click();
+  await expect(page.getByRole('dialog').getByText('Nothing changed between these snapshots.')).toBeVisible();
+  await look(page, 'snapshot-diff');
+});
+
+test('settings and notifications', async ({ page, request }) => {
+  const res = await request.post('/api/v2/notifiers', {
+    data: { name: 'My phone', url: 'ntfy://ntfy.example.com/backups', on_failure: true, on_success: false, on_missed: true, enabled: true },
+  });
+  expect(res.status()).toBe(201);
+  await both(page, 'notifications', '/ui/notifications', (p) => expect(p.getByTestId('notifiers').getByRole('listitem')).toHaveCount(1));
+  await both(page, 'settings', `/ui/repositories/${photos}?tab=settings`, (p) => expect(p.getByRole('heading', { name: 'Hooks' })).toBeVisible());
 });
 
 test('new repository wizard', async ({ page }) => {

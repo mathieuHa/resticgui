@@ -44,6 +44,19 @@ type fakeRestic struct {
 	dump      string
 	groups    []restic.ForgetGroup
 	forgets   []restic.ForgetOptions
+	exists    bool
+	existsErr error
+	diff      *restic.Diff
+}
+
+func (f *fakeRestic) Exists(_ context.Context, repo *restic.Repo) (bool, error) {
+	f.record("exists " + repo.Location)
+	return f.exists, f.existsErr
+}
+
+func (f *fakeRestic) Diff(_ context.Context, _ *restic.Repo, from, to string) (*restic.Diff, error) {
+	f.record("diff " + from + " " + to)
+	return f.diff, f.err
 }
 
 func (f *fakeRestic) Snapshots(_ context.Context, _ *restic.Repo, filter restic.SnapshotFilter) ([]restic.Snapshot, error) {

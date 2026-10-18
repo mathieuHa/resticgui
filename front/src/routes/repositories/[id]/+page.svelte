@@ -10,6 +10,7 @@
   import JobProgress from '#lib/components/JobProgress.svelte';
   import Modal from '#lib/components/Modal.svelte';
   import SnapshotBrowser from '#lib/components/SnapshotBrowser.svelte';
+  import SnapshotDiff from '#lib/components/SnapshotDiff.svelte';
   import StatusStrip from '#lib/components/StatusStrip.svelte';
   import Timeline from '#lib/components/Timeline.svelte';
   import { backupPoints } from '#lib/charts.ts';
@@ -28,6 +29,7 @@
   import SettingsIcon from '@lucide/svelte/icons/settings';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import FolderOpen from '@lucide/svelte/icons/folder-open';
+  import GitCompare from '@lucide/svelte/icons/git-compare';
 
   import Settings from './Settings.svelte';
 
@@ -49,6 +51,7 @@
   let allSnapshots = $state(false);
   let browsing = $state<Snapshot | null>(null);
   let forgetting = $state<Snapshot | null>(null);
+  let comparing = $state<{ from: Snapshot; to: Snapshot } | null>(null);
   let forgetPrune = $state(false);
   let stats = $state<Stats | null>(null);
   let statsError = $state('');
@@ -66,7 +69,13 @@
   async function loadSnapshots() {
     snapshotsError = '';
     try {
-      snapshots = (await api.snapshots(id, allSnapshots)).reverse();
+      let list = await api.snapshots(id, allSnapshots);
+      if (!list.length && !allSnapshots) {
+        // a repository connected with its existing snapshots has none tagged by ResticGUI yet
+        const all = await api.snapshots(id, true);
+        if (all.length) [list, allSnapshots] = [all, true];
+      }
+      snapshots = list.reverse();
     } catch (err) {
       snapshots = [];
       snapshotsError = err instanceof Error ? err.message : String(err);
@@ -134,6 +143,13 @@
       forgetting = null;
       loadSnapshots();
     }
+  }
+
+  // the snapshot before s, of the same paths when there is one; snapshots are newest first
+  function older(s: Snapshot): Snapshot | undefined {
+    const before = (snapshots ?? []).filter((x) => Date.parse(x.time) < Date.parse(s.time));
+    const key = (x: Snapshot) => [...x.paths].sort().join('\n');
+    return before.find((x) => key(x) === key(s)) ?? before[0];
   }
 
   async function removed() {
@@ -273,6 +289,11 @@
                       <td class="tabular whitespace-nowrap">{bytes((s.summary as { data_added?: number } | undefined)?.data_added)}</td>
                       <td class="whitespace-nowrap text-right">
                         <button class="btn btn-sm" onclick={() => (browsing = s)}><FolderOpen class="size-4" aria-hidden="true" />Browse</button>
+                        {#if older(s)}
+                          <button class="btn btn-ghost btn-sm" onclick={() => (comparing = { from: older(s)!, to: s })} title="What changed since the snapshot before">
+                            <GitCompare class="size-4" aria-hidden="true" />Changes
+                          </button>
+                        {/if}
                         <button class="btn btn-ghost btn-sm" onclick={() => { forgetting = s; forgetPrune = false; }}>Forget</button>
                       </td>
                     </tr>
@@ -292,6 +313,24 @@
     {/key}
   {/if}
 {/if}
+
+<Modal open={!!comparing} wide title="Changes in snapshot {comparing?.to.short_id}" onclose={() => (comparing = null)}>
+  {#if comparing}
+    <label class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+      <span class="text-sm">Compared with</span>
+      <select class="select select-sm" aria-label="Compared with" value={comparing.from.id} onchange={(e) => {
+        const from = snapshots?.find((x) => x.id === e.currentTarget.value);
+        if (from && comparing) comparing = { ...comparing, from };
+      }}>
+        {#each (snapshots ?? []).filter((x) => x.id !== comparing?.to.id) as x (x.id)}
+          <option value={x.id}>{x.short_id}, {dateTime(x.time)}</option>
+        {/each}
+      </select>
+    </label>
+    {#key comparing.from.id}<SnapshotDiff repositoryId={id} from={comparing.from} to={comparing.to} />{/key}
+  {/if}
+  {#snippet actions()}<button class="btn" onclick={() => (comparing = null)}>Close</button>{/snippet}
+</Modal>
 
 <Modal open={!!forgetting} title="Forget snapshot {forgetting?.short_id}" onclose={() => (forgetting = null)}>
   <p class="mb-3">The snapshot from {dateTime(forgetting?.time)} is removed from the repository. This cannot be undone.</p>

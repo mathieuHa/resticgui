@@ -52,6 +52,8 @@ func main() {
 	viper.SetDefault("restic.bin", "restic")
 	viper.SetDefault("jobs.workers", 2)
 	viper.SetDefault("jobs.schedule", true)
+	viper.SetDefault("hooks.commands", false)
+	viper.SetDefault("metrics.enabled", false)
 
 	router := gin.New()
 	router.Use(server.Logger(), server.Recovery())
@@ -74,6 +76,9 @@ func main() {
 		Username:       viper.GetString("auth.username"),
 		PasswordHash:   viper.GetString("auth.password_hash"),
 		Version:        version,
+		HookCommands:   viper.GetBool("hooks.commands"),
+		Metrics:        viper.GetBool("metrics.enabled"),
+		MetricsToken:   viper.GetString("metrics.token"),
 	}, router)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot start")

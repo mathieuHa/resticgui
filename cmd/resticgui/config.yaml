@@ -32,3 +32,14 @@ auth:
   # make a hash with: resticgui hash-password
   username: admin
   password_hash: ""
+
+hooks:
+  # allow command hooks, which run before and after backups with ResticGUI's
+  # rights; webhooks need no setting. See docs/hooks.md
+  commands: false
+
+metrics:
+  # serve Prometheus metrics at /metrics. See docs/metrics.md
+  enabled: false
+  # when set, scrapes must send "Authorization: Bearer <token>"
+  token: ""
