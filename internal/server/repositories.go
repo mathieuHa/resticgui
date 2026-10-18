@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 
@@ -97,10 +98,10 @@ var (
 )
 
 // validate checks the input against the secrets that will be stored.
-func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, roots Roots) error {
+func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, roots Roots, commands bool) error {
 	var errs []error
 	if in.Backend == "local" && filepath.IsAbs(in.Location) {
-		if err := roots.Check(in.Location); err != nil {
+		if err := roots.checkLinks(in.Location); err != nil {
 			errs = append(errs, fmt.Errorf("location: %w", err))
 		}
 	}
@@ -122,13 +123,22 @@ func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, 
 	if in.ExcludeLargerThan != "" && !sizePattern.MatchString(in.ExcludeLargerThan) {
 		errs = append(errs, errors.New("exclude_larger_than is a size such as 500M or 2G"))
 	}
-	if in.CACert != "" && !filepath.IsAbs(in.CACert) {
+	if in.CACert != "" && (!filepath.IsAbs(in.CACert) || strings.ContainsFunc(in.CACert, unicode.IsControl)) {
 		errs = append(errs, errors.New("cacert is an absolute path"))
 	}
 	for _, k := range sortedKeys(in.Extended) {
 		if !extendedKey.MatchString(k) {
 			errs = append(errs, fmt.Errorf("extended option %q is not a restic option name such as s3.storage-class", k))
 		}
+	}
+	env := map[string]string{}
+	for _, m := range []map[string]string{in.Env, secretEnv} {
+		for k, v := range m {
+			env[k] = v
+		}
+	}
+	if found := restic.CommandOptions(in.Location, in.Extended, env); len(found) > 0 && !commands {
+		errs = append(errs, fmt.Errorf("%s would run a program with ResticGUI's rights, which needs hooks.commands: true in the configuration", strings.Join(found, ", ")))
 	}
 	return errors.Join(errs...)
 }
@@ -275,7 +285,7 @@ func (s *Server) createRepository(c *gin.Context) {
 	if in.Secrets != nil {
 		secretEnv = *in.Secrets
 	}
-	if err := in.validate(secretEnv, true, s.Roots); err != nil {
+	if err := in.validate(secretEnv, true, s.Roots, s.HookCommands); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -332,7 +342,7 @@ func (s *Server) updateRepository(c *gin.Context) {
 	if in.Password != "" {
 		sec.Password = in.Password
 	}
-	if err := in.validate(sec.Env, false, s.Roots); err != nil {
+	if err := in.validate(sec.Env, false, s.Roots, s.HookCommands); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -411,7 +421,7 @@ func (s *Server) putPaths(c *gin.Context) {
 	}
 	var errs []error
 	for _, p := range in.Include {
-		if err := s.Roots.Check(p); err != nil {
+		if err := s.Roots.checkLinks(p); err != nil {
 			errs = append(errs, err)
 		}
 	}

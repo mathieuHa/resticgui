@@ -40,6 +40,12 @@ kubectl -n resticgui port-forward service/resticgui 3001:80
 Open <http://127.0.0.1:3001/ui/> and continue with
 [your first backup](/guide/first-backup).
 
+The manifests keep ResticGUI to itself: a NetworkPolicy refuses
+connections from other pods (port-forward still works), the container's
+root filesystem is read-only, and it runs as root with only the
+capabilities needed to read and restore files of every owner. Mount what
+to back up under `/backup`, as below.
+
 ## Back up the volumes of an application
 
 Mount the volumes under `/backup`, read-only, in the Deployment. Copy the
@@ -80,6 +86,10 @@ kubectl -n resticgui exec -it deploy/resticgui -- /opt/resticgui hash-password
 ```
 
 <<< @/../deploy/kubernetes/ingress.yaml
+
+Its NetworkPolicy lets the ingress controller through; change the namespace
+if yours is not `ingress-nginx`. With a host name and no password,
+ResticGUI answers only if the name is in `server.allowed_hosts`.
 
 ## Updates
 

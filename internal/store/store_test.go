@@ -48,9 +48,18 @@ func TestMigrationsUpDownUp(t *testing.T) {
 
 	version, err := migrator.GetDBVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, 3, version)
+	assert.EqualValues(t, 4, version)
 
 	// each down step works on its own
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	version, err = migrator.GetDBVersion(ctx)
+	require.NoError(t, err)
+	assert.EqualValues(t, 3, version)
+	var sessions int
+	require.NoError(t, s.DB.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'sessions'`).Scan(&sessions))
+	assert.Zero(t, sessions)
+
 	_, err = migrator.Down(ctx)
 	require.NoError(t, err)
 	version, err = migrator.GetDBVersion(ctx)

@@ -181,3 +181,24 @@ func TestSafeEnv(t *testing.T) {
 	assert.Contains(t, env, "HOME=/home/me")
 	assert.NotContains(t, env, "MY_TOKEN")
 }
+
+func TestCommandOptionsNeedPermission(t *testing.T) {
+	f := newFake(t, scenario{StdoutFile: "testdata/backup.jsonl"})
+	f.repo.Options = map[string]string{"sftp.command": "sh -c 'touch /tmp/owned'"}
+	_, err := f.runner.Backup(context.Background(), f.repo, BackupOptions{Paths: []string{"/home/me"}}, nil)
+	require.ErrorIs(t, err, ErrCommandsOff)
+	assert.NoFileExists(t, f.record, "restic was not started")
+
+	f.runner.AllowCommands = true
+	_, err = f.runner.Backup(context.Background(), f.repo, BackupOptions{Paths: []string{"/home/me"}}, nil)
+	require.NoError(t, err)
+	assert.Contains(t, strings.Join(f.invocation().Args, " "), "-o sftp.command=")
+}
+
+func TestCommandOptions(t *testing.T) {
+	assert.Empty(t, CommandOptions("s3:host/bucket", map[string]string{"s3.storage-class": "GLACIER", "sftp.connections": "5"}, map[string]string{"AWS_ACCESS_KEY_ID": "a"}))
+	assert.Equal(t, []string{"RCLONE.PROGRAM", "sftp.args"}, CommandOptions("sftp:h:/r", map[string]string{"sftp.args": "-o ProxyCommand=x", "RCLONE.PROGRAM": "/bin/sh"}, nil))
+	assert.Len(t, CommandOptions("rclone::sftp,host=h,ssh='sh -c x':/r", nil, nil), 1)
+	assert.Equal(t, []string{"RCLONE_CONFIG"}, CommandOptions("rclone:nas:backups", nil, map[string]string{"RCLONE_CONFIG": "/srv/data/restored.conf"}))
+	assert.Empty(t, CommandOptions("rclone:nas:backups", nil, nil), "a remote of the default rclone.conf")
+}

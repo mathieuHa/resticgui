@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidate(t *testing.T) {
@@ -79,4 +80,14 @@ func TestRegistry(t *testing.T) {
 		}
 		assert.NoError(t, Validate(name, b.Example, env, secrets), "the example of %s validates", name)
 	}
+}
+
+func TestLocationsDoNotCarryPasswords(t *testing.T) {
+	err := Validate("rest", "rest:https://alice:s3cret@backup.example.com:8000/photos/", nil, nil)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "RESTIC_REST_PASSWORD")
+	assert.NotContains(t, err.Error(), "s3cret")
+	assert.NoError(t, Validate("rest", "rest:https://alice@backup.example.com:8000/photos/", nil, nil), "a user name alone")
+	assert.NoError(t, Validate("rest", "rest:https://backup.example.com:8000/photos/", nil, nil))
+	assert.NoError(t, Validate("sftp", "sftp:user@host:/srv/restic", nil, nil))
 }

@@ -6,6 +6,7 @@ package backends
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -108,6 +109,13 @@ func Validate(backend, location string, env, secrets map[string]string) error {
 		}
 	case !strings.HasPrefix(location, b.Prefix) || len(location) == len(b.Prefix):
 		errs = append(errs, fmt.Errorf("a %s location starts with %q, such as %s", b.Name, b.Prefix, b.Example))
+	}
+	if i := strings.Index(location, "://"); i >= 0 {
+		if u, err := url.Parse(location[strings.LastIndex(location[:i], ":")+1:]); err == nil && u.User != nil {
+			if _, hasPassword := u.User.Password(); hasPassword {
+				errs = append(errs, errors.New("the location carries a password, which would be shown in the interface: give it as a credential instead (RESTIC_REST_PASSWORD for a REST server)"))
+			}
+		}
 	}
 	errs = append(errs, checkKeys("env", env, b.Env)...)
 	errs = append(errs, checkKeys("secret", secrets, append(append([]string{}, b.Env...), b.Secrets...))...)

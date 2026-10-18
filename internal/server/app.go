@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -51,6 +52,12 @@ type Config struct {
 	// (a bearer token) when it is set.
 	Metrics      bool
 	MetricsToken string
+	// Listen is the address the server listens on, to warn when it is open
+	// to the network without a login.
+	Listen string
+	// AllowedHosts are the host names the server is reached by, besides IP
+	// addresses and localhost, checked when there is no login.
+	AllowedHosts []string
 }
 
 // App is the running API: store, job manager and scheduler.
@@ -77,20 +84,25 @@ func Start(ctx context.Context, cfg Config, router gin.IRouter) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	guard, err := auth.New(cfg.Username, cfg.PasswordHash, key)
-	if err != nil {
-		return nil, err
-	}
-	if !guard.Enabled() {
-		log.Warn().Msg("no auth.password_hash configured: the API is open to anyone who can reach it")
-	}
-
 	st, err := openStore(ctx, cfg, box)
 	if err != nil {
 		return nil, err
 	}
+	guard, err := auth.New(cfg.Username, cfg.PasswordHash, key, storeSessions{st})
+	if err != nil {
+		st.Close()
+		return nil, err
+	}
+	if !guard.Enabled() {
+		if loopback(cfg.Listen) {
+			log.Warn().Msg("no auth.password_hash configured: anyone who can reach this machine's 127.0.0.1 can use the API")
+		} else {
+			log.Warn().Str("listen", cfg.Listen).Msg("no auth.password_hash configured and listening on every address: anyone who can reach this port controls the backups and the files of this machine; set a password (resticgui hash-password) unless only this machine can reach it")
+		}
+	}
 
 	runner := restic.NewRunner(cfg.ResticBin)
+	runner.AllowCommands = cfg.HookCommands
 	if version, err := runner.CheckVersion(ctx); err != nil {
 		// keep serving: settings can still be edited, and jobs report the error
 		log.Error().Err(err).Msg("restic is not usable")
@@ -133,8 +145,21 @@ func Start(ctx context.Context, cfg Config, router gin.IRouter) (*App, error) {
 	(&Server{
 		Store: st, Box: box, Restic: runner, Jobs: manager, Scheduler: sched, Roots: roots, Auth: guard, Version: cfg.Version,
 		Notify: alerts, HookCommands: cfg.HookCommands, Metrics: cfg.Metrics,
-	}).Register(router.Group(BasePath))
+	}).Register(router.Group(BasePath, Guard(cfg.AllowedHosts, !guard.Enabled())))
 	return app, nil
+}
+
+// loopback reports whether addr (host:port) listens on this machine only.
+func loopback(addr string) bool {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		host = addr
+	}
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func openStore(ctx context.Context, cfg Config, box *secrets.Box) (*store.Store, error) {

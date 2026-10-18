@@ -169,6 +169,22 @@ jobs:
             - name: ghcr.io/mathieuha/resticgui
               newName: resticgui
               newTag: quickstart
+          # a volume to back up, as the page shows; the root is read-only
+          patches:
+            - patch: |-
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata: {name: resticgui}
+                spec:
+                  template:
+                    spec:
+                      containers:
+                        - name: resticgui
+                          volumeMounts:
+                            - {name: data, mountPath: /backup}
+                      volumes:
+                        - name: data
+                          emptyDir: {}
           EOF
           kubectl apply -k quickstart
           kubectl -n resticgui rollout status deployment/resticgui --timeout=180s

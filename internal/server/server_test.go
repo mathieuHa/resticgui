@@ -293,6 +293,24 @@ func TestCreateRepositoryValidation(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, status)
 }
 
+func TestOptionsThatRunProgramsNeedCommandHooks(t *testing.T) {
+	sftp := map[string]any{
+		"name": "sftp", "backend": "sftp", "location": "sftp:nas:/backups", "password": "pw",
+		"extended": map[string]string{"sftp.command": "sh -c 'id > /tmp/owned'"},
+	}
+	a := newAPI(t)
+	for _, path := range []string{"/repositories", "/repositories/probe"} {
+		status, body := a.do(http.MethodPost, path, sftp)
+		require.Equal(t, http.StatusBadRequest, status, path)
+		assert.Contains(t, string(body), "sftp.command would run a program", path)
+	}
+	assert.Nil(t, a.restic.filters, "nothing was run")
+
+	allowed := newAPI(t, func(s *Server) { s.HookCommands = true })
+	status, body := allowed.do(http.MethodPost, "/repositories", sftp)
+	assert.Equal(t, http.StatusCreated, status, string(body))
+}
+
 func TestUpdateRepositoryKeepsOrReplacesSecrets(t *testing.T) {
 	a := newAPI(t)
 	repo := a.create("photos")

@@ -1,17 +1,20 @@
-// Package auth protects the API with a single user and a signed session
-// cookie. The password is stored as a bcrypt hash in the configuration.
+// Package auth protects the API with a single user and a session cookie.
+// The password is stored as a bcrypt hash in the configuration; sessions
+// are random tokens whose hashes are kept in a Sessions store.
 package auth
 
 import (
+	"context"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,15 +28,22 @@ const CookieName = "resticgui_session"
 type Auth struct {
 	Username     string
 	PasswordHash string
-	// SessionTTL is how long a login lasts (default 7 days).
+	// SessionTTL is how long a login lasts at most (default 7 days).
 	SessionTTL time.Duration
-	key        []byte
-	now        func() time.Time
+	// IdleTimeout ends a session not used for that long (default 24 hours).
+	IdleTimeout time.Duration
+	sessions    Sessions
+	principal   string
+	limiter     *limiter
+	// checking bounds the bcrypt comparisons running at once
+	checking chan struct{}
+	now      func() time.Time
 }
 
-// New returns an Auth whose sessions are signed with a key derived from
-// secret. Changing the password hash invalidates every session.
-func New(username, passwordHash string, secret []byte) (*Auth, error) {
+// New returns an Auth that keeps its sessions in sessions. They belong to a
+// principal derived from secret, the username and the password hash, so
+// changing either ends every session.
+func New(username, passwordHash string, secret []byte, sessions Sessions) (*Auth, error) {
 	if passwordHash != "" {
 		if _, err := bcrypt.Cost([]byte(passwordHash)); err != nil {
 			return nil, fmt.Errorf("auth: the password hash is not a bcrypt hash (make one with: resticgui hash-password): %w", err)
@@ -41,10 +51,18 @@ func New(username, passwordHash string, secret []byte) (*Auth, error) {
 		if username == "" {
 			return nil, errors.New("auth: a username is required with a password")
 		}
+		if sessions == nil {
+			return nil, errors.New("auth: no session store")
+		}
 	}
 	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte("resticgui session\x00" + username + "\x00" + passwordHash))
-	return &Auth{Username: username, PasswordHash: passwordHash, SessionTTL: 7 * 24 * time.Hour, key: mac.Sum(nil), now: time.Now}, nil
+	return &Auth{
+		Username: username, PasswordHash: passwordHash,
+		SessionTTL: 7 * 24 * time.Hour, IdleTimeout: 24 * time.Hour,
+		sessions: sessions, principal: hex.EncodeToString(mac.Sum(nil)),
+		limiter: newLimiter(), checking: make(chan struct{}, 2), now: time.Now,
+	}, nil
 }
 
 // Enabled reports whether a login is required.
@@ -64,6 +82,8 @@ func HashPassword(password string) (string, error) {
 var dummyHash, _ = bcrypt.GenerateFromPassword([]byte("not the password"), bcrypt.DefaultCost)
 
 func (a *Auth) check(username, password string) bool {
+	a.checking <- struct{}{}
+	defer func() { <-a.checking }()
 	userOK := subtle.ConstantTimeCompare([]byte(username), []byte(a.Username)) == 1
 	hash := []byte(a.PasswordHash)
 	if !userOK {
@@ -72,25 +92,41 @@ func (a *Auth) check(username, password string) bool {
 	return bcrypt.CompareHashAndPassword(hash, []byte(password)) == nil && userOK
 }
 
-func (a *Auth) sign(payload string) string {
-	mac := hmac.New(sha256.New, a.key)
-	mac.Write([]byte(payload))
-	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+// newToken returns a random session token and the hash the store keeps.
+func newToken() (token string, hash []byte, err error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", nil, err
+	}
+	token = base64.RawURLEncoding.EncodeToString(b)
+	return token, hashToken(token), nil
 }
 
-// token is "expiry-unix.signature".
-func (a *Auth) token(expires time.Time) string {
-	payload := strconv.FormatInt(expires.Unix(), 10)
-	return payload + "." + a.sign(payload)
+func hashToken(token string) []byte {
+	h := sha256.Sum256([]byte(token))
+	return h[:]
 }
 
-func (a *Auth) valid(token string) bool {
-	payload, sig, ok := strings.Cut(token, ".")
-	if !ok || !hmac.Equal([]byte(sig), []byte(a.sign(payload))) {
+// valid reports whether token is a live session, and records its use.
+func (a *Auth) valid(ctx context.Context, token string) bool {
+	if token == "" {
 		return false
 	}
-	expires, err := strconv.ParseInt(payload, 10, 64)
-	return err == nil && a.now().Unix() < expires
+	hash := hashToken(token)
+	s, err := a.sessions.Get(ctx, hash)
+	if err != nil {
+		return false
+	}
+	now := a.now()
+	if s.Principal != a.principal || now.Sub(s.Created) >= a.SessionTTL || now.Sub(s.LastSeen) >= a.IdleTimeout {
+		_ = a.sessions.Delete(ctx, hash)
+		return false
+	}
+	// a write per minute at most
+	if now.Sub(s.LastSeen) >= time.Minute {
+		_ = a.sessions.Touch(ctx, hash, now)
+	}
+	return true
 }
 
 func secure(c *gin.Context) bool {
@@ -120,15 +156,39 @@ func (a *Auth) login(c *gin.Context) {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
+	client := c.ClientIP()
+	if wait := a.limiter.wait(client, a.now()); wait > 0 {
+		c.Header("Retry-After", strconv.Itoa(int(wait.Seconds())+1))
+		c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "too many failed logins, try again later"})
+		return
+	}
 	if err := c.ShouldBindJSON(&in); err != nil || !a.check(in.Username, in.Password) {
+		a.limiter.fail(client, a.now())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "wrong username or password"})
 		return
 	}
-	a.setCookie(c, a.token(a.now().Add(a.SessionTTL)), int(a.SessionTTL.Seconds()))
+	a.limiter.reset(client)
+	token, hash, err := newToken()
+	if err == nil {
+		now := a.now()
+		_ = a.sessions.Prune(c, a.principal, now.Add(-a.SessionTTL), now.Add(-a.IdleTimeout))
+		err = a.sessions.Create(c, hash, Session{Principal: a.principal, Created: now, LastSeen: now})
+	}
+	if err != nil {
+		_ = c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
+	}
+	a.setCookie(c, token, int(a.SessionTTL.Seconds()))
 	c.Status(http.StatusNoContent)
 }
 
+// logout ends the session on the server, so that a copy of the cookie stops
+// working too.
 func (a *Auth) logout(c *gin.Context) {
+	if cookie, err := c.Cookie(CookieName); err == nil && a.Enabled() {
+		_ = a.sessions.Delete(c, hashToken(cookie))
+	}
 	a.setCookie(c, "", -1)
 	c.Status(http.StatusNoContent)
 }
@@ -138,7 +198,7 @@ func (a *Auth) authenticated(c *gin.Context) bool {
 		return true
 	}
 	cookie, err := c.Cookie(CookieName)
-	return err == nil && a.valid(cookie)
+	return err == nil && a.valid(c, cookie)
 }
 
 // session tells the frontend whether it must show the login form.
