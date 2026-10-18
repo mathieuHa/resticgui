@@ -9,6 +9,7 @@
   import Logo from '#lib/components/Logo.svelte';
   import ThemeToggle from '#lib/components/ThemeToggle.svelte';
   import Toasts from '#lib/components/Toasts.svelte';
+  import Bell from '@lucide/svelte/icons/bell';
   import LogOut from '@lucide/svelte/icons/log-out';
   import Plus from '@lucide/svelte/icons/plus';
   import WifiOff from '@lucide/svelte/icons/wifi-off';
@@ -80,6 +81,7 @@
       {/if}
       <ThemeToggle />
       {#if allowed}
+        <a class="btn btn-ghost btn-sm btn-square" href={resolve('/notifications')} aria-label="Notifications" title="Notifications"><Bell class="size-4" aria-hidden="true" /></a>
         <a class="btn btn-primary btn-sm" href={resolve('/repositories/new')} aria-label="New repository"><Plus class="size-4" aria-hidden="true" /><span class="hidden sm:inline">New repository</span></a>
         {#if session?.auth_enabled}
           <button class="btn btn-ghost btn-sm" onclick={logout} aria-label="Log out {session.username}" title="Log out {session.username}">

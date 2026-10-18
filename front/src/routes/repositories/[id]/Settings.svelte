@@ -8,6 +8,7 @@
   import RepositoryForm from '#lib/components/RepositoryForm.svelte';
   import RetentionEditor from '#lib/components/RetentionEditor.svelte';
   import ScheduleEditor from '#lib/components/ScheduleEditor.svelte';
+  import Monitoring from './Monitoring.svelte';
   import { draftOf, problems, toInput } from '#lib/repository.ts';
   import { isEmpty, normalize, suggested } from '#lib/retention.ts';
 
@@ -132,6 +133,8 @@
       <div class="card-actions justify-end"><button class="btn btn-primary btn-sm" onclick={saveRetention}>Save retention</button></div>
     </div>
   </section>
+
+  <Monitoring {repo} {onsaved} />
 
   <section class="card bg-base-100 border-error/30 border shadow-sm">
     <div class="card-body">

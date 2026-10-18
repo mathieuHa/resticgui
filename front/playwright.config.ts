@@ -6,6 +6,7 @@ export const OPEN_PORT = 3097;
 export const AUTH_PORT = 3096;
 export const LOOK_PORT = 3095;
 export const CALM_PORT = 3094;
+export const RELIABILITY_PORT = 3093;
 export const PASSWORD = 'correct horse battery';
 
 export default defineConfig({
@@ -45,6 +46,11 @@ export default defineConfig({
         viewport: { width: 1280, height: 900 },
       },
     },
+    {
+      name: 'reliability',
+      testMatch: 'reliability.spec.ts',
+      use: { baseURL: `http://127.0.0.1:${RELIABILITY_PORT}` },
+    },
     // the main flow again with the system asking for less motion
     {
       name: 'reduced motion',
@@ -69,6 +75,11 @@ export default defineConfig({
     {
       command: `node e2e/serve.mjs ${CALM_PORT}`,
       url: `http://127.0.0.1:${CALM_PORT}/api/v2/auth/session`,
+      reuseExistingServer: false,
+    },
+    {
+      command: `node e2e/serve.mjs ${RELIABILITY_PORT}`,
+      url: `http://127.0.0.1:${RELIABILITY_PORT}/api/v2/auth/session`,
       reuseExistingServer: false,
     },
     {

@@ -16,6 +16,9 @@ import (
 	"sync"
 	"time"
 
+	zlog "github.com/rs/zerolog/log"
+
+	"github.com/mathieuHa/resticgui/internal/hooks"
 	"github.com/mathieuHa/resticgui/internal/restic"
 	"github.com/mathieuHa/resticgui/internal/secrets"
 	"github.com/mathieuHa/resticgui/internal/store"
@@ -97,6 +100,7 @@ type Restic interface {
 	Prune(ctx context.Context, repo *restic.Repo) error
 	Check(ctx context.Context, repo *restic.Repo, opts restic.CheckOptions) (*restic.CheckSummary, error)
 	Restore(ctx context.Context, repo *restic.Repo, opts restic.RestoreOptions, onProgress func(restic.RestoreStatus)) (*restic.RestoreSummary, error)
+	Stats(ctx context.Context, repo *restic.Repo, mode, snapshotID string) (*restic.Stats, error)
 }
 
 // RestoreParams says what a restore job restores, and where.
@@ -113,6 +117,8 @@ type Options struct {
 	// ProgressInterval is the minimum time between two progress events of a
 	// job (default 500ms). restic reports progress up to 60 times a second.
 	ProgressInterval time.Duration
+	// Hooks runs the hooks set on repositories around backups.
+	Hooks hooks.Runner
 }
 
 // Manager queues and runs jobs. It is safe for concurrent use.
@@ -121,6 +127,7 @@ type Manager struct {
 	box    *secrets.Box
 	restic Restic
 	events *Broker
+	hooks  hooks.Runner
 
 	progressInterval time.Duration
 	slots            chan struct{}
@@ -145,6 +152,9 @@ type task struct {
 	// cancel and cancelled are set once the task starts and guarded by Manager.mu
 	cancel    context.CancelFunc
 	cancelled bool
+	// finished is set, under Manager.mu, once the job's outcome is being
+	// written, so that a cancel arriving then answers ErrFinished
+	finished bool
 }
 
 func New(st *store.Store, box *secrets.Box, r Restic, events *Broker, opts Options) *Manager {
@@ -160,6 +170,7 @@ func New(st *store.Store, box *secrets.Box, r Restic, events *Broker, opts Optio
 		box:              box,
 		restic:           r,
 		events:           events,
+		hooks:            opts.Hooks,
 		progressInterval: opts.ProgressInterval,
 		slots:            make(chan struct{}, opts.Workers),
 		ctx:              ctx,
@@ -278,7 +289,7 @@ func (m *Manager) dispatch(repositoryID int64) {
 func (m *Manager) Cancel(ctx context.Context, jobID int64) error {
 	m.mu.Lock()
 	for _, q := range m.queues {
-		if q.active != nil && q.active.job.ID == jobID {
+		if q.active != nil && q.active.job.ID == jobID && !q.active.finished {
 			q.active.cancelled = true
 			q.active.cancel()
 			m.mu.Unlock()
@@ -336,27 +347,72 @@ func (m *Manager) run(ctx context.Context, t *task) {
 		m.mu.Unlock()
 	}()
 
+	finish := func(out outcome) {
+		m.mu.Lock()
+		t.finished = true
+		m.mu.Unlock()
+		_ = m.finish(t.job, out)
+	}
+
 	select {
 	case m.slots <- struct{}{}:
 		defer func() { <-m.slots }()
 	case <-ctx.Done():
-		_ = m.finish(t.job, m.stopped(t, nil))
+		finish(m.stopped(t, nil))
 		return
 	}
 
 	// the job row must be updated even while the manager shuts down
 	bg := context.Background()
 	if _, err := m.store.StartJob(bg, t.job.ID); err != nil {
-		_ = m.finish(t.job, outcome{status: StatusFailed, err: err})
+		finish(outcome{status: StatusFailed, err: err})
 		return
 	}
 	m.publish(t.job, EventStatus, StatusRunning, nil)
 
 	out := m.execute(ctx, t.job)
 	if ctx.Err() != nil {
+		log := out.stderr
 		out = m.stopped(t, out.err)
+		if len(out.stderr) == 0 {
+			// keep what the hooks printed
+			out.stderr = log
+		}
 	}
-	_ = m.finish(t.job, out)
+	finish(out)
+	if out.status == StatusSucceeded && changesSnapshots(Kind(t.job.Kind)) {
+		m.refreshStats(t.job.RepositoryID)
+	}
+}
+
+// changesSnapshots reports whether a job of kind changes the snapshot count
+// or the size of the repository.
+func changesSnapshots(kind Kind) bool {
+	return kind == KindBackup || kind == KindForget || kind == KindPrune || kind == KindInit
+}
+
+// refreshStats records the snapshot count and size of a repository for the
+// metrics endpoint. It runs while the job still holds the repository, so
+// that it never waits for a lock, and a failure only leaves the old values.
+func (m *Manager) refreshStats(repositoryID int64) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+	repo, err := m.store.GetRepository(ctx, repositoryID)
+	if err != nil {
+		return
+	}
+	target, err := ResticRepo(m.box, repo)
+	if err != nil {
+		return
+	}
+	stats, err := m.restic.Stats(ctx, target, "raw-data", "")
+	if err != nil {
+		zlog.Warn().Err(err).Str("repository", repo.Name).Msg("could not refresh the repository size")
+		return
+	}
+	_ = m.store.UpsertRepositoryStats(ctx, db.UpsertRepositoryStatsParams{
+		RepositoryID: repositoryID, Snapshots: int64(stats.SnapshotsCount), TotalSize: int64(stats.TotalSize),
+	})
 }
 
 // stopped is the outcome of a job whose context ended: cancelled by a user,
@@ -456,7 +512,7 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 			return failed(err)
 		}
 	case KindBackup:
-		return m.backup(ctx, job, repo, target)
+		return m.withHooks(ctx, job, repo, func() outcome { return m.backup(ctx, job, repo, target) })
 	case KindForget:
 		return m.forget(ctx, repo, target)
 	case KindPrune:

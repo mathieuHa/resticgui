@@ -8,6 +8,24 @@ import (
 	"time"
 )
 
+type Healthcheck struct {
+	RepositoryID int64
+	Url          []byte
+	Host         string
+}
+
+type Hook struct {
+	ID             int64
+	RepositoryID   int64
+	Event          string
+	Kind           string
+	Command        string
+	Url            []byte
+	Host           string
+	TimeoutSeconds int64
+	Position       int64
+}
+
 type Job struct {
 	ID           int64
 	RepositoryID int64
@@ -23,6 +41,18 @@ type Job struct {
 	ExitCode     *int64
 	LogExcerpt   string
 	Params       string
+}
+
+type Notifier struct {
+	ID        int64
+	Name      string
+	Url       []byte
+	Service   string
+	OnFailure bool
+	OnSuccess bool
+	OnMissed  bool
+	Enabled   bool
+	CreatedAt time.Time
 }
 
 type Path struct {
@@ -45,6 +75,13 @@ type Repository struct {
 	InitializedAt     *time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+}
+
+type RepositoryStat struct {
+	RepositoryID int64
+	Snapshots    int64
+	TotalSize    int64
+	UpdatedAt    time.Time
 }
 
 type Retention struct {

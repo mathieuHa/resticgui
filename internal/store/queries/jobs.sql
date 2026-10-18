@@ -25,3 +25,14 @@ SELECT * FROM jobs WHERE repository_id = ? ORDER BY id DESC LIMIT ? OFFSET ?;
 UPDATE jobs
 SET status = 'interrupted', finished_at = CURRENT_TIMESTAMP
 WHERE status IN ('queued', 'running');
+
+-- name: LastJobs :many
+-- the latest finished job of each kind for each repository, and the latest
+-- successful one, for the metrics endpoint and missed-backup alerts
+SELECT j.* FROM jobs j
+WHERE j.id IN (
+    SELECT max(id) FROM jobs WHERE status NOT IN ('queued', 'running') GROUP BY repository_id, kind
+    UNION
+    SELECT max(id) FROM jobs WHERE status = 'succeeded' GROUP BY repository_id, kind
+)
+ORDER BY j.repository_id, j.kind, j.id;

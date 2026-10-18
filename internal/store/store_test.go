@@ -48,18 +48,21 @@ func TestMigrationsUpDownUp(t *testing.T) {
 
 	version, err := migrator.GetDBVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, 2, version)
+	assert.EqualValues(t, 3, version)
 
 	// each down step works on its own
 	_, err = migrator.Down(ctx)
 	require.NoError(t, err)
 	version, err = migrator.GetDBVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, 1, version)
+	assert.EqualValues(t, 2, version)
+	var tables int
+	require.NoError(t, s.DB.QueryRowContext(ctx,
+		`SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name IN ('notifiers', 'healthchecks', 'hooks', 'repository_stats')`).Scan(&tables))
+	assert.Zero(t, tables)
 
 	_, err = migrator.DownTo(ctx, 0)
 	require.NoError(t, err)
-	var tables int
 	require.NoError(t, s.DB.QueryRowContext(ctx,
 		`SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name IN ('repositories', 'paths', 'schedules', 'retention', 'jobs')`).Scan(&tables))
 	assert.Zero(t, tables)
@@ -380,4 +383,34 @@ func TestOptionsRoundTrip(t *testing.T) {
 	empty, err := EncodeOptions(RepositoryOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, "{}", empty)
+}
+
+func TestRepositoryMonitoringGoesWithTheRepository(t *testing.T) {
+	ctx := context.Background()
+	s := openTestStore(t)
+	r := createRepository(t, s, "photos")
+	require.NoError(t, s.UpsertHealthcheck(ctx, db.UpsertHealthcheckParams{RepositoryID: r.ID, Url: []byte("sealed"), Host: "hc-ping.com"}))
+	_, err := s.CreateHook(ctx, db.CreateHookParams{RepositoryID: r.ID, Event: "before", Kind: "command", Command: "true", TimeoutSeconds: 60})
+	require.NoError(t, err)
+	require.NoError(t, s.UpsertRepositoryStats(ctx, db.UpsertRepositoryStatsParams{RepositoryID: r.ID, Snapshots: 2, TotalSize: 10}))
+	require.NoError(t, s.UpsertRepositoryStats(ctx, db.UpsertRepositoryStatsParams{RepositoryID: r.ID, Snapshots: 3, TotalSize: 20}))
+	stats, err := s.ListRepositoryStats(ctx)
+	require.NoError(t, err)
+	require.Len(t, stats, 1)
+	assert.EqualValues(t, 3, stats[0].Snapshots)
+
+	_, err = s.CreateHook(ctx, db.CreateHookParams{RepositoryID: r.ID, Event: "after", Kind: "command", Command: "true", TimeoutSeconds: 60})
+	assert.Error(t, err, "the event is checked")
+
+	_, err = s.DeleteRepository(ctx, r.ID)
+	require.NoError(t, err)
+	hooks, err := s.ListAllHooks(ctx)
+	require.NoError(t, err)
+	assert.Empty(t, hooks)
+	checks, err := s.ListHealthchecks(ctx)
+	require.NoError(t, err)
+	assert.Empty(t, checks)
+	stats, err = s.ListRepositoryStats(ctx)
+	require.NoError(t, err)
+	assert.Empty(t, stats)
 }

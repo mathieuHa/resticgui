@@ -1,0 +1,5 @@
+{"message_type":"change","path":"/dtest/d/a","modifier":"-"}
+{"message_type":"change","path":"/dtest/d/b","modifier":"M"}
+{"message_type":"change","path":"/dtest/d/new/","modifier":"+"}
+{"message_type":"change","path":"/dtest/d/new/c","modifier":"+"}
+{"message_type":"statistics","source_snapshot":"1135e1d8","target_snapshot":"f7108643","changed_files":1,"added":{"files":1,"dirs":1,"others":0,"data_blobs":2,"tree_blobs":4,"bytes":1751},"removed":{"files":1,"dirs":0,"others":0,"data_blobs":2,"tree_blobs":3,"bytes":1396}}

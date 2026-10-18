@@ -32,5 +32,7 @@ export const repository = (over: Partial<Repository> = {}): Repository => ({
   paths: { include: ['/home/me'], exclude: [] },
   retention: null,
   schedules: [{ job: 'backup', cron: '30 2 * * *', enabled: true, next_run: '2026-10-19T02:30:00Z' }],
+  healthcheck: null,
+  hooks: [],
   ...over,
 });

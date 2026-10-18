@@ -43,6 +43,10 @@ type RepositoryDTO struct {
 	Paths             PathsDTO          `json:"paths"`
 	Retention         *RetentionDTO     `json:"retention"`
 	Schedules         []ScheduleDTO     `json:"schedules"`
+	// Healthcheck is the Healthchecks check pinged by backups, null when unset.
+	Healthcheck *HealthcheckDTO `json:"healthcheck"`
+	// Hooks run around backups, in order.
+	Hooks []HookDTO `json:"hooks"`
 }
 
 type PathsDTO struct {
@@ -214,6 +218,9 @@ func (s *Server) repositoryDTO(ctx context.Context, r db.Repository) (Repository
 			out.NextRun = &next
 		}
 		dto.Schedules = append(dto.Schedules, out)
+	}
+	if err := s.monitoringDTO(ctx, &dto); err != nil {
+		return RepositoryDTO{}, err
 	}
 	return dto, nil
 }
