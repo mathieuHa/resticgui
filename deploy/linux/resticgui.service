@@ -1,6 +1,6 @@
 [Unit]
 Description=ResticGUI, a web interface for restic backups
-Documentation=https://resticgui.com
+Documentation=https://docs.resticgui.com
 Wants=network-online.target
 After=network-online.target
 

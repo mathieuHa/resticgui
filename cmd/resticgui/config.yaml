@@ -35,11 +35,11 @@ auth:
 
 hooks:
   # allow command hooks, which run before and after backups with ResticGUI's
-  # rights; webhooks need no setting. See https://resticgui.com/features/hooks
+  # rights; webhooks need no setting. See https://docs.resticgui.com/features/hooks
   commands: false
 
 metrics:
-  # serve Prometheus metrics at /metrics. See https://resticgui.com/features/metrics
+  # serve Prometheus metrics at /metrics. See https://docs.resticgui.com/features/metrics
   enabled: false
   # when set, scrapes must send "Authorization: Bearer <token>"
   token: ""
