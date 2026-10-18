@@ -91,8 +91,13 @@ var (
 )
 
 // validate checks the input against the secrets that will be stored.
-func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool) error {
+func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, roots Roots) error {
 	var errs []error
+	if in.Backend == "local" && filepath.IsAbs(in.Location) {
+		if err := roots.Check(in.Location); err != nil {
+			errs = append(errs, fmt.Errorf("location: %w", err))
+		}
+	}
 	if strings.TrimSpace(in.Name) == "" {
 		errs = append(errs, errors.New("name is required"))
 	}
@@ -246,7 +251,7 @@ func (s *Server) createRepository(c *gin.Context) {
 	if in.Secrets != nil {
 		secretEnv = *in.Secrets
 	}
-	if err := in.validate(secretEnv, true); err != nil {
+	if err := in.validate(secretEnv, true, s.Roots); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -303,7 +308,7 @@ func (s *Server) updateRepository(c *gin.Context) {
 	if in.Password != "" {
 		sec.Password = in.Password
 	}
-	if err := in.validate(sec.Env, false); err != nil {
+	if err := in.validate(sec.Env, false, s.Roots); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -382,8 +387,8 @@ func (s *Server) putPaths(c *gin.Context) {
 	}
 	var errs []error
 	for _, p := range in.Include {
-		if !filepath.IsAbs(p) {
-			errs = append(errs, fmt.Errorf("path %q is not absolute", p))
+		if err := s.Roots.Check(p); err != nil {
+			errs = append(errs, err)
 		}
 	}
 	for _, p := range in.Exclude {

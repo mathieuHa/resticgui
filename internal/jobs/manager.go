@@ -33,11 +33,13 @@ const (
 	KindPrune  Kind = "prune"
 	KindCheck  Kind = "check"
 	KindUnlock Kind = "unlock"
+	// KindRestore restores a snapshot, as described by its RestoreParams.
+	KindRestore Kind = "restore"
 )
 
 func (k Kind) valid() bool {
 	switch k {
-	case KindInit, KindBackup, KindForget, KindPrune, KindCheck, KindUnlock:
+	case KindInit, KindBackup, KindForget, KindPrune, KindCheck, KindUnlock, KindRestore:
 		return true
 	}
 	return false
@@ -94,6 +96,14 @@ type Restic interface {
 	Forget(ctx context.Context, repo *restic.Repo, opts restic.ForgetOptions) ([]restic.ForgetGroup, error)
 	Prune(ctx context.Context, repo *restic.Repo) error
 	Check(ctx context.Context, repo *restic.Repo, opts restic.CheckOptions) (*restic.CheckSummary, error)
+	Restore(ctx context.Context, repo *restic.Repo, opts restic.RestoreOptions, onProgress func(restic.RestoreStatus)) (*restic.RestoreSummary, error)
+}
+
+// RestoreParams says what a restore job restores, and where.
+type RestoreParams struct {
+	SnapshotID string   `json:"snapshot_id"`
+	Target     string   `json:"target"`
+	Include    []string `json:"include,omitempty"`
 }
 
 // Options configures a Manager.
@@ -168,6 +178,25 @@ func (m *Manager) Recover(ctx context.Context) (int64, error) {
 // free. A scheduled job is skipped with ErrAlreadyQueued when the same kind
 // is already queued or running for the repository.
 func (m *Manager) Enqueue(ctx context.Context, repositoryID int64, kind Kind, trigger Trigger) (db.Job, error) {
+	if kind == KindRestore {
+		return db.Job{}, fmt.Errorf("%w: a restore needs EnqueueRestore", ErrUnknownKind)
+	}
+	return m.enqueue(ctx, repositoryID, kind, trigger, "{}")
+}
+
+// EnqueueRestore queues a manual restore of a snapshot.
+func (m *Manager) EnqueueRestore(ctx context.Context, repositoryID int64, p RestoreParams) (db.Job, error) {
+	if p.SnapshotID == "" || p.Target == "" {
+		return db.Job{}, errors.New("jobs: a restore needs a snapshot and a target")
+	}
+	params, err := json.Marshal(p)
+	if err != nil {
+		return db.Job{}, err
+	}
+	return m.enqueue(ctx, repositoryID, KindRestore, TriggerManual, string(params))
+}
+
+func (m *Manager) enqueue(ctx context.Context, repositoryID int64, kind Kind, trigger Trigger, params string) (db.Job, error) {
 	if !kind.valid() {
 		return db.Job{}, fmt.Errorf("%w: %q", ErrUnknownKind, kind)
 	}
@@ -191,7 +220,7 @@ func (m *Manager) Enqueue(ctx context.Context, repositoryID int64, kind Kind, tr
 	if trigger == TriggerSchedule && q.has(kind) {
 		return db.Job{}, ErrAlreadyQueued
 	}
-	job, err := m.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repositoryID, Kind: string(kind), Trigger: string(trigger)})
+	job, err := m.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repositoryID, Kind: string(kind), Trigger: string(trigger), Params: params})
 	if err != nil {
 		if len(q.pending) == 0 && q.active == nil {
 			delete(m.queues, repositoryID)
@@ -439,6 +468,8 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 		if err := m.restic.Unlock(ctx, target); err != nil {
 			return failed(err)
 		}
+	case KindRestore:
+		return m.restore(ctx, job, target)
 	default:
 		return failed(fmt.Errorf("%w: %q", ErrUnknownKind, job.Kind))
 	}
@@ -556,6 +587,27 @@ func (m *Manager) forget(ctx context.Context, repo db.Repository, target *restic
 	for _, g := range groups {
 		summary.Kept += len(g.Keep)
 		summary.Removed += len(g.Remove)
+	}
+	return outcome{status: StatusSucceeded, summary: summary}
+}
+
+func (m *Manager) restore(ctx context.Context, job db.Job, target *restic.Repo) outcome {
+	var p RestoreParams
+	if err := json.Unmarshal([]byte(job.Params), &p); err != nil {
+		return failed(fmt.Errorf("restore parameters: %w", err))
+	}
+	var last time.Time
+	summary, err := m.restic.Restore(ctx, target, restic.RestoreOptions{SnapshotID: p.SnapshotID, Target: p.Target, Include: p.Include}, func(s restic.RestoreStatus) {
+		if now := time.Now(); now.Sub(last) >= m.progressInterval {
+			last = now
+			m.publish(job, EventProgress, StatusRunning, &Progress{
+				PercentDone: s.PercentDone, FilesDone: s.FilesRestored, TotalFiles: s.TotalFiles,
+				BytesDone: s.BytesRestored, TotalBytes: s.TotalBytes, SecondsRemaining: s.SecondsRemaining,
+			})
+		}
+	})
+	if err != nil {
+		return failed(err)
 	}
 	return outcome{status: StatusSucceeded, summary: summary}
 }

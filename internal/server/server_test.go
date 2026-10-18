@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -37,6 +38,10 @@ type fakeRestic struct {
 	err       error
 	filters   []restic.SnapshotFilter
 	block     chan struct{}
+	calls     []string
+	nodes     []restic.Node
+	found     []restic.FindResult
+	dump      string
 }
 
 func (f *fakeRestic) Snapshots(_ context.Context, _ *restic.Repo, filter restic.SnapshotFilter) ([]restic.Snapshot, error) {
@@ -44,6 +49,42 @@ func (f *fakeRestic) Snapshots(_ context.Context, _ *restic.Repo, filter restic.
 	defer f.mu.Unlock()
 	f.filters = append(f.filters, filter)
 	return f.snapshots, f.err
+}
+
+func (f *fakeRestic) record(call string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.calls = append(f.calls, call)
+}
+
+func (f *fakeRestic) Ls(_ context.Context, _ *restic.Repo, snapshotID, dir string) ([]restic.Node, error) {
+	f.record("ls " + snapshotID + " " + dir)
+	return f.nodes, f.err
+}
+
+func (f *fakeRestic) Find(_ context.Context, _ *restic.Repo, snapshotID, pattern string) ([]restic.FindResult, error) {
+	f.record("find " + snapshotID + " " + pattern)
+	return f.found, f.err
+}
+
+func (f *fakeRestic) Stats(_ context.Context, _ *restic.Repo, mode, snapshotID string) (*restic.Stats, error) {
+	f.record("stats " + mode + " " + snapshotID)
+	return &restic.Stats{TotalSize: 42, SnapshotsCount: 3}, f.err
+}
+
+func (f *fakeRestic) ForgetSnapshots(_ context.Context, _ *restic.Repo, ids []string, prune bool) error {
+	f.record(fmt.Sprintf("forget %v prune=%v", ids, prune))
+	return f.err
+}
+
+func (f *fakeRestic) Dump(_ context.Context, _ *restic.Repo, snapshotID, path, archive string, w io.Writer) error {
+	f.record("dump " + snapshotID + " " + path + " " + archive)
+	if f.dump != "" {
+		if _, err := io.WriteString(w, f.dump); err != nil {
+			return err
+		}
+	}
+	return f.err
 }
 
 func (f *fakeRestic) wait(ctx context.Context) error {
@@ -70,6 +111,9 @@ func (f *fakeRestic) Backup(ctx context.Context, _ *restic.Repo, _ restic.Backup
 func (f *fakeRestic) Forget(ctx context.Context, _ *restic.Repo, _ restic.ForgetOptions) ([]restic.ForgetGroup, error) {
 	return nil, f.wait(ctx)
 }
+func (f *fakeRestic) Restore(ctx context.Context, _ *restic.Repo, _ restic.RestoreOptions, _ func(restic.RestoreStatus)) (*restic.RestoreSummary, error) {
+	return &restic.RestoreSummary{}, f.wait(ctx)
+}
 func (f *fakeRestic) Check(ctx context.Context, _ *restic.Repo, _ restic.CheckOptions) (*restic.CheckSummary, error) {
 	return &restic.CheckSummary{}, f.wait(ctx)
 }
@@ -86,7 +130,7 @@ type api struct {
 	reloads *reloads
 }
 
-func newAPI(t *testing.T) *api {
+func newAPI(t *testing.T, configure ...func(*Server)) *api {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	st, err := store.Open(context.Background(), filepath.Join(t.TempDir(), "resticgui.db"))
@@ -99,7 +143,11 @@ func newAPI(t *testing.T) *api {
 	t.Cleanup(manager.Close)
 	a := &api{t: t, store: st, restic: fake, reloads: &reloads{}}
 	r := gin.New()
-	(&Server{Store: st, Box: box, Restic: fake, Jobs: manager, Scheduler: a.reloads}).Register(r.Group(BasePath))
+	srv := &Server{Store: st, Box: box, Restic: fake, Jobs: manager, Scheduler: a.reloads}
+	for _, f := range configure {
+		f(srv)
+	}
+	srv.Register(r.Group(BasePath))
 	a.srv = httptest.NewServer(r)
 	t.Cleanup(a.srv.Close)
 	return a
@@ -279,7 +327,7 @@ func TestPaths(t *testing.T) {
 
 	status, body := a.do(http.MethodPut, path, PathsDTO{Include: []string{"relative/dir"}, Exclude: []string{" "}})
 	require.Equal(t, http.StatusBadRequest, status)
-	assert.Contains(t, string(body), `path \"relative/dir\" is not absolute`)
+	assert.Contains(t, string(body), `\"relative/dir\" is not an absolute path`)
 	assert.Contains(t, string(body), "an exclude pattern is empty")
 
 	status, body = a.do(http.MethodPut, path, PathsDTO{

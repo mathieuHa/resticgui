@@ -48,6 +48,13 @@ func TestMigrationsUpDownUp(t *testing.T) {
 
 	version, err := migrator.GetDBVersion(ctx)
 	require.NoError(t, err)
+	assert.EqualValues(t, 2, version)
+
+	// each down step works on its own
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	version, err = migrator.GetDBVersion(ctx)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, version)
 
 	_, err = migrator.DownTo(ctx, 0)
@@ -138,7 +145,7 @@ func TestDeleteRepositoryCascades(t *testing.T) {
 		require.NoError(t, err)
 		_, err = s.UpsertRetention(ctx, db.UpsertRetentionParams{RepositoryID: id, KeepLast: 3, Prune: true})
 		require.NoError(t, err)
-		_, err = s.CreateJob(ctx, db.CreateJobParams{RepositoryID: id, Kind: "backup", Trigger: "manual"})
+		_, err = s.CreateJob(ctx, db.CreateJobParams{RepositoryID: id, Kind: "backup", Trigger: "manual", Params: "{}"})
 		require.NoError(t, err)
 	}
 
@@ -244,7 +251,7 @@ func TestJobLifecycle(t *testing.T) {
 	s := openTestStore(t)
 	r := createRepository(t, s, "docs")
 
-	job, err := s.CreateJob(ctx, db.CreateJobParams{RepositoryID: r.ID, Kind: "backup", Trigger: "schedule"})
+	job, err := s.CreateJob(ctx, db.CreateJobParams{RepositoryID: r.ID, Kind: "backup", Trigger: "schedule", Params: "{}"})
 	require.NoError(t, err)
 	assert.Equal(t, "queued", job.Status)
 	assert.Nil(t, job.StartedAt)
@@ -277,7 +284,7 @@ func TestJobLifecycle(t *testing.T) {
 	assert.EqualValues(t, 3, *got.ExitCode)
 
 	finish.Summary = "not json"
-	other, err := s.CreateJob(ctx, db.CreateJobParams{RepositoryID: r.ID, Kind: "backup", Trigger: "manual"})
+	other, err := s.CreateJob(ctx, db.CreateJobParams{RepositoryID: r.ID, Kind: "backup", Trigger: "manual", Params: "{}"})
 	require.NoError(t, err)
 	finish.ID = other.ID
 	_, err = s.FinishJob(ctx, finish)
@@ -291,7 +298,7 @@ func TestListJobsAndInterrupt(t *testing.T) {
 
 	var ids []int64
 	for i := 0; i < 5; i++ {
-		job, err := s.CreateJob(ctx, db.CreateJobParams{RepositoryID: r.ID, Kind: "backup", Trigger: "manual"})
+		job, err := s.CreateJob(ctx, db.CreateJobParams{RepositoryID: r.ID, Kind: "backup", Trigger: "manual", Params: "{}"})
 		require.NoError(t, err)
 		ids = append(ids, job.ID)
 	}

@@ -29,6 +29,7 @@ type JobDTO struct {
 	Error        string          `json:"error,omitempty"`
 	ExitCode     *int64          `json:"exit_code,omitempty"`
 	LogExcerpt   string          `json:"log_excerpt,omitempty"`
+	Params       json.RawMessage `json:"params"`
 }
 
 func NewJobDTO(j db.Job) JobDTO {
@@ -36,6 +37,7 @@ func NewJobDTO(j db.Job) JobDTO {
 		ID: j.ID, RepositoryID: j.RepositoryID, Kind: Kind(j.Kind), Trigger: Trigger(j.Trigger), Status: Status(j.Status),
 		CreatedAt: j.CreatedAt, StartedAt: j.StartedAt, FinishedAt: j.FinishedAt,
 		SnapshotID: j.SnapshotID, Summary: json.RawMessage(j.Summary), Error: j.Error, ExitCode: j.ExitCode, LogExcerpt: j.LogExcerpt,
+		Params: json.RawMessage(j.Params),
 	}
 }
 

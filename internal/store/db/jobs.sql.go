@@ -10,17 +10,23 @@ import (
 )
 
 const createJob = `-- name: CreateJob :one
-INSERT INTO jobs (repository_id, kind, trigger) VALUES (?, ?, ?) RETURNING id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt
+INSERT INTO jobs (repository_id, kind, trigger, params) VALUES (?, ?, ?, ?) RETURNING id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params
 `
 
 type CreateJobParams struct {
 	RepositoryID int64
 	Kind         string
 	Trigger      string
+	Params       string
 }
 
 func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
-	row := q.db.QueryRowContext(ctx, createJob, arg.RepositoryID, arg.Kind, arg.Trigger)
+	row := q.db.QueryRowContext(ctx, createJob,
+		arg.RepositoryID,
+		arg.Kind,
+		arg.Trigger,
+		arg.Params,
+	)
 	var i Job
 	err := row.Scan(
 		&i.ID,
@@ -36,6 +42,7 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		&i.Error,
 		&i.ExitCode,
 		&i.LogExcerpt,
+		&i.Params,
 	)
 	return i, err
 }
@@ -79,7 +86,7 @@ func (q *Queries) FinishJob(ctx context.Context, arg FinishJobParams) (int64, er
 }
 
 const getJob = `-- name: GetJob :one
-SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt FROM jobs WHERE id = ?
+SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params FROM jobs WHERE id = ?
 `
 
 func (q *Queries) GetJob(ctx context.Context, id int64) (Job, error) {
@@ -99,12 +106,13 @@ func (q *Queries) GetJob(ctx context.Context, id int64) (Job, error) {
 		&i.Error,
 		&i.ExitCode,
 		&i.LogExcerpt,
+		&i.Params,
 	)
 	return i, err
 }
 
 const listJobsForRepository = `-- name: ListJobsForRepository :many
-SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt FROM jobs WHERE repository_id = ? ORDER BY id DESC LIMIT ? OFFSET ?
+SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params FROM jobs WHERE repository_id = ? ORDER BY id DESC LIMIT ? OFFSET ?
 `
 
 type ListJobsForRepositoryParams struct {
@@ -136,6 +144,7 @@ func (q *Queries) ListJobsForRepository(ctx context.Context, arg ListJobsForRepo
 			&i.Error,
 			&i.ExitCode,
 			&i.LogExcerpt,
+			&i.Params,
 		); err != nil {
 			return nil, err
 		}

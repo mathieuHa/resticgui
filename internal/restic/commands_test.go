@@ -3,8 +3,10 @@ package restic
 import (
 	"bytes"
 	"context"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -257,4 +259,21 @@ func TestDump(t *testing.T) {
 	require.NoError(t, f.runner.Dump(context.Background(), f.repo, "latest", "/home/me/docs", "zip", &out))
 	assert.Equal(t, "file content\n", out.String())
 	assert.Equal(t, []string{"dump", "--archive", "zip", "--", "latest", "/home/me/docs"}, f.invocation().Args[:6])
+}
+
+func TestGlobalFlagsComeBeforeArguments(t *testing.T) {
+	f := newFake(t, scenario{})
+	f.runner.RetryLock = 5 * time.Second
+	f.repo.CACert = "/etc/ssl/ca.pem"
+	f.repo.Options = map[string]string{"s3.storage-class": "STANDARD_IA"}
+	require.NoError(t, f.runner.ForgetSnapshots(context.Background(), f.repo, []string{"f0feba17"}, false))
+	args := f.invocation().Args
+	sep := slices.Index(args, "--")
+	require.NotEqual(t, -1, sep, args)
+	assert.Equal(t, []string{"f0feba17"}, args[sep+1:], "only snapshot IDs follow --")
+	assert.Equal(t, "forget", args[0])
+	for _, flag := range []string{"--retry-lock", "--cacert", "-o"} {
+		i := slices.Index(args, flag)
+		assert.True(t, i > 0 && i < sep, "%s before --: %v", flag, args)
+	}
 }

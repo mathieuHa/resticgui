@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,9 +22,15 @@ import (
 // BasePath is where Register is expected to be mounted.
 const BasePath = "/api/v2"
 
-// Snapshotter is the part of *restic.Runner the API calls directly.
-type Snapshotter interface {
+// Restic is the part of *restic.Runner the API calls directly, for reads
+// that answer at once rather than as jobs.
+type Restic interface {
 	Snapshots(ctx context.Context, repo *restic.Repo, filter restic.SnapshotFilter) ([]restic.Snapshot, error)
+	Ls(ctx context.Context, repo *restic.Repo, snapshotID, dir string) ([]restic.Node, error)
+	Find(ctx context.Context, repo *restic.Repo, snapshotID, pattern string) ([]restic.FindResult, error)
+	Stats(ctx context.Context, repo *restic.Repo, mode, snapshotID string) (*restic.Stats, error)
+	ForgetSnapshots(ctx context.Context, repo *restic.Repo, ids []string, prune bool) error
+	Dump(ctx context.Context, repo *restic.Repo, snapshotID, path, archive string, w io.Writer) error
 }
 
 // Reloader is told when schedules change; *scheduler.Scheduler implements it.
@@ -35,9 +42,12 @@ type Reloader interface {
 type Server struct {
 	Store     *store.Store
 	Box       *secrets.Box
-	Restic    Snapshotter
+	Restic    Restic
 	Jobs      *jobs.Manager
 	Scheduler Reloader
+	// Roots limits backup paths, local repositories, restore targets and
+	// the folder browser; empty allows the whole filesystem.
+	Roots Roots
 }
 
 // Register adds the routes under r, which is usually router.Group(BasePath).
@@ -56,6 +66,13 @@ func (s *Server) Register(r gin.IRouter) {
 	r.DELETE("/repositories/:id/schedules/:job", s.deleteSchedule)
 	r.POST("/repositories/:id/jobs", s.startJob)
 	r.GET("/repositories/:id/snapshots", s.listSnapshots)
+	r.DELETE("/repositories/:id/snapshots/:snapshot", s.forgetSnapshot)
+	r.GET("/repositories/:id/snapshots/:snapshot/files", s.listFiles)
+	r.GET("/repositories/:id/snapshots/:snapshot/find", s.findFiles)
+	r.GET("/repositories/:id/snapshots/:snapshot/download", s.download)
+	r.POST("/repositories/:id/snapshots/:snapshot/restore", s.restore)
+	r.GET("/repositories/:id/stats", s.stats)
+	r.GET("/fs", s.browse)
 
 	(&jobs.Handler{Manager: s.Jobs}).Register(r)
 }

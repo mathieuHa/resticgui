@@ -151,13 +151,16 @@ func (r *Runner) run(ctx context.Context, repo *Repo, c call) error {
 	if bin == "" {
 		bin = "restic"
 	}
-	args := append([]string{c.command}, c.args...)
+	// global flags go before the command's own arguments, which may end
+	// with "--" followed by snapshot IDs or paths
+	args := []string{c.command}
 	if repo != nil {
 		args = append(args, repoFlags(repo)...)
 		if r.RetryLock > 0 {
 			args = append(args, "--retry-lock", r.RetryLock.String())
 		}
 	}
+	args = append(args, c.args...)
 
 	cmd := exec.CommandContext(ctx, bin, args...)
 	cmd.Env = r.environment(repo)

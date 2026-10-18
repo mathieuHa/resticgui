@@ -87,6 +87,14 @@ func (f *fakeRestic) Check(ctx context.Context, repo *restic.Repo, opts restic.C
 	return f.check, f.do(ctx, "check", repo, opts)
 }
 
+func (f *fakeRestic) Restore(ctx context.Context, repo *restic.Repo, opts restic.RestoreOptions, onProgress func(restic.RestoreStatus)) (*restic.RestoreSummary, error) {
+	onProgress(restic.RestoreStatus{PercentDone: 0.25, FilesRestored: 1, TotalFiles: 4})
+	if err := f.do(ctx, "restore", repo, opts); err != nil {
+		return nil, err
+	}
+	return &restic.RestoreSummary{FilesRestored: 4, TotalFiles: 4}, nil
+}
+
 // gate blocks the restic calls of a test until released, and reports which
 // repositories are running.
 type gate struct {
@@ -559,9 +567,9 @@ func TestRecoverMarksUnfinishedJobsInterrupted(t *testing.T) {
 	e := newEnv(t, Options{})
 	repo := e.repository(t, "r")
 	// rows left behind by a process that died
-	queued, err := e.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repo.ID, Kind: "backup", Trigger: "schedule"})
+	queued, err := e.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repo.ID, Kind: "backup", Trigger: "schedule", Params: "{}"})
 	require.NoError(t, err)
-	running, err := e.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repo.ID, Kind: "check", Trigger: "manual"})
+	running, err := e.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repo.ID, Kind: "check", Trigger: "manual", Params: "{}"})
 	require.NoError(t, err)
 	_, err = e.store.StartJob(ctx, running.ID)
 	require.NoError(t, err)
@@ -594,4 +602,37 @@ func TestBrokerDropsSlowSubscribers(t *testing.T) {
 	_, ok = <-ch
 	assert.False(t, ok, "a subscriber that misses a status event is closed")
 	unsubscribe() // safe after the broker closed it
+}
+
+func TestRestoreJob(t *testing.T) {
+	ctx := context.Background()
+	e := newEnv(t, Options{})
+	repo := e.repository(t, "r")
+	events, unsubscribe := e.events.Subscribe(16)
+	defer unsubscribe()
+
+	_, err := e.manager.Enqueue(ctx, repo.ID, KindRestore, TriggerManual)
+	assert.ErrorIs(t, err, ErrUnknownKind, "a restore needs its parameters")
+	_, err = e.manager.EnqueueRestore(ctx, repo.ID, RestoreParams{SnapshotID: "abc"})
+	assert.Error(t, err)
+
+	job, err := e.manager.EnqueueRestore(ctx, repo.ID, RestoreParams{SnapshotID: "abc", Target: "/restore", Include: []string{"/home/me/a.txt"}})
+	require.NoError(t, err)
+	assert.Equal(t, "restore", job.Kind)
+	assert.JSONEq(t, `{"snapshot_id":"abc","target":"/restore","include":["/home/me/a.txt"]}`, job.Params)
+	done := e.waitStatus(t, job.ID, StatusSucceeded)
+	var summary restic.RestoreSummary
+	require.NoError(t, json.Unmarshal([]byte(done.Summary), &summary))
+	assert.EqualValues(t, 4, summary.FilesRestored)
+
+	calls := e.restic.Calls()
+	require.Len(t, calls, 1)
+	assert.Equal(t, restic.RestoreOptions{SnapshotID: "abc", Target: "/restore", Include: []string{"/home/me/a.txt"}}, calls[0].Opts)
+	var progress *Progress
+	for ev := range drain(events) {
+		if ev.Type == EventProgress {
+			progress = ev.Progress
+		}
+	}
+	assert.Equal(t, &Progress{PercentDone: 0.25, FilesDone: 1, TotalFiles: 4}, progress)
 }

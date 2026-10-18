@@ -33,7 +33,8 @@ func realRunner(t *testing.T) *Runner {
 		bin = "restic"
 	}
 	r := NewRunner(bin)
-	r.RetryLock = 0
+	// short, but set: global flags must not land after "--"
+	r.RetryLock = 5 * time.Second
 	// restic needs a cache directory; keep it inside the test
 	r.Env = append(SafeEnv(), "RESTIC_CACHE_DIR="+t.TempDir())
 	v, err := r.CheckVersion(context.Background())
