@@ -1,8 +1,11 @@
 package webui
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -43,4 +46,24 @@ func TestHandlerWithoutBuild(t *testing.T) {
 	Handler(fstest.MapFS{}, "/ui").ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/ui/", nil))
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 	assert.Contains(t, rec.Body.String(), "not built")
+}
+
+func TestCSPAllowsOnlyThePageScripts(t *testing.T) {
+	page := []byte("<head><script>\n  theme()\n</script><script src=\"/ui/app.js\"></script></head><body><div><script>{ start() }</script></div></body>")
+	ui := fstest.MapFS{"index.html": {Data: page}, "app.js": {Data: []byte("js")}}
+	h := Handler(ui, "/ui")
+	for _, p := range []string{"/ui/", "/ui/repositories/3", "/ui/app.js"} {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, p, nil))
+		csp := rec.Header().Get("Content-Security-Policy")
+		assert.Contains(t, csp, "frame-ancestors 'none'", p)
+		assert.Contains(t, csp, "object-src 'none'", p)
+		assert.Contains(t, csp, "'sha256-", p)
+	}
+	csp := CSP(page)
+	sum := sha256.Sum256([]byte("\n  theme()\n"))
+	assert.Contains(t, csp, "'sha256-"+base64.StdEncoding.EncodeToString(sum[:])+"'")
+	assert.Equal(t, 2, strings.Count(csp, "'sha256-"), "the two inline scripts, not the loaded one")
+	scriptSrc, _, _ := strings.Cut(strings.Split(csp, "script-src")[1], ";")
+	assert.NotContains(t, scriptSrc, "unsafe")
 }

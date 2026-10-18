@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,8 +30,13 @@ func NewRoots(dirs []string) (Roots, error) {
 	return roots, nil
 }
 
-// Check returns an error unless p is an absolute path inside a root.
+// Check returns an error unless p is an absolute path inside a root, free
+// of control characters: restic reads backup paths one per line, so a
+// newline would smuggle in a second path.
 func (r Roots) Check(p string) error {
+	if strings.ContainsFunc(p, unicode.IsControl) {
+		return fmt.Errorf("%q contains a control character", p)
+	}
 	if !filepath.IsAbs(p) {
 		return fmt.Errorf("%q is not an absolute path", p)
 	}
@@ -67,6 +73,44 @@ func (r Roots) checkResolved(p string) error {
 		return fmt.Errorf("%q leads outside the allowed directories", p)
 	}
 	return nil
+}
+
+// checkLinks is Check, then the same for p with its symbolic links followed,
+// as far as p exists: a link inside a root must not lead restic to back up
+// or restore into a directory outside of them.
+func (r Roots) checkLinks(p string) error {
+	if err := r.Check(p); err != nil || len(r) == 0 {
+		return err
+	}
+	resolved, err := resolveExisting(filepath.Clean(p))
+	if err != nil {
+		return err
+	}
+	if !r.contains(resolved) {
+		return fmt.Errorf("%q leads outside the allowed directories", p)
+	}
+	return nil
+}
+
+// resolveExisting follows the symbolic links of the longest existing
+// prefix of p and appends the rest.
+func resolveExisting(p string) (string, error) {
+	rest := ""
+	for {
+		resolved, err := filepath.EvalSymlinks(p)
+		if err == nil {
+			return filepath.Join(resolved, rest), nil
+		}
+		if !errors.Is(err, os.ErrNotExist) {
+			return "", err
+		}
+		parent := filepath.Dir(p)
+		if parent == p {
+			return filepath.Join(p, rest), nil
+		}
+		rest = filepath.Join(filepath.Base(p), rest)
+		p = parent
+	}
 }
 
 // Entry is one item of a directory listing.

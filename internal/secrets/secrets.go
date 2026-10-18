@@ -96,7 +96,7 @@ func LoadKey(keyFile string) ([]byte, error) {
 	if runtime.GOOS != "windows" && info.Mode().Perm()&0o077 != 0 {
 		return nil, fmt.Errorf("secrets: key file %s is accessible by other users, run: chmod 600 %s", keyFile, keyFile)
 	}
-	content, err := os.ReadFile(keyFile)
+	content, err := os.ReadFile(keyFile) // #nosec G304 -- the key file named in the configuration
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func createKeyFile(keyFile string) ([]byte, error) {
 		return nil, err
 	}
 	// O_EXCL so two processes starting together cannot overwrite each other's key.
-	f, err := os.OpenFile(keyFile, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	f, err := os.OpenFile(keyFile, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600) // #nosec G304 -- the key file named in the configuration
 	if err != nil {
 		return nil, err
 	}

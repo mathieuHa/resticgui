@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -44,13 +45,22 @@ func sessionCookie(t *testing.T, rec *httptest.ResponseRecorder) *http.Cookie {
 	return nil
 }
 
-func newAuth(t *testing.T, password string) *Auth {
+func newAuth(t *testing.T, password string, sessions ...Sessions) *Auth {
 	t.Helper()
 	hash, err := HashPassword(password)
 	require.NoError(t, err)
-	a, err := New("admin", hash, []byte("secret key"))
+	var store Sessions = NewMemorySessions()
+	if len(sessions) > 0 {
+		store = sessions[0]
+	}
+	a, err := New("admin", hash, []byte("secret key"), store)
 	require.NoError(t, err)
 	return a
+}
+
+func login(t *testing.T, r http.Handler) *http.Cookie {
+	t.Helper()
+	return sessionCookie(t, request(r, http.MethodPost, "/auth/login", `{"username":"admin","password":"correct horse"}`))
 }
 
 func TestLoginFlow(t *testing.T) {
@@ -80,21 +90,87 @@ func TestLoginFlow(t *testing.T) {
 }
 
 func TestSessionsExpireAndAreBoundToThePassword(t *testing.T) {
-	a := newAuth(t, "correct horse")
+	store := NewMemorySessions()
+	a := newAuth(t, "correct horse", store)
 	r := newRouter(t, a)
-	cookie := sessionCookie(t, request(r, http.MethodPost, "/auth/login", `{"username":"admin","password":"correct horse"}`))
+	cookie := login(t, r)
+	assert.Len(t, cookie.Value, 43, "32 random bytes")
+	assert.NotEqual(t, cookie.Value, login(t, r).Value)
 
-	tampered := *cookie
-	tampered.Value = "9999999999." + strings.SplitN(cookie.Value, ".", 2)[1]
-	assert.Equal(t, http.StatusUnauthorized, request(r, http.MethodGet, "/secret", "", &tampered).Code, "a longer expiry breaks the signature")
+	forged := *cookie
+	forged.Value = "9999999999.c2lnbmF0dXJl"
+	assert.Equal(t, http.StatusUnauthorized, request(r, http.MethodGet, "/secret", "", &forged).Code, "an unknown token")
 
-	a.now = func() time.Time { return time.Now().Add(8 * 24 * time.Hour) }
-	assert.Equal(t, http.StatusUnauthorized, request(r, http.MethodGet, "/secret", "", cookie).Code, "expired")
+	start := time.Now()
+	at := func(d time.Duration) { a.now = func() time.Time { return start.Add(d) } }
+	// used every 20 hours, the session outlives the idle timeout...
+	for d := 20 * time.Hour; d < 7*24*time.Hour; d += 20 * time.Hour {
+		at(d)
+		assert.Equal(t, http.StatusOK, request(r, http.MethodGet, "/secret", "", cookie).Code, d)
+	}
+	// ...but not its lifetime
+	at(7*24*time.Hour + time.Minute)
+	assert.Equal(t, http.StatusUnauthorized, request(r, http.MethodGet, "/secret", "", cookie).Code, "past the lifetime")
+
 	a.now = time.Now
+	idle := login(t, r)
+	at(25 * time.Hour)
+	assert.Equal(t, http.StatusUnauthorized, request(r, http.MethodGet, "/secret", "", idle).Code, "idle for a day")
 
-	other := newAuth(t, "a new password")
+	a.now = time.Now
+	cookie = login(t, r)
+	other := newAuth(t, "a new password", store)
 	assert.Equal(t, http.StatusUnauthorized, request(newRouter(t, other), http.MethodGet, "/secret", "", cookie).Code,
 		"changing the password ends existing sessions")
+}
+
+func TestLogoutEndsTheSessionOnTheServer(t *testing.T) {
+	store := NewMemorySessions()
+	a := newAuth(t, "correct horse", store)
+	r := newRouter(t, a)
+	cookie := login(t, r)
+	stolen := *cookie
+	require.Equal(t, 1, store.Len())
+
+	request(r, http.MethodPost, "/auth/logout", "", cookie)
+	assert.Equal(t, 0, store.Len())
+	assert.Equal(t, http.StatusUnauthorized, request(r, http.MethodGet, "/secret", "", &stolen).Code,
+		"a copy of the cookie stops working")
+}
+
+func TestFailedLoginsAreLimited(t *testing.T) {
+	a := newAuth(t, "correct horse")
+	r := newRouter(t, a)
+	from := func(ip, body string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.RemoteAddr = ip + ":40000"
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		return rec
+	}
+	wrong := `{"username":"admin","password":"guess"}`
+	right := `{"username":"admin","password":"correct horse"}`
+	for i := range maxFailures {
+		assert.Equal(t, http.StatusUnauthorized, from("192.0.2.1", wrong).Code, i)
+	}
+	rec := from("192.0.2.1", right)
+	assert.Equal(t, http.StatusTooManyRequests, rec.Code, "even the right password waits")
+	assert.NotEmpty(t, rec.Header().Get("Retry-After"))
+	assert.Equal(t, http.StatusNoContent, from("192.0.2.2", right).Code, "other clients are not blocked")
+
+	start := time.Now()
+	a.now = func() time.Time { return start.Add(window) }
+	assert.Equal(t, http.StatusNoContent, from("192.0.2.1", right).Code, "after the window")
+}
+
+func TestLimiterMemoryIsBounded(t *testing.T) {
+	l := newLimiter()
+	now := time.Now()
+	for i := range maxClients + 10 {
+		l.fail(strconv.Itoa(i), now)
+	}
+	assert.LessOrEqual(t, len(l.failures), maxClients)
 }
 
 func TestSecureCookieBehindHTTPS(t *testing.T) {
@@ -108,7 +184,7 @@ func TestSecureCookieBehindHTTPS(t *testing.T) {
 }
 
 func TestDisabled(t *testing.T) {
-	a, err := New("", "", []byte("k"))
+	a, err := New("", "", []byte("k"), nil)
 	require.NoError(t, err)
 	r := newRouter(t, a)
 	assert.Equal(t, http.StatusOK, request(r, http.MethodGet, "/secret", "").Code)
@@ -116,11 +192,13 @@ func TestDisabled(t *testing.T) {
 }
 
 func TestConfigErrors(t *testing.T) {
-	_, err := New("admin", "plaintext-password", []byte("k"))
+	_, err := New("admin", "plaintext-password", []byte("k"), NewMemorySessions())
 	assert.ErrorContains(t, err, "hash-password")
 	hash, err := HashPassword("long enough")
 	require.NoError(t, err)
-	_, err = New("", hash, []byte("k"))
+	_, err = New("", hash, []byte("k"), NewMemorySessions())
+	assert.Error(t, err)
+	_, err = New("admin", hash, []byte("k"), nil)
 	assert.Error(t, err)
 	_, err = HashPassword("short")
 	assert.Error(t, err)

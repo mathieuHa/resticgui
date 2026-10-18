@@ -103,3 +103,10 @@ type Schedule struct {
 	Cron         string
 	Enabled      bool
 }
+
+type Session struct {
+	TokenHash  []byte
+	Principal  string
+	CreatedAt  int64
+	LastSeenAt int64
+}

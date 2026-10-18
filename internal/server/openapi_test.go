@@ -37,7 +37,7 @@ func TestOpenAPIMatchesRoutes(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	a, err := auth.New("", "", []byte("k"))
+	a, err := auth.New("", "", []byte("k"), nil)
 	require.NoError(t, err)
 	(&Server{Auth: a}).Register(r.Group(BasePath))
 	param := regexp.MustCompile(`:(\w+)`)
@@ -75,7 +75,7 @@ func TestOpenAPIIsServed(t *testing.T) {
 func TestAuthGuardsTheAPI(t *testing.T) {
 	hash, err := auth.HashPassword("long enough password")
 	require.NoError(t, err)
-	guard, err := auth.New("admin", hash, []byte("k"))
+	guard, err := auth.New("admin", hash, []byte("k"), auth.NewMemorySessions())
 	require.NoError(t, err)
 	a := newAPI(t, func(s *Server) { s.Auth = guard })
 

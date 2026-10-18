@@ -53,6 +53,7 @@ export default defineConfig({
         items: [
           { text: 'Configuration', link: '/reference/configuration' },
           { text: 'Security', link: '/reference/security' },
+          { text: 'Security review', link: '/reference/security-review' },
           { text: 'API', link: '/reference/api' },
           { text: 'Upgrading from 0.1', link: '/reference/upgrading' },
         ],

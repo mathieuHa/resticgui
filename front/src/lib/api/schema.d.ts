@@ -75,6 +75,13 @@ export interface paths {
                     content?: never;
                 };
                 401: components["responses"]["Error"];
+                /** @description Too many failed logins from this client; wait for Retry-After seconds */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete?: never;
@@ -92,7 +99,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Clear the session cookie */
+        /** End the session on the server and clear its cookie */
         post: {
             parameters: {
                 query?: never;

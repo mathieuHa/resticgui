@@ -10,6 +10,12 @@ info:
     /openapi.yaml needs the session cookie set by POST /auth/login.
     Secrets (the repository password and secret variables) can be written
     but are never returned.
+
+    Requests that change something must send JSON (Content-Type:
+    application/json) and are refused when the browser says they come from
+    another site (Sec-Fetch-Site or Origin). Without a password, only IP
+    addresses, localhost and the names in server.allowed_hosts are answered
+    (421 otherwise).
 servers:
   - url: /api/v2
 security:
@@ -40,9 +46,10 @@ paths:
       responses:
         "204": { description: Logged in; the session cookie is set }
         "401": { $ref: "#/components/responses/Error" }
+        "429": { description: Too many failed logins from this client; wait for Retry-After seconds }
   /auth/logout:
     post:
-      summary: Clear the session cookie
+      summary: End the session on the server and clear its cookie
       security: []
       responses:
         "204": { description: Logged out }

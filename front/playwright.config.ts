@@ -29,7 +29,7 @@ export default defineConfig({
   projects: [
     {
       name: 'open',
-      testMatch: 'backup.spec.ts',
+      testMatch: ['backup.spec.ts', 'security.spec.ts'],
       use: { baseURL: `http://127.0.0.1:${OPEN_PORT}` },
     },
     {

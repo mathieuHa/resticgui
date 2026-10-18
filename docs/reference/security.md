@@ -19,7 +19,14 @@ auth:
 ```
 
 Without `auth.password_hash`, ResticGUI logs a warning at start and the
-interface and API are open.
+interface and API are open to whoever reaches the port. It still refuses
+requests sent by other web sites, and answers only to IP addresses,
+`localhost` and the names in `server.allowed_hosts`, so that a web page
+cannot reach it through a domain that resolves to your machine.
+
+A login lasts 7 days at most, and ends after 24 hours without use or when
+you log out, on every copy of the cookie. Changing the password ends every
+session. After 10 wrong passwords in 15 minutes, a client must wait.
 
 ## HTTPS
 
@@ -39,6 +46,8 @@ With nginx:
 ```nginx
 location / {
     proxy_pass http://127.0.0.1:3001;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
     proxy_buffering off;
     proxy_read_timeout 1h;
 }
@@ -62,6 +71,15 @@ location / {
   when you do not restore in place.
 - Command [hooks](/features/hooks) are off unless `hooks.commands: true`.
 - `/metrics` is off by default; give it a `metrics.token`.
+- restic options that run a program (`sftp.command`, `rclone.program` and
+  the like) need `hooks.commands: true` too.
+- The [Kubernetes manifests](/install/kubernetes) refuse connections from
+  other pods and run with a read-only root and only the capabilities needed
+  to read and restore files; the [systemd unit](/install/linux) is
+  sandboxed likewise.
+
+The [security review](/reference/security-review) lists what was checked
+and found.
 
 ## Report a vulnerability
 

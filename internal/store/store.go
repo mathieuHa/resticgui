@@ -103,7 +103,7 @@ type RepositorySecrets struct {
 
 // SealSecrets encrypts s for the repositories.secrets column.
 func SealSecrets(box *secrets.Box, s RepositorySecrets) ([]byte, error) {
-	plaintext, err := json.Marshal(s)
+	plaintext, err := json.Marshal(s) // #nosec G117 -- marshalled to be encrypted, never sent
 	if err != nil {
 		return nil, err
 	}
