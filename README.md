@@ -120,6 +120,35 @@ auth:
 A public demo environment is available at [demo.resticgui.com](https://demo.resticgui.com)  
 It is reinitialized every hour and do not persist data between restarts. 
 
+## Similar projects
+
+ResticGUI is one of several web and desktop front-ends for restic. If it does not fit your needs, these are worth a look, and they inspire parts of our roadmap:
+
+| Project | Kind | License |
+|---|---|---|
+| [Backrest](https://github.com/garethgeorge/backrest) | Web UI and orchestrator, Go | GPL-3.0 |
+| [Zerobyte](https://github.com/nicotsx/zerobyte) | Self-hosted web app, TypeScript | AGPL-3.0 |
+| [restic-browser](https://github.com/emuell/restic-browser) | Desktop snapshot browser, Tauri | MIT |
+| [Resticity](https://github.com/ad-on-is/resticity) | Desktop app, Wails (archived) | GPL-3.0 |
+| [resticprofile](https://github.com/creativeprojects/resticprofile) | CLI configuration wrapper | GPL-3.0 |
+
+What sets ResticGUI apart: a single static binary with the UI embedded, a dry-run preview of what a retention policy will delete, live progress over Server-Sent Events, and a documented OpenAPI.
+
+## Roadmap
+
+Ideas we plan to work on, roughly in this order. Suggestions are welcome in the issues.
+
+- **Dashboard**: last backup status and age per repository, next run, size over time, success/failure history.
+- **Notifications**: alerts on failure, success or a missed schedule through [Shoutrrr](https://github.com/containrrr/shoutrrr) URLs (ntfy, Gotify, Discord, Slack, Telegram, email) and Healthchecks.io pings.
+- **Hooks**: a command or webhook before and after a backup, for example to dump a database.
+- **Import an existing restic repository** and index its snapshots.
+- **Prometheus metrics** at `/metrics`: last backup time and status, duration, data added, repository size.
+- **Snapshot diff**: what changed between two snapshots.
+- **Backup plans**: several sets of paths, each with its own schedule and retention, into one repository; exclude patterns and per-plan restic options.
+- **Copy to a second repository** (`restic copy`) for 3-2-1 backups.
+- **Maintenance tools**: unlock, repair, partial data check, password change.
+- **Configuration from a file or environment variables** for container deployments.
+
 ## Glossary
 
 The Design of Restic component is detailed in [github.com/restic/restic/blob/master/doc/design.rst](https://github.com/restic/restic/blob/master/doc/design.rst)
