@@ -1,0 +1,190 @@
+name: Image
+
+# Builds the container image for every platform and smoke-tests each one.
+# Pull requests stop there; main publishes edge, and the Release and Weekly
+# rebuild workflows call this one to publish versioned tags.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build
+        type: string
+        required: true
+      version:
+        description: Release version such as 1.4.2; empty builds edge
+        type: string
+        default: ""
+      fail-on-critical:
+        description: Fail when the image has a fixable critical vulnerability
+        type: boolean
+        default: false
+    outputs:
+      digest:
+        description: Digest of the published image
+        value: ${{ jobs.publish.outputs.digest }}
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/mathieuha/resticgui
+  PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
+
+jobs:
+  test:
+    name: test (${{ matrix.platform }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/arm/v7]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - name: Version
+        id: vars
+        env:
+          RELEASE: ${{ inputs.version }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          echo "version=${RELEASE:-dev-$(git rev-parse --short HEAD)}" >> "$GITHUB_OUTPUT"
+          echo "slug=$(echo "$PLATFORM" | tr / -)" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@v4
+        if: matrix.platform != 'linux/amd64'
+      - uses: docker/setup-buildx-action@v4
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          load: true
+          tags: resticgui:test
+          build-args: VERSION=${{ steps.vars.outputs.version }}
+          cache-from: type=gha,scope=${{ steps.vars.outputs.slug }}
+          cache-to: type=gha,mode=max,scope=${{ steps.vars.outputs.slug }}
+      - name: Smoke test
+        run: scripts/smoke-image.sh resticgui:test "${{ matrix.platform }}" "${{ steps.vars.outputs.version }}"
+      - name: Vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: resticgui:test
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Vulnerabilities report
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: resticgui:test
+          format: sarif
+          output: trivy.sarif
+          skip-setup-trivy: true
+      - name: Upload to code scanning
+        if: github.event_name != 'pull_request'
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy.sarif
+          category: image-${{ inputs.version || 'edge' }}-${{ steps.vars.outputs.slug }}
+      - name: No fixable critical vulnerability
+        if: inputs.fail-on-critical
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: resticgui:test
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          skip-setup-trivy: true
+
+  publish:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency: image-${{ inputs.version || 'edge' }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # keyless cosign signature
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - name: Tags
+        id: tags
+        env:
+          RELEASE: ${{ inputs.version }}
+        run: |
+          {
+            echo "tags<<EOF"
+            if [ -n "$RELEASE" ]; then
+              echo "type=raw,value=$RELEASE"
+              echo "type=raw,value=$RELEASE-$(date -u +%Y%m%d)"
+              case "$RELEASE" in
+              *-*) ;; # a pre-release only gets its own tag
+              *)
+                major=${RELEASE%%.*}
+                minor=${RELEASE#*.}; minor=${minor%%.*}
+                echo "type=raw,value=$major.$minor"
+                [ "$major" = 0 ] || echo "type=raw,value=$major"
+                echo "type=raw,value=latest"
+                ;;
+              esac
+            else
+              echo "type=raw,value=edge"
+              echo "type=raw,value=sha-$(git rev-parse --short HEAD)"
+            fi
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+          echo "version=${RELEASE:-dev-$(git rev-parse --short HEAD)}" >> "$GITHUB_OUTPUT"
+      - uses: docker/metadata-action@v6
+        id: meta
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: org.opencontainers.image.version=${{ steps.tags.outputs.version }}
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: VERSION=${{ steps.tags.outputs.version }}
+          sbom: true
+          provenance: mode=max
+          cache-from: |
+            type=gha,scope=linux-amd64
+            type=gha,scope=linux-arm64
+            type=gha,scope=linux-arm-v7
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      - name: Sign
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: cosign sign --yes "$IMAGE@$DIGEST"
+      - name: Summary
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          {
+            echo "### Published $IMAGE@$DIGEST"
+            echo
+            echo "$TAGS" | sed 's/^/- `/; s/$/`/'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -54,6 +54,8 @@ type Server struct {
 	// Auth guards every route but its own and the OpenAPI document; nil
 	// leaves the API open.
 	Auth *auth.Auth
+	// Version is the ResticGUI version, "dev" for a build that is not a release.
+	Version string
 }
 
 //go:embed openapi.yaml
@@ -62,6 +64,7 @@ var openAPI []byte
 // Register adds the routes under r, which is usually router.Group(BasePath).
 func (s *Server) Register(public gin.IRouter) {
 	public.GET("/openapi.yaml", func(c *gin.Context) { c.Data(http.StatusOK, "application/yaml", openAPI) })
+	public.GET("/version", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"version": s.Version}) })
 	r := public
 	if s.Auth != nil {
 		s.Auth.Register(public)

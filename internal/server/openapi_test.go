@@ -85,7 +85,16 @@ func TestAuthGuardsTheAPI(t *testing.T) {
 	}
 	status, _ := a.do(http.MethodGet, "/openapi.yaml", nil)
 	assert.Equal(t, http.StatusOK, status)
+	status, _ = a.do(http.MethodGet, "/version", nil)
+	assert.Equal(t, http.StatusOK, status)
 	status, body := a.do(http.MethodGet, "/auth/session", nil)
 	assert.Equal(t, http.StatusOK, status)
 	assert.JSONEq(t, `{"auth_enabled":true,"authenticated":false}`, string(body))
+}
+
+func TestVersion(t *testing.T) {
+	a := newAPI(t, func(s *Server) { s.Version = "1.2.3" })
+	status, body := a.do(http.MethodGet, "/version", nil)
+	assert.Equal(t, http.StatusOK, status)
+	assert.JSONEq(t, `{"version":"1.2.3"}`, string(body))
 }

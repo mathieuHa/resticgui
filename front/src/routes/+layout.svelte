@@ -12,6 +12,7 @@
 
   let session = $state<Session | null>(null);
   let failed = $state('');
+  let version = $state('');
 
   const onLogin = $derived(page.route.id === '/login');
 
@@ -30,6 +31,10 @@
 
   $effect(() => {
     check();
+    api.version().then(
+      (v) => (version = v.version),
+      () => {},
+    );
   });
 
   const allowed = $derived(!!session && (!session.auth_enabled || session.authenticated));
@@ -87,6 +92,10 @@
       {@render children()}
     {/if}
   </main>
+
+  {#if version}
+    <footer class="text-base-content/60 p-4 text-center text-xs">ResticGUI {version}</footer>
+  {/if}
 </div>
 
 <Toasts />

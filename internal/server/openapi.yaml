@@ -63,6 +63,21 @@ paths:
                   authenticated: { type: boolean }
                   username: { type: string }
 
+  /version:
+    get:
+      summary: The ResticGUI version
+      security: []
+      responses:
+        "200":
+          description: Version, "dev" for a build that is not a release
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [version]
+                properties:
+                  version: { type: string, examples: ["0.2.0"] }
+
   /backends:
     get:
       summary: Supported backends and the variables each reads

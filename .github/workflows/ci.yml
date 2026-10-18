@@ -26,6 +26,8 @@ jobs:
         run: go test -race ./internal/... -coverprofile=coverage.out
       - name: Coverage
         run: go tool cover -func=coverage.out | tail -1
+      - name: Release scripts
+        run: python3 scripts/semver_test.py
 
   front:
     runs-on: ubuntu-latest
