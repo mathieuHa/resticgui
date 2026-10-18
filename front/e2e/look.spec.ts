@@ -94,7 +94,11 @@ test('dashboard', async ({ page, request }) => {
 
 test('repository overview, runs and snapshots', async ({ page }) => {
   const base = `/ui/repositories/${photos}`;
-  await both(page, 'overview', base, (p) => expect(p.getByTestId('chart')).toHaveCount(3));
+  await both(page, 'overview', base, async (p) => {
+    await expect(p.getByTestId('chart')).toHaveCount(3);
+    // the sizes come from restic stats, after the page
+    await expect(p.locator('.skeleton')).toHaveCount(0);
+  });
   await both(page, 'runs', `${base}?tab=runs`, (p) => expect(p.getByTestId('run-history').getByRole('listitem')).toHaveCount(3));
   await both(page, 'snapshots', `${base}?tab=snapshots`, (p) => expect(p.getByTestId('snapshots').locator('tbody tr')).toHaveCount(2));
 
