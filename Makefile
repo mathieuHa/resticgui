@@ -8,7 +8,7 @@ TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
 CI?=false
 BASEDOCKERIMAGE?=alpine:latest
-NODEVERSION?=18.15.0-alpine
+NODEVERSION?=22-alpine
 ALPINEDOCKERIMAGE?=alpine:latest
 UBUNTUDOCKERIMAGE?=ubuntu:latest
 GOVERSION?=1.20.5
@@ -145,11 +145,21 @@ rundev: buildgo run ## Build and run resticgui binary listening on localhost:808
 rundevweb: installwebdev ## Run dev web listening on localhost:3000
 	cd $(WEBDIR) && npm run dev
     
-# testweb: installweb
-# 	npm run lint
 
 generate: ## Regenerate the sqlc queries in internal/store/db
 	sqlc generate -f internal/store/sqlc.yaml
+
+testweb: ## Run the frontend checks and unit tests
+	cd $(WEBDIR) && npm run check && npm run lint && npm test
+
+e2e: createdir ## Run the end-to-end tests: built UI in the binary, real restic (RESTIC_BIN)
+	cd $(WEBDIR) && npm run build
+	cp -r $(WEBDIR)/build/. internal/webui/ui/
+	CGO_ENABLED=0 go build -o ${BUILDDIR}/resticgui-e2e ./cmd/resticgui
+	cd $(WEBDIR) && RESTICGUI_BIN=${BUILDDIR}/resticgui-e2e npx playwright test
+
+genapi: ## Regenerate the frontend API types from internal/server/openapi.yaml
+	cd $(WEBDIR) && npm run gen:api
 
 testgo: ## Run the go Tests
 	go test ./internal/... -cover

@@ -415,6 +415,13 @@ func (m *Manager) finish(job db.Job, out outcome) error {
 		params.ExitCode = &code
 	}
 	params.LogExcerpt = strings.Join(out.stderr, "\n")
+	if out.status == StatusSucceeded && Kind(job.Kind) != KindUnlock {
+		// the command opened the repository, so it exists, also when it was
+		// created outside resticgui and never had an init job
+		if err := m.store.MarkRepositoryInitialized(context.Background(), job.RepositoryID); err != nil {
+			return err
+		}
+	}
 	if _, err := m.store.FinishJob(context.Background(), params); err != nil {
 		return err
 	}

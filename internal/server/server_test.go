@@ -505,12 +505,16 @@ func TestSnapshots(t *testing.T) {
 	repo := a.create("photos")
 	path := "/repositories/" + itoa(repo.ID) + "/snapshots"
 	a.restic.snapshots = []restic.Snapshot{{ID: "abc", ShortID: "abc"}}
+	require.Nil(t, repo.InitializedAt)
 
 	status, body := a.do(http.MethodGet, path, nil)
 	require.Equal(t, http.StatusOK, status, string(body))
 	var snaps []restic.Snapshot
 	a.decode(body, &snaps)
 	assert.Equal(t, a.restic.snapshots, snaps)
+	_, body = a.do(http.MethodGet, "/repositories/"+itoa(repo.ID), nil)
+	a.decode(body, &repo)
+	assert.NotNil(t, repo.InitializedAt, "listing snapshots shows the repository exists")
 	status, _ = a.do(http.MethodGet, path+"?all=true", nil)
 	require.Equal(t, http.StatusOK, status)
 	assert.Equal(t, []restic.SnapshotFilter{{Host: "nas", Tags: []string{jobs.Tag(repo.ID)}}, {}}, a.restic.filters)

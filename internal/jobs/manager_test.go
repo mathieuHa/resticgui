@@ -379,6 +379,35 @@ func TestInitJobMarksRepositoryInitialized(t *testing.T) {
 	assert.NotNil(t, repo.InitializedAt)
 }
 
+func TestSucceededJobsMarkRepositoryInitialized(t *testing.T) {
+	ctx := context.Background()
+	e := newEnv(t, Options{})
+	initialized := func(id int64) bool {
+		r, err := e.store.GetRepository(ctx, id)
+		require.NoError(t, err)
+		return r.InitializedAt != nil
+	}
+	run := func(id int64, kind Kind, want Status) {
+		job, err := e.manager.Enqueue(ctx, id, kind, TriggerManual)
+		require.NoError(t, err)
+		e.waitStatus(t, job.ID, want)
+	}
+
+	// a repository made with restic on the command line never has an init job
+	existing := e.repository(t, "existing")
+	run(existing.ID, KindUnlock, StatusSucceeded)
+	assert.False(t, initialized(existing.ID), "unlock works on a missing repository too")
+	run(existing.ID, KindCheck, StatusSucceeded)
+	assert.True(t, initialized(existing.ID))
+
+	missing := e.repository(t, "missing")
+	e.restic.mu.Lock()
+	e.restic.run = func(context.Context, fakeCall) error { return restic.ErrRepositoryNotFound }
+	e.restic.mu.Unlock()
+	run(missing.ID, KindBackup, StatusFailed)
+	assert.False(t, initialized(missing.ID))
+}
+
 func TestOtherKinds(t *testing.T) {
 	e := newEnv(t, Options{})
 	repo := e.repository(t, "r")

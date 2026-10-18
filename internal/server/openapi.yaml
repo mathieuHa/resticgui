@@ -514,11 +514,11 @@ components:
         started_at: { type: [string, "null"], format: date-time }
         finished_at: { type: [string, "null"], format: date-time }
         snapshot_id: { type: string }
-        summary: { type: object, description: restic's summary for the kind of job }
+        summary: { type: object, additionalProperties: true, description: restic's summary for the kind of job }
         error: { type: string }
         exit_code: { type: integer }
         log_excerpt: { type: string, description: Last lines restic wrote to stderr }
-        params: { type: object, description: 'For a restore: snapshot_id, target, include' }
+        params: { type: object, additionalProperties: true, description: 'For a restore: snapshot_id, target, include' }
     Event:
       type: object
       required: [job_id, repository_id, kind, status]
@@ -559,7 +559,7 @@ components:
         paths: { type: array, items: { type: string } }
         hostname: { type: string }
         tags: { type: array, items: { type: string } }
-        summary: { type: object }
+        summary: { type: object, additionalProperties: true, description: Stored by restic 0.17 and later }
     Node:
       type: object
       required: [name, type, path, size, mtime, permissions]

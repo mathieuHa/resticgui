@@ -1,9 +1,9 @@
 dist/*
 build/*
-.gitignore
 .vscode
-testdata/resticgui.db
 front/node_modules
 front/.svelte-kit
 front/build
 internal/webui/ui
+front/test-results
+front/playwright-report

@@ -676,6 +676,12 @@ func (s *Server) listSnapshots(c *gin.Context) {
 		resticFailure(c, err)
 		return
 	}
+	if r.InitializedAt == nil {
+		if err := s.Store.MarkRepositoryInitialized(ctx, r.ID); err != nil {
+			internal(c, err)
+			return
+		}
+	}
 	c.JSON(http.StatusOK, snaps)
 }
 

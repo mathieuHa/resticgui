@@ -152,7 +152,16 @@ make run
 ```
 make rundevweb
 ```
-> Listen on http://localhost:3000
+> Listen on http://localhost:3000/ui, and sends `/api` to the backend on port 3001
+
+#### Tests
+
+```
+make testgo     # Go unit tests
+make testweb    # svelte-check, eslint and Vitest
+make e2e        # Playwright against the built binary; needs restic, or RESTIC_BIN=/path/to/restic
+make genapi     # after changing internal/server/openapi.yaml
+```
 
 #### Start container
 
@@ -165,10 +174,10 @@ make rundocker
 
 ### Frontend
 
-#### Install node 18
+#### Install node 22
 
 ```
-curl -sL https://deb.nodesource.com/setup_18.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo bash -
 sudo apt -y install nodejs
 ```
 
