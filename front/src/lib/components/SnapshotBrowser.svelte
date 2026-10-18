@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { api, ApiError, type FileNode, type FindMatch, type Snapshot } from '$lib/api/client';
-  import { bytes, dateTime } from '$lib/format';
+  import { api, ApiError, type FileNode, type FindMatch, type Snapshot } from '#lib/api/client.ts';
+  import { bytes, dateTime } from '#lib/format.ts';
 
   import RestoreDialog from './RestoreDialog.svelte';
 

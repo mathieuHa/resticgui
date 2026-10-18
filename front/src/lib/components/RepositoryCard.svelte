@@ -1,10 +1,10 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { api, type Repository } from '$lib/api/client';
-  import { attempt, jobs } from '$lib/app.svelte';
-  import { relative } from '$lib/format';
-  import { BACKEND_LABELS } from '$lib/repository';
-  import { describe, parse } from '$lib/schedule';
+  import { api, type Repository } from '#lib/api/client.ts';
+  import { attempt, jobs } from '#lib/app.svelte.ts';
+  import { relative } from '#lib/format.ts';
+  import { BACKEND_LABELS } from '#lib/repository.ts';
+  import { describe, parse } from '#lib/schedule.ts';
 
   import JobProgress from './JobProgress.svelte';
 

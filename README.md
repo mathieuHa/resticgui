@@ -174,10 +174,10 @@ make rundocker
 
 ### Frontend
 
-#### Install node 22
+#### Install node 24
 
 ```
-curl -sL https://deb.nodesource.com/setup_22.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo bash -
 sudo apt -y install nodejs
 ```
 
@@ -189,8 +189,8 @@ __Linux__
 ```bash
 sudo apt-get install golang-go
 # Ou 
-wget https://go.dev/dl/go1.19.4.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.19.4.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.27.2.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.27.2.linux-amd64.tar.gz
 ```
 
 __Windows__

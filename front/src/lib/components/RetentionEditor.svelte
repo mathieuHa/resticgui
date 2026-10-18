@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { api, type Retention, type RetentionPreview } from '$lib/api/client';
-  import { notifyError } from '$lib/app.svelte';
-  import { dateTime } from '$lib/format';
-  import { COUNT_RULES, isEmpty, normalize } from '$lib/retention';
+  import { api, type Retention, type RetentionPreview } from '#lib/api/client.ts';
+  import { notifyError } from '#lib/app.svelte.ts';
+  import { dateTime } from '#lib/format.ts';
+  import { COUNT_RULES, isEmpty, normalize } from '#lib/retention.ts';
 
   // Edits a retention policy; with a repository id it can preview the policy.
   let {

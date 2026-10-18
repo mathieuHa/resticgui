@@ -4,9 +4,9 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
-  import { api, onUnauthorized, type Session } from '$lib/api/client';
-  import { attempt, jobs } from '$lib/app.svelte';
-  import Toasts from '$lib/components/Toasts.svelte';
+  import { api, onUnauthorized, type Session } from '#lib/api/client.ts';
+  import { attempt, jobs } from '#lib/app.svelte.ts';
+  import Toasts from '#lib/components/Toasts.svelte';
 
   let { children } = $props();
 

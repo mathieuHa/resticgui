@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { JobStatus } from '$lib/api/client';
+  import type { JobStatus } from '#lib/api/client.ts';
 
   let { status }: { status: JobStatus } = $props();
 

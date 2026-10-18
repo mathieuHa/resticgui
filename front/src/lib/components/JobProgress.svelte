@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { api, type Job } from '$lib/api/client';
-  import { attempt, jobs } from '$lib/app.svelte';
-  import { bytes, duration, elapsed, percent } from '$lib/format';
-  import { KIND_LABELS } from '$lib/jobtext';
+  import { api, type Job } from '#lib/api/client.ts';
+  import { attempt, jobs } from '#lib/app.svelte.ts';
+  import { bytes, duration, elapsed, percent } from '#lib/format.ts';
+  import { KIND_LABELS } from '#lib/jobtext.ts';
 
   import JobBadge from './JobBadge.svelte';
 

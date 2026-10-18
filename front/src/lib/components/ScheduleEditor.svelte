@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { checkCron, defaults, describe, parse, toCron, WEEKDAYS, type Preset, type PresetKind } from '$lib/schedule';
+  import { checkCron, defaults, describe, parse, toCron, WEEKDAYS, type Preset, type PresetKind } from '#lib/schedule.ts';
 
   // Edits a cron expression as a preset. null means no schedule.
   let { value = $bindable(null), label }: { value?: string | null; label: string } = $props();

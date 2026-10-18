@@ -2,17 +2,17 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
-  import { api, type Repository, type Snapshot, type Stats } from '$lib/api/client';
-  import { attempt, jobs, notify } from '$lib/app.svelte';
-  import JobProgress from '$lib/components/JobProgress.svelte';
-  import RunHistory from '$lib/components/RunHistory.svelte';
-  import SnapshotBrowser from '$lib/components/SnapshotBrowser.svelte';
-  import Modal from '$lib/components/Modal.svelte';
-  import { bytes, dateTime, relative } from '$lib/format';
-  import { KIND_LABELS } from '$lib/jobtext';
-  import { BACKEND_LABELS } from '$lib/repository';
-  import { describeRetention } from '$lib/retention';
-  import { describe, parse } from '$lib/schedule';
+  import { api, type Repository, type Snapshot, type Stats } from '#lib/api/client.ts';
+  import { attempt, jobs, notify } from '#lib/app.svelte.ts';
+  import JobProgress from '#lib/components/JobProgress.svelte';
+  import RunHistory from '#lib/components/RunHistory.svelte';
+  import SnapshotBrowser from '#lib/components/SnapshotBrowser.svelte';
+  import Modal from '#lib/components/Modal.svelte';
+  import { bytes, dateTime, relative } from '#lib/format.ts';
+  import { KIND_LABELS } from '#lib/jobtext.ts';
+  import { BACKEND_LABELS } from '#lib/repository.ts';
+  import { describeRetention } from '#lib/retention.ts';
+  import { describe, parse } from '#lib/schedule.ts';
 
   import Settings from './Settings.svelte';
 

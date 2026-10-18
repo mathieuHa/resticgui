@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { api } from '$lib/api/client';
-  import { jobs, notifyError } from '$lib/app.svelte';
-  import { dateTime, duration, elapsed } from '$lib/format';
-  import { KIND_LABELS, summarize } from '$lib/jobtext';
+  import { api } from '#lib/api/client.ts';
+  import { jobs, notifyError } from '#lib/app.svelte.ts';
+  import { dateTime, duration, elapsed } from '#lib/format.ts';
+  import { KIND_LABELS, summarize } from '#lib/jobtext.ts';
 
   import JobBadge from './JobBadge.svelte';
   import JobProgress from './JobProgress.svelte';
