@@ -167,6 +167,8 @@ func (h *Handler) stream(c *gin.Context) {
 	defer unsubscribe()
 
 	w := c.Writer
+	// the stream outlives the server's WriteTimeout
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("X-Accel-Buffering", "no")

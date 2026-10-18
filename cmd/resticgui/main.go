@@ -15,13 +15,14 @@ import (
 	"github.com/mathieuHa/resticgui/internal/database"
 	"github.com/mathieuHa/resticgui/internal/legacy"
 	Logs "github.com/mathieuHa/resticgui/internal/logs"
+	"github.com/mathieuHa/resticgui/internal/server"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
 var (
-	server *http.Server
+	httpServer *http.Server
 )
 var cr *cron.Cron
 
@@ -43,13 +44,36 @@ func main() {
 
 	router := api.SetupRouter()
 
+	// The new API runs next to the old one until the new frontend uses it.
+	viper.SetDefault("api_v2.enabled", false)
+	viper.SetDefault("api_v2.database", "resticgui-v2.db")
+	viper.SetDefault("api_v2.key_file", "resticgui.key")
+	viper.SetDefault("api_v2.workers", 2)
+	viper.SetDefault("api_v2.schedule", false)
+	viper.SetDefault("restic.bin", "restic")
+	var v2 *server.App
+	if viper.GetBool("api_v2.enabled") {
+		var err error
+		v2, err = server.Start(context.Background(), server.Config{
+			Database:  viper.GetString("api_v2.database"),
+			KeyFile:   viper.GetString("api_v2.key_file"),
+			ResticBin: viper.GetString("restic.bin"),
+			Workers:   viper.GetInt("api_v2.workers"),
+			Schedule:  viper.GetBool("api_v2.schedule"),
+		}, router)
+		if err != nil {
+			log.Fatal().Err(err).Msg("cannot start the v2 API")
+		}
+		log.Info().Msg("v2 API enabled under " + server.BasePath)
+	}
+
 	// setting server information
 	serverIP := viper.GetString("server.ip")
 	serverDisable := viper.GetBool("server.disable")
 	serverPort := viper.GetInt("server.port")
 	serverAddr := fmt.Sprintf("%s:%d", serverIP, serverPort)
 
-	server = &http.Server{
+	httpServer = &http.Server{
 		Handler:      router,
 		Addr:         serverAddr,
 		WriteTimeout: 15 * time.Second,
@@ -59,7 +83,7 @@ func main() {
 	if !serverDisable {
 		// Run our server in a goroutine so that it doesn't block.
 		go func() {
-			if err := server.ListenAndServe(); err != nil {
+			if err := httpServer.ListenAndServe(); err != nil {
 				log.Err(err).Msg("Error running server")
 			} else {
 				log.Info().Msgf("Start Server listen at %v", serverAddr)
@@ -83,7 +107,12 @@ func main() {
 	defer cancel()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
-	err := server.Shutdown(ctx)
+	err := httpServer.Shutdown(ctx)
+	if v2 != nil {
+		if err := v2.Close(); err != nil {
+			log.Error().Err(err).Msg("closing the v2 API")
+		}
+	}
 	if err != nil {
 		log.Error().Msg("error shutting down")
 		return

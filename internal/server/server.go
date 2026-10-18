@@ -1,0 +1,104 @@
+// Package server is the /api/v2 HTTP API, backed by the store, the job
+// manager and the scheduler.
+package server
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/mathieuHa/resticgui/internal/jobs"
+	"github.com/mathieuHa/resticgui/internal/restic"
+	"github.com/mathieuHa/resticgui/internal/secrets"
+	"github.com/mathieuHa/resticgui/internal/store"
+)
+
+// BasePath is where Register is expected to be mounted.
+const BasePath = "/api/v2"
+
+// Snapshotter is the part of *restic.Runner the API calls directly.
+type Snapshotter interface {
+	Snapshots(ctx context.Context, repo *restic.Repo, filter restic.SnapshotFilter) ([]restic.Snapshot, error)
+}
+
+// Reloader is told when schedules change; *scheduler.Scheduler implements it.
+type Reloader interface {
+	Reload()
+}
+
+// Server holds what the handlers need.
+type Server struct {
+	Store     *store.Store
+	Box       *secrets.Box
+	Restic    Snapshotter
+	Jobs      *jobs.Manager
+	Scheduler Reloader
+}
+
+// Register adds the routes under r, which is usually router.Group(BasePath).
+func (s *Server) Register(r gin.IRouter) {
+	r.GET("/backends", s.listBackends)
+
+	r.GET("/repositories", s.listRepositories)
+	r.POST("/repositories", s.createRepository)
+	r.GET("/repositories/:id", s.getRepository)
+	r.PUT("/repositories/:id", s.updateRepository)
+	r.DELETE("/repositories/:id", s.deleteRepository)
+	r.PUT("/repositories/:id/paths", s.putPaths)
+	r.PUT("/repositories/:id/retention", s.putRetention)
+	r.DELETE("/repositories/:id/retention", s.deleteRetention)
+	r.PUT("/repositories/:id/schedules/:job", s.putSchedule)
+	r.DELETE("/repositories/:id/schedules/:job", s.deleteSchedule)
+	r.POST("/repositories/:id/jobs", s.startJob)
+	r.GET("/repositories/:id/snapshots", s.listSnapshots)
+
+	(&jobs.Handler{Manager: s.Jobs}).Register(r)
+}
+
+// apiError is the body of every error response.
+type apiError struct {
+	Error string `json:"error"`
+	// Details lists validation problems, one per line of the error.
+	Details []string `json:"details,omitempty"`
+}
+
+func fail(c *gin.Context, status int, msg string) {
+	c.AbortWithStatusJSON(status, apiError{Error: msg})
+}
+
+func invalid(c *gin.Context, err error) {
+	c.AbortWithStatusJSON(http.StatusBadRequest, apiError{Error: "invalid request", Details: strings.Split(err.Error(), "\n")})
+}
+
+// internal logs err through gin and answers 500 without details.
+func internal(c *gin.Context, err error) {
+	_ = c.Error(err)
+	fail(c, http.StatusInternalServerError, "internal error")
+}
+
+func repositoryID(c *gin.Context) (int64, bool) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || id <= 0 {
+		fail(c, http.StatusBadRequest, "invalid repository id")
+		return 0, false
+	}
+	return id, true
+}
+
+// notFound answers 404 for a missing row and 500 for any other error.
+func notFound(c *gin.Context, err error, what string) {
+	if errors.Is(err, sql.ErrNoRows) {
+		fail(c, http.StatusNotFound, what+" not found")
+		return
+	}
+	internal(c, err)
+}
+
+func isUniqueViolation(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "UNIQUE constraint failed")
+}

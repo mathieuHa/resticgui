@@ -204,6 +204,14 @@ func (m *Manager) Enqueue(ctx context.Context, repositoryID int64, kind Kind, tr
 	return job, nil
 }
 
+// Busy reports whether a job is queued or running for the repository.
+func (m *Manager) Busy(repositoryID int64) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	q := m.queues[repositoryID]
+	return q != nil && (q.active != nil || len(q.pending) > 0)
+}
+
 func (q *repoQueue) has(kind Kind) bool {
 	if q.active != nil && Kind(q.active.job.Kind) == kind {
 		return true
@@ -398,7 +406,7 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 	if err != nil {
 		return failed(err)
 	}
-	target, err := m.resticRepo(repo)
+	target, err := ResticRepo(m.box, repo)
 	if err != nil {
 		return failed(err)
 	}
@@ -437,8 +445,10 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 	return outcome{status: StatusSucceeded}
 }
 
-func (m *Manager) resticRepo(repo db.Repository) (*restic.Repo, error) {
-	sec, err := store.OpenSecrets(m.box, repo.Secrets)
+// ResticRepo builds what restic needs to open a stored repository: its
+// location, decrypted password and variables, and options.
+func ResticRepo(box *secrets.Box, repo db.Repository) (*restic.Repo, error) {
+	sec, err := store.OpenSecrets(box, repo.Secrets)
 	if err != nil {
 		return nil, fmt.Errorf("repository %q: decrypt secrets: %w", repo.Name, err)
 	}

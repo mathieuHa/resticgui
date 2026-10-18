@@ -9,6 +9,18 @@ import (
 	"context"
 )
 
+const deleteRetention = `-- name: DeleteRetention :execrows
+DELETE FROM retention WHERE repository_id = ?
+`
+
+func (q *Queries) DeleteRetention(ctx context.Context, repositoryID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteRetention, repositoryID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getRetention = `-- name: GetRetention :one
 SELECT repository_id, keep_last, keep_hourly, keep_daily, keep_weekly, keep_monthly, keep_yearly, keep_within, prune FROM retention WHERE repository_id = ?
 `

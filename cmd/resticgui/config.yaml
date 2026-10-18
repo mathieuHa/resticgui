@@ -9,3 +9,16 @@ server:
   ip: "127.0.0.1"
   port: 3001
   disable: false
+
+# The new API (/api/v2), its own database and the restic binary it runs.
+# Import the old database first: resticgui migrate-legacy -from resticgui.db -to resticgui-v2.db
+api_v2:
+  enabled: false
+  database: resticgui-v2.db
+  key_file: resticgui.key
+  workers: 2
+  # off while the old scheduler runs too, or scheduled jobs run twice
+  schedule: false
+
+restic:
+  bin: restic
