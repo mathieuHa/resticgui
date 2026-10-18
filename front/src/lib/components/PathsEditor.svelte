@@ -1,4 +1,5 @@
 <script lang="ts">
+  import X from '@lucide/svelte/icons/x';
   import type { Paths } from '#lib/api/client.ts';
 
   import PathPicker from './PathPicker.svelte';
@@ -27,13 +28,13 @@
   <div>
     <h4 class="mb-2 font-medium">Back up</h4>
     {#if value.include.length === 0}
-      <p class="mb-2 text-sm opacity-60">Nothing yet. Pick folders below.</p>
+      <p class="mb-2 text-sm text-base-content/70">Nothing yet. Pick folders below.</p>
     {/if}
     <ul class="mb-2 flex flex-col gap-1" data-testid="include-paths">
       {#each value.include as path, i (path)}
         <li class="bg-base-200 rounded-box flex items-center gap-2 px-3 py-1 font-mono text-sm">
           <span class="flex-1 truncate">{path}</span>
-          <button type="button" class="btn btn-ghost btn-xs" aria-label="Remove {path}" onclick={() => value.include.splice(i, 1)}>✕</button>
+          <button type="button" class="btn btn-ghost btn-xs" aria-label="Remove {path}" onclick={() => value.include.splice(i, 1)}><X class="size-4" aria-hidden="true" /></button>
         </li>
       {/each}
     </ul>
@@ -51,7 +52,7 @@
   </div>
   <label class="flex flex-col gap-1">
     <span class="font-medium">Exclude</span>
-    <span class="text-xs opacity-60">One restic pattern per line, such as <span class="font-mono">*.tmp</span> or <span class="font-mono">/home/*/.cache</span></span>
+    <span class="text-xs text-base-content/70">One restic pattern per line, such as <span class="font-mono">*.tmp</span> or <span class="font-mono">/home/*/.cache</span></span>
     <textarea class="textarea w-full font-mono text-sm" rows="3" bind:value={excludes}></textarea>
   </label>
 </div>

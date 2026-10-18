@@ -447,6 +447,13 @@ func TestSchedules(t *testing.T) {
 	require.Equal(t, http.StatusOK, status, string(body))
 	var dto RepositoryDTO
 	a.decode(body, &dto)
+	require.Len(t, dto.Schedules, 2)
+	next := dto.Schedules[0].NextRun
+	require.NotNil(t, next, "an enabled schedule says when it runs next")
+	assert.Equal(t, 2, next.Local().Hour(), "cron runs in the server's time zone")
+	assert.Equal(t, 30, next.Local().Minute())
+	assert.WithinDuration(t, time.Now(), *next, 24*time.Hour)
+	dto.Schedules[0].NextRun = nil
 	assert.Equal(t, []ScheduleDTO{{Job: "backup", Cron: "30 2 * * *", Enabled: true}, {Job: "forget", Cron: "@weekly", Enabled: false}}, dto.Schedules)
 	assert.EqualValues(t, 2, a.reloads.n.Load(), "the scheduler reloads after each change")
 

@@ -494,11 +494,12 @@ components:
           type: array
           items:
             type: object
-            required: [job, cron, enabled]
+            required: [job, cron, enabled, next_run]
             properties:
               job: { type: string, enum: [backup, forget, check] }
               cron: { type: string }
               enabled: { type: boolean }
+              next_run: { type: [string, "null"], format: date-time, description: When it runs next; null when disabled }
     Paths:
       type: object
       required: [include, exclude]

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { fly } from 'svelte/transition';
+
+  import { ms } from '#lib/motion.ts';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { api, type Backend, type Paths, type Retention } from '#lib/api/client.ts';
@@ -77,7 +80,7 @@
 
 <svelte:head><title>New repository · ResticGUI</title></svelte:head>
 
-<div class="card bg-base-100 mx-auto max-w-3xl shadow-sm">
+<div class="card bg-base-100 border-base-300 animate-rise mx-auto max-w-3xl border shadow-sm">
   <div class="card-body gap-6">
     <h1 class="card-title">New repository</h1>
     <ul class="steps w-full">
@@ -86,6 +89,8 @@
       {/each}
     </ul>
 
+    {#key step}
+    <div class="flex flex-col gap-6" in:fly={{ x: 16, duration: ms(200) }}>
     {#if step === 0}
       <div class="join">
         <button class="btn join-item btn-sm {isNew ? 'btn-active' : ''}" onclick={() => (isNew = true)}>Create a new repository</button>
@@ -109,17 +114,19 @@
       <ScheduleEditor label="Check the repository's integrity" bind:value={checkCron} />
     {:else}
       <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-        <dt class="opacity-60">Name</dt><dd>{draft.name}</dd>
-        <dt class="opacity-60">Storage</dt><dd>{BACKEND_LABELS[draft.backend]} · <span class="font-mono">{draft.location}</span></dd>
-        <dt class="opacity-60">Repository</dt><dd>{isNew ? 'Created now with restic init' : 'Already exists'}</dd>
-        <dt class="opacity-60">Backs up</dt><dd class="font-mono">{paths.include.join(', ')}</dd>
-        {#if paths.exclude.length}<dt class="opacity-60">Excludes</dt><dd class="font-mono">{paths.exclude.join(', ')}</dd>{/if}
-        <dt class="opacity-60">Backups</dt><dd>{backupCron ? describe(parse(backupCron)) : 'Only when started by hand'}</dd>
-        <dt class="opacity-60">Retention</dt>
+        <dt class="text-base-content/70">Name</dt><dd>{draft.name}</dd>
+        <dt class="text-base-content/70">Storage</dt><dd>{BACKEND_LABELS[draft.backend]} · <span class="font-mono">{draft.location}</span></dd>
+        <dt class="text-base-content/70">Repository</dt><dd>{isNew ? 'Created now with restic init' : 'Already exists'}</dd>
+        <dt class="text-base-content/70">Backs up</dt><dd class="font-mono">{paths.include.join(', ')}</dd>
+        {#if paths.exclude.length}<dt class="text-base-content/70">Excludes</dt><dd class="font-mono">{paths.exclude.join(', ')}</dd>{/if}
+        <dt class="text-base-content/70">Backups</dt><dd>{backupCron ? describe(parse(backupCron)) : 'Only when started by hand'}</dd>
+        <dt class="text-base-content/70">Retention</dt>
         <dd>{retentionOn ? describeRetention(retention) : 'Keep everything'}{retentionOn && forgetCron ? `, ${describe(parse(forgetCron)).toLowerCase()}` : ''}</dd>
-        <dt class="opacity-60">Check</dt><dd>{checkCron ? describe(parse(checkCron)) : 'Only when started by hand'}</dd>
+        <dt class="text-base-content/70">Check</dt><dd>{checkCron ? describe(parse(checkCron)) : 'Only when started by hand'}</dd>
       </dl>
     {/if}
+    </div>
+    {/key}
 
     {#if shown.length}
       <ul class="text-error text-sm" data-testid="problems">

@@ -30,7 +30,7 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <p class="text-sm opacity-70">Keep the most recent snapshot of each period, for this many periods.</p>
+  <p class="text-sm text-base-content/70">Keep the most recent snapshot of each period, for this many periods.</p>
   <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
     {#each COUNT_RULES as [key, label] (key)}
       <label class="input input-sm">
@@ -63,7 +63,7 @@
           <h4 class="text-success font-medium">Keeps {preview.keep.length}</h4>
           <ul class="text-sm">
             {#each preview.keep as s (s.id)}
-              <li><span class="font-mono">{s.short_id}</span> {dateTime(s.time)} <span class="opacity-60">{s.matches?.join(', ')}</span></li>
+              <li><span class="font-mono">{s.short_id}</span> {dateTime(s.time)} <span class="text-base-content/70">{s.matches?.join(', ')}</span></li>
             {/each}
           </ul>
         </div>

@@ -2,10 +2,13 @@ import { expect, test } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { OPEN_PORT } from '../playwright.config';
 import { e2eRoot } from './paths.mjs';
 
-const root = e2eRoot(OPEN_PORT);
+// the open and reduced motion projects each have their own server and folder
+let root = '';
+test.beforeAll(() => {
+  root = e2eRoot(new URL(test.info().project.use.baseURL!).port);
+});
 
 // One repository through its whole life: create, back up with live progress,
 // browse, restore, preview retention and forget. Steps share the server.
@@ -29,8 +32,8 @@ test('create a repository with the wizard', async ({ page }) => {
   // what to back up: pick a folder with the browser, type another path
   const picker = page.getByTestId('path-picker');
   // the allowed roots are listed by their full path
-  await picker.getByRole('button', { name: `📁 ${root}`, exact: true }).click();
-  await picker.getByRole('button', { name: '📁 data', exact: true }).click();
+  await picker.getByRole('button', { name: root, exact: true }).click();
+  await picker.getByRole('button', { name: 'data', exact: true }).click();
   await page.getByRole('button', { name: 'Add this folder' }).click();
   await expect(page.getByTestId('include-paths')).toContainText(`${root}/data`);
   await page.getByRole('button', { name: 'Next' }).click();
@@ -44,8 +47,10 @@ test('create a repository with the wizard', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Documents' })).toBeVisible();
   await page.getByRole('tab', { name: 'Runs' }).click();
-  const init = page.getByTestId('run-history').getByRole('row').filter({ hasText: 'Create repository' });
-  await expect(init.locator('[data-status="succeeded"]')).toBeVisible({ timeout: 30_000 });
+  const init = page.getByTestId('run-history').getByRole('listitem').filter({ hasText: 'Create repository' });
+  await expect(init.locator('[data-status="succeeded"]')).toBeVisible({
+    timeout: 30_000,
+  });
   expect(existsSync(path.join(root, 'repo/config'))).toBe(true);
 });
 
@@ -56,8 +61,12 @@ test('back up now and follow the progress', async ({ page }) => {
   await card.getByRole('button', { name: 'Back up now' }).click();
   // the card shows the running job, then the result
   await expect(card.getByTestId('job-progress').or(card.getByText(/Last backup/))).toBeVisible();
-  await expect(card).toContainText(/Last backup .*(now|second)/, { timeout: 30_000 });
+  await expect(card).toContainText(/Last backup .*(now|second)/, {
+    timeout: 30_000,
+  });
   await expect(card.getByRole('button', { name: 'Back up now' })).toBeEnabled();
+  await expect(card.locator('[data-health="ok"]')).toBeVisible();
+  await expect(page.getByTestId('headline')).toHaveText('Your repository is backed up');
 });
 
 test('browse and download from a snapshot', async ({ page }) => {
@@ -71,10 +80,28 @@ test('browse and download from a snapshot', async ({ page }) => {
   const browser = page.getByTestId('snapshot-browser');
   // the snapshot keeps full paths: walk down to the backed up folder
   for (const part of `${root}/data`.split('/').filter(Boolean)) {
-    await browser.getByRole('button', { name: `📁 ${part}`, exact: true }).click();
+    await browser.getByRole('button', { name: part, exact: true }).click();
   }
   await expect(browser.getByText('notes.md')).toBeVisible();
-  await browser.getByRole('button', { name: '📁 docs', exact: true }).click();
+
+  // the keyboard: End selects the last entry, d downloads it
+  const list = browser.getByRole('region');
+  await list.focus();
+  await page.keyboard.press('End');
+  await expect(list.locator('tr[aria-selected="true"]')).toContainText('notes.md');
+  const notes = page.waitForEvent('download');
+  await page.keyboard.press('d');
+  expect(readFileSync(await (await notes).path(), 'utf8')).toBe('# notes\n');
+  // Home, down to docs, Enter opens it, Backspace comes back with docs selected
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowDown');
+  await expect(list.locator('tr[aria-selected="true"]')).toContainText('docs');
+  await page.keyboard.press('Enter');
+  await expect(browser.getByText('hello.txt')).toBeVisible();
+  await page.keyboard.press('Backspace');
+  await expect(list.locator('tr[aria-selected="true"]')).toContainText('docs');
+
+  await browser.getByRole('button', { name: 'docs', exact: true }).click();
   const file = browser.getByRole('row').filter({ hasText: 'hello.txt' });
   const download = page.waitForEvent('download');
   await file.getByRole('link', { name: 'Download' }).click();
@@ -98,17 +125,28 @@ test('restore a folder', async ({ page }) => {
   await browser.getByRole('button', { name: 'Find' }).click();
   // restic find also matches files inside a matching folder
   await expect(browser.getByText('2 found')).toBeVisible();
-  const folder = browser.getByRole('listitem').filter({ hasText: `${root}/data/docs` }).filter({ hasNotText: 'hello.txt' });
+  const folder = browser
+    .getByRole('row')
+    .filter({ hasText: `${root}/data/docs` })
+    .filter({ hasNotText: 'hello.txt' });
   await folder.getByRole('button', { name: 'Restore…' }).click();
 
   const dialog = page.getByRole('dialog');
   await dialog.getByPlaceholder(/Restore into/).fill(`${root}/restore`);
   await dialog.getByRole('button', { name: 'Restore', exact: true }).click();
-  await expect(page.getByText(/Restoring into/)).toBeVisible();
+  await expect(page.locator('.toast').getByText(/Restoring into/)).toBeVisible();
+  // the dialog follows the restore to its end
+  await expect(dialog.getByText('Restored', { exact: true })).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(dialog).toContainText(/\d+ files? \(.*\) into/);
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click();
 
   await page.getByRole('tab', { name: 'Runs' }).click();
-  const run = page.getByTestId('run-history').getByRole('row').filter({ hasText: 'Restore' });
-  await expect(run.locator('[data-status="succeeded"]')).toBeVisible({ timeout: 30_000 });
+  const run = page.getByTestId('run-history').getByRole('listitem').filter({ hasText: 'Restore' });
+  await expect(run.locator('[data-status="succeeded"]')).toBeVisible({
+    timeout: 30_000,
+  });
   await expect(run).toContainText(`into ${root}/restore`);
   expect(readFileSync(path.join(root, 'restore', root, 'data/docs/hello.txt'), 'utf8')).toBe('hello from resticgui\n');
   expect(existsSync(path.join(root, 'restore', root, 'data/notes.md'))).toBe(false);
