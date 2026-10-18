@@ -15,28 +15,20 @@ The following actions are supported:
 - search for files in a Snapshot
 - dowloading files or directories from a Snapshot
 
-The following storage providers are supported:
-- `local`
-- `AWS S3`
-- `B2`
-- `Minio S3`
+The following storage backends are supported: local folder, Amazon S3 and S3-compatible storage, Backblaze B2, REST server, SFTP, rclone, Azure Blob Storage and Google Cloud Storage.
 
-This ResticGUI version works with Restic version `0.12.1` or more.  
-Restic must be installed and present in the $PATH if run as a single binary.
+ResticGUI needs restic 0.17.0 or newer. Restic must be installed and present in the $PATH if run as a single binary.
 
-## ScreenShots
+## Screenshots
 
-### File Tree Navigation
-![file tree navigation](/images/resticgui-file-tree-navigation-v011.png "File Tree Navigation")
+### Repositories
+![Repositories](images/repositories.png "Repositories")
 
-### Repository General View
-![general repository view](/images/resticgui-general-view-v011.png "Repository General View")
+### New repository
+![New repository](images/new-repository.png "New repository")
 
-### Repository Snapshot List
-![snapshot list view](/images/resticgui-snapshot-list.png "Snapshot List View")
-
-### Repository Snapshot Explore
-![snapshot files view](/images/resticgui-snapshot-files-view-v011.png "Snapshot Explore View")
+### Backup runs
+![Backup runs](images/runs.png "Backup runs")
 
 ## Install
 
@@ -151,8 +143,6 @@ ResticGUI is licensed under [GPL 3.0 License](https://www.gnu.org/licenses/gpl-3
 complete text in [``COPYING``](COPYING).
 
 ## Dev tools
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/resticgui/resticgui)
 
 
 #### Launch Backend server
