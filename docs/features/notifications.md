@@ -4,7 +4,7 @@ ResticGUI can tell you when something goes wrong, without you opening it.
 
 ## Notifiers
 
-Open **Notifications** (the bell in the top bar) and add a notifier. A
+Open **Notifications**, the bell in the top bar, and add a notifier. A
 notifier is a [Shoutrrr](https://github.com/nicholas-fedor/shoutrrr) URL,
 which covers ntfy, Gotify, Discord, Slack, Telegram, email and many more:
 
@@ -28,6 +28,8 @@ Each notifier chooses what it receives:
 - **Successes**: every successful backup, cleanup and check, with the
   snapshot and how much was added.
 
+![Notifiers](../../images/ui-notifications.png){.screenshot}
+
 **Send a test** sends a message right away, so you can check the URL.
 
 The URL usually holds a token. ResticGUI stores it encrypted, never shows it
@@ -45,6 +47,8 @@ cannot. In a repository's **Settings**, set its ping URL, such as
 - `<url>/start` when it starts,
 - `<url>` when it succeeds, with the snapshot in the body,
 - `<url>/fail` when it fails or is interrupted, with the error in the body.
+
+![Healthchecks and hooks in a repository's settings](../../images/ui-hooks.png){.screenshot}
 
 Set the check's period to match the backup schedule; Healthchecks alerts you
 through its own integrations when a ping does not come.

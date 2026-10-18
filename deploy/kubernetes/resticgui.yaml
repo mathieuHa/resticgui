@@ -1,0 +1,72 @@
+# ResticGUI on Kubernetes: one replica (it keeps its state in SQLite),
+# its database on a PersistentVolumeClaim, the encryption key in a Secret.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: resticgui-db
+  labels: {app.kubernetes.io/name: resticgui}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resticgui
+  labels: {app.kubernetes.io/name: resticgui}
+spec:
+  replicas: 1
+  # never two pods on one database
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app.kubernetes.io/name: resticgui}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: resticgui}
+    spec:
+      containers:
+        - name: resticgui
+          image: ghcr.io/mathieuha/resticgui:latest
+          ports:
+            - {name: http, containerPort: 3030}
+          env:
+            - name: RESTICGUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef: {name: resticgui-key, key: key}
+            - {name: RESTIC_CACHE_DIR, value: /opt/db/cache}
+            # schedules follow this time zone
+            - {name: TZ, value: UTC}
+          volumeMounts:
+            - {name: db, mountPath: /opt/db}
+            - {name: config, mountPath: /opt/config.yaml, subPath: config.yaml, readOnly: true}
+            # what to back up, for example a volume of another application:
+            # - {name: data, mountPath: /backup/data, readOnly: true}
+          readinessProbe:
+            httpGet: {path: /api/v2/version, port: http}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /api/v2/version, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 1Gi}
+      volumes:
+        - name: db
+          persistentVolumeClaim: {claimName: resticgui-db}
+        - name: config
+          configMap: {name: resticgui-config}
+        # - name: data
+        #   persistentVolumeClaim: {claimName: my-app-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resticgui
+  labels: {app.kubernetes.io/name: resticgui}
+spec:
+  selector: {app.kubernetes.io/name: resticgui}
+  ports:
+    - {name: http, port: 80, targetPort: http}

@@ -157,10 +157,16 @@ genapi: ## Regenerate the frontend API types from internal/server/openapi.yaml
 	cd $(WEBDIR) && npm run gen:api
 
 testgo: ## Run the go Tests
-	go test ./internal/... -cover
+	go test ./cmd/... ./internal/... -cover
 
 testgoci: ## Run the go Tests and export coverage
-	go test ./internal/... -cover -coverprofile=coverage.out
+	go test ./cmd/... ./internal/... -cover -coverprofile=coverage.out
+
+docs: ## Build the documentation site in docs/.vitepress/dist
+	cd docs && npm ci && npm run build
+
+docsdev: ## Serve the documentation site with live reload on http://localhost:5173
+	cd docs && npm ci && npm run dev
 
 clean: ## Clean build and temporary directory
 	$(RM) ${DISTDIR}
@@ -169,7 +175,7 @@ clean: ## Clean build and temporary directory
 	$(RM) $(WEBDIR)/build
 	$(RM) $(WEBDIR)/.svelte-kit
 
-.PHONY: help e2ebin e2e e2edocker
+.PHONY: help e2ebin e2e e2edocker docs docsdev
 .DEFAULT_GOAL := help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -66,7 +66,7 @@ Or a last run that failed:
 
 ## Grafana dashboard
 
-[`deploy/grafana/resticgui-dashboard.json`](../deploy/grafana/resticgui-dashboard.json)
+[`deploy/grafana/resticgui-dashboard.json`](https://github.com/mathieuHa/resticgui/blob/main/deploy/grafana/resticgui-dashboard.json)
 shows the backups and the repositories: how many repositories there are,
 which jobs are failing, the age of the oldest last backup, a table with each
 repository's last backup, size and snapshots, and graphs of time since the
@@ -74,7 +74,7 @@ last backup, run results, data added, duration, repository size and
 snapshot count. A **Repository** filter at the top narrows it to some of
 them.
 
-![The ResticGUI dashboard in Grafana](../images/grafana-dashboard.png)
+![The ResticGUI dashboard in Grafana](../../images/grafana-dashboard.png){.screenshot}
 
 To import it, in Grafana open **Dashboards**, **New**, **Import**, upload
 the file and pick the Prometheus data source that scrapes ResticGUI. To

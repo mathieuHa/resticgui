@@ -1,0 +1,187 @@
+name: Docs
+
+# Builds the documentation site at https://resticgui.com, checks its links,
+# and follows each quick start to a first backup. main deploys the site to
+# GitHub Pages.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # lastUpdated reads the history of each page
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - run: npm ci
+      # VitePress fails the build on a dead link
+      - run: npm run build
+      - uses: actions/configure-pages@v6
+        if: github.event_name != 'pull_request'
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [site, linux, docker, kubernetes]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5
+
+  # The quick starts run what the pages say, with the binary and the image
+  # built from this commit instead of the latest release.
+  linux:
+    runs-on: ubuntu-latest
+    env:
+      RESTIC_VERSION: "0.19.1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+      - name: Build the binary as a release does
+        run: |
+          (cd front && npm ci && npm run build)
+          cp -r front/build/. internal/webui/ui/
+          CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=quickstart" -o resticgui ./cmd/resticgui
+      - name: 1. Install restic and ResticGUI
+        run: |
+          curl -fsSL "https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_amd64.bz2" | bunzip2 > restic
+          sudo install -m 755 restic /usr/local/bin/restic
+          sudo install -m 755 resticgui /usr/local/bin/resticgui
+          resticgui version
+      - name: 2. Configure it
+        run: |
+          sudo mkdir -p /etc/resticgui
+          sudo cp deploy/linux/config.yaml /etc/resticgui/config.yaml
+          sudo cp deploy/linux/resticgui.service /etc/systemd/system/resticgui.service
+      - name: 3. Start it
+        run: |
+          sudo systemctl daemon-reload
+          sudo systemctl enable --now resticgui
+          systemctl status resticgui --no-pager
+      - name: First backup
+        run: |
+          sudo mkdir -p /srv/quickstart/data
+          echo "hello from the Linux quick start" | sudo tee /srv/quickstart/data/hello.txt
+          scripts/first-backup.sh http://127.0.0.1:3001 /srv/quickstart/data /srv/quickstart/repo
+          sudo test -f /var/lib/resticgui/resticgui.sqlite
+          sudo test -f /var/lib/resticgui/resticgui.key
+      - name: Logs
+        if: always()
+        run: sudo journalctl -u resticgui --no-pager | tail -100
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: resticgui:quickstart
+          build-args: VERSION=quickstart
+          cache-from: type=gha,scope=linux-amd64
+      # the docker run command of the page, with the image of this commit
+      - name: Run it as the page says
+        run: |
+          awk '/^```sh$/ {s = 1; next} /^```$/ {if (found) exit; s = 0; next} s && /docker run/ {found = 1} s && found' docs/install/docker.md > run.sh
+          sed -i 's|ghcr.io/mathieuha/resticgui:latest|resticgui:quickstart|' run.sh
+          cat run.sh
+          grep -q 'resticgui:quickstart' run.sh
+          sh run.sh
+      - name: First backup
+        run: |
+          mkdir -p "$HOME/photos"
+          echo "hello from the Docker quick start" > "$HOME/photos/hello.txt"
+          scripts/first-backup.sh http://127.0.0.1:3001 "/backup$HOME/photos" /repositories/quickstart
+          sudo test -d /srv/restic/quickstart/snapshots
+      - name: Logs
+        if: always()
+        run: docker logs resticgui
+
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: resticgui:quickstart
+          build-args: VERSION=quickstart
+          cache-from: type=gha,scope=linux-amd64
+      - uses: helm/kind-action@v1.15.1
+        with:
+          cluster_name: quickstart
+      - name: Load the image into the cluster
+        run: kind load docker-image resticgui:quickstart --name quickstart
+      - name: 1. Create the namespace and the key
+        run: |
+          kubectl create namespace resticgui
+          kubectl -n resticgui create secret generic resticgui-key \
+            --from-literal=key="$(openssl rand -base64 32)"
+      # the manifests of this commit, with the image built above
+      - name: 2. Apply the manifests
+        run: |
+          mkdir quickstart
+          cat > quickstart/kustomization.yaml <<'EOF'
+          resources:
+            - ../deploy/kubernetes
+          images:
+            - name: ghcr.io/mathieuha/resticgui
+              newName: resticgui
+              newTag: quickstart
+          EOF
+          kubectl apply -k quickstart
+          kubectl -n resticgui rollout status deployment/resticgui --timeout=180s
+      - name: 3. Open it
+        run: |
+          kubectl -n resticgui port-forward service/resticgui 3001:80 > port-forward.log 2>&1 &
+      - name: First backup
+        run: |
+          kubectl -n resticgui exec deploy/resticgui -- sh -c 'mkdir -p /backup/data && echo "hello from the Kubernetes quick start" > /backup/data/hello.txt'
+          scripts/first-backup.sh http://127.0.0.1:3001 /backup/data /backup/repo
+      - name: Logs
+        if: always()
+        run: |
+          kubectl -n resticgui get all
+          kubectl -n resticgui describe pods | tail -40
+          kubectl -n resticgui logs deploy/resticgui --tail=100 || true

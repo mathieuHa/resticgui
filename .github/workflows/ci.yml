@@ -23,7 +23,7 @@ jobs:
       - name: Generated queries are up to date
         run: sqlc diff -f internal/store/sqlc.yaml
       - name: Test
-        run: go test -race ./internal/... -coverprofile=coverage.out
+        run: go test -race ./cmd/... ./internal/... -coverprofile=coverage.out
       - name: Coverage
         run: go tool cover -func=coverage.out | tail -1
       - name: Release scripts
