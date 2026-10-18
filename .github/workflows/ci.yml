@@ -78,7 +78,7 @@ jobs:
           docker logs garage
           exit 1
       - name: Integration tests
-        run: go test -count=1 -tags integration -v ./internal/restic/
+        run: go test -count=1 -tags integration -v ./internal/restic/ ./internal/jobs/
       - name: Garage logs
         if: failure()
         run: docker logs garage
