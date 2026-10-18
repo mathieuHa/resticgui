@@ -19,6 +19,7 @@
     );
   });
 
+  const files = (n: number) => `${n} ${n === 1 ? 'file' : 'files'}`;
   const list = $derived(diff ? changes(diff.changes) : []);
   const n = $derived(counts(list));
   const BADGES: Record<ChangeKind, { label: string; tone: string }> = {
@@ -39,15 +40,15 @@
   <div class="grid grid-cols-1 gap-2 sm:grid-cols-3" data-testid="diff-stats">
     <div class="bg-base-200 rounded-box p-3">
       <div class="text-base-content/70 text-xs">Added</div>
-      <div class="tabular font-semibold">{diff.stats.added.files} files, {bytes(diff.stats.added.bytes)}</div>
+      <div class="tabular font-semibold">{files(diff.stats.added.files)}, {bytes(diff.stats.added.bytes)}</div>
     </div>
     <div class="bg-base-200 rounded-box p-3">
       <div class="text-base-content/70 text-xs">Removed</div>
-      <div class="tabular font-semibold">{diff.stats.removed.files} files, {bytes(diff.stats.removed.bytes)}</div>
+      <div class="tabular font-semibold">{files(diff.stats.removed.files)}, {bytes(diff.stats.removed.bytes)}</div>
     </div>
     <div class="bg-base-200 rounded-box p-3">
       <div class="text-base-content/70 text-xs">Changed</div>
-      <div class="tabular font-semibold">{diff.stats.changed_files} files</div>
+      <div class="tabular font-semibold">{files(diff.stats.changed_files)}</div>
     </div>
   </div>
   {#if list.length === 0}

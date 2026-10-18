@@ -94,7 +94,7 @@ test('compare two snapshots', async ({ page }) => {
   // newest first: the second backup is what changed since the first
   await page.getByTestId('snapshots').locator('tbody tr').first().getByRole('button', { name: 'Changes' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByTestId('diff-stats')).toContainText('1 files');
+  await expect(dialog.getByTestId('diff-stats')).toContainText('1 file');
   const changes = dialog.getByTestId('diff-changes').getByRole('listitem');
   await expect(changes).toHaveCount(3);
   await expect(changes.filter({ hasText: 'beach.jpg' })).toContainText('changed');

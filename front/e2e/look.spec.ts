@@ -23,6 +23,8 @@ async function look(page: Page, name: string) {
   await expect(page).toHaveScreenshot(`${name}.png`, {
     fullPage: true,
     mask: dynamic(page),
+    // grey bars, not Playwright's magenta, where times, sizes and ids change
+    maskColor: '#9ca3af',
   });
 }
 
