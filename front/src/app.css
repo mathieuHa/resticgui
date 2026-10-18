@@ -1,4 +1,128 @@
 @import 'tailwindcss';
 @plugin 'daisyui' {
-  themes: light --default, dark --prefersdark;
+  themes: false;
+}
+
+/* Calm blues on neutral greys; status colours are dark enough for white
+   text in the light theme and light enough for dark text in the dark one. */
+@plugin 'daisyui/theme' {
+  name: 'resticgui-light';
+  default: true;
+  color-scheme: light;
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(97.5% 0.004 256);
+  --color-base-300: oklch(92.5% 0.008 256);
+  --color-base-content: oklch(24% 0.02 262);
+  --color-primary: oklch(50% 0.17 262);
+  --color-primary-content: oklch(98% 0.01 262);
+  --color-secondary: oklch(52% 0.11 200);
+  --color-secondary-content: oklch(98% 0.01 200);
+  --color-accent: oklch(55% 0.16 300);
+  --color-accent-content: oklch(98% 0.01 300);
+  --color-neutral: oklch(30% 0.02 262);
+  --color-neutral-content: oklch(96% 0.005 262);
+  --color-info: oklch(50% 0.13 240);
+  --color-info-content: oklch(98% 0.01 240);
+  --color-success: oklch(48% 0.12 155);
+  --color-success-content: oklch(98% 0.02 155);
+  --color-warning: oklch(80% 0.15 80);
+  --color-warning-content: oklch(28% 0.06 70);
+  --color-error: oklch(51% 0.19 25);
+  --color-error-content: oklch(98% 0.01 25);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.875rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin 'daisyui/theme' {
+  name: 'resticgui-dark';
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: oklch(22% 0.014 262);
+  --color-base-200: oklch(18.5% 0.013 262);
+  --color-base-300: oklch(28% 0.016 262);
+  --color-base-content: oklch(92% 0.01 262);
+  --color-primary: oklch(72% 0.13 262);
+  --color-primary-content: oklch(20% 0.04 262);
+  --color-secondary: oklch(74% 0.1 200);
+  --color-secondary-content: oklch(20% 0.03 200);
+  --color-accent: oklch(74% 0.13 300);
+  --color-accent-content: oklch(20% 0.04 300);
+  --color-neutral: oklch(32% 0.015 262);
+  --color-neutral-content: oklch(92% 0.01 262);
+  --color-info: oklch(74% 0.11 240);
+  --color-info-content: oklch(20% 0.03 240);
+  --color-success: oklch(74% 0.13 155);
+  --color-success-content: oklch(20% 0.04 155);
+  --color-warning: oklch(82% 0.14 80);
+  --color-warning-content: oklch(25% 0.05 70);
+  --color-error: oklch(70% 0.16 25);
+  --color-error-content: oklch(20% 0.04 25);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.875rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --animate-done: done 0.9s ease-out;
+  --animate-rise: rise 0.35s ease-out both;
+
+  @keyframes done {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-success) 55%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+  /* numbers that change in place keep their width */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* daisyUI dims inactive tabs, table headers and labels below the WCAG AA
+   contrast ratio */
+.tabs > .tab:not(.tab-active),
+.table :where(thead, tfoot),
+.label {
+  color: color-mix(in oklab, var(--color-base-content) 75%, transparent);
 }

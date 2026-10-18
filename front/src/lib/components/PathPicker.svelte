@@ -1,4 +1,9 @@
 <script lang="ts">
+  import CornerLeftUp from '@lucide/svelte/icons/corner-left-up';
+  import File from '@lucide/svelte/icons/file';
+  import Folder from '@lucide/svelte/icons/folder';
+  import House from '@lucide/svelte/icons/house';
+
   import { api, ApiError, type Entry } from '#lib/api/client.ts';
 
   // Browses folders on the server, within the allowed roots.
@@ -45,9 +50,13 @@
 
 <div class="rounded-box border-base-300 border" data-testid="path-picker">
   <div class="bg-base-200 flex items-center gap-2 px-3 py-2 text-sm">
-    <button type="button" class="btn btn-ghost btn-xs" onclick={() => open(undefined)} title="Allowed folders">⌂</button>
+    <button type="button" class="btn btn-ghost btn-xs btn-square" onclick={() => open(undefined)} title="Allowed folders" aria-label="Allowed folders">
+      <House class="size-4" aria-hidden="true" />
+    </button>
     {#if path !== undefined}
-      <button type="button" class="btn btn-ghost btn-xs" onclick={() => open(parent)} disabled={!parent}>↑</button>
+      <button type="button" class="btn btn-ghost btn-xs btn-square" onclick={() => open(parent)} disabled={!parent} title="Parent folder" aria-label="Parent folder">
+        <CornerLeftUp class="size-4" aria-hidden="true" />
+      </button>
     {/if}
     <span class="truncate font-mono">{path ?? 'Allowed folders'}</span>
     {#if path !== undefined}
@@ -61,16 +70,16 @@
     {#if loading}
       <li class="p-3"><span class="loading loading-spinner loading-sm"></span></li>
     {:else if shown.length === 0}
-      <li class="p-3 text-sm opacity-60">Empty folder</li>
+      <li class="text-base-content/70 p-3 text-sm">Empty folder</li>
     {/if}
     {#each shown as entry (entry.path)}
       <li class="hover:bg-base-200 flex items-center gap-2 px-3 py-1 text-sm">
         {#if entry.dir}
-          <button type="button" class="link link-hover flex-1 truncate text-left" onclick={() => open(entry.path)}>
-            📁 {entry.name}
+          <button type="button" class="link link-hover flex flex-1 items-center gap-2 truncate text-left" onclick={() => open(entry.path)}>
+            <Folder class="text-primary size-4 shrink-0" aria-hidden="true" />{entry.name}
           </button>
         {:else}
-          <span class="flex-1 truncate">📄 {entry.name}</span>
+          <span class="flex flex-1 items-center gap-2 truncate"><File class="text-base-content/60 size-4 shrink-0" aria-hidden="true" />{entry.name}</span>
         {/if}
         <button type="button" class="btn btn-ghost btn-xs" onclick={() => onpick(entry.path)}>Pick</button>
       </li>

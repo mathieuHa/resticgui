@@ -1245,6 +1245,11 @@ export interface components {
                 job: "backup" | "forget" | "check";
                 cron: string;
                 enabled: boolean;
+                /**
+                 * Format: date-time
+                 * @description When it runs next; null when disabled
+                 */
+                next_run: string | null;
             }[];
         };
         Paths: {

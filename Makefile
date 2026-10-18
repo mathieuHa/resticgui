@@ -135,11 +135,23 @@ generate: ## Regenerate the sqlc queries in internal/store/db
 testweb: ## Run the frontend checks and unit tests
 	cd $(WEBDIR) && npm run check && npm run lint && npm test
 
-e2e: createdir ## Run the end-to-end tests: built UI in the binary, real restic (RESTIC_BIN)
+e2ebin: createdir
 	cd $(WEBDIR) && npm run build
 	cp -r $(WEBDIR)/build/. internal/webui/ui/
 	CGO_ENABLED=0 go build -o ${BUILDDIR}/resticgui-e2e ./cmd/resticgui
+
+e2e: e2ebin ## Run the end-to-end tests: built UI in the binary, real restic (RESTIC_BIN)
 	cd $(WEBDIR) && RESTICGUI_BIN=${BUILDDIR}/resticgui-e2e npx playwright test
+
+# The Playwright image that matches the installed @playwright/test, so that
+# screenshots render the same here and in CI
+PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v$(shell node -p "require('./$(WEBDIR)/node_modules/@playwright/test/package.json').version" 2>/dev/null)-noble
+
+e2edocker: e2ebin ## Run the end-to-end tests in the Playwright container and compare the screenshots (ARGS=--update-snapshots to refresh them)
+	docker run --rm --init --ipc=host --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e CI \
+		-e PLAYWRIGHT_SCREENSHOTS=1 -e RESTICGUI_BIN=/src/build/resticgui-e2e -e RESTIC_BIN=/usr/local/bin/restic \
+		-v "$(CURDIR)":/src -v "$(shell command -v $(or $(RESTIC_BIN),restic))":/usr/local/bin/restic:ro \
+		-w /src/$(WEBDIR) $(PLAYWRIGHT_IMAGE) npx playwright test $(ARGS)
 
 genapi: ## Regenerate the frontend API types from internal/server/openapi.yaml
 	cd $(WEBDIR) && npm run gen:api
@@ -157,7 +169,7 @@ clean: ## Clean build and temporary directory
 	$(RM) $(WEBDIR)/build
 	$(RM) $(WEBDIR)/.svelte-kit
 
-.PHONY: help
+.PHONY: help e2ebin e2e e2edocker
 .DEFAULT_GOAL := help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

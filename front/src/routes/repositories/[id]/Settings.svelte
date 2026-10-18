@@ -94,7 +94,7 @@
     </ul>
   {/if}
 
-  <section class="card bg-base-100 shadow-sm">
+  <section class="card bg-base-100 border-base-300 border shadow-sm">
     <div class="card-body">
       <h2 class="card-title text-base">Storage</h2>
       <RepositoryForm bind:draft {backends} existing={repo} />
@@ -102,7 +102,7 @@
     </div>
   </section>
 
-  <section class="card bg-base-100 shadow-sm">
+  <section class="card bg-base-100 border-base-300 border shadow-sm">
     <div class="card-body">
       <h2 class="card-title text-base">What to back up</h2>
       <PathsEditor bind:value={paths} />
@@ -110,10 +110,10 @@
     </div>
   </section>
 
-  <section class="card bg-base-100 shadow-sm">
+  <section class="card bg-base-100 border-base-300 border shadow-sm">
     <div class="card-body">
       <h2 class="card-title text-base">Schedules</h2>
-      <p class="text-xs opacity-60">Times are in the server's time zone.</p>
+      <p class="text-xs text-base-content/70">Times are in the server's time zone.</p>
       <ScheduleEditor label="Back up automatically" bind:value={schedules.backup} />
       <ScheduleEditor label="Apply the retention policy automatically" bind:value={schedules.forget} />
       <ScheduleEditor label="Check the repository's integrity" bind:value={schedules.check} />
@@ -121,7 +121,7 @@
     </div>
   </section>
 
-  <section class="card bg-base-100 shadow-sm">
+  <section class="card bg-base-100 border-base-300 border shadow-sm">
     <div class="card-body">
       <h2 class="card-title text-base">Retention</h2>
       <label class="label cursor-pointer gap-3">

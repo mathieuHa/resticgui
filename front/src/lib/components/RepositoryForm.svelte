@@ -60,7 +60,7 @@
       {/if}
     </div>
   {:else if backend}
-    <p class="-mt-2 text-xs opacity-60">For example <span class="font-mono">{backend.example}</span></p>
+    <p class="-mt-2 text-xs text-base-content/70">For example <span class="font-mono">{backend.example}</span></p>
   {/if}
 
   <label class="floating-label">
@@ -74,7 +74,7 @@
     />
   </label>
   {#if !existing}
-    <p class="-mt-2 text-xs opacity-60">restic encrypts the repository with it. Without it the backups cannot be read, so keep a copy.</p>
+    <p class="-mt-2 text-xs text-base-content/70">restic encrypts the repository with it. Without it the backups cannot be read, so keep a copy.</p>
   {/if}
 
   {#if envVars.length || backend?.secrets.length}
@@ -88,7 +88,7 @@
       {/each}
       {#if existing && !draft.replaceSecrets}
         <div class="flex items-center gap-2 text-sm">
-          <span class="opacity-70">
+          <span class="text-base-content/70">
             {existing.secrets.length ? `Stored: ${existing.secrets.join(', ')}` : 'No credentials stored'}
           </span>
           <button type="button" class="btn btn-xs" onclick={() => (draft.replaceSecrets = true)}>Replace</button>
@@ -101,7 +101,7 @@
           </label>
         {/each}
         {#if existing}
-          <p class="text-xs opacity-60">Saving replaces all the stored credentials with these.</p>
+          <p class="text-xs text-base-content/70">Saving replaces all the stored credentials with these.</p>
         {/if}
       {/if}
     </fieldset>

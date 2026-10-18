@@ -41,5 +41,5 @@
       <div class="modal-action">{@render actions()}</div>
     {/if}
   </div>
-  <form method="dialog" class="modal-backdrop"><button aria-label="Close">close</button></form>
+  <form method="dialog" class="modal-backdrop"><button aria-label="Close the dialog" tabindex="-1">close</button></form>
 </dialog>
