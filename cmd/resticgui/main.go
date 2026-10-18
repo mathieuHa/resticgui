@@ -1,96 +1,119 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
+	"syscall"
 	"time"
 
-	"github.com/mathieuHa/resticgui/internal/api"
-	"github.com/mathieuHa/resticgui/internal/backup"
-	"github.com/mathieuHa/resticgui/internal/commands"
-	Config "github.com/mathieuHa/resticgui/internal/config"
-	"github.com/mathieuHa/resticgui/internal/database"
-	"github.com/mathieuHa/resticgui/internal/legacy"
-	Logs "github.com/mathieuHa/resticgui/internal/logs"
-	"github.com/robfig/cron/v3"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-)
 
-var (
-	server *http.Server
+	"github.com/mathieuHa/resticgui/internal/auth"
+	Config "github.com/mathieuHa/resticgui/internal/config"
+	"github.com/mathieuHa/resticgui/internal/legacy"
+	Logs "github.com/mathieuHa/resticgui/internal/logs"
+	"github.com/mathieuHa/resticgui/internal/server"
+	"github.com/mathieuHa/resticgui/internal/webui"
 )
-var cr *cron.Cron
 
 func main() {
-	if len(os.Args) > 1 && os.Args[1] == "migrate-legacy" {
-		os.Exit(legacy.Main(os.Args[2:], os.Stdout, os.Stderr))
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "migrate-legacy":
+			os.Exit(legacy.Main(os.Args[2:], os.Stdout, os.Stderr))
+		case "hash-password":
+			os.Exit(hashPassword())
+		}
 	}
 
 	Config.InitConfig()
 	Logs.Initlogs()
 
-	log.Info().Msg("Start main")
+	viper.SetDefault("server.ip", "127.0.0.1")
+	viper.SetDefault("server.port", 3001)
+	viper.SetDefault("store.path", "resticgui.sqlite")
+	viper.SetDefault("store.key_file", "resticgui.key")
+	viper.SetDefault("store.legacy_path", "resticgui.db")
+	viper.SetDefault("restic.bin", "restic")
+	viper.SetDefault("jobs.workers", 2)
+	viper.SetDefault("jobs.schedule", true)
 
-	//Run the cron scheduler
-	commands.ResticInit()
+	router := gin.New()
+	router.Use(server.Logger(), server.Recovery())
+	router.StaticFS("/ui", http.FS(webui.UI))
+	router.NoRoute(func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/ui")
+	})
 
-	database.Migrate()
-	defer database.Close()
-
-	router := api.SetupRouter()
-
-	// setting server information
-	serverIP := viper.GetString("server.ip")
-	serverDisable := viper.GetBool("server.disable")
-	serverPort := viper.GetInt("server.port")
-	serverAddr := fmt.Sprintf("%s:%d", serverIP, serverPort)
-
-	server = &http.Server{
-		Handler:      router,
-		Addr:         serverAddr,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
-	if !serverDisable {
-		// Run our server in a goroutine so that it doesn't block.
-		go func() {
-			if err := server.ListenAndServe(); err != nil {
-				log.Err(err).Msg("Error running server")
-			} else {
-				log.Info().Msgf("Start Server listen at %v", serverAddr)
-			}
-		}()
-	}
-
-	c := make(chan os.Signal, 1)
-	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
-	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
-	signal.Notify(c, os.Interrupt)
-
-	// Block until we receive our signal.
-	<-c
-
-	// Remove current running backups
-	backup.RemoveAllScheduledBackup(cr)
-
-	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	// Doesn't block if no connections, but will otherwise wait
-	// until the timeout deadline.
-	err := server.Shutdown(ctx)
+	app, err := server.Start(context.Background(), server.Config{
+		Database:       viper.GetString("store.path"),
+		LegacyDatabase: viper.GetString("store.legacy_path"),
+		KeyFile:        viper.GetString("store.key_file"),
+		ResticBin:      viper.GetString("restic.bin"),
+		Workers:        viper.GetInt("jobs.workers"),
+		Schedule:       viper.GetBool("jobs.schedule"),
+		Roots:          viper.GetStringSlice("paths.roots"),
+		Username:       viper.GetString("auth.username"),
+		PasswordHash:   viper.GetString("auth.password_hash"),
+	}, router)
 	if err != nil {
-		log.Error().Msg("error shutting down")
-		return
+		log.Fatal().Err(err).Msg("cannot start")
 	}
-	// Optionally, you could run srv.Shutdown in a goroutine and block on
-	// <-ctx.Done() if your application should wait for other services
-	// to finalize based on context cancellation.
+
+	addr := fmt.Sprintf("%s:%d", viper.GetString("server.ip"), viper.GetInt("server.port"))
+	httpServer := &http.Server{
+		Handler:           router,
+		Addr:              addr,
+		ReadHeaderTimeout: 10 * time.Second,
+		// the event stream and downloads lift the write deadline themselves
+		WriteTimeout: 60 * time.Second,
+	}
+	go func() {
+		log.Info().Msgf("listening on http://%s", addr)
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal().Err(err).Msg("server stopped")
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	<-ctx.Done()
+	stop()
 	log.Info().Msg("shutting down")
-	os.Exit(0)
+
+	shutdown, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(shutdown); err != nil {
+		log.Error().Err(err).Msg("closing connections")
+	}
+	// interrupts running jobs, which are marked so on the next start
+	if err := app.Close(); err != nil {
+		log.Error().Err(err).Msg("closing the store")
+	}
+}
+
+// hashPassword reads a password on stdin and prints its bcrypt hash, the
+// value of auth.password_hash.
+func hashPassword() int {
+	fmt.Fprint(os.Stderr, "Password: ")
+	line, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil && line == "" {
+		fmt.Fprintln(os.Stderr, "hash-password: no password read on stdin")
+		return 1
+	}
+	hash, err := auth.HashPassword(strings.TrimRight(line, "\r\n"))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "\nhash-password:", err)
+		return 1
+	}
+	fmt.Fprintln(os.Stderr)
+	fmt.Println(hash)
+	return 0
 }

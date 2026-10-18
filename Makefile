@@ -2,7 +2,7 @@
 DISTDIR=${CURDIR}/dist
 BUILDDIR=${CURDIR}/build
 WEBDIR=front
-RESTICVERSION=0.15.2
+RESTICVERSION=0.18.1
 RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${GOARCH}.bz2
 TAG?=dev
 CI_REGISTRY_IMAGE?=resticgui
@@ -45,7 +45,7 @@ else
 			--output ${BUILDDIR}/restic.bz2
 	MKDIR= mkdir -p
 	ifeq ($(CI), true)
-		BUILDGOARG= -ldflags '-w -s -extldflags "-static"'
+		BUILDGOARG= -ldflags '-w -s'
 	endif
 	ifeq ($(UNAME_S),Linux)
 		os="linux"
@@ -90,11 +90,6 @@ installweb: createdir ## Install the web dependancies in the build dir
 installgo: ## Install go on Windows using choco
 	choco install go
 
-installswag: ## Install swag 1.8 on linux
-	wget https://github.com/swaggo/swag/releases/download/v1.8.0/swag_1.8.0_Linux_x86_64.tar.gz
-	tar -xvzf swag_1.8.0_Linux_x86_64.tar.gz -C /tmp/
-	sudo mv /tmp/swag /usr/bin/
-	rm swag*
 
 createdir: ## Create the build and package dist dir if not present
 ifeq ("$(wildcard $(DISTDIR))","")
@@ -115,13 +110,9 @@ build: buildgo buildweb buildrestic ## Build go backend, Web and restic binary
 buildgo: createdir ## Build the go backend in dist dir
 	cp -r ${DISTDIR}/build/* ./internal/webui/ui/
 	cp cmd/resticgui/config.yaml ${DISTDIR}/config.yaml
-	cd cmd/resticgui && GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT} ${BUILDGOARG}
+	cd cmd/resticgui && GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build -o ${DISTDIR}/resticgui-${GOARCH}${EXT} ${BUILDGOARG}
 
-buildschema: ## Build the go ent schema backend
-	go generate ./ent
 
-showschema: ## Show the go ent schema
-	go run entgo.io/ent/cmd/ent describe ./ent/schema
 
 buildweb: installweb ## Build the frontend in dist dir
 	npm run build --prefix $(BUILDDIR)/$(WEBDIR) && \
@@ -137,8 +128,6 @@ endif
 	--build-arg GOVERSION=$(GOVERSION) \
 	--build-arg TARGETARCH=$(TARGETARCH)
 
-builddoc: ## Build the swagger openapi documenation
-	swag init --parseInternal --parseDependency -g router.go  --dir internal/api
 
 pushdocker: builddocker ## Push the built docker image to gitlab registry
 ifeq ($(CI), true)
@@ -163,10 +152,10 @@ generate: ## Regenerate the sqlc queries in internal/store/db
 	sqlc generate -f internal/store/sqlc.yaml
 
 testgo: ## Run the go Tests
-	go test -p 1 ./internal/... -cover
+	go test ./internal/... -cover
 
 testgoci: ## Run the go Tests and export coverage
-	go test -p 1 ./internal/... -cover -coverprofile=coverage.out
+	go test ./internal/... -cover -coverprofile=coverage.out
 
 clean: ## Clean build and temporary directory
 	$(RM) ${DISTDIR}

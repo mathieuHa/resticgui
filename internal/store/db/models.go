@@ -22,6 +22,7 @@ type Job struct {
 	Error        string
 	ExitCode     *int64
 	LogExcerpt   string
+	Params       string
 }
 
 type Path struct {

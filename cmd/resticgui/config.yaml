@@ -2,10 +2,33 @@ logs:
   debug: false
   level: 1
 
-db:
-  name: resticgui.db
-
 server:
   ip: "127.0.0.1"
   port: 3001
-  disable: false
+
+store:
+  # SQLite database, created on the first start
+  path: resticgui.sqlite
+  # key that encrypts repository passwords and credentials; $RESTICGUI_SECRET_KEY wins
+  key_file: resticgui.key
+  # database of ResticGUI v0.1, imported once when path does not exist yet
+  legacy_path: resticgui.db
+
+restic:
+  bin: restic
+
+jobs:
+  # how many restic commands may run at once (one per repository at most)
+  workers: 2
+  # run the backup, forget/prune and check schedules
+  schedule: true
+
+paths:
+  # directories that may be backed up, restored into and browsed; empty allows all
+  roots: []
+
+auth:
+  # leave password_hash empty to run without a login (only on a trusted network)
+  # make a hash with: resticgui hash-password
+  username: admin
+  password_hash: ""

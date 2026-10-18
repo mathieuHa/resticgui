@@ -14,3 +14,6 @@ RETURNING *;
 
 -- name: GetRetention :one
 SELECT * FROM retention WHERE repository_id = ?;
+
+-- name: DeleteRetention :execrows
+DELETE FROM retention WHERE repository_id = ?;

@@ -5,8 +5,8 @@
 //
 //	go run internal/legacy/testdata/gen_fixture.go
 //
-// It needs the ent code that is still in the tree; the generated file is
-// committed so the tests keep working once ent is removed.
+// It needs the ent code, which was removed after commit 0e49007: check that
+// commit out to run it. The generated file is committed.
 package main
 
 import (

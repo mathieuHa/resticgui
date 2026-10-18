@@ -2,10 +2,26 @@ logs:
   debug: false
   level: 1
 
-db:
-  name: /opt/db/resticgui.db
-
 server:
   ip: "0.0.0.0"
   port: 3030
-  disable: false
+
+store:
+  path: /opt/db/resticgui.sqlite
+  key_file: /opt/db/resticgui.key
+  legacy_path: /opt/db/resticgui.db
+
+restic:
+  bin: /usr/bin/restic
+
+jobs:
+  workers: 2
+  schedule: true
+
+paths:
+  roots: []
+
+auth:
+  # set password_hash (resticgui hash-password), or put the container behind a login
+  username: admin
+  password_hash: ""

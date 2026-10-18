@@ -158,3 +158,24 @@ func TestHTTPEventStream(t *testing.T) {
 	}
 	assert.Equal(t, []Status{StatusQueued, StatusRunning, StatusSucceeded}, statuses)
 }
+
+func TestHTTPEventStreamOutlivesWriteTimeout(t *testing.T) {
+	e := newEnv(t, Options{})
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	(&Handler{Manager: e.manager, Heartbeat: 150 * time.Millisecond}).Register(r)
+	srv := httptest.NewUnstartedServer(r)
+	srv.Config.WriteTimeout = 50 * time.Millisecond
+	srv.Start()
+	defer srv.Close()
+
+	resp, err := http.Get(srv.URL + "/events")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	sc := bufio.NewScanner(resp.Body)
+	var lines []string
+	for len(lines) < 4 && sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+	assert.Equal(t, []string{"retry: 3000", "", ": ping", ""}, lines, "the heartbeat arrives after the write timeout")
+}

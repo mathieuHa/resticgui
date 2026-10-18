@@ -18,7 +18,7 @@ ARG BASEDOCKERIMAGE
 FROM docker.io/${BASEDOCKERIMAGE} as BuilderRestic
 
 ARG TARGETARCH
-ARG RESTICVERSION=0.15.1
+ARG RESTICVERSION=0.18.1
 ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${TARGETARCH}.bz2
 ARG BUILDDIR=./build
 
@@ -42,8 +42,6 @@ ARG TARGETARCH
 
 FROM docker.io/golang:${GOVERSION} as BuilderResticGui
 
-RUN apk update && apk add musl-dev gcc
-
 ARG BUILDDIR=./build
 
 RUN mkdir -p ${BUILDDIR}
@@ -54,7 +52,7 @@ COPY --from=BuilderWeb /front/build ${BUILDDIR}/internal/webui/ui
 
 WORKDIR ${BUILDDIR}
 
-RUN cd cmd/resticgui && GOARCH=${TARGETARCH} CGO_ENABLED=1 go build -o /resticgui -ldflags '-w -s -extldflags "-static"'
+RUN cd cmd/resticgui && GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -o /resticgui -ldflags '-w -s'
 
 ARG BASEDOCKERIMAGE
 
