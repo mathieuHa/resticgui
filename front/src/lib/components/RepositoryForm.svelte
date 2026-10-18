@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Backend, Repository } from '$lib/api/client';
-  import { BACKEND_LABELS, sortBackends, type RepositoryDraft } from '$lib/repository';
+  import type { Backend, Repository } from '#lib/api/client.ts';
+  import { BACKEND_LABELS, sortBackends, type RepositoryDraft } from '#lib/repository.ts';
 
   import PathPicker from './PathPicker.svelte';
 

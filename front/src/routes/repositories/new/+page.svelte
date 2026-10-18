@@ -1,15 +1,15 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
-  import { api, type Backend, type Paths, type Retention } from '$lib/api/client';
-  import { jobs, notify, notifyError } from '$lib/app.svelte';
-  import PathsEditor from '$lib/components/PathsEditor.svelte';
-  import RepositoryForm from '$lib/components/RepositoryForm.svelte';
-  import RetentionEditor from '$lib/components/RetentionEditor.svelte';
-  import ScheduleEditor from '$lib/components/ScheduleEditor.svelte';
-  import { BACKEND_LABELS, newDraft, problems, toInput } from '$lib/repository';
-  import { describeRetention, isEmpty, normalize, suggested } from '$lib/retention';
-  import { describe, parse } from '$lib/schedule';
+  import { api, type Backend, type Paths, type Retention } from '#lib/api/client.ts';
+  import { jobs, notify, notifyError } from '#lib/app.svelte.ts';
+  import PathsEditor from '#lib/components/PathsEditor.svelte';
+  import RepositoryForm from '#lib/components/RepositoryForm.svelte';
+  import RetentionEditor from '#lib/components/RetentionEditor.svelte';
+  import ScheduleEditor from '#lib/components/ScheduleEditor.svelte';
+  import { BACKEND_LABELS, newDraft, problems, toInput } from '#lib/repository.ts';
+  import { describeRetention, isEmpty, normalize, suggested } from '#lib/retention.ts';
+  import { describe, parse } from '#lib/schedule.ts';
 
   const STEPS = ['Storage', 'What to back up', 'When', 'Review'];
   let step = $state(0);

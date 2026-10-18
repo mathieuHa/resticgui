@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { api, ApiError, type Entry } from '$lib/api/client';
+  import { api, ApiError, type Entry } from '#lib/api/client.ts';
 
   // Browses folders on the server, within the allowed roots.
   let {

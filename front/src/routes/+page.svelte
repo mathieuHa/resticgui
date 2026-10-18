@@ -1,8 +1,8 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { api, type Repository } from '$lib/api/client';
-  import { jobs, notifyError } from '$lib/app.svelte';
-  import RepositoryCard from '$lib/components/RepositoryCard.svelte';
+  import { api, type Repository } from '#lib/api/client.ts';
+  import { jobs, notifyError } from '#lib/app.svelte.ts';
+  import RepositoryCard from '#lib/components/RepositoryCard.svelte';
 
   let repositories = $state<Repository[] | null>(null);
 

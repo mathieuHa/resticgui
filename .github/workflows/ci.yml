@@ -9,17 +9,17 @@ jobs:
   go:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Vet
         run: go vet ./...
       - name: Format
         run: test -z "$(gofmt -l cmd internal)" || (gofmt -l cmd internal && exit 1)
-      - uses: sqlc-dev/setup-sqlc@v4
+      - uses: sqlc-dev/setup-sqlc@v5
         with:
-          sqlc-version: "1.29.0"
+          sqlc-version: "1.31.1"
       - name: Generated queries are up to date
         run: sqlc diff -f internal/store/sqlc.yaml
       - name: Test
@@ -33,10 +33,10 @@ jobs:
       run:
         working-directory: front
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: front/package-lock.json
       - run: npm ci
@@ -50,17 +50,17 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     env:
-      RESTIC_VERSION: "0.18.1"
+      RESTIC_VERSION: "0.19.1"
       RESTIC_BIN: ${{ github.workspace }}/bin/restic
       RESTICGUI_BIN: ${{ github.workspace }}/bin/resticgui
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: front/package-lock.json
       - name: Install restic
@@ -79,7 +79,7 @@ jobs:
       - name: End-to-end tests
         working-directory: front
         run: npx playwright test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
@@ -89,14 +89,14 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     env:
-      RESTIC_VERSION: "0.18.1"
+      RESTIC_VERSION: "0.19.1"
       RESTIC_BIN: ${{ github.workspace }}/bin/restic
       RESTIC_TEST_S3_LOCATION: s3:http://127.0.0.1:3900/restic
       AWS_ACCESS_KEY_ID: GK000000000000000000000001
       AWS_SECRET_ACCESS_KEY: "0000000000000000000000000000000000000000000000000000000000000002"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Install restic
@@ -112,7 +112,7 @@ jobs:
             -e GARAGE_DEFAULT_ACCESS_KEY="$AWS_ACCESS_KEY_ID" \
             -e GARAGE_DEFAULT_SECRET_KEY="$AWS_SECRET_ACCESS_KEY" \
             -e GARAGE_DEFAULT_BUCKET=restic \
-            dxflrs/garage:v2.3.0 /garage server --single-node --default-bucket
+            dxflrs/garage:v2.4.1 /garage server --single-node --default-bucket
           for i in $(seq 1 60); do
             curl -s -o /dev/null http://127.0.0.1:3900/ && docker logs garage 2>&1 | grep -q 'Creating default bucket' && exit 0
             sleep 1

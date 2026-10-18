@@ -6,7 +6,7 @@ import path from 'node:path';
 
 import { e2eRoot } from './paths.mjs';
 
-const [port, password] = process.argv.slice(2);
+const [port = '3001', password] = process.argv.slice(2);
 const bin = path.resolve(process.env.RESTICGUI_BIN ?? '../resticgui');
 const restic = process.env.RESTIC_BIN ?? 'restic';
 const root = e2eRoot(port);
@@ -34,5 +34,5 @@ ${auth}`,
 );
 
 const child = spawn(bin, [], { cwd: root, stdio: 'inherit' });
-for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));
+for (const signal of /** @type {const} */ (['SIGINT', 'SIGTERM'])) process.on(signal, () => child.kill(signal));
 child.on('exit', (code) => process.exit(code ?? 0));

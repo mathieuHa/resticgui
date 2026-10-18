@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
 import { describe, expect, it } from 'vitest';
 
-import type { Job } from '$lib/api/client';
-import { jobs } from '$lib/app.svelte';
+import type { Job } from '#lib/api/client.ts';
+import { jobs } from '#lib/app.svelte.ts';
 
 import JobProgress from './JobProgress.svelte';
 

@@ -222,6 +222,8 @@ func TestBackends(t *testing.T) {
 	a.decode(body, &list)
 	require.Len(t, list, 8)
 	assert.Equal(t, "azure", list[0].Name)
+	// the local backend has no variables: empty lists, not null
+	assert.NotContains(t, string(body), "null")
 }
 
 func TestCreateAndGetRepository(t *testing.T) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Paths } from '$lib/api/client';
+  import type { Paths } from '#lib/api/client.ts';
 
   import PathPicker from './PathPicker.svelte';
 

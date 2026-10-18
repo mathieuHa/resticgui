@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { api, type Snapshot } from '$lib/api/client';
-  import { jobs, notify, notifyError } from '$lib/app.svelte';
+  import { api, type Snapshot } from '#lib/api/client.ts';
+  import { jobs, notify, notifyError } from '#lib/app.svelte.ts';
 
   import Modal from './Modal.svelte';
   import PathPicker from './PathPicker.svelte';

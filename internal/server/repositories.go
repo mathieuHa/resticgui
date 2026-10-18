@@ -139,9 +139,19 @@ func sortedKeys(m map[string]string) []string {
 func (s *Server) listBackends(c *gin.Context) {
 	out := make([]backends.Backend, 0, len(backends.Registry))
 	for _, name := range backends.Names() {
-		out = append(out, backends.Registry[name])
+		b := backends.Registry[name]
+		// lists, never null, as the API promises
+		b.Env, b.Secrets, b.Required = orEmpty(b.Env), orEmpty(b.Secrets), orEmpty(b.Required)
+		out = append(out, b)
 	}
 	c.JSON(http.StatusOK, out)
+}
+
+func orEmpty(s []string) []string {
+	if s == nil {
+		return []string{}
+	}
+	return s
 }
 
 // repositoryDTO loads everything a repository response shows.

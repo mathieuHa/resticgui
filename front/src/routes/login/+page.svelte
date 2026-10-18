@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ApiError, api } from '$lib/api/client';
+  import { ApiError, api } from '#lib/api/client.ts';
 
   let username = $state('');
   let password = $state('');

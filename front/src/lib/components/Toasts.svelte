@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dismiss, toasts } from '$lib/app.svelte';
+  import { dismiss, toasts } from '#lib/app.svelte.ts';
 
   const classes = { success: 'alert-success', error: 'alert-error', info: 'alert-info' };
 </script>

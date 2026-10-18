@@ -1,15 +1,15 @@
 <script lang="ts">
   import { untrack } from 'svelte';
 
-  import { api, type Backend, type Repository, type Retention, type ScheduledJob } from '$lib/api/client';
-  import { attempt, jobs, notify } from '$lib/app.svelte';
-  import Modal from '$lib/components/Modal.svelte';
-  import PathsEditor from '$lib/components/PathsEditor.svelte';
-  import RepositoryForm from '$lib/components/RepositoryForm.svelte';
-  import RetentionEditor from '$lib/components/RetentionEditor.svelte';
-  import ScheduleEditor from '$lib/components/ScheduleEditor.svelte';
-  import { draftOf, problems, toInput } from '$lib/repository';
-  import { isEmpty, normalize, suggested } from '$lib/retention';
+  import { api, type Backend, type Repository, type Retention, type ScheduledJob } from '#lib/api/client.ts';
+  import { attempt, jobs, notify } from '#lib/app.svelte.ts';
+  import Modal from '#lib/components/Modal.svelte';
+  import PathsEditor from '#lib/components/PathsEditor.svelte';
+  import RepositoryForm from '#lib/components/RepositoryForm.svelte';
+  import RetentionEditor from '#lib/components/RetentionEditor.svelte';
+  import ScheduleEditor from '#lib/components/ScheduleEditor.svelte';
+  import { draftOf, problems, toInput } from '#lib/repository.ts';
+  import { isEmpty, normalize, suggested } from '#lib/retention.ts';
 
   let { repo, onsaved, onremoved }: { repo: Repository; onsaved: (r: Repository) => void; onremoved: () => void } = $props();
 
