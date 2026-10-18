@@ -57,6 +57,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [auth_enabled, authenticated]
                 properties:
                   auth_enabled: { type: boolean }
                   authenticated: { type: boolean }
@@ -161,6 +162,38 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/Repository" }
         "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/retention/preview:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      summary: Show what a retention policy would keep and remove
+      description: Runs restic forget --dry-run on the snapshots a forget job would consider. The policy need not be saved.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Retention" }
+      responses:
+        "200":
+          description: Snapshots kept and removed, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [keep, remove]
+                properties:
+                  keep:
+                    type: array
+                    items:
+                      allOf:
+                        - { $ref: "#/components/schemas/Snapshot" }
+                        - type: object
+                          properties:
+                            matches: { type: array, items: { type: string }, description: The rules that keep it }
+                  remove: { type: array, items: { $ref: "#/components/schemas/Snapshot" } }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
 
   /repositories/{id}/schedules/{job}:
     parameters:
@@ -398,6 +431,7 @@ components:
   schemas:
     Backend:
       type: object
+      required: [name, prefix, example, env, secrets, required]
       properties:
         name: { type: string, enum: [azure, b2, gs, local, rclone, rest, s3, sftp] }
         prefix: { type: string, example: "s3:" }
@@ -422,6 +456,7 @@ components:
         exclude_larger_than: { type: string, example: 2G }
     Repository:
       type: object
+      required: [id, name, backend, location, env, secrets, has_password, extended, host, compression, exclude_larger_than, initialized_at, created_at, updated_at, paths, retention, schedules]
       properties:
         id: { type: integer }
         name: { type: string }
@@ -444,12 +479,14 @@ components:
           type: array
           items:
             type: object
+            required: [job, cron, enabled]
             properties:
               job: { type: string, enum: [backup, forget, check] }
               cron: { type: string }
               enabled: { type: boolean }
     Paths:
       type: object
+      required: [include, exclude]
       properties:
         include: { type: array, items: { type: string }, description: Absolute paths inside the allowed roots }
         exclude: { type: array, items: { type: string }, description: restic exclude patterns }
@@ -466,6 +503,7 @@ components:
         prune: { type: boolean }
     Job:
       type: object
+      required: [id, repository_id, kind, trigger, status, created_at, started_at, finished_at, summary, params]
       properties:
         id: { type: integer }
         repository_id: { type: integer }
@@ -483,6 +521,7 @@ components:
         params: { type: object, description: 'For a restore: snapshot_id, target, include' }
     Event:
       type: object
+      required: [job_id, repository_id, kind, status]
       properties:
         job_id: { type: integer }
         repository_id: { type: integer }
@@ -492,6 +531,7 @@ components:
         error: { type: string }
         progress:
           type: object
+          required: [percent_done, files_done, total_files, bytes_done, total_bytes, seconds_remaining]
           properties:
             percent_done: { type: number }
             files_done: { type: integer }
@@ -502,6 +542,7 @@ components:
             current_files: { type: array, items: { type: string } }
     Entry:
       type: object
+      required: [name, path, dir, size, mtime]
       properties:
         name: { type: string }
         path: { type: string }
@@ -510,6 +551,7 @@ components:
         mtime: { type: string, format: date-time }
     Snapshot:
       type: object
+      required: [id, short_id, time, paths, hostname]
       properties:
         id: { type: string }
         short_id: { type: string }
@@ -520,6 +562,7 @@ components:
         summary: { type: object }
     Node:
       type: object
+      required: [name, type, path, size, mtime, permissions]
       properties:
         name: { type: string }
         type: { type: string, enum: [file, dir, symlink] }
@@ -529,6 +572,7 @@ components:
         permissions: { type: string }
     FindMatch:
       type: object
+      required: [path, type, size, mtime]
       properties:
         path: { type: string }
         type: { type: string }

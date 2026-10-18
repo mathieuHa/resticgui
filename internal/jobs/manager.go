@@ -564,18 +564,12 @@ func (m *Manager) forget(ctx context.Context, repo db.Repository, target *restic
 	if err != nil {
 		return failed(err)
 	}
-	opts := restic.ForgetOptions{
-		Policy: restic.Policy{
-			KeepLast: int(ret.KeepLast), KeepHourly: int(ret.KeepHourly), KeepDaily: int(ret.KeepDaily),
-			KeepWeekly: int(ret.KeepWeekly), KeepMonthly: int(ret.KeepMonthly), KeepYearly: int(ret.KeepYearly),
-			KeepWithin: ret.KeepWithin,
-		},
-		// only snapshots resticgui made for this repository, grouped so that
-		// editing the backup paths does not start a new retention group
-		Filter:  restic.SnapshotFilter{Host: repo.Host, Tags: []string{Tag(repo.ID)}},
-		GroupBy: "host,tags",
-		Prune:   ret.Prune,
-	}
+	opts := ForgetOptions(repo, restic.Policy{
+		KeepLast: int(ret.KeepLast), KeepHourly: int(ret.KeepHourly), KeepDaily: int(ret.KeepDaily),
+		KeepWeekly: int(ret.KeepWeekly), KeepMonthly: int(ret.KeepMonthly), KeepYearly: int(ret.KeepYearly),
+		KeepWithin: ret.KeepWithin,
+	})
+	opts.Prune = ret.Prune
 	if opts.Policy.IsEmpty() {
 		return failed(ErrNoRetention)
 	}
@@ -610,4 +604,16 @@ func (m *Manager) restore(ctx context.Context, job db.Job, target *restic.Repo) 
 		return failed(err)
 	}
 	return outcome{status: StatusSucceeded, summary: summary}
+}
+
+// ForgetOptions applies policy to the snapshots resticgui made for repo,
+// grouped so that editing the backup paths does not start a new retention
+// group. The retention preview uses it too, so that it shows what a forget
+// job would do.
+func ForgetOptions(repo db.Repository, policy restic.Policy) restic.ForgetOptions {
+	return restic.ForgetOptions{
+		Policy:  policy,
+		Filter:  restic.SnapshotFilter{Host: repo.Host, Tags: []string{Tag(repo.ID)}},
+		GroupBy: "host,tags",
+	}
 }

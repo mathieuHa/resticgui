@@ -42,6 +42,8 @@ type fakeRestic struct {
 	nodes     []restic.Node
 	found     []restic.FindResult
 	dump      string
+	groups    []restic.ForgetGroup
+	forgets   []restic.ForgetOptions
 }
 
 func (f *fakeRestic) Snapshots(_ context.Context, _ *restic.Repo, filter restic.SnapshotFilter) ([]restic.Snapshot, error) {
@@ -70,6 +72,19 @@ func (f *fakeRestic) Find(_ context.Context, _ *restic.Repo, snapshotID, pattern
 func (f *fakeRestic) Stats(_ context.Context, _ *restic.Repo, mode, snapshotID string) (*restic.Stats, error) {
 	f.record("stats " + mode + " " + snapshotID)
 	return &restic.Stats{TotalSize: 42, SnapshotsCount: 3}, f.err
+}
+
+func (f *fakeRestic) Forget(ctx context.Context, _ *restic.Repo, opts restic.ForgetOptions) ([]restic.ForgetGroup, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.forgets = append(f.forgets, opts)
+	groups, err := f.groups, f.err
+	f.mu.Unlock()
+	if werr := f.wait(ctx); werr != nil {
+		return nil, werr
+	}
+	f.mu.Lock()
+	return groups, err
 }
 
 func (f *fakeRestic) ForgetSnapshots(_ context.Context, _ *restic.Repo, ids []string, prune bool) error {
@@ -107,9 +122,6 @@ func (f *fakeRestic) Unlock(ctx context.Context, _ *restic.Repo) error { return 
 func (f *fakeRestic) Prune(ctx context.Context, _ *restic.Repo) error  { return f.wait(ctx) }
 func (f *fakeRestic) Backup(ctx context.Context, _ *restic.Repo, _ restic.BackupOptions, _ func(restic.BackupStatus)) (*restic.BackupResult, error) {
 	return &restic.BackupResult{Summary: &restic.BackupSummary{SnapshotID: "snap1"}}, f.wait(ctx)
-}
-func (f *fakeRestic) Forget(ctx context.Context, _ *restic.Repo, _ restic.ForgetOptions) ([]restic.ForgetGroup, error) {
-	return nil, f.wait(ctx)
 }
 func (f *fakeRestic) Restore(ctx context.Context, _ *restic.Repo, _ restic.RestoreOptions, _ func(restic.RestoreStatus)) (*restic.RestoreSummary, error) {
 	return &restic.RestoreSummary{}, f.wait(ctx)
@@ -372,6 +384,47 @@ func TestRetention(t *testing.T) {
 	require.Equal(t, http.StatusOK, status)
 	a.decode(body, &dto)
 	assert.Nil(t, dto.Retention)
+}
+
+func TestRetentionPreview(t *testing.T) {
+	a := newAPI(t)
+	repo := a.create("photos")
+	path := "/repositories/" + itoa(repo.ID) + "/retention/preview"
+	day := func(d int) time.Time { return time.Date(2026, 10, d, 2, 30, 0, 0, time.UTC) }
+	a.restic.groups = []restic.ForgetGroup{{
+		Keep:    []restic.Snapshot{{ID: "aaaa1111", Time: day(1)}, {ID: "cccc3333", Time: day(3)}},
+		Remove:  []restic.Snapshot{{ID: "bbbb2222", Time: day(2)}},
+		Reasons: []restic.KeepReason{{Snapshot: restic.Snapshot{ID: "cccc3333"}, Matches: []string{"daily snapshot"}}},
+	}}
+
+	status, body := a.do(http.MethodPost, path, RetentionDTO{})
+	assert.Equal(t, http.StatusBadRequest, status, "an empty policy is refused before restic runs")
+	assert.Contains(t, string(body), "must keep something")
+	assert.Empty(t, a.restic.forgets)
+
+	status, body = a.do(http.MethodPost, path, RetentionDTO{KeepDaily: 2})
+	require.Equal(t, http.StatusOK, status, string(body))
+	var preview RetentionPreview
+	a.decode(body, &preview)
+	require.Len(t, preview.Keep, 2)
+	assert.Equal(t, "cccc3333", preview.Keep[0].ID, "newest first")
+	assert.Equal(t, []string{"daily snapshot"}, preview.Keep[0].Matches)
+	require.Len(t, preview.Remove, 1)
+	assert.Equal(t, "bbbb2222", preview.Remove[0].ID)
+
+	require.Len(t, a.restic.forgets, 1)
+	opts := a.restic.forgets[0]
+	assert.True(t, opts.DryRun, "a preview never forgets anything")
+	assert.False(t, opts.Prune)
+	assert.Equal(t, restic.Policy{KeepDaily: 2}, opts.Policy)
+	assert.Equal(t, []string{jobs.Tag(repo.ID)}, opts.Filter.Tags, "same snapshots as a forget job")
+	assert.Equal(t, "host,tags", opts.GroupBy)
+
+	a.restic.err = restic.ErrRepositoryNotFound
+	status, _ = a.do(http.MethodPost, path, RetentionDTO{KeepDaily: 2})
+	assert.Equal(t, http.StatusConflict, status)
+	status, _ = a.do(http.MethodPost, "/repositories/999/retention/preview", RetentionDTO{KeepDaily: 2})
+	assert.Equal(t, http.StatusNotFound, status)
 }
 
 func TestSchedules(t *testing.T) {

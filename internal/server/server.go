@@ -31,6 +31,7 @@ type Restic interface {
 	Ls(ctx context.Context, repo *restic.Repo, snapshotID, dir string) ([]restic.Node, error)
 	Find(ctx context.Context, repo *restic.Repo, snapshotID, pattern string) ([]restic.FindResult, error)
 	Stats(ctx context.Context, repo *restic.Repo, mode, snapshotID string) (*restic.Stats, error)
+	Forget(ctx context.Context, repo *restic.Repo, opts restic.ForgetOptions) ([]restic.ForgetGroup, error)
 	ForgetSnapshots(ctx context.Context, repo *restic.Repo, ids []string, prune bool) error
 	Dump(ctx context.Context, repo *restic.Repo, snapshotID, path, archive string, w io.Writer) error
 }
@@ -77,6 +78,7 @@ func (s *Server) Register(public gin.IRouter) {
 	r.PUT("/repositories/:id/paths", s.putPaths)
 	r.PUT("/repositories/:id/retention", s.putRetention)
 	r.DELETE("/repositories/:id/retention", s.deleteRetention)
+	r.POST("/repositories/:id/retention/preview", s.previewRetention)
 	r.PUT("/repositories/:id/schedules/:job", s.putSchedule)
 	r.DELETE("/repositories/:id/schedules/:job", s.deleteSchedule)
 	r.POST("/repositories/:id/jobs", s.startJob)
