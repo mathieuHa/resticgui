@@ -1,27 +1,18 @@
-import path from 'path';
-import { defineConfig } from 'vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
+import { svelteTesting } from '@testing-library/svelte/vite';
+import { defineConfig } from 'vitest/config';
 
-const config = defineConfig({
-  plugins: [sveltekit()],
+export default defineConfig({
+  plugins: [tailwindcss(), sveltekit(), svelteTesting()],
   server: {
-    host: 'localhost',
     port: 3000,
-    proxy: {
-      '/api/v1': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      },
-    },
+    // run the Go server (make run) for the API
+    proxy: { '/api': { target: 'http://localhost:3001', changeOrigin: true } },
   },
-  build: {
-    sourcemap: false,
-  },
-  resolve: {
-    alias: {
-      $utils: path.resolve(__dirname, './src/utils'),
-    },
+  test: {
+    include: ['src/**/*.test.ts'],
+    environment: 'jsdom',
+    setupFiles: ['src/test-setup.ts'],
   },
 });
-
-export default config;

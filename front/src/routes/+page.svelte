@@ -1,122 +1,55 @@
 <script lang="ts">
-  import dayjs from 'dayjs';
+  import { resolve } from '$app/paths';
+  import { api, type Repository } from '$lib/api/client';
+  import { jobs, notifyError } from '$lib/app.svelte';
+  import RepositoryCard from '$lib/components/RepositoryCard.svelte';
 
-  import agent from '$utils/api';
-  import Eye from '$lib/Icon/Eye.svelte';
-  import Logs from '$lib/Icon/Logs.svelte';
-  import Pen from '$lib/Icon/Pen.svelte';
-  import Trash from '$lib/Icon/Trash.svelte';
-  import RepositoryModal from '$lib/RepositoryModal/RepositoryModal.svelte';
-  import Snapshot from '$lib/Icon/Snapshot.svelte';
-    import Modal from '$lib/Modal.svelte';
+  let repositories = $state<Repository[] | null>(null);
 
-  let repos = [];
-  let step = 0;
-  let initialValues: any = null;
-  let removeId: number | null = null;
-
-  const onRefresh = async () => {
-    repos = await agent.get('/repositories');
-    initialValues = repos.find((repo: any) => repo.id === initialValues?.id);
-    return repos;
-  };
-  let reposPromise = onRefresh()
-
-  const onRemove = async (repoId: number) => {
+  async function load() {
     try {
-      await agent.delete(`/repositories/${repoId}`);
-      reposPromise = onRefresh();
-      removeId = null;
+      const list = await api.repositories();
+      // enough history for the last backup and anything running
+      await Promise.all(list.map(async (r) => jobs.add(await api.jobs(r.id, 20))));
+      repositories = list;
     } catch (err) {
-      console.log(err);
+      notifyError(err, 'Could not load the repositories');
+      repositories ??= [];
     }
-  };
+  }
 
-  $: if (initialValues === null) step = 0;
-  $: values = Object.assign({}, initialValues) || step;
-
+  $effect(() => {
+    load();
+    const stop = jobs.onResync(load);
+    // a finished init or backup changes what the cards show
+    const unsubscribe = jobs.onChange((job) => {
+      if (job.status === 'succeeded' && job.kind === 'init') load();
+    });
+    return () => {
+      stop();
+      unsubscribe();
+    };
+  });
 </script>
 
-{#if removeId}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <Modal on:close={() => (removeId = null)}>
-    <div class="modal-box">
-      <h3 class="font-bold text-lg">Warning</h3>
-      <p class="py-4">Do you want to delete repository #{removeId} ?</p>
-      <div class="modal-action">
-        <button class="btn btn-info" on:click={() => (removeId = null)}>No</button>
-        <button class="btn btn-error" on:click={() => removeId && onRemove(removeId)}>Yes</button>
+<svelte:head><title>Repositories · ResticGUI</title></svelte:head>
+
+{#if repositories === null}
+  <span class="loading loading-spinner"></span>
+{:else if repositories.length === 0}
+  <div class="hero bg-base-100 rounded-box py-16">
+    <div class="hero-content text-center">
+      <div class="max-w-md">
+        <h1 class="text-2xl font-bold">No repository yet</h1>
+        <p class="py-4">A repository is where restic keeps your backups: a folder, a bucket or a server.</p>
+        <a class="btn btn-primary" href={resolve('/repositories/new')}>Add a repository</a>
       </div>
     </div>
-  </Modal>
-{:else if initialValues}
-  <RepositoryModal
-    repository={initialValues}
-    on:close={() => (initialValues = null)}
-    on:refresh={() => (reposPromise = onRefresh())}
-  />
-{/if}
-
-<div class="w-full flex flex-col gap-5 mb-6">
-  {#await reposPromise}
-    <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md animate-pulse">
-      <div><div class="w-36 h-5 my-1 bg-neutral-content rounded-xl" /></div>
-      <div class="flex flex-wrap gap-2 mt-5 mb-1">
-        <div class="btn btn-square btn-sm btn-warning" />
-        <div class="btn btn-square btn-sm btn-info" />
-        <div class="btn btn-square btn-sm btn-error" />
-        <div class="btn btn-square btn-sm btn-success" />
-        <div class="btn btn-square btn-sm btn-primary" />
-      </div>
-    </div>
-    <div class="btn btn-ghost bg-base-100 hover:bg-base-200 rounded-xl shadow-md animate-pulse" />
-  {:then repos}
-    {#each repos as repo, i}
-      <div class="p-3 flex flex-col bg-base-100 rounded-xl shadow-md">
-        <div class="flex flex-wrap h-7 items-end gap-2">
-          <p class="text-lg font-bold whitespace-nowrap {repo.active ? '' :'text-error'}">#{repo.id} - {repo.name}</p>
-          <p class="flex-1 text-sm font-light text-right whitespace-nowrap">
-            {dayjs(repo.createdAt).format('DD/MM/YYYY HH:mm')}
-          </p>
-        </div>
-
-        <div class="flex flex-wrap justify-between mt-5 mb-1">
-          <div class="flex flex-wrap gap-2">
-            <a href="/ui/{repo.id}" class="btn btn-square btn-sm btn-warning" title="See">
-              <Eye />
-            </a>
-            <button
-              class="btn btn-square btn-sm btn-info"
-              title="Update"
-              on:click|stopPropagation={() => (initialValues = Object.assign({}, repo))}
-            >
-              <Pen />
-            </button>
-            <button
-              class="btn btn-square btn-sm btn-error"
-              title="Remove"
-              on:click|stopPropagation={() => (removeId = repo.id)}
-            >
-              <Trash />
-            </button>
-            <a href="/ui/{repo.id}?tab=logs" class="btn btn-square btn-sm btn-success" title="Logs">
-              <Logs />
-            </a>
-            <a href="/ui/{repo.id}?tab=snapshots" class="btn btn-square btn-sm btn-primary" title="Snapshots">
-              <Snapshot />
-            </a>
-          </div>
-          <span class="{values.running ? '' : 'text-red-500'} flex-1 pl-1 whitespace-nowrap text-right ">
-            {values.running ? 'running' : 'not running'}
-          </span>
-        </div>
-      </div>
+  </div>
+{:else}
+  <div class="grid gap-4 md:grid-cols-2">
+    {#each repositories as r (r.id)}
+      <RepositoryCard repository={r} />
     {/each}
-    <button
-      on:click={() => { initialValues = {}; }}
-      class="btn btn-ghost bg-base-100 hover:bg-base-200 rounded-xl shadow-md normal-case text-base"
-    >
-      Add a repository
-    </button>
-  {/await}
-</div>
+  </div>
+{/if}

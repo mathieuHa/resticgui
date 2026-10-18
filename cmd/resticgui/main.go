@@ -48,7 +48,10 @@ func main() {
 
 	router := gin.New()
 	router.Use(server.Logger(), server.Recovery())
-	router.StaticFS("/ui", http.FS(webui.UI))
+	ui := gin.WrapH(webui.Handler(webui.UI, "/ui"))
+	router.GET("/ui", ui)
+	router.GET("/ui/*path", ui)
+	router.HEAD("/ui/*path", ui)
 	router.NoRoute(func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/ui")
 	})

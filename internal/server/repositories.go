@@ -436,16 +436,8 @@ func dedupe(list []string) []string {
 	return out
 }
 
-func (s *Server) putRetention(c *gin.Context) {
-	id, ok := repositoryID(c)
-	if !ok {
-		return
-	}
-	var in RetentionDTO
-	if err := c.ShouldBindJSON(&in); err != nil {
-		invalid(c, err)
-		return
-	}
+// policy validates the retention rules and returns them as restic's.
+func (in RetentionDTO) policy() (restic.Policy, error) {
 	var errs []error
 	for name, v := range map[string]int64{
 		"keep_last": in.KeepLast, "keep_hourly": in.KeepHourly, "keep_daily": in.KeepDaily,
@@ -465,7 +457,83 @@ func (s *Server) putRetention(c *gin.Context) {
 	if policy.IsEmpty() {
 		errs = append(errs, errors.New("the policy must keep something; delete the retention instead"))
 	}
-	if err := errors.Join(errs...); err != nil {
+	return policy, errors.Join(errs...)
+}
+
+// RetentionPreview is what a policy would keep and remove.
+type RetentionPreview struct {
+	Keep   []KeptSnapshot    `json:"keep"`
+	Remove []restic.Snapshot `json:"remove"`
+}
+
+// KeptSnapshot is a snapshot a policy keeps and the rules that keep it.
+type KeptSnapshot struct {
+	restic.Snapshot
+	Matches []string `json:"matches"`
+}
+
+// previewRetention runs "restic forget --dry-run" with the given policy,
+// which need not be saved yet, on the snapshots a forget job would consider.
+func (s *Server) previewRetention(c *gin.Context) {
+	id, ok := repositoryID(c)
+	if !ok {
+		return
+	}
+	var in RetentionDTO
+	if err := c.ShouldBindJSON(&in); err != nil {
+		invalid(c, err)
+		return
+	}
+	policy, err := in.policy()
+	if err != nil {
+		invalid(c, err)
+		return
+	}
+	ctx := c.Request.Context()
+	r, err := s.Store.GetRepository(ctx, id)
+	if err != nil {
+		notFound(c, err, "repository")
+		return
+	}
+	target, err := s.resticRepo(r)
+	if err != nil {
+		internal(c, err)
+		return
+	}
+	opts := jobs.ForgetOptions(r, policy)
+	opts.DryRun = true
+	groups, err := s.Restic.Forget(ctx, target, opts)
+	if err != nil {
+		resticFailure(c, err)
+		return
+	}
+	out := RetentionPreview{Keep: []KeptSnapshot{}, Remove: []restic.Snapshot{}}
+	for _, g := range groups {
+		matches := map[string][]string{}
+		for _, reason := range g.Reasons {
+			matches[reason.Snapshot.ID] = reason.Matches
+		}
+		for _, snap := range g.Keep {
+			out.Keep = append(out.Keep, KeptSnapshot{Snapshot: snap, Matches: matches[snap.ID]})
+		}
+		out.Remove = append(out.Remove, g.Remove...)
+	}
+	sort.Slice(out.Keep, func(i, j int) bool { return out.Keep[i].Time.After(out.Keep[j].Time) })
+	sort.Slice(out.Remove, func(i, j int) bool { return out.Remove[i].Time.After(out.Remove[j].Time) })
+	c.JSON(http.StatusOK, out)
+}
+
+func (s *Server) putRetention(c *gin.Context) {
+	id, ok := repositoryID(c)
+	if !ok {
+		return
+	}
+	var in RetentionDTO
+	if err := c.ShouldBindJSON(&in); err != nil {
+		invalid(c, err)
+		return
+	}
+	if _, err := in.policy(); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -607,6 +675,12 @@ func (s *Server) listSnapshots(c *gin.Context) {
 	if err != nil {
 		resticFailure(c, err)
 		return
+	}
+	if r.InitializedAt == nil {
+		if err := s.Store.MarkRepositoryInitialized(ctx, r.ID); err != nil {
+			internal(c, err)
+			return
+		}
 	}
 	c.JSON(http.StatusOK, snaps)
 }
