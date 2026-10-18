@@ -67,22 +67,22 @@ docker run -d resticgui/resticgui:v0.1.2 -v /home/myuser:/backup
 
 ## Configure
 
-Configuration is made in the `config.yaml` file.  
-The `config.yaml` must be place in the same directory as the resticgui binary.  
+Configuration is made in the config.yaml file.  
+The config.yaml must be place in the same directory as the resticgui binary.  
 
 ### Variables
 
-- `logs.debug` (bool, default `false`): enable the debug logs (overrides `logs.level`)
-- `logs.level` (int, default `1`): zerolog levels, 0 debug, 1 info, 2 warn, 3 error
-- `server.ip` (default `127.0.0.1`) and `server.port` (default `3001`): where the web server listens
-- `store.path` (default `resticgui.sqlite`): the SQLite database, created on the first start
-- `store.key_file` (default `resticgui.key`): the key that encrypts repository passwords and credentials, created if missing; `$RESTICGUI_SECRET_KEY` takes precedence. Keep a copy: without it the stored passwords cannot be read.
-- `store.legacy_path` (default `resticgui.db`): a ResticGUI v0.1 database, imported once when `store.path` does not exist yet. The import can also be run by hand with `resticgui migrate-legacy -from resticgui.db -to resticgui.sqlite`.
-- `restic.bin` (default `restic`): the restic binary
-- `jobs.workers` (default `2`): how many restic commands may run at once
-- `jobs.schedule` (default `true`): run the scheduled backups, forget/prune and checks
-- `paths.roots` (default empty, meaning everything): directories that may be backed up, restored into and browsed
-- `auth.username` and `auth.password_hash`: the login. Make the hash with `resticgui hash-password` (it reads the password on stdin). With no hash the API needs no login, so only do that on a trusted network.
+- **logs.debug** (bool, default false): enable the debug logs (overrides logs.level)
+- **logs.level** (int, default 1): zerolog levels, 0 debug, 1 info, 2 warn, 3 error
+- **server.ip** (default 127.0.0.1) and **server.port** (default 3001): where the web server listens
+- **store.path** (default resticgui.sqlite): the SQLite database, created on the first start
+- **store.key_file** (default resticgui.key): the key that encrypts repository passwords and credentials, created if missing; $RESTICGUI_SECRET_KEY takes precedence. Keep a copy: without it the stored passwords cannot be read.
+- **store.legacy_path** (default resticgui.db): a ResticGUI v0.1 database, imported once when store.path does not exist yet. The import can also be run by hand with resticgui migrate-legacy -from resticgui.db -to resticgui.sqlite.
+- **restic.bin** (default restic): the restic binary
+- **jobs.workers** (default 2): how many restic commands may run at once
+- **jobs.schedule** (default true): run the scheduled backups, forget/prune and checks
+- **paths.roots** (default empty, meaning everything): directories that may be backed up, restored into and browsed
+- **auth.username** and **auth.password_hash**: the login. Make the hash with resticgui hash-password (it reads the password on stdin). With no hash the API needs no login, so only do that on a trusted network.
 
 ### Example
 ```yaml
@@ -120,10 +120,10 @@ Features we plan to work on, roughly in this order. Suggestions are welcome in t
 - **Notifications**: alerts on failure, success or a missed schedule through [Shoutrrr](https://github.com/containrrr/shoutrrr) URLs (ntfy, Gotify, Discord, Slack, Telegram, email) and Healthchecks.io pings.
 - **Hooks**: a command or webhook before and after a backup, for example to dump a database.
 - **Import an existing restic repository** and index its snapshots.
-- **Prometheus metrics** at `/metrics`: last backup time and status, duration, data added, repository size.
+- **Prometheus metrics** at /metrics: last backup time and status, duration, data added, repository size.
 - **Snapshot diff**: what changed between two snapshots.
 - **Backup plans**: several sets of paths, each with its own schedule and retention, into one repository; exclude patterns and per-plan restic options.
-- **Copy to a second repository** (`restic copy`) for 3-2-1 backups.
+- **Copy to a second repository** (restic copy) for 3-2-1 backups.
 - **Maintenance tools**: unlock, repair, partial data check, password change.
 - **Configuration from a file or environment variables** for container deployments.
 
@@ -140,7 +140,7 @@ Extract from this documentation:
 ## License
 
 ResticGUI is licensed under [GPL 3.0 License](https://www.gnu.org/licenses/gpl-3.0.txt). You can find the
-complete text in [``COPYING``](COPYING).
+complete text in [COPYING](COPYING).
 
 ## Dev tools
 
@@ -157,7 +157,7 @@ make run
 ```
 make rundevweb
 ```
-> Listen on http://localhost:3000/ui, and sends `/api` to the backend on port 3001
+> Listen on http://localhost:3000/ui, and sends /api to the backend on port 3001
 
 #### Tests
 
