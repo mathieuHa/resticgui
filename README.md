@@ -2,22 +2,30 @@
 
 A smart GUI for Restic [github.com/restic/restic](https://github.com/restic/restic)
 
+**Documentation: [docs.resticgui.com](https://docs.resticgui.com)**
+
 It features a complete web interface that ease configuration of:
 - scheduling backups
-- retention policy
+- retention policy, with a preview of what it will delete
 - storage provider configuration
 - selecting paths from file tree navigation
+- notifications (ntfy, Gotify, Discord, Slack, Telegram, email and more) and Healthchecks.io pings
+- hooks: a command or webhook before and after a backup
 
 The following actions are supported:
-- listing Snapshots
+- a dashboard with the status, size and history of every repository
+- starting a backup and following its progress live
+- importing an existing restic repository
+- listing Snapshots, and comparing two of them
 - removing specific Snapshot
 - show statistics of a specific Snapshot
 - search for files in a Snapshot
-- dowloading files or directories from a Snapshot
+- downloading or restoring files or directories from a Snapshot
+- Prometheus metrics, with a ready-made Grafana dashboard
 
 The following storage backends are supported: local folder, Amazon S3 and S3-compatible storage, Backblaze B2, REST server, SFTP, rclone, Azure Blob Storage and Google Cloud Storage.
 
-ResticGUI needs restic 0.17.0 or newer. Restic must be installed and present in the $PATH if run as a single binary.
+ResticGUI needs restic 0.17.0 or newer. The Docker image includes it; a standalone binary needs it in the $PATH.
 
 ## Screenshots
 
@@ -32,38 +40,25 @@ ResticGUI needs restic 0.17.0 or newer. Restic must be installed and present in 
 
 ## Install
 
-### Run as binary
-
-Download the last stable release [0.1.2](https://gitlab.com/resticgui/resticgui/-/releases/v0.1.2)
-
-> Uncompress  
-
-```bash
-mkdir /opt
-tar -xvzf resticgui-ce54653c-amd64.tar.gz -C /opt/resticgui
-```
-
-> Run
-
-```bash
-/opt/resticgui/resticgui
-```
+The [installation guide](https://docs.resticgui.com/install/docker) covers Docker, Linux (systemd) and Kubernetes.
 
 ### Run with docker
 
-Pull the latest stable image from dockerhub registry or gitlab registry:
-- [gitlab](https://gitlab.com/resticgui/resticgui/container_registry)
-- [dockerhub](https://hub.docker.com/r/resticgui/resticgui)
-
-Example:
+The image holds ResticGUI and restic, for linux/amd64, linux/arm64 and linux/arm/v7. Mount the folders to back up under /backup:
 
 ```bash
-docker pull resticgui/resticgui:v0.1.2
+docker run -d --name resticgui --restart unless-stopped \
+  -p 127.0.0.1:3001:3030 \
+  -v resticgui:/opt/db \
+  -v /home:/backup/home:ro \
+  ghcr.io/mathieuha/resticgui:latest
 ```
-> You can bind mount the directories you want to backup in the container
-```bash
-docker run -d resticgui/resticgui:v0.1.2 -v /home/myuser:/backup
-```  
+
+Then open http://127.0.0.1:3001/ui/
+
+### Run as binary
+
+Download a binary for your architecture from the [releases](https://github.com/mathieuHa/resticgui/releases), with restic 0.17.0 or newer in the $PATH, and see the [Linux guide](https://docs.resticgui.com/install/linux).
 
 ## Configure
 
@@ -116,15 +111,10 @@ It is reinitialized every hour and do not persist data between restarts.
 
 Features we plan to work on, roughly in this order. Suggestions are welcome in the issues.
 
-- **Dashboard**: last backup status and age per repository, next run, size over time, success/failure history.
-- **Notifications**: alerts on failure, success or a missed schedule through [Shoutrrr](https://github.com/containrrr/shoutrrr) URLs (ntfy, Gotify, Discord, Slack, Telegram, email) and Healthchecks.io pings.
-- **Hooks**: a command or webhook before and after a backup, for example to dump a database.
-- **Import an existing restic repository** and index its snapshots.
-- **Prometheus metrics** at /metrics: last backup time and status, duration, data added, repository size.
-- **Snapshot diff**: what changed between two snapshots.
+- **Security review** of the whole application before 1.0.
 - **Backup plans**: several sets of paths, each with its own schedule and retention, into one repository; exclude patterns and per-plan restic options.
-- **Copy to a second repository** (restic copy) for 3-2-1 backups.
 - **Maintenance tools**: unlock, repair, partial data check, password change.
+- **Copy to a second repository** (restic copy) for 3-2-1 backups.
 - **Configuration from a file or environment variables** for container deployments.
 
 ## Glossary
@@ -211,24 +201,30 @@ The API is described by its OpenAPI document at http://localhost:3001/api/v2/ope
 ```
 all                            Run Build and launch Tests
 build                          Build go backend, Web and restic binary
-builddocker                    Build the docker image (needs auth for gitlab registry)
+builddocker                    Build the container image for this machine as $(IMAGE):$(TAG)
 buildgo                        Build the go backend in dist dir
 buildrestic                    Download restic binary in build dir
 buildweb                       Build the frontend in dist dir
 clean                          Clean build and temporary directory
 createdir                      Create the build and package dist dir if not present
+docs                           Build the documentation site in docs/.vitepress/dist
+docsdev                        Serve the documentation site with live reload on http://localhost:5173
+genapi                         Regenerate the frontend API types from internal/server/openapi.yaml
+generate                       Regenerate the sqlc queries in internal/store/db
 install                        Install the web dependancies and download restic binary
 installgo                      Install go on Windows using choco
 installweb                     Install the web dependancies in the build dir
 installwebdev                  Install the web dependancies for Development
 printvars                      Print vars for debug
-pushdocker                     Push the built docker image to gitlab registry
-rundev                         Build and run resticgui binary listening on localhost:8080
 run                            Run resticgui binary listening on localhost:8080
+rundev                         Build and run resticgui binary listening on localhost:8080
 rundevweb                      Run dev web listening on localhost:3000
-rundocker                      Run the docker container locally
+rundocker                      Run the container image locally on http://localhost:8000/ui
+smokedocker                    Smoke-test the container image: UI, API and one backup
 test                           Launch Tests for the go backend
 testgo                         Run the go Tests
+testgoci                       Run the go Tests and export coverage
+testweb                        Run the frontend checks and unit tests
 ```
 
 ### Library Doc
