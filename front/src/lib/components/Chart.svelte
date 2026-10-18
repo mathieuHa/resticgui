@@ -38,7 +38,8 @@
   const hovered = $derived(hover === null ? undefined : points[hover]);
 </script>
 
-<figure class="flex flex-col gap-2" data-testid="chart">
+<!-- items-stretch: cards centre the content of a figure -->
+<figure class="flex flex-col items-stretch gap-2" data-testid="chart">
   <figcaption class="flex items-baseline justify-between gap-2">
     <span class="text-base-content/70 text-sm">{title}</span>
     <span class="tabular text-sm font-semibold">
@@ -84,7 +85,7 @@
         {/each}
       {/if}
     </svg>
-    <div class="text-base-content/70 flex justify-between text-xs">
+    <div class="text-base-content/70 flex justify-between gap-2 text-xs">
       <time datetime={new Date(points[0]!.time).toISOString()}>{dateTime(new Date(points[0]!.time).toISOString())}</time>
       <span>max {format(max)}</span>
     </div>
