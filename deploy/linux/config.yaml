@@ -1,0 +1,23 @@
+# /etc/resticgui/config.yaml; all the settings: https://resticgui.com/reference/configuration
+server:
+  # 127.0.0.1 keeps it on this machine; 0.0.0.0 opens it to the network,
+  # set auth.password_hash first
+  ip: 127.0.0.1
+  port: 3001
+
+store:
+  path: /var/lib/resticgui/resticgui.sqlite
+  key_file: /var/lib/resticgui/resticgui.key
+  legacy_path: ""
+
+restic:
+  bin: /usr/local/bin/restic
+
+paths:
+  # the folders that may be backed up and restored into; empty allows all
+  roots: [/home, /etc, /srv]
+
+auth:
+  username: admin
+  # sudo resticgui hash-password, then paste the hash here
+  password_hash: ""

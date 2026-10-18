@@ -5,6 +5,8 @@ succeeds, or after it fails. Set them in the repository's **Settings**,
 under **Hooks**. Use them to dump a database before the backup, to stop and
 start a service, or to tell another system how it went.
 
+![Hooks in a repository's settings](../../images/ui-hooks.png){.screenshot}
+
 ## Kinds
 
 - **Webhook**: ResticGUI sends a `POST` with a JSON body to the URL. Any
@@ -52,3 +54,39 @@ as a JSON body (`event`, `repository_id`, `repository`, `job_id`, `status`,
 A webhook URL can carry a token, so ResticGUI stores it encrypted and shows
 only its host. To change it, enter a new URL; to keep it, leave the field
 empty.
+
+## Examples
+
+Dump a PostgreSQL database into a folder that the backup includes, before
+each backup:
+
+```sh
+pg_dump --format=custom --file=/srv/dumps/app.dump app
+```
+
+Stop a container for a consistent copy, and start it again whatever the
+outcome (one hook on **success**, one on **failure**):
+
+```sh
+docker stop nextcloud          # before
+docker start nextcloud         # after success, and after failure
+```
+
+Write to the system log when a backup fails:
+
+```sh
+logger -t resticgui "backup of $RESTICGUI_REPOSITORY failed: $RESTICGUI_ERROR"
+```
+
+Tell another service through a webhook, which receives:
+
+```json
+{
+  "event": "success",
+  "repository_id": 1,
+  "repository": "Photos",
+  "job_id": 42,
+  "status": "succeeded",
+  "snapshot_id": "5fe4a3b5c2e8d1f0a9b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5"
+}
+```
