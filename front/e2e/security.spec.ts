@@ -43,6 +43,8 @@ test('a hostile file name renders as text', async ({ page }) => {
   await page
     .getByTestId('snapshots')
     .locator('tbody tr')
+    // the Default plan backs up the whole data folder
+    .filter({ has: page.getByTestId('snapshot-plan').getByText('Default', { exact: true }) })
     .first()
     .getByRole('button', { name: 'Browse' })
     .click();

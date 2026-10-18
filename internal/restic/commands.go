@@ -142,7 +142,16 @@ type BackupOptions struct {
 	ExcludeLargerThan string
 	// Compression is "auto", "off" or "max"; empty keeps restic's default.
 	Compression string
-	DryRun      bool
+	// OneFileSystem does not cross into other file systems under the paths.
+	OneFileSystem bool
+	// ExcludeCaches skips folders holding a CACHEDIR.TAG file.
+	ExcludeCaches bool
+	// ExcludeIfPresent skips folders holding a file of one of these names.
+	ExcludeIfPresent []string
+	// LimitUpload and LimitDownload cap the transfer rate in KiB/s; 0 for none.
+	LimitUpload   int
+	LimitDownload int
+	DryRun        bool
 }
 
 // Backup runs a backup and calls onProgress for each status message.
@@ -181,6 +190,22 @@ func (r *Runner) Backup(ctx context.Context, repo *Repo, opts BackupOptions, onP
 	}
 	if opts.Compression != "" {
 		args = append(args, "--compression", opts.Compression)
+	}
+	if opts.OneFileSystem {
+		args = append(args, "--one-file-system")
+	}
+	if opts.ExcludeCaches {
+		args = append(args, "--exclude-caches")
+	}
+	for _, name := range opts.ExcludeIfPresent {
+		// one argument, so that a name starting with "-" stays a name
+		args = append(args, "--exclude-if-present="+name)
+	}
+	if opts.LimitUpload > 0 {
+		args = append(args, "--limit-upload", strconv.Itoa(opts.LimitUpload))
+	}
+	if opts.LimitDownload > 0 {
+		args = append(args, "--limit-download", strconv.Itoa(opts.LimitDownload))
 	}
 	if opts.DryRun {
 		args = append(args, "--dry-run")

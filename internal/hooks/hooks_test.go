@@ -13,12 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var run = Run{Event: Success, RepositoryID: 7, Repository: "Photos", JobID: 42, Status: "succeeded", SnapshotID: "f0feba17"}
+var run = Run{Event: Success, RepositoryID: 7, Repository: "Photos", Plan: "Camera", JobID: 42, Status: "succeeded", SnapshotID: "f0feba17"}
 
 func TestCommandGetsTheJobInItsEnvironment(t *testing.T) {
-	out, err := Runner{Commands: true}.Do(context.Background(), Hook{Kind: Command, Command: `echo "$RESTICGUI_EVENT $RESTICGUI_REPOSITORY $RESTICGUI_REPOSITORY_ID $RESTICGUI_JOB_ID $RESTICGUI_SNAPSHOT_ID"; echo oops >&2`}, run)
+	out, err := Runner{Commands: true}.Do(context.Background(), Hook{Kind: Command, Command: `echo "$RESTICGUI_EVENT $RESTICGUI_REPOSITORY $RESTICGUI_REPOSITORY_ID $RESTICGUI_PLAN $RESTICGUI_JOB_ID $RESTICGUI_SNAPSHOT_ID"; echo oops >&2`}, run)
 	require.NoError(t, err)
-	assert.Equal(t, []string{"success Photos 7 42 f0feba17", "oops"}, out)
+	assert.Equal(t, []string{"success Photos 7 Camera 42 f0feba17", "oops"}, out)
 }
 
 func TestCommandFailure(t *testing.T) {

@@ -90,6 +90,45 @@ func TestBackup(t *testing.T) {
 	assert.NotContains(t, inv.Args, "")
 }
 
+// each plan option, and only the ones set, reaches restic
+func TestBackupPlanOptions(t *testing.T) {
+	tests := []struct {
+		name string
+		opts BackupOptions
+		want []string
+	}{
+		{"none", BackupOptions{}, nil},
+		{"one file system", BackupOptions{OneFileSystem: true}, []string{"--one-file-system"}},
+		{"caches", BackupOptions{ExcludeCaches: true}, []string{"--exclude-caches"}},
+		{"if present", BackupOptions{ExcludeIfPresent: []string{".nobackup", "-x"}}, []string{"--exclude-if-present=.nobackup", "--exclude-if-present=-x"}},
+		{"upload", BackupOptions{LimitUpload: 512}, []string{"--limit-upload", "512"}},
+		{"download", BackupOptions{LimitDownload: 2048}, []string{"--limit-download", "2048"}},
+		{"compression", BackupOptions{Compression: "off"}, []string{"--compression", "off"}},
+	}
+	withValue := []string{"--limit-upload", "--limit-download", "--compression"}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := newFake(t, scenario{StdoutFile: "testdata/backup.jsonl"})
+			tt.opts.Paths = []string{"/x"}
+			_, err := f.runner.Backup(context.Background(), f.repo, tt.opts, nil)
+			require.NoError(t, err)
+			args := f.invocation().Args
+			// the option flags and their values, in order
+			var got []string
+			for i := 0; i < len(args); i++ {
+				switch {
+				case slices.Contains(withValue, args[i]):
+					got = append(got, args[i], args[i+1])
+					i++
+				case args[i] == "--one-file-system" || args[i] == "--exclude-caches" || strings.HasPrefix(args[i], "--exclude-if-present"):
+					got = append(got, args[i])
+				}
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestBackupDryRunAndEmptyPaths(t *testing.T) {
 	f := newFake(t, scenario{StdoutFile: "testdata/backup.jsonl"})
 	_, err := f.runner.Backup(context.Background(), f.repo, BackupOptions{Paths: []string{"/x"}, DryRun: true}, nil)

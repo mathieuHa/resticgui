@@ -24,6 +24,7 @@ class FakeSource implements EventSourceLike {
 const job = (over: Partial<Job>): Job => ({
   id: 1,
   repository_id: 7,
+  plan_id: null,
   kind: 'backup',
   trigger: 'manual',
   status: 'queued',

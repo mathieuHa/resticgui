@@ -52,7 +52,7 @@ func TestHooksRunAroundTheBackupInOrder(t *testing.T) {
 		return nil
 	}
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusSucceeded)
 	assert.Equal(t, []string{"before-1", "before-2", "success-abc123"}, readTrace(t, trace))
@@ -69,7 +69,7 @@ func TestAFailingBeforeHookStopsTheBackup(t *testing.T) {
 	e.addHook(t, repo.ID, hooks.Before, "echo never >> "+trace, 0)
 	e.addHook(t, repo.ID, hooks.Failure, `echo "failure:$RESTICGUI_ERROR" | tr ' ' _ >> `+trace, 0)
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusFailed)
 	assert.Empty(t, e.restic.Calls(), "no backup after a failed before hook")
@@ -87,7 +87,7 @@ func TestFailureHooksRunWhenTheBackupFails(t *testing.T) {
 	e.addHook(t, repo.ID, hooks.Failure, `echo "$RESTICGUI_STATUS" >> `+trace, 0)
 	e.restic.run = func(ctx context.Context, c fakeCall) error { return errors.New("repository is locked") }
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusFailed)
 	assert.Equal(t, "repository is locked", done.Error)
@@ -102,7 +102,7 @@ func TestAFailingSuccessHookKeepsTheSnapshot(t *testing.T) {
 	e.restic.backup = &restic.BackupResult{Summary: &restic.BackupSummary{SnapshotID: "abc123"}}
 
 	start := time.Now()
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusSucceeded)
 	assert.Less(t, time.Since(start), 8*time.Second, "the hook's timeout stopped it")
@@ -116,7 +116,7 @@ func TestCommandHooksNeedTheConfiguration(t *testing.T) {
 	repo := e.repository(t, "photos")
 	e.addHook(t, repo.ID, hooks.Before, "true", 0)
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusFailed)
 	assert.Contains(t, done.Error, "commands are turned off")
@@ -129,7 +129,7 @@ func TestStatsAreRefreshedAfterABackup(t *testing.T) {
 	repo := e.repository(t, "photos")
 	e.restic.stats = restic.Stats{TotalSize: 4096, SnapshotsCount: 3}
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	e.waitStatus(t, job.ID, StatusSucceeded)
 	require.Eventually(t, func() bool {

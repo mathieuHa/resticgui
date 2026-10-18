@@ -69,10 +69,28 @@ const (
 	StatusInterrupted Status = "interrupted"
 )
 
-// Tag returns the tag put on every snapshot of a repository, so that
-// retention only ever applies to snapshots resticgui made for it.
+// Tag returns the tag of the snapshots resticgui made for a repository
+// before it had plans, which its first plan kept. The snapshots of the
+// plans made later have tags starting with Tag and a colon.
 func Tag(repositoryID int64) string {
 	return fmt.Sprintf("resticgui:%d", repositoryID)
+}
+
+// OfRepository reports whether a snapshot with these tags was made by
+// resticgui for the repository, by any of its plans, also deleted ones.
+func OfRepository(repositoryID int64, tags []string) bool {
+	tag := Tag(repositoryID)
+	for _, t := range tags {
+		if t == tag || strings.HasPrefix(t, tag+":") {
+			return true
+		}
+	}
+	return false
+}
+
+// byPlan reports whether jobs of kind belong to a plan.
+func byPlan(kind Kind) bool {
+	return kind == KindBackup || kind == KindForget
 }
 
 var (
@@ -87,8 +105,13 @@ var (
 	// kind is already queued or running for the repository.
 	ErrAlreadyQueued = errors.New("jobs: a job of this kind is already queued or running")
 	ErrClosed        = errors.New("jobs: manager is closed")
-	// ErrNoRetention: a forget job ran for a repository without a policy.
-	ErrNoRetention = errors.New("jobs: the repository has no retention policy")
+	// ErrNoRetention: a forget job ran for a plan without a policy.
+	ErrNoRetention = errors.New("jobs: the plan has no retention policy")
+	// ErrPlanNotFound: the plan does not exist, or is not the repository's.
+	ErrPlanNotFound = errors.New("jobs: plan not found")
+	// ErrPlanRequired: a backup or forget of a repository with several
+	// plans, or none, does not say which plan.
+	ErrPlanRequired = errors.New("jobs: say which plan to run")
 )
 
 // Restic is the part of *restic.Runner the manager uses.
@@ -187,12 +210,46 @@ func (m *Manager) Recover(ctx context.Context) (int64, error) {
 
 // Enqueue records a job and runs it once the repository and a worker are
 // free. A scheduled job is skipped with ErrAlreadyQueued when the same kind
-// is already queued or running for the repository.
-func (m *Manager) Enqueue(ctx context.Context, repositoryID int64, kind Kind, trigger Trigger) (db.Job, error) {
+// is already queued or running for the repository, or for the plan.
+//
+// A backup or forget runs a plan: planID, or the repository's only plan
+// when planID is 0.
+func (m *Manager) Enqueue(ctx context.Context, repositoryID, planID int64, kind Kind, trigger Trigger) (db.Job, error) {
 	if kind == KindRestore {
 		return db.Job{}, fmt.Errorf("%w: a restore needs EnqueueRestore", ErrUnknownKind)
 	}
-	return m.enqueue(ctx, repositoryID, kind, trigger, "{}")
+	var plan *int64
+	if byPlan(kind) {
+		id, err := m.plan(ctx, repositoryID, planID)
+		if err != nil {
+			return db.Job{}, err
+		}
+		plan = &id
+	}
+	return m.enqueue(ctx, repositoryID, plan, kind, trigger, "{}")
+}
+
+// plan checks that planID is a plan of the repository, or finds its only
+// plan when planID is 0.
+func (m *Manager) plan(ctx context.Context, repositoryID, planID int64) (int64, error) {
+	if planID != 0 {
+		p, err := m.store.GetPlan(ctx, planID)
+		if errors.Is(err, sql.ErrNoRows) || err == nil && p.RepositoryID != repositoryID {
+			return 0, ErrPlanNotFound
+		}
+		return planID, err
+	}
+	if _, err := m.store.GetRepository(ctx, repositoryID); errors.Is(err, sql.ErrNoRows) {
+		return 0, ErrRepositoryNotFound
+	}
+	plans, err := m.store.ListPlans(ctx, repositoryID)
+	if err != nil {
+		return 0, err
+	}
+	if len(plans) != 1 {
+		return 0, fmt.Errorf("%w: the repository has %d plans", ErrPlanRequired, len(plans))
+	}
+	return plans[0].ID, nil
 }
 
 // EnqueueRestore queues a manual restore of a snapshot.
@@ -204,10 +261,10 @@ func (m *Manager) EnqueueRestore(ctx context.Context, repositoryID int64, p Rest
 	if err != nil {
 		return db.Job{}, err
 	}
-	return m.enqueue(ctx, repositoryID, KindRestore, TriggerManual, string(params))
+	return m.enqueue(ctx, repositoryID, nil, KindRestore, TriggerManual, string(params))
 }
 
-func (m *Manager) enqueue(ctx context.Context, repositoryID int64, kind Kind, trigger Trigger, params string) (db.Job, error) {
+func (m *Manager) enqueue(ctx context.Context, repositoryID int64, planID *int64, kind Kind, trigger Trigger, params string) (db.Job, error) {
 	if !kind.valid() {
 		return db.Job{}, fmt.Errorf("%w: %q", ErrUnknownKind, kind)
 	}
@@ -228,10 +285,10 @@ func (m *Manager) enqueue(ctx context.Context, repositoryID int64, kind Kind, tr
 		q = &repoQueue{}
 		m.queues[repositoryID] = q
 	}
-	if trigger == TriggerSchedule && q.has(kind) {
+	if trigger == TriggerSchedule && q.has(kind, planID) {
 		return db.Job{}, ErrAlreadyQueued
 	}
-	job, err := m.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repositoryID, Kind: string(kind), Trigger: string(trigger), Params: params})
+	job, err := m.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repositoryID, PlanID: planID, Kind: string(kind), Trigger: string(trigger), Params: params})
 	if err != nil {
 		if len(q.pending) == 0 && q.active == nil {
 			delete(m.queues, repositoryID)
@@ -252,12 +309,15 @@ func (m *Manager) Busy(repositoryID int64) bool {
 	return q != nil && (q.active != nil || len(q.pending) > 0)
 }
 
-func (q *repoQueue) has(kind Kind) bool {
-	if q.active != nil && Kind(q.active.job.Kind) == kind {
+func (q *repoQueue) has(kind Kind, planID *int64) bool {
+	same := func(j db.Job) bool {
+		return Kind(j.Kind) == kind && (planID == nil || j.PlanID != nil && *j.PlanID == *planID)
+	}
+	if q.active != nil && same(q.active.job) {
 		return true
 	}
 	for _, t := range q.pending {
-		if Kind(t.job.Kind) == kind {
+		if same(t.job) {
 			return true
 		}
 	}
@@ -482,14 +542,14 @@ func (m *Manager) finish(job db.Job, out outcome) error {
 		return err
 	}
 	m.events.Publish(Event{
-		Type: EventStatus, JobID: job.ID, RepositoryID: job.RepositoryID, Kind: Kind(job.Kind),
+		Type: EventStatus, JobID: job.ID, RepositoryID: job.RepositoryID, PlanID: job.PlanID, Kind: Kind(job.Kind),
 		Status: out.status, SnapshotID: out.snapshotID, Error: params.Error,
 	})
 	return nil
 }
 
 func (m *Manager) publish(job db.Job, typ string, status Status, p *Progress) {
-	m.events.Publish(Event{Type: typ, JobID: job.ID, RepositoryID: job.RepositoryID, Kind: Kind(job.Kind), Status: status, Progress: p})
+	m.events.Publish(Event{Type: typ, JobID: job.ID, RepositoryID: job.RepositoryID, PlanID: job.PlanID, Kind: Kind(job.Kind), Status: status, Progress: p})
 }
 
 // execute runs the restic command of a job.
@@ -511,10 +571,21 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 		if err := m.store.MarkRepositoryInitialized(context.Background(), repo.ID); err != nil {
 			return failed(err)
 		}
-	case KindBackup:
-		return m.withHooks(ctx, job, repo, func() outcome { return m.backup(ctx, job, repo, target) })
-	case KindForget:
-		return m.forget(ctx, repo, target)
+	case KindBackup, KindForget:
+		if job.PlanID == nil {
+			return failed(ErrPlanRequired)
+		}
+		plan, err := m.store.GetPlan(ctx, *job.PlanID)
+		if errors.Is(err, sql.ErrNoRows) {
+			return failed(fmt.Errorf("%w: it was deleted", ErrPlanNotFound))
+		}
+		if err != nil {
+			return failed(err)
+		}
+		if Kind(job.Kind) == KindForget {
+			return m.forget(ctx, repo, plan, target)
+		}
+		return m.withHooks(ctx, job, repo, plan, func() outcome { return m.backup(ctx, job, repo, plan, target) })
 	case KindPrune:
 		if err := m.restic.Prune(ctx, target); err != nil {
 			return failed(err)
@@ -560,23 +631,45 @@ func ResticRepo(box *secrets.Box, repo db.Repository) (*restic.Repo, error) {
 	return &restic.Repo{Location: repo.Location, Password: sec.Password, Env: env, CACert: opts.CACert, Options: opts.Extended}, nil
 }
 
-func (m *Manager) backup(ctx context.Context, job db.Job, repo db.Repository, target *restic.Repo) outcome {
-	paths, err := m.store.ListPaths(ctx, repo.ID)
+// BackupOptions is how a plan of repo runs restic backup.
+func BackupOptions(repo db.Repository, plan db.Plan, paths []db.PlanPath) (restic.BackupOptions, error) {
+	opts, err := store.DecodePlanOptions(plan.Options)
 	if err != nil {
-		return failed(err)
+		return restic.BackupOptions{}, fmt.Errorf("plan %q: decode options: %w", plan.Name, err)
 	}
-	opts := restic.BackupOptions{
-		Tags:              []string{Tag(repo.ID)},
+	tags, err := store.DecodeTags(plan.Tags)
+	if err != nil {
+		return restic.BackupOptions{}, fmt.Errorf("plan %q: decode tags: %w", plan.Name, err)
+	}
+	out := restic.BackupOptions{
+		Tags:              append([]string{plan.Tag}, tags...),
 		Host:              repo.Host,
-		ExcludeLargerThan: repo.ExcludeLargerThan,
-		Compression:       repo.Compression,
+		ExcludeLargerThan: opts.ExcludeLargerThan,
+		Compression:       opts.Compression,
+		OneFileSystem:     opts.OneFileSystem,
+		ExcludeCaches:     opts.ExcludeCaches,
+		ExcludeIfPresent:  opts.ExcludeIfPresent,
+		LimitUpload:       opts.LimitUpload,
+		LimitDownload:     opts.LimitDownload,
 	}
 	for _, p := range paths {
 		if p.Kind == "exclude" {
-			opts.Excludes = append(opts.Excludes, p.Path)
+			out.Excludes = append(out.Excludes, p.Path)
 		} else {
-			opts.Paths = append(opts.Paths, p.Path)
+			out.Paths = append(out.Paths, p.Path)
 		}
+	}
+	return out, nil
+}
+
+func (m *Manager) backup(ctx context.Context, job db.Job, repo db.Repository, plan db.Plan, target *restic.Repo) outcome {
+	paths, err := m.store.ListPlanPaths(ctx, plan.ID)
+	if err != nil {
+		return failed(err)
+	}
+	opts, err := BackupOptions(repo, plan, paths)
+	if err != nil {
+		return failed(err)
 	}
 
 	var last time.Time
@@ -619,15 +712,15 @@ type ForgetSummary struct {
 	Pruned  bool `json:"pruned"`
 }
 
-func (m *Manager) forget(ctx context.Context, repo db.Repository, target *restic.Repo) outcome {
-	ret, err := m.store.GetRetention(ctx, repo.ID)
+func (m *Manager) forget(ctx context.Context, repo db.Repository, plan db.Plan, target *restic.Repo) outcome {
+	ret, err := m.store.GetPlanRetention(ctx, plan.ID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return failed(ErrNoRetention)
 	}
 	if err != nil {
 		return failed(err)
 	}
-	opts := ForgetOptions(repo, restic.Policy{
+	opts := ForgetOptions(repo, plan, restic.Policy{
 		KeepLast: int(ret.KeepLast), KeepHourly: int(ret.KeepHourly), KeepDaily: int(ret.KeepDaily),
 		KeepWeekly: int(ret.KeepWeekly), KeepMonthly: int(ret.KeepMonthly), KeepYearly: int(ret.KeepYearly),
 		KeepWithin: ret.KeepWithin,
@@ -669,14 +762,14 @@ func (m *Manager) restore(ctx context.Context, job db.Job, target *restic.Repo) 
 	return outcome{status: StatusSucceeded, summary: summary}
 }
 
-// ForgetOptions applies policy to the snapshots resticgui made for repo,
-// grouped so that editing the backup paths does not start a new retention
-// group. The retention preview uses it too, so that it shows what a forget
-// job would do.
-func ForgetOptions(repo db.Repository, policy restic.Policy) restic.ForgetOptions {
+// ForgetOptions applies policy to the snapshots of a plan, in one group, so
+// that editing the plan's paths or tags does not start a new retention
+// group, and the other plans' snapshots are left alone. The retention
+// preview uses it too, so that it shows what a forget job would do.
+func ForgetOptions(repo db.Repository, plan db.Plan, policy restic.Policy) restic.ForgetOptions {
 	return restic.ForgetOptions{
 		Policy:  policy,
-		Filter:  restic.SnapshotFilter{Host: repo.Host, Tags: []string{Tag(repo.ID)}},
-		GroupBy: "host,tags",
+		Filter:  restic.SnapshotFilter{Host: repo.Host, Tags: []string{plan.Tag}},
+		GroupBy: "host",
 	}
 }

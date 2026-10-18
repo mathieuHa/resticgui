@@ -30,8 +30,6 @@ export type RepositoryDraft = {
   cacert: string;
   extended: string;
   host: string;
-  compression: 'auto' | 'off' | 'max';
-  exclude_larger_than: string;
 };
 
 export function newDraft(): RepositoryDraft {
@@ -46,8 +44,6 @@ export function newDraft(): RepositoryDraft {
     cacert: '',
     extended: '',
     host: '',
-    compression: 'auto',
-    exclude_larger_than: '',
   };
 }
 
@@ -65,8 +61,6 @@ export function draftOf(r: Repository): RepositoryDraft {
       .map(([k, v]) => `${k}=${v}`)
       .join('\n'),
     host: r.host,
-    compression: (['auto', 'off', 'max'].includes(r.compression) ? r.compression : 'auto') as RepositoryDraft['compression'],
-    exclude_larger_than: r.exclude_larger_than,
   };
 }
 
@@ -101,8 +95,6 @@ export function toInput(d: RepositoryDraft, backend: Backend | undefined): Repos
     cacert: d.cacert.trim(),
     extended: parseExtended(d.extended),
     host: d.host.trim(),
-    compression: d.compression,
-    exclude_larger_than: d.exclude_larger_than.trim(),
   };
   if (d.password) input.password = d.password;
   if (d.replaceSecrets) input.secrets = pick(d.secrets, backend?.secrets ?? []);

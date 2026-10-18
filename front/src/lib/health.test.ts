@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { headline, health, periodHours } from './health';
 import { parse } from './schedule';
-import { job, repository } from './testing/fixtures';
+import { job, plan, repository } from './testing/fixtures';
 
 const NOW = Date.parse('2026-10-18T12:00:00Z');
 const at = (iso: string) => ({ started_at: iso, finished_at: iso });
@@ -12,9 +12,10 @@ describe('health', () => {
     expect(health(repository(), [job({ status: 'running', finished_at: null })], NOW)).toBe('running');
   });
 
-  it('asks for setup until the repository exists and has paths', () => {
+  it('asks for setup until the repository exists and has a plan with paths', () => {
     expect(health(repository({ initialized_at: null }), [], NOW)).toBe('setup');
-    expect(health(repository({ paths: { include: [], exclude: [] } }), [], NOW)).toBe('setup');
+    expect(health(repository({ plans: [] }), [], NOW)).toBe('setup');
+    expect(health(repository({ plans: [plan({ paths: { include: [], exclude: [] } })] }), [], NOW)).toBe('setup');
   });
 
   it('is never without a good backup, failed when the last one failed', () => {
@@ -32,10 +33,27 @@ describe('health', () => {
     const daily = repository();
     expect(health(daily, [job(at('2026-10-17T00:00:00Z'))], NOW)).toBe('ok'); // 36h ago
     expect(health(daily, [job(at('2026-10-16T09:00:00Z'))], NOW)).toBe('late'); // 51h ago
-    const manual = repository({ schedules: [] });
+    const manual = repository({ plans: [plan({ schedules: [] })] });
     expect(health(manual, [job(at('2026-01-01T00:00:00Z'))], NOW)).toBe('ok');
-    const disabled = repository({ schedules: [{ job: 'backup', cron: '@hourly', enabled: false, next_run: null }] });
+    const disabled = repository({ plans: [plan({ schedules: [{ job: 'backup', cron: '@hourly', enabled: false, next_run: null }] })] });
     expect(health(disabled, [job(at('2026-10-17T00:00:00Z'))], NOW)).toBe('ok');
+  });
+
+  it('is the worst of its plans', () => {
+    const photos = plan({ id: 71, name: 'Photos', tag: 'resticgui:7:aa' });
+    const two = repository({ plans: [plan(), photos] });
+    const good = job({ id: 1, ...at('2026-10-18T02:30:00Z') });
+    // the second plan never backed up
+    expect(health(two, [good], NOW)).toBe('never');
+    const photosGood = job({ id: 2, plan_id: 71, ...at('2026-10-18T02:40:00Z') });
+    expect(health(two, [good, photosGood], NOW)).toBe('ok');
+    // a failure of one plan is not hidden by a later success of the other
+    const photosBad = job({ id: 3, plan_id: 71, status: 'failed', ...at('2026-10-18T03:00:00Z') });
+    const later = job({ id: 4, ...at('2026-10-18T04:00:00Z') });
+    expect(health(two, [good, photosGood, photosBad, later], NOW)).toBe('failed');
+    // a plan without paths waits for them without holding the others back
+    const empty = repository({ plans: [plan(), plan({ id: 72, name: 'Later', paths: { include: [], exclude: [] } })] });
+    expect(health(empty, [good], NOW)).toBe('ok');
   });
 
   it('knows the period of each preset', () => {

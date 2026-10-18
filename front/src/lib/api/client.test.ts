@@ -25,18 +25,18 @@ describe('api client', () => {
 
   it('sends JSON and reads JSON', async () => {
     const fetch = respond(200, { id: 1 });
-    await expect(api.setPaths(1, { include: ['/a'], exclude: [] })).resolves.toEqual({ id: 1 });
-    expect(fetch).toHaveBeenCalledWith('/api/v2/repositories/1/paths', {
-      method: 'PUT',
+    await expect(api.startJob(1, 'backup', 5)).resolves.toEqual({ id: 1 });
+    expect(fetch).toHaveBeenCalledWith('/api/v2/repositories/1/jobs', {
+      method: 'POST',
       credentials: 'same-origin',
-      body: '{"include":["/a"],"exclude":[]}',
+      body: '{"kind":"backup","plan_id":5}',
       headers: { 'Content-Type': 'application/json' },
     });
   });
 
   it('turns an error response into an ApiError with its details', async () => {
     respond(400, { error: 'invalid request', details: ['name is required', 'location is required'] });
-    const err = await api.createRepository({ name: '', backend: 'local', location: '', compression: 'auto' }).catch((e) => e);
+    const err = await api.createRepository({ name: '', backend: 'local', location: '' }).catch((e) => e);
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(400);
     expect(err.lines).toEqual(['invalid request', 'name is required', 'location is required']);

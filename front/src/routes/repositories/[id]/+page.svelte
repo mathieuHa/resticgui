@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
-  import { api, type Repository, type Snapshot, type Stats } from '#lib/api/client.ts';
+  import { api, type Plan, type Repository, type Snapshot, type Stats } from '#lib/api/client.ts';
   import { attempt, jobs, notify } from '#lib/app.svelte.ts';
   import BackendIcon from '#lib/components/BackendIcon.svelte';
   import Chart from '#lib/components/Chart.svelte';
@@ -17,6 +17,7 @@
   import { bytes, dateTime, duration, relative } from '#lib/format.ts';
   import { health } from '#lib/health.ts';
   import { KIND_LABELS } from '#lib/jobtext.ts';
+  import { planOfSnapshot, ready } from '#lib/plan.ts';
   import { BACKEND_LABELS } from '#lib/repository.ts';
   import { describeRetention } from '#lib/retention.ts';
   import { describe, parse } from '#lib/schedule.ts';
@@ -123,14 +124,19 @@
   const lastGood = $derived(list.find((j) => j.kind === 'backup' && j.status === 'succeeded'));
   const status = $derived(repo ? health(repo, list) : 'ok');
   const points = $derived(backupPoints(list, 30));
+  const plans = $derived(repo ? ready(repo) : []);
+  const several = $derived((repo?.plans.length ?? 0) > 1);
+  const check = $derived(repo?.schedules.find((s) => s.job === 'check'));
 
   function href(t: Tab) {
     return resolve('/repositories/[id]', { id: String(id) }) + (t === 'overview' ? '' : `?tab=${t}`);
   }
 
-  async function start(kind: 'backup' | 'check' | 'forget' | 'prune' | 'unlock' | 'init') {
+  // backups and retention run for one plan, or for each of plans
+  async function start(kind: 'backup' | 'check' | 'forget' | 'prune' | 'unlock' | 'init', of: Plan[] = []) {
     await attempt(async () => {
-      jobs.add([await api.startJob(id, kind)]);
+      if (of.length) for (const p of of) jobs.add([await api.startJob(id, kind, p.id)]);
+      else jobs.add([await api.startJob(id, kind)]);
       notify(`${KIND_LABELS[kind]} started`, 'info', 3000);
     }, `Could not start: ${KIND_LABELS[kind]}`);
   }
@@ -145,11 +151,12 @@
     }
   }
 
-  // the snapshot before s, of the same paths when there is one; snapshots are newest first
+  // the snapshot before s, of the same plan and paths when there is one; snapshots are newest first
   function older(s: Snapshot): Snapshot | undefined {
     const before = (snapshots ?? []).filter((x) => Date.parse(x.time) < Date.parse(s.time));
     const key = (x: Snapshot) => [...x.paths].sort().join('\n');
-    return before.find((x) => key(x) === key(s)) ?? before[0];
+    const plan = (x: Snapshot) => (repo ? planOfSnapshot(repo, x.tags)?.id : undefined);
+    return before.find((x) => key(x) === key(s) && plan(x) === plan(s)) ?? before.find((x) => key(x) === key(s)) ?? before[0];
   }
 
   async function removed() {
@@ -182,15 +189,29 @@
       <p class="text-base-content/70 truncate text-sm">{BACKEND_LABELS[repo.backend] ?? repo.backend} · <span class="font-mono">{repo.location}</span></p>
     </div>
     <div class="flex flex-wrap gap-2">
-      <button class="btn btn-primary btn-sm" onclick={() => start('backup')} disabled={!!active || repo.paths.include.length === 0}>
-        <Play class="size-4" aria-hidden="true" />Back up now
-      </button>
+      {#if plans.length > 1}
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-primary btn-sm {active ? 'btn-disabled' : ''}" aria-disabled={!!active}>
+            <Play class="size-4" aria-hidden="true" />Back up now<ChevronDown class="size-4" aria-hidden="true" />
+          </div>
+          <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-10 w-56 border p-2 shadow-lg" data-testid="backup-menu">
+            <li><button onclick={() => start('backup', plans)}>All plans</button></li>
+            {#each plans as p (p.id)}<li><button onclick={() => start('backup', [p])}>{p.name}</button></li>{/each}
+          </ul>
+        </div>
+      {:else}
+        <button class="btn btn-primary btn-sm" onclick={() => start('backup', plans)} disabled={!!active || plans.length === 0}>
+          <Play class="size-4" aria-hidden="true" />Back up now
+        </button>
+      {/if}
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-sm">More<ChevronDown class="size-4" aria-hidden="true" /></div>
         <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-10 w-56 border p-2 shadow-lg">
           {#if !repo.initialized_at}<li><button onclick={() => start('init')}>Create in restic (init)</button></li>{/if}
           <li><button onclick={() => start('check')}>Check integrity</button></li>
-          {#if repo.retention}<li><button onclick={() => start('forget')}>Apply retention now</button></li>{/if}
+          {#each repo.plans.filter((p) => p.retention) as p (p.id)}
+            <li><button onclick={() => start('forget', [p])}>Apply retention now{several ? ` (${p.name})` : ''}</button></li>
+          {/each}
           <li><button onclick={() => start('prune')}>Prune unused data</button></li>
           <li><button onclick={() => start('unlock')}>Remove stale locks</button></li>
         </ul>
@@ -219,17 +240,28 @@
             {#if lastGood}Last backup <time datetime={lastGood.finished_at} title={dateTime(lastGood.finished_at)}>{relative(lastGood.finished_at)}</time>{:else}No backup yet{/if}
           </p>
           {#if points.length}<StatusStrip {points} slots={30} />{/if}
-          <ul class="text-base-content/80 flex flex-col gap-1 text-sm">
-            {#each ['backup', 'forget', 'check'] as const as job (job)}
-              {@const s = repo.schedules.find((x) => x.job === job)}
-              <li class="flex justify-between gap-2">
-                <span>{KIND_LABELS[job]}: {s?.enabled ? describe(parse(s.cron)) : 'by hand only'}</span>
-                {#if s?.next_run}<span class="text-base-content/70 whitespace-nowrap">next <time datetime={s.next_run}>{relative(s.next_run)}</time></span>{/if}
-              </li>
-            {/each}
-          </ul>
-          <p class="text-base-content/80 text-sm">{describeRetention(repo.retention)}</p>
-          <p class="text-base-content/80 text-sm">Backs up <span class="font-mono">{repo.paths.include.join(', ') || 'nothing yet'}</span></p>
+          {#each repo.plans as p (p.id)}
+            <div class="border-base-300 flex flex-col gap-1 border-t pt-2 text-sm" data-testid="plan-summary">
+              {#if several}<h3 class="font-medium">{p.name}</h3>{/if}
+              <p class="text-base-content/80">Backs up <span class="font-mono">{p.paths.include.join(', ') || 'nothing yet'}</span></p>
+              <ul class="text-base-content/80 flex flex-col gap-1">
+                {#each ['backup', 'forget'] as const as job (job)}
+                  {@const s = p.schedules.find((x) => x.job === job)}
+                  <li class="flex justify-between gap-2">
+                    <span>{KIND_LABELS[job]}: {s?.enabled ? describe(parse(s.cron)) : 'by hand only'}</span>
+                    {#if s?.next_run}<span class="text-base-content/70 whitespace-nowrap">next <time datetime={s.next_run}>{relative(s.next_run)}</time></span>{/if}
+                  </li>
+                {/each}
+              </ul>
+              <p class="text-base-content/80">{describeRetention(p.retention)}</p>
+            </div>
+          {:else}
+            <p class="text-base-content/80 text-sm">Nothing to back up yet: add a plan in Settings.</p>
+          {/each}
+          <p class="text-base-content/80 border-base-300 flex justify-between gap-2 border-t pt-2 text-sm">
+            <span>{KIND_LABELS.check}: {check?.enabled ? describe(parse(check.cron)) : 'by hand only'}</span>
+            {#if check?.next_run}<span class="text-base-content/70 whitespace-nowrap">next <time datetime={check.next_run}>{relative(check.next_run)}</time></span>{/if}
+          </p>
         </div>
       </section>
       <section class="card bg-base-100 border-base-300 border shadow-sm">
@@ -278,12 +310,13 @@
           {:else}
             <div class="overflow-x-auto">
               <table class="table-sm table" data-testid="snapshots">
-                <thead><tr><th>Snapshot</th><th>Time</th><th>Host</th><th>Paths</th><th>Added</th><th></th></tr></thead>
+                <thead><tr><th>Snapshot</th><th>Time</th>{#if several}<th>Plan</th>{/if}<th>Host</th><th>Paths</th><th>Added</th><th></th></tr></thead>
                 <tbody>
                   {#each snapshots as s (s.id)}
                     <tr class="hover:bg-base-200">
                       <td><span class="badge badge-ghost font-mono">{s.short_id}</span></td>
                       <td class="whitespace-nowrap"><time datetime={s.time}>{dateTime(s.time)}</time></td>
+                      {#if several}<td data-testid="snapshot-plan">{planOfSnapshot(repo, s.tags)?.name ?? ''}</td>{/if}
                       <td>{s.hostname}</td>
                       <td class="max-w-xs truncate font-mono text-xs" title={s.paths.join('\n')}>{s.paths.join(', ')}</td>
                       <td class="tabular whitespace-nowrap">{bytes((s.summary as { data_added?: number } | undefined)?.data_added)}</td>
@@ -306,7 +339,7 @@
       </div>
     </div>
   {:else if tab === 'runs'}
-    <div class="card bg-base-100 border-base-300 animate-rise border shadow-sm"><div class="card-body"><Timeline repositoryId={id} /></div></div>
+    <div class="card bg-base-100 border-base-300 animate-rise border shadow-sm"><div class="card-body"><Timeline repositoryId={id} plans={repo.plans} /></div></div>
   {:else}
     {#key repo.updated_at}
       <Settings {repo} onsaved={(r) => (repo = r)} onremoved={removed} />

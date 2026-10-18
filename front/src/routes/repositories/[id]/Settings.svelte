@@ -1,16 +1,16 @@
 <script lang="ts">
   import { untrack } from 'svelte';
 
-  import { api, type Backend, type Repository, type Retention, type ScheduledJob } from '#lib/api/client.ts';
+  import { api, type Backend, type Repository } from '#lib/api/client.ts';
   import { attempt, jobs, notify } from '#lib/app.svelte.ts';
   import Modal from '#lib/components/Modal.svelte';
-  import PathsEditor from '#lib/components/PathsEditor.svelte';
   import RepositoryForm from '#lib/components/RepositoryForm.svelte';
-  import RetentionEditor from '#lib/components/RetentionEditor.svelte';
   import ScheduleEditor from '#lib/components/ScheduleEditor.svelte';
   import Monitoring from './Monitoring.svelte';
+  import PlanSettings from './PlanSettings.svelte';
   import { draftOf, problems, toInput } from '#lib/repository.ts';
-  import { isEmpty, normalize, suggested } from '#lib/retention.ts';
+
+  import Plus from '@lucide/svelte/icons/plus';
 
   let { repo, onsaved, onremoved }: { repo: Repository; onsaved: (r: Repository) => void; onremoved: () => void } = $props();
 
@@ -18,18 +18,9 @@
   const initial = untrack(() => repo);
   let backends = $state<Backend[]>([]);
   let draft = $state(draftOf(initial));
-  let paths = $state($state.snapshot(initial.paths));
-  const cronOf = (job: ScheduledJob) => {
-    const s = initial.schedules.find((x) => x.job === job);
-    return s?.enabled ? s.cron : null;
-  };
-  let schedules: Record<ScheduledJob, string | null> = $state({
-    backup: cronOf('backup'),
-    forget: cronOf('forget'),
-    check: cronOf('check'),
-  });
-  let retentionOn = $state(!!initial.retention);
-  let retention: Retention = $state(initial.retention ? { ...initial.retention } : suggested());
+  const check = initial.schedules.find((x) => x.job === 'check');
+  let checkCron = $state(check?.enabled ? check.cron : null);
+  let adding = $state(false);
   let confirmDelete = $state(false);
   let errors = $state<string[]>([]);
 
@@ -47,38 +38,12 @@
     }, 'Could not save the storage settings');
   }
 
-  async function savePaths() {
+  async function saveCheck() {
     await attempt(async () => {
-      onsaved(await api.setPaths(repo.id, $state.snapshot(paths)));
-      notify('Paths saved');
-    }, 'Could not save the paths');
-  }
-
-  async function saveSchedules() {
-    await attempt(async () => {
-      let latest = repo;
-      for (const job of ['backup', 'forget', 'check'] as const) {
-        const cron = schedules[job];
-        const had = repo.schedules.some((s) => s.job === job);
-        if (cron) latest = await api.setSchedule(repo.id, job, cron);
-        else if (had) latest = await api.deleteSchedule(repo.id, job);
-      }
-      onsaved(latest);
-      notify('Schedules saved');
-    }, 'Could not save the schedules');
-  }
-
-  async function saveRetention() {
-    if (retentionOn && isEmpty(retention)) {
-      errors = ['Set at least one retention rule, or turn retention off'];
-      return;
-    }
-    errors = [];
-    await attempt(async () => {
-      if (retentionOn) onsaved(await api.setRetention(repo.id, normalize($state.snapshot(retention))));
-      else if (repo.retention) onsaved(await api.deleteRetention(repo.id));
-      notify('Retention saved');
-    }, 'Could not save the retention policy');
+      if (checkCron) onsaved(await api.setCheckSchedule(repo.id, checkCron));
+      else if (repo.schedules.some((s) => s.job === 'check')) onsaved(await api.deleteCheckSchedule(repo.id));
+      notify('Integrity check saved');
+    }, 'Could not save the integrity check');
   }
 
   async function remove() {
@@ -103,34 +68,31 @@
     </div>
   </section>
 
-  <section class="card bg-base-100 border-base-300 border shadow-sm">
-    <div class="card-body">
-      <h2 class="card-title text-base">What to back up</h2>
-      <PathsEditor bind:value={paths} />
-      <div class="card-actions justify-end"><button class="btn btn-primary btn-sm" onclick={savePaths}>Save paths</button></div>
+  <div class="flex flex-col gap-3" data-testid="plans">
+    <div class="flex flex-wrap items-end justify-between gap-2">
+      <div>
+        <h2 class="text-lg font-semibold">Backup plans</h2>
+        <p class="text-base-content/70 text-sm">Each plan backs up its own folders on its own schedule, all into this repository, where identical data is stored once. Times are in the server's time zone.</p>
+      </div>
+      {#if !adding}
+        <button class="btn btn-sm" onclick={() => (adding = true)}><Plus class="size-4" aria-hidden="true" />Add a plan</button>
+      {/if}
     </div>
-  </section>
+    {#each repo.plans as plan (plan.id)}
+      <PlanSettings {repo} {plan} {busy} {onsaved} />
+    {/each}
+    {#if adding}
+      <PlanSettings {repo} onsaved={(r) => { adding = false; onsaved(r); }} oncancel={() => (adding = false)} />
+    {:else if !repo.plans.length}
+      <p class="text-base-content/70 text-sm">No plan yet: add one to choose what to back up.</p>
+    {/if}
+  </div>
 
   <section class="card bg-base-100 border-base-300 border shadow-sm">
     <div class="card-body">
-      <h2 class="card-title text-base">Schedules</h2>
-      <p class="text-xs text-base-content/70">Times are in the server's time zone.</p>
-      <ScheduleEditor label="Back up automatically" bind:value={schedules.backup} />
-      <ScheduleEditor label="Apply the retention policy automatically" bind:value={schedules.forget} />
-      <ScheduleEditor label="Check the repository's integrity" bind:value={schedules.check} />
-      <div class="card-actions justify-end"><button class="btn btn-primary btn-sm" onclick={saveSchedules}>Save schedules</button></div>
-    </div>
-  </section>
-
-  <section class="card bg-base-100 border-base-300 border shadow-sm">
-    <div class="card-body">
-      <h2 class="card-title text-base">Retention</h2>
-      <label class="label cursor-pointer gap-3">
-        <input type="checkbox" class="toggle toggle-sm" bind:checked={retentionOn} />
-        <span class="text-base-content">Remove old snapshots</span>
-      </label>
-      {#if retentionOn}<RetentionEditor bind:value={retention} repositoryId={repo.id} />{/if}
-      <div class="card-actions justify-end"><button class="btn btn-primary btn-sm" onclick={saveRetention}>Save retention</button></div>
+      <h2 class="card-title text-base">Integrity check</h2>
+      <ScheduleEditor label="Check the repository's integrity" bind:value={checkCron} />
+      <div class="card-actions justify-end"><button class="btn btn-primary btn-sm" onclick={saveCheck}>Save check</button></div>
     </div>
   </section>
 

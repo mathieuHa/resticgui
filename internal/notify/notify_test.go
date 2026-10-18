@@ -126,10 +126,30 @@ func (e *env) repository(t *testing.T, name string) db.Repository {
 	sealed, err := store.SealSecrets(e.box, store.RepositorySecrets{Password: "pw"})
 	require.NoError(t, err)
 	r, err := e.store.CreateRepository(context.Background(), db.CreateRepositoryParams{
-		Name: name, Backend: "local", Location: "/srv/" + name, Options: "{}", Secrets: sealed, Compression: "auto",
+		Name: name, Backend: "local", Location: "/srv/" + name, Options: "{}", Secrets: sealed,
 	})
 	require.NoError(t, err)
+	e.plan(t, r.ID, "Default")
 	return r
+}
+
+func (e *env) plan(t *testing.T, repositoryID int64, name string) db.Plan {
+	t.Helper()
+	var plan db.Plan
+	require.NoError(t, e.store.InTx(context.Background(), func(q *db.Queries) error {
+		var err error
+		plan, err = store.SavePlan(context.Background(), q, repositoryID, 0, store.Plan{Name: name, Include: []string{"/data"}})
+		return err
+	}))
+	return plan
+}
+
+// firstPlan is the plan made with the repository.
+func (e *env) firstPlan(t *testing.T, repositoryID int64) db.Plan {
+	t.Helper()
+	plans, err := e.store.ListPlans(context.Background(), repositoryID)
+	require.NoError(t, err)
+	return plans[0]
 }
 
 func (e *env) notifier(t *testing.T, name, rawURL string, failure, success, missed, enabled bool) {
@@ -145,7 +165,12 @@ func (e *env) notifier(t *testing.T, name, rawURL string, failure, success, miss
 func (e *env) finishedJob(t *testing.T, repoID int64, kind jobs.Kind, status jobs.Status, summary, errText string) db.Job {
 	t.Helper()
 	ctx := context.Background()
-	job, err := e.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repoID, Kind: string(kind), Trigger: "schedule", Params: "{}"})
+	var plan *int64
+	if kind == jobs.KindBackup || kind == jobs.KindForget {
+		id := e.firstPlan(t, repoID).ID
+		plan = &id
+	}
+	job, err := e.store.CreateJob(ctx, db.CreateJobParams{RepositoryID: repoID, PlanID: plan, Kind: string(kind), Trigger: "schedule", Params: "{}"})
 	require.NoError(t, err)
 	_, err = e.store.FinishJob(ctx, db.FinishJobParams{ID: job.ID, Status: string(status), Summary: summary, Error: errText})
 	require.NoError(t, err)
@@ -216,8 +241,7 @@ func TestMissedBackupsAreReportedOnce(t *testing.T) {
 	e := newEnv(t)
 	repo := e.repository(t, "Photos")
 	e.notifier(t, "phone", "ntfy://ntfy.sh/phone", true, false, true, true)
-	_, err := e.store.UpsertSchedule(ctx, db.UpsertScheduleParams{RepositoryID: repo.ID, Job: "backup", Cron: "30 2 * * *", Enabled: true})
-	require.NoError(t, err)
+	require.NoError(t, e.store.UpsertPlanSchedule(ctx, db.UpsertPlanScheduleParams{PlanID: e.firstPlan(t, repo.ID).ID, Job: "backup", Cron: "30 2 * * *", Enabled: true}))
 
 	// on time: nothing is due yet
 	e.svc.Now = func() time.Time { return repo.CreatedAt.Add(time.Minute) }
@@ -244,8 +268,7 @@ func TestAFailedRunIsNotAlsoMissed(t *testing.T) {
 	e := newEnv(t)
 	repo := e.repository(t, "Photos")
 	e.notifier(t, "phone", "ntfy://ntfy.sh/phone", true, false, true, true)
-	_, err := e.store.UpsertSchedule(ctx, db.UpsertScheduleParams{RepositoryID: repo.ID, Job: "backup", Cron: "@every 1h", Enabled: true})
-	require.NoError(t, err)
+	require.NoError(t, e.store.UpsertPlanSchedule(ctx, db.UpsertPlanScheduleParams{PlanID: e.firstPlan(t, repo.ID).ID, Job: "backup", Cron: "@every 1h", Enabled: true}))
 	job := e.finishedJob(t, repo.ID, jobs.KindBackup, jobs.StatusFailed, "{}", "locked")
 
 	// the failure was already reported; within the hour after it, nothing is missed
@@ -255,6 +278,33 @@ func TestAFailedRunIsNotAlsoMissed(t *testing.T) {
 	e.svc.Now = func() time.Time { return job.FinishedAt.Add(3 * time.Hour) }
 	e.svc.CheckMissed(ctx)
 	assert.Len(t, *e.sent, 1)
+}
+
+// With several plans, messages say which plan, and each plan's schedule is
+// watched on its own.
+func TestPlansAreNamedOnceThereAreSeveral(t *testing.T) {
+	ctx := context.Background()
+	e := newEnv(t)
+	repo := e.repository(t, "Home")
+	e.notifier(t, "phone", "ntfy://ntfy.sh/phone", true, false, true, true)
+	first := e.firstPlan(t, repo.ID)
+	videos := e.plan(t, repo.ID, "Videos")
+	for _, p := range []db.Plan{first, videos} {
+		require.NoError(t, e.store.UpsertPlanSchedule(ctx, db.UpsertPlanScheduleParams{PlanID: p.ID, Job: "backup", Cron: "@every 1h", Enabled: true}))
+	}
+	job := e.finishedJob(t, repo.ID, jobs.KindBackup, jobs.StatusFailed, "{}", "locked")
+	e.svc.Handle(ctx, jobs.Event{Type: jobs.EventStatus, JobID: job.ID, RepositoryID: repo.ID, Kind: jobs.KindBackup, Status: jobs.StatusFailed})
+	require.Len(t, *e.sent, 1)
+	assert.Contains(t, (*e.sent)[0], "❌ Backup of Home (Default) failed")
+
+	// later, the first plan backed up again, so only the other one is late
+	later := job.FinishedAt.Add(3 * time.Hour)
+	_, err := e.store.DB.ExecContext(ctx, `UPDATE jobs SET finished_at = ? WHERE id = ?`, later, job.ID)
+	require.NoError(t, err)
+	e.svc.Now = func() time.Time { return later.Add(time.Minute) }
+	e.svc.CheckMissed(ctx)
+	require.Len(t, *e.sent, 2)
+	assert.Contains(t, (*e.sent)[1], "⏰ Backup of Home (Videos) did not run")
 }
 
 func TestMissed(t *testing.T) {

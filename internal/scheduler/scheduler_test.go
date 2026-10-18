@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mathieuHa/resticgui/internal/jobs"
+	"github.com/mathieuHa/resticgui/internal/store"
 	"github.com/mathieuHa/resticgui/internal/store/db"
 )
 
@@ -69,16 +70,16 @@ func (c *fakeClock) waitAfters(t *testing.T, n int) {
 
 type source struct {
 	mu        sync.Mutex
-	schedules []db.Schedule
+	schedules []store.Schedule
 }
 
-func (s *source) ListEnabledSchedules(context.Context) ([]db.Schedule, error) {
+func (s *source) EnabledSchedules(context.Context) ([]store.Schedule, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return append([]db.Schedule(nil), s.schedules...), nil
+	return append([]store.Schedule(nil), s.schedules...), nil
 }
 
-func (s *source) set(schedules ...db.Schedule) {
+func (s *source) set(schedules ...store.Schedule) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.schedules = schedules
@@ -86,6 +87,7 @@ func (s *source) set(schedules ...db.Schedule) {
 
 type enqueued struct {
 	RepositoryID int64
+	PlanID       int64
 	Kind         jobs.Kind
 	Trigger      jobs.Trigger
 }
@@ -95,8 +97,8 @@ type enqueuer struct {
 	err   error
 }
 
-func (e *enqueuer) Enqueue(_ context.Context, repositoryID int64, kind jobs.Kind, trigger jobs.Trigger) (db.Job, error) {
-	e.calls <- enqueued{repositoryID, kind, trigger}
+func (e *enqueuer) Enqueue(_ context.Context, repositoryID, planID int64, kind jobs.Kind, trigger jobs.Trigger) (db.Job, error) {
+	e.calls <- enqueued{repositoryID, planID, kind, trigger}
 	return db.Job{ID: 1}, e.err
 }
 
@@ -129,7 +131,7 @@ type harness struct {
 	cancel context.CancelFunc
 }
 
-func start(t *testing.T, enqErr error, schedules ...db.Schedule) *harness {
+func start(t *testing.T, enqErr error, schedules ...store.Schedule) *harness {
 	t.Helper()
 	h := &harness{
 		clock:  &fakeClock{now: time.Date(2026, 10, 18, 2, 30, 0, 0, time.UTC)},
@@ -155,8 +157,8 @@ func start(t *testing.T, enqErr error, schedules ...db.Schedule) *harness {
 
 func TestFiresWhenDue(t *testing.T) {
 	h := start(t, nil,
-		db.Schedule{RepositoryID: 1, Job: "backup", Cron: "0 3 * * *", Enabled: true},
-		db.Schedule{RepositoryID: 2, Job: "check", Cron: "@every 1h", Enabled: true},
+		store.Schedule{RepositoryID: 1, Job: "backup", Cron: "0 3 * * *"},
+		store.Schedule{RepositoryID: 2, Job: "check", Cron: "@every 1h"},
 	)
 	h.clock.waitAfters(t, 1)
 
@@ -165,68 +167,68 @@ func TestFiresWhenDue(t *testing.T) {
 	h.enq.none(t)
 
 	h.clock.Advance(time.Minute) // 03:00
-	assert.Equal(t, enqueued{1, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{1, 0, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
 	h.clock.waitAfters(t, 2)
 	h.enq.none(t)
 
 	h.clock.Advance(30 * time.Minute) // 03:30
-	assert.Equal(t, enqueued{2, jobs.KindCheck, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{2, 0, jobs.KindCheck, jobs.TriggerSchedule}, h.enq.next(t))
 	h.clock.waitAfters(t, 3)
 
 	h.clock.Advance(time.Hour) // 04:30: check again, backup only tomorrow
-	assert.Equal(t, enqueued{2, jobs.KindCheck, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{2, 0, jobs.KindCheck, jobs.TriggerSchedule}, h.enq.next(t))
 	h.clock.waitAfters(t, 4)
 	h.enq.none(t)
 
 	h.clock.Advance(22*time.Hour + 30*time.Minute) // 03:00 the next day
-	assert.Equal(t, enqueued{1, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{1, 0, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
 }
 
 func TestSchedulesDueTogether(t *testing.T) {
 	h := start(t, nil,
-		db.Schedule{RepositoryID: 1, Job: "backup", Cron: "0 3 * * *", Enabled: true},
-		db.Schedule{RepositoryID: 1, Job: "forget", Cron: "0 3 * * *", Enabled: true},
+		store.Schedule{RepositoryID: 1, Job: "backup", Cron: "0 3 * * *"},
+		store.Schedule{RepositoryID: 1, Job: "forget", Cron: "0 3 * * *"},
 	)
 	h.clock.waitAfters(t, 1)
 	h.clock.Advance(30 * time.Minute)
 	got := []enqueued{h.enq.next(t), h.enq.next(t)}
 	assert.ElementsMatch(t, []enqueued{
-		{1, jobs.KindBackup, jobs.TriggerSchedule},
-		{1, jobs.KindForget, jobs.TriggerSchedule},
+		{1, 0, jobs.KindBackup, jobs.TriggerSchedule},
+		{1, 0, jobs.KindForget, jobs.TriggerSchedule},
 	}, got)
 }
 
 func TestInvalidScheduleIsSkipped(t *testing.T) {
 	h := start(t, nil,
-		db.Schedule{RepositoryID: 1, Job: "backup", Cron: "not a cron", Enabled: true},
-		db.Schedule{RepositoryID: 2, Job: "backup", Cron: "0 3 * * *", Enabled: true},
+		store.Schedule{RepositoryID: 1, Job: "backup", Cron: "not a cron"},
+		store.Schedule{RepositoryID: 2, Job: "backup", Cron: "0 3 * * *"},
 	)
 	h.clock.waitAfters(t, 1)
 	h.clock.Advance(30 * time.Minute)
-	assert.Equal(t, enqueued{2, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{2, 0, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
 	h.clock.waitAfters(t, 2)
 	h.enq.none(t)
 }
 
 func TestReload(t *testing.T) {
-	yearly := db.Schedule{RepositoryID: 9, Job: "check", Cron: "0 0 1 1 *", Enabled: true}
+	yearly := store.Schedule{RepositoryID: 9, Job: "check", Cron: "0 0 1 1 *"}
 	h := start(t, nil, yearly)
 	h.clock.waitAfters(t, 1)
 
 	// a schedule added later fires without a restart
-	h.source.set(yearly, db.Schedule{RepositoryID: 3, Job: "forget", Cron: "45 3 * * *", Enabled: true})
+	h.source.set(yearly, store.Schedule{RepositoryID: 3, Job: "forget", Cron: "45 3 * * *"})
 	h.sched.Reload()
 	h.clock.waitAfters(t, 2)
 	h.clock.Advance(75 * time.Minute) // 03:45
-	assert.Equal(t, enqueued{3, jobs.KindForget, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{3, 0, jobs.KindForget, jobs.TriggerSchedule}, h.enq.next(t))
 	h.clock.waitAfters(t, 3)
 
 	// a replaced schedule stops firing
-	h.source.set(yearly, db.Schedule{RepositoryID: 4, Job: "check", Cron: "0 12 * * *", Enabled: true})
+	h.source.set(yearly, store.Schedule{RepositoryID: 4, Job: "check", Cron: "0 12 * * *"})
 	h.sched.Reload()
 	h.clock.waitAfters(t, 4)
 	h.clock.Advance(24 * time.Hour) // past 12:00 and past 03:45 the next day
-	assert.Equal(t, enqueued{4, jobs.KindCheck, jobs.TriggerSchedule}, h.enq.next(t))
+	assert.Equal(t, enqueued{4, 0, jobs.KindCheck, jobs.TriggerSchedule}, h.enq.next(t))
 	h.clock.waitAfters(t, 5)
 	h.enq.none(t)
 }
@@ -239,7 +241,7 @@ func TestNoSchedules(t *testing.T) {
 }
 
 func TestKeepsRunningWhenAJobIsSkipped(t *testing.T) {
-	h := start(t, jobs.ErrAlreadyQueued, db.Schedule{RepositoryID: 1, Job: "backup", Cron: "@every 1h", Enabled: true})
+	h := start(t, jobs.ErrAlreadyQueued, store.Schedule{RepositoryID: 1, Job: "backup", Cron: "@every 1h"})
 	for i := 1; i <= 3; i++ {
 		h.clock.waitAfters(t, i)
 		h.clock.Advance(time.Hour)
@@ -256,4 +258,25 @@ func TestParse(t *testing.T) {
 		_, err := Parse(spec)
 		assert.Error(t, err, spec)
 	}
+}
+
+func TestTwoPlansOfOneRepositoryFireOnTheirOwn(t *testing.T) {
+	h := start(t, nil,
+		store.Schedule{RepositoryID: 1, PlanID: 10, Job: "backup", Cron: "0 3 * * *"},
+		store.Schedule{RepositoryID: 1, PlanID: 11, Job: "backup", Cron: "0 * * * *"},
+		store.Schedule{RepositoryID: 1, PlanID: 11, Job: "forget", Cron: "0 3 * * *"},
+	)
+	h.clock.waitAfters(t, 1)
+	h.clock.Advance(30 * time.Minute) // 03:00
+	got := []enqueued{h.enq.next(t), h.enq.next(t), h.enq.next(t)}
+	assert.ElementsMatch(t, []enqueued{
+		{1, 10, jobs.KindBackup, jobs.TriggerSchedule},
+		{1, 11, jobs.KindBackup, jobs.TriggerSchedule},
+		{1, 11, jobs.KindForget, jobs.TriggerSchedule},
+	}, got)
+	h.clock.waitAfters(t, 2)
+	h.clock.Advance(time.Hour) // 04:00: only the hourly plan
+	assert.Equal(t, enqueued{1, 11, jobs.KindBackup, jobs.TriggerSchedule}, h.enq.next(t))
+	h.clock.waitAfters(t, 3)
+	h.enq.none(t)
 }

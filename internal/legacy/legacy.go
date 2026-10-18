@@ -122,16 +122,18 @@ func importRepository(ctx context.Context, src *sql.DB, q *db.Queries, box *secr
 	// restic init failed, so the new code checks the repository itself.
 	created, err := q.CreateRepository(ctx, db.CreateRepositoryParams{
 		Name: r.name, Backend: backend.kind, Location: backend.location, Options: options,
-		Secrets: sealed, Compression: "auto", ExcludeLargerThan: r.maxSize,
+		Secrets: sealed,
 	})
 	if err != nil {
 		return "", err
 	}
 
-	if err := importPaths(ctx, src, q, r.id, created.ID); err != nil {
+	// v0.1 had one set of paths per repository: it becomes one plan
+	plan := store.Plan{Name: "Default", Options: store.PlanOptions{Compression: "auto", ExcludeLargerThan: r.maxSize}}
+	if plan.Include, plan.Exclude, err = importPaths(ctx, src, r.id); err != nil {
 		return "", err
 	}
-	if err := importRetention(ctx, src, q, r.id, created.ID); err != nil {
+	if plan.Retention, err = importRetention(ctx, src, r.id); err != nil {
 		return "", err
 	}
 	schedules := []struct {
@@ -154,13 +156,10 @@ func importRepository(ctx context.Context, src *sql.DB, q *db.Queries, box *secr
 			report.Warnings = append(report.Warnings, fmt.Sprintf("%s: %s schedule not imported: %v", r.name, s.job, spec.err))
 			continue
 		}
-		if _, err := q.UpsertSchedule(ctx, db.UpsertScheduleParams{
-			RepositoryID: created.ID, Job: s.job, Cron: spec.cron, Enabled: s.enabled,
-		}); err != nil {
-			return "", err
-		}
+		plan.Schedules = append(plan.Schedules, db.PlanSchedule{Job: s.job, Cron: spec.cron, Enabled: s.enabled})
 	}
-	return "", nil
+	_, err = store.SavePlan(ctx, q, created.ID, 0, plan)
+	return "", err
 }
 
 type backend struct {
@@ -235,10 +234,10 @@ func readBackend(ctx context.Context, src *sql.DB, r legacyRepository) (*backend
 	return nil, fmt.Errorf("unknown provider %q", r.provider)
 }
 
-func importPaths(ctx context.Context, src *sql.DB, q *db.Queries, legacyID, newID int64) error {
+func importPaths(ctx context.Context, src *sql.DB, legacyID int64) (include, exclude []string, err error) {
 	rows, err := src.QueryContext(ctx, "SELECT abs_path, rel_path, included FROM `paths` WHERE repository_paths = ? ORDER BY id", legacyID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	defer rows.Close()
 	seen := map[string]bool{}
@@ -246,7 +245,7 @@ func importPaths(ctx context.Context, src *sql.DB, q *db.Queries, legacyID, newI
 		var absPath, relPath string
 		var included bool
 		if err := rows.Scan(&absPath, &relPath, &included); err != nil {
-			return err
+			return nil, nil, err
 		}
 		// v0.1 passed rel_path to restic (abs_path was only displayed)
 		path := relPath
@@ -261,28 +260,29 @@ func importPaths(ctx context.Context, src *sql.DB, q *db.Queries, legacyID, newI
 			continue
 		}
 		seen[kind+path] = true
-		if _, err := q.AddPath(ctx, db.AddPathParams{RepositoryID: newID, Path: path, Kind: kind}); err != nil {
-			return err
+		if included {
+			include = append(include, path)
+		} else {
+			exclude = append(exclude, path)
 		}
 	}
-	return rows.Err()
+	return include, exclude, rows.Err()
 }
 
-func importRetention(ctx context.Context, src *sql.DB, q *db.Queries, legacyID, newID int64) error {
-	var p db.UpsertRetentionParams
+func importRetention(ctx context.Context, src *sql.DB, legacyID int64) (*db.PlanRetention, error) {
+	var p db.PlanRetention
 	err := src.QueryRowContext(ctx,
 		"SELECT nb_keep_last, nb_keep_hours, nb_keep_days, nb_keep_weeks, nb_keep_months FROM `BackupPolicy` WHERE repository_backup_policy = ?", legacyID).
 		Scan(&p.KeepLast, &p.KeepHourly, &p.KeepDaily, &p.KeepWeekly, &p.KeepMonthly)
 	if err == sql.ErrNoRows {
-		return nil
+		return nil, nil
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// keep_all was stored but never used by v0.1, so it is not carried over.
-	p.RepositoryID, p.Prune = newID, true
-	_, err = q.UpsertRetention(ctx, p)
-	return err
+	p.Prune = true
+	return &p, nil
 }
 
 type scheduleSpec struct {

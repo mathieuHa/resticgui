@@ -10,6 +10,7 @@ import JobProgress from './JobProgress.svelte';
 const job: Job = {
   id: 42,
   repository_id: 1,
+  plan_id: 1,
   kind: 'backup',
   trigger: 'schedule',
   status: 'running',
