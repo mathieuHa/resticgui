@@ -1,0 +1,547 @@
+openapi: 3.1.0
+info:
+  title: ResticGUI API
+  version: "2.0"
+  description: |
+    Configure restic repositories, run backups and other jobs, follow their
+    progress and browse or restore snapshots.
+
+    When a password is configured, every endpoint except /auth/* and
+    /openapi.yaml needs the session cookie set by POST /auth/login.
+    Secrets (the repository password and secret variables) can be written
+    but are never returned.
+servers:
+  - url: /api/v2
+security:
+  - session: []
+
+paths:
+  /openapi.yaml:
+    get:
+      summary: This document
+      security: []
+      responses:
+        "200": { description: The OpenAPI document, content: { application/yaml: {} } }
+
+  /auth/login:
+    post:
+      summary: Log in and receive the session cookie
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string, format: password }
+      responses:
+        "204": { description: Logged in; the session cookie is set }
+        "401": { $ref: "#/components/responses/Error" }
+  /auth/logout:
+    post:
+      summary: Clear the session cookie
+      security: []
+      responses:
+        "204": { description: Logged out }
+  /auth/session:
+    get:
+      summary: Whether a login is required and whether this client has one
+      security: []
+      responses:
+        "200":
+          description: Session state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_enabled: { type: boolean }
+                  authenticated: { type: boolean }
+                  username: { type: string }
+
+  /backends:
+    get:
+      summary: Supported backends and the variables each reads
+      responses:
+        "200":
+          description: Backends
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Backend" } }
+
+  /fs:
+    get:
+      summary: List a local directory inside the allowed roots
+      description: Without a path, lists the allowed roots.
+      parameters:
+        - { name: path, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Entries, directories first
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Entry" } }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories:
+    get:
+      summary: List repositories
+      responses:
+        "200":
+          description: Repositories
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Repository" } }
+    post:
+      summary: Create a repository
+      description: This records the repository; run an init job to create it in restic when it is new.
+      requestBody: { $ref: "#/components/requestBodies/RepositoryInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      summary: Get a repository
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "404": { $ref: "#/components/responses/Error" }
+    put:
+      summary: Replace a repository's settings
+      description: An empty password keeps the current one; omitting secrets keeps them.
+      requestBody: { $ref: "#/components/requestBodies/RepositoryInput" }
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Forget a repository in resticgui
+      description: The restic repository and its snapshots are left untouched.
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/paths:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    put:
+      summary: Replace the backup paths and exclude patterns
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Paths" }
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/retention:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    put:
+      summary: Set the retention policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Retention" }
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Remove the retention policy
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/schedules/{job}:
+    parameters:
+      - { $ref: "#/components/parameters/id" }
+      - { name: job, in: path, required: true, schema: { type: string, enum: [backup, forget, check] } }
+    put:
+      summary: Set when a job runs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cron]
+              properties:
+                cron: { type: string, description: 'Five cron fields or a descriptor such as "@daily" or "@every 6h"', example: "30 2 * * *" }
+                enabled: { type: boolean, default: true }
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Remove a schedule
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/jobs:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      summary: Start a job now
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: { type: string, enum: [init, backup, forget, prune, check, unlock] }
+      responses:
+        "202": { $ref: "#/components/responses/Job" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/backup:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      summary: Back up now
+      responses:
+        "202": { $ref: "#/components/responses/Job" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/stats:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      summary: Repository or snapshot statistics
+      parameters:
+        - { name: mode, in: query, schema: { type: string, enum: [restore-size, files-by-contents, raw-data, blobs-per-file], default: restore-size } }
+        - { name: snapshot, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Statistics
+          content: { application/json: { schema: { $ref: "#/components/schemas/Stats" } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/snapshots:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      summary: List snapshots, oldest first
+      parameters:
+        - { name: all, in: query, description: Also snapshots made outside resticgui, schema: { type: boolean } }
+      responses:
+        "200":
+          description: Snapshots
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Snapshot" } }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/snapshots/{snapshot}:
+    parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
+    delete:
+      summary: Forget one snapshot
+      parameters:
+        - { name: prune, in: query, schema: { type: boolean } }
+      responses:
+        "204": { description: Forgotten }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/snapshots/{snapshot}/files:
+    parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
+    get:
+      summary: List a directory of a snapshot
+      parameters:
+        - { name: path, in: query, schema: { type: string, default: / } }
+      responses:
+        "200":
+          description: Entries
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Node" } }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/snapshots/{snapshot}/find:
+    parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
+    get:
+      summary: Find files by name in a snapshot
+      parameters:
+        - { name: pattern, in: query, required: true, schema: { type: string, example: "*.jpg" } }
+      responses:
+        "200":
+          description: Matches
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/FindMatch" } }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/snapshots/{snapshot}/download:
+    parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
+    get:
+      summary: Download a file, or a directory as an archive
+      parameters:
+        - { name: path, in: query, schema: { type: string, default: / } }
+        - { name: archive, in: query, schema: { type: string, enum: [zip, tar, none], default: zip } }
+      responses:
+        "200": { description: The file or archive, content: { application/octet-stream: {} } }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/snapshots/{snapshot}/restore:
+    parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
+    post:
+      summary: Restore a snapshot, as a job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target]
+              properties:
+                target: { type: string, description: A local directory inside the allowed roots }
+                include: { type: array, items: { type: string }, description: Paths inside the snapshot to restore; all when empty }
+      responses:
+        "202": { $ref: "#/components/responses/Job" }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /jobs:
+    get:
+      summary: Jobs of a repository, newest first
+      parameters:
+        - { name: repository, in: query, required: true, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 50 } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Job" } }
+        "400": { $ref: "#/components/responses/Error" }
+  /jobs/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      summary: Get a job
+      responses:
+        "200": { $ref: "#/components/responses/Job" }
+        "404": { $ref: "#/components/responses/Error" }
+  /jobs/{id}/cancel:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      summary: Cancel a queued or running job
+      responses:
+        "202": { description: Cancelling; the job ends as cancelled }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /events:
+    get:
+      summary: Server-Sent Events for job status and progress
+      description: |
+        Event "job" carries a status change, event "progress" the progress of a
+        running backup or restore. Both have an Event as data. A client too slow
+        to keep up is disconnected and should reload the jobs it shows.
+      responses:
+        "200":
+          description: The event stream
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/Event" }
+
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: resticgui_session
+
+  parameters:
+    id: { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+    snapshot:
+      name: snapshot
+      in: path
+      required: true
+      description: A snapshot ID (8 to 64 hex characters) or "latest"
+      schema: { type: string, pattern: "^([0-9a-f]{8,64}|latest)$" }
+
+  requestBodies:
+    RepositoryInput:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/RepositoryInput" }
+
+  responses:
+    Error:
+      description: An error
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error: { type: string }
+              details: { type: array, items: { type: string }, description: One line per validation problem }
+    Repository:
+      description: The repository
+      content: { application/json: { schema: { $ref: "#/components/schemas/Repository" } } }
+    Job:
+      description: The job
+      content: { application/json: { schema: { $ref: "#/components/schemas/Job" } } }
+
+  schemas:
+    Backend:
+      type: object
+      properties:
+        name: { type: string, enum: [azure, b2, gs, local, rclone, rest, s3, sftp] }
+        prefix: { type: string, example: "s3:" }
+        example: { type: string }
+        env: { type: array, items: { type: string } }
+        secrets: { type: array, items: { type: string } }
+        required: { type: array, items: { type: string } }
+    RepositoryInput:
+      type: object
+      required: [name, backend, location]
+      properties:
+        name: { type: string }
+        backend: { type: string, enum: [azure, b2, gs, local, rclone, rest, s3, sftp] }
+        location: { type: string, example: "s3:https://s3.eu-west-3.amazonaws.com/bucket/photos" }
+        password: { type: string, format: password, writeOnly: true, description: Required on create }
+        env: { type: object, additionalProperties: { type: string } }
+        secrets: { type: object, additionalProperties: { type: string }, writeOnly: true }
+        cacert: { type: string }
+        extended: { type: object, additionalProperties: { type: string }, description: 'restic -o options, such as s3.storage-class' }
+        host: { type: string }
+        compression: { type: string, enum: [auto, off, max], default: auto }
+        exclude_larger_than: { type: string, example: 2G }
+    Repository:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        backend: { type: string }
+        location: { type: string }
+        env: { type: object, additionalProperties: { type: string } }
+        secrets: { type: array, items: { type: string }, description: Names of the secret variables that are set }
+        has_password: { type: boolean }
+        cacert: { type: string }
+        extended: { type: object, additionalProperties: { type: string } }
+        host: { type: string }
+        compression: { type: string }
+        exclude_larger_than: { type: string }
+        initialized_at: { type: [string, "null"], format: date-time }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        paths: { $ref: "#/components/schemas/Paths" }
+        retention: { oneOf: [{ $ref: "#/components/schemas/Retention" }, { type: "null" }] }
+        schedules:
+          type: array
+          items:
+            type: object
+            properties:
+              job: { type: string, enum: [backup, forget, check] }
+              cron: { type: string }
+              enabled: { type: boolean }
+    Paths:
+      type: object
+      properties:
+        include: { type: array, items: { type: string }, description: Absolute paths inside the allowed roots }
+        exclude: { type: array, items: { type: string }, description: restic exclude patterns }
+    Retention:
+      type: object
+      properties:
+        keep_last: { type: integer, minimum: 0 }
+        keep_hourly: { type: integer, minimum: 0 }
+        keep_daily: { type: integer, minimum: 0 }
+        keep_weekly: { type: integer, minimum: 0 }
+        keep_monthly: { type: integer, minimum: 0 }
+        keep_yearly: { type: integer, minimum: 0 }
+        keep_within: { type: string, example: 1y6m }
+        prune: { type: boolean }
+    Job:
+      type: object
+      properties:
+        id: { type: integer }
+        repository_id: { type: integer }
+        kind: { type: string, enum: [init, backup, forget, prune, check, unlock, restore] }
+        trigger: { type: string, enum: [manual, schedule] }
+        status: { type: string, enum: [queued, running, succeeded, failed, cancelled, interrupted] }
+        created_at: { type: string, format: date-time }
+        started_at: { type: [string, "null"], format: date-time }
+        finished_at: { type: [string, "null"], format: date-time }
+        snapshot_id: { type: string }
+        summary: { type: object, description: restic's summary for the kind of job }
+        error: { type: string }
+        exit_code: { type: integer }
+        log_excerpt: { type: string, description: Last lines restic wrote to stderr }
+        params: { type: object, description: 'For a restore: snapshot_id, target, include' }
+    Event:
+      type: object
+      properties:
+        job_id: { type: integer }
+        repository_id: { type: integer }
+        kind: { type: string }
+        status: { type: string }
+        snapshot_id: { type: string }
+        error: { type: string }
+        progress:
+          type: object
+          properties:
+            percent_done: { type: number }
+            files_done: { type: integer }
+            total_files: { type: integer }
+            bytes_done: { type: integer }
+            total_bytes: { type: integer }
+            seconds_remaining: { type: integer }
+            current_files: { type: array, items: { type: string } }
+    Entry:
+      type: object
+      properties:
+        name: { type: string }
+        path: { type: string }
+        dir: { type: boolean }
+        size: { type: integer }
+        mtime: { type: string, format: date-time }
+    Snapshot:
+      type: object
+      properties:
+        id: { type: string }
+        short_id: { type: string }
+        time: { type: string, format: date-time }
+        paths: { type: array, items: { type: string } }
+        hostname: { type: string }
+        tags: { type: array, items: { type: string } }
+        summary: { type: object }
+    Node:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [file, dir, symlink] }
+        path: { type: string }
+        size: { type: integer }
+        mtime: { type: string, format: date-time }
+        permissions: { type: string }
+    FindMatch:
+      type: object
+      properties:
+        path: { type: string }
+        type: { type: string }
+        size: { type: integer }
+        permissions: { type: string }
+        mtime: { type: string, format: date-time }
+        user: { type: string }
+        group: { type: string }
+    Stats:
+      type: object
+      properties:
+        total_size: { type: integer }
+        total_uncompressed_size: { type: integer }
+        compression_ratio: { type: number }
+        total_file_count: { type: integer }
+        snapshots_count: { type: integer }

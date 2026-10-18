@@ -5,6 +5,7 @@ package server
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"errors"
 	"io"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/mathieuHa/resticgui/internal/auth"
 	"github.com/mathieuHa/resticgui/internal/jobs"
 	"github.com/mathieuHa/resticgui/internal/restic"
 	"github.com/mathieuHa/resticgui/internal/secrets"
@@ -48,10 +50,23 @@ type Server struct {
 	// Roots limits backup paths, local repositories, restore targets and
 	// the folder browser; empty allows the whole filesystem.
 	Roots Roots
+	// Auth guards every route but its own and the OpenAPI document; nil
+	// leaves the API open.
+	Auth *auth.Auth
 }
 
+//go:embed openapi.yaml
+var openAPI []byte
+
 // Register adds the routes under r, which is usually router.Group(BasePath).
-func (s *Server) Register(r gin.IRouter) {
+func (s *Server) Register(public gin.IRouter) {
+	public.GET("/openapi.yaml", func(c *gin.Context) { c.Data(http.StatusOK, "application/yaml", openAPI) })
+	r := public
+	if s.Auth != nil {
+		s.Auth.Register(public)
+		r = public.Group("", s.Auth.Require())
+	}
+
 	r.GET("/backends", s.listBackends)
 
 	r.GET("/repositories", s.listRepositories)
