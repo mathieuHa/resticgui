@@ -80,54 +80,39 @@ The `config.yaml` must be place in the same directory as the resticgui binary.
 
 ### Variables
 
-- `logs.debug` 
-  - bool
-  - default: false
-  - enable the debug logs (overrides `logs.level`)
-- `logs.level`
-  - int
-  - default: 1, zerolog levels: 0 debug, 1 info, 2 warn, 3 error
-- `db.name`
-  - string
-  - default: `resticgui.db`
-  - name of the resticgui sqlite database
-- `server.ip`
-  - string
-  - default: `127.0.0.1`
-  - IP listening for the web server
-- `server.port`
-  - string
-  - default: `3001`
-  - tcp port for the web server
-- `server.disable`
-  - bool
-  - default: `false`
-  - disable web server
-- `front.path`
-  - string
-  - default: `./build`
-  - path of the webserver static files
+- `logs.debug` (bool, default `false`): enable the debug logs (overrides `logs.level`)
+- `logs.level` (int, default `1`): zerolog levels, 0 debug, 1 info, 2 warn, 3 error
+- `server.ip` (default `127.0.0.1`) and `server.port` (default `3001`): where the web server listens
+- `store.path` (default `resticgui.sqlite`): the SQLite database, created on the first start
+- `store.key_file` (default `resticgui.key`): the key that encrypts repository passwords and credentials, created if missing; `$RESTICGUI_SECRET_KEY` takes precedence. Keep a copy: without it the stored passwords cannot be read.
+- `store.legacy_path` (default `resticgui.db`): a ResticGUI v0.1 database, imported once when `store.path` does not exist yet. The import can also be run by hand with `resticgui migrate-legacy -from resticgui.db -to resticgui.sqlite`.
+- `restic.bin` (default `restic`): the restic binary
+- `jobs.workers` (default `2`): how many restic commands may run at once
+- `jobs.schedule` (default `true`): run the scheduled backups, forget/prune and checks
+- `paths.roots` (default empty, meaning everything): directories that may be backed up, restored into and browsed
+- `auth.username` and `auth.password_hash`: the login. Make the hash with `resticgui hash-password` (it reads the password on stdin). With no hash the API needs no login, so only do that on a trusted network.
 
 ### Example
 ```yaml
-# configuration
 logs:
   debug: false
   level: 1
 
-db:
-  name: resticgui.db
-
 server:
   ip: "127.0.0.1"
   port: 3001
-  disable: false
 
-front:
-  path: ./build
+store:
+  path: resticgui.sqlite
+  key_file: resticgui.key
+
+paths:
+  roots: [/home/myuser]
+
+auth:
+  username: admin
+  password_hash: "$2a$10$..."
 ```
-
-When the backups have been configured and the webserver is not needed to be exposed even in localhost, you can turn off the server with `server.disable: true`. Restart ResticGui and backup will happen in the background while the webserver is not exposed.
 
 
 ### Demo environment
@@ -205,7 +190,7 @@ choco install go mingw make
 ```
 #### Documentation
 
-http://localhost:8000/swagger/index.html
+The API is described by its OpenAPI document at http://localhost:3001/api/v2/openapi.yaml
 
 ### Makefile help
 

@@ -7,6 +7,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -234,6 +235,8 @@ func (s *Server) download(c *gin.Context) {
 	} else {
 		archive = ""
 	}
+	// a large download takes longer than the server's write timeout
+	_ = http.NewResponseController(c.Writer).SetWriteDeadline(time.Time{})
 	w := &lazyWriter{c: c, filename: name}
 	err := s.Restic.Dump(c.Request.Context(), target, snapshot, p, archive, w)
 	if err == nil && !w.started {
