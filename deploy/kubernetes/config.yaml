@@ -1,5 +1,5 @@
 # ResticGUI's settings, mounted at /opt/config.yaml.
-# All of them: https://resticgui.com/reference/configuration
+# All of them: https://docs.resticgui.com/reference/configuration
 server:
   ip: 0.0.0.0
   port: 3030

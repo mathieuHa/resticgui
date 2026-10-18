@@ -1,4 +1,4 @@
-# /etc/resticgui/config.yaml; all the settings: https://resticgui.com/reference/configuration
+# /etc/resticgui/config.yaml; all the settings: https://docs.resticgui.com/reference/configuration
 server:
   # 127.0.0.1 keeps it on this machine; 0.0.0.0 opens it to the network,
   # set auth.password_hash first

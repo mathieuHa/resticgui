@@ -1,6 +1,6 @@
 name: Docs
 
-# Builds the documentation site at https://resticgui.com, checks its links,
+# Builds the documentation site at https://docs.resticgui.com, checks its links,
 # and follows each quick start to a first backup. main deploys the site to
 # GitHub Pages.
 on:

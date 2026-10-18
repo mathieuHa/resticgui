@@ -8,7 +8,7 @@ export default defineConfig({
   lang: 'en',
   cleanUrls: true,
   lastUpdated: true,
-  sitemap: { hostname: 'https://resticgui.com' },
+  sitemap: { hostname: 'https://docs.resticgui.com' },
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
     ['meta', { property: 'og:title', content: 'ResticGUI' }],

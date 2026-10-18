@@ -35,7 +35,7 @@
     {
       "title": "ResticGUI metrics",
       "type": "link",
-      "url": "https://resticgui.com/features/metrics",
+      "url": "https://docs.resticgui.com/features/metrics",
       "targetBlank": true,
       "icon": "doc"
     }
