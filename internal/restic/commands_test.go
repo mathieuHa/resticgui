@@ -253,6 +253,31 @@ func TestStats(t *testing.T) {
 	assert.Equal(t, []string{"stats", "--json", "--mode", "raw-data", "--", "latest"}, f.invocation().Args[:6])
 }
 
+func TestDiff(t *testing.T) {
+	// recorded from restic 0.19.1: a removed file, a changed one and a new folder
+	f := newFake(t, scenario{StdoutFile: "testdata/diff.jsonl"})
+	d, err := f.runner.Diff(context.Background(), f.repo, "1135e1d8", "f7108643")
+	require.NoError(t, err)
+	assert.Equal(t, []DiffChange{
+		{Path: "/dtest/d/a", Modifier: "-"},
+		{Path: "/dtest/d/b", Modifier: "M"},
+		{Path: "/dtest/d/new/", Modifier: "+"},
+		{Path: "/dtest/d/new/c", Modifier: "+"},
+	}, d.Changes)
+	assert.Equal(t, 1, d.Stats.ChangedFiles)
+	assert.Equal(t, DiffCount{Files: 1, Dirs: 1, Bytes: 1751}, d.Stats.Added)
+	assert.Equal(t, 1, d.Stats.Removed.Files)
+	assert.Equal(t, []string{"diff", "--json", "--", "1135e1d8", "f7108643"}, f.invocation().Args[:5])
+}
+
+func TestDiffNothingChanged(t *testing.T) {
+	f := newFake(t, scenario{Stdout: []string{`{"message_type":"statistics","source_snapshot":"a","target_snapshot":"b","changed_files":0,"added":{},"removed":{}}`}})
+	d, err := f.runner.Diff(context.Background(), f.repo, "a", "b")
+	require.NoError(t, err)
+	assert.Empty(t, d.Changes)
+	assert.NotNil(t, d.Changes, "an empty list, not null, in JSON")
+}
+
 func TestDump(t *testing.T) {
 	f := newFake(t, scenario{Stdout: []string{"file content"}})
 	var out bytes.Buffer

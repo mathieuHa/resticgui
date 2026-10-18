@@ -88,6 +88,65 @@ paths:
             application/json:
               schema: { type: array, items: { $ref: "#/components/schemas/Backend" } }
 
+  /settings:
+    get:
+      summary: Optional features the configuration turns on
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [hook_commands, metrics]
+                properties:
+                  hook_commands: { type: boolean, description: Command hooks are allowed (hooks.commands) }
+                  metrics: { type: boolean, description: Prometheus metrics are served at /metrics (metrics.enabled) }
+
+  /notifiers:
+    get:
+      summary: List the notifiers
+      description: Notifiers alert about every repository. Their URLs are never returned.
+      responses:
+        "200":
+          description: Notifiers
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Notifier" } }
+    post:
+      summary: Add a notifier
+      requestBody: { $ref: "#/components/requestBodies/NotifierInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Notifier" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /notifiers/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    put:
+      summary: Change a notifier
+      description: An empty url keeps the current one.
+      requestBody: { $ref: "#/components/requestBodies/NotifierInput" }
+      responses:
+        "200": { $ref: "#/components/responses/Notifier" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Remove a notifier
+      responses:
+        "204": { description: Removed }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /notifiers/{id}/test:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      summary: Send a test message
+      responses:
+        "204": { description: Sent }
+        "404": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+
   /fs:
     get:
       summary: List a local directory inside the allowed roots
@@ -118,6 +177,26 @@ paths:
       requestBody: { $ref: "#/components/requestBodies/RepositoryInput" }
       responses:
         "201": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/probe:
+    post:
+      summary: Look at a repository location before adding it
+      description: Says whether a restic repository exists there and opens with the password, and lists its newest snapshot. Nothing is saved.
+      requestBody: { $ref: "#/components/requestBodies/RepositoryInput" }
+      responses:
+        "200":
+          description: What is there
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [exists, snapshots, latest]
+                properties:
+                  exists: { type: boolean }
+                  snapshots: { type: integer, description: Every snapshot, also those made outside ResticGUI }
+                  latest: { oneOf: [{ $ref: "#/components/schemas/Snapshot" }, { type: "null" }] }
         "400": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
 
@@ -236,6 +315,44 @@ paths:
         "200": { $ref: "#/components/responses/Repository" }
         "404": { $ref: "#/components/responses/Error" }
 
+  /repositories/{id}/healthcheck:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    put:
+      summary: Ping a Healthchecks check on every backup
+      description: The URL is pinged with /start, then itself or /fail. It is never returned, only its host.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, format: uri, writeOnly: true, example: "https://hc-ping.com/your-uuid" }
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Stop pinging Healthchecks
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+
+  /repositories/{id}/hooks:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    put:
+      summary: Replace the hooks run around backups
+      description: Hooks of one event run in the order given. A webhook sent back with its id and no url keeps its URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: array, items: { $ref: "#/components/schemas/HookInput" } }
+      responses:
+        "200": { $ref: "#/components/responses/Repository" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
   /repositories/{id}/jobs:
     parameters: [{ $ref: "#/components/parameters/id" }]
     post:
@@ -340,6 +457,21 @@ paths:
         "200": { description: The file or archive, content: { application/octet-stream: {} } }
         "400": { $ref: "#/components/responses/Error" }
 
+  /repositories/{id}/snapshots/{snapshot}/diff:
+    parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
+    get:
+      summary: What changed from this snapshot to another
+      parameters:
+        - { name: to, in: query, required: true, schema: { type: string, pattern: "^([0-9a-f]{8,64}|latest)$" } }
+      responses:
+        "200":
+          description: The changes
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Diff" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
   /repositories/{id}/snapshots/{snapshot}/restore:
     parameters: [{ $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/snapshot" }]
     post:
@@ -425,6 +557,21 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/RepositoryInput" }
 
+    NotifierInput:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name]
+            properties:
+              name: { type: string }
+              url: { type: string, writeOnly: true, description: 'A Shoutrrr URL, required on create; empty keeps it', example: "ntfy://ntfy.sh/my-backups" }
+              on_failure: { type: boolean }
+              on_success: { type: boolean }
+              on_missed: { type: boolean }
+              enabled: { type: boolean }
+
   responses:
     Error:
       description: An error
@@ -442,6 +589,9 @@ components:
     Job:
       description: The job
       content: { application/json: { schema: { $ref: "#/components/schemas/Job" } } }
+    Notifier:
+      description: The notifier
+      content: { application/json: { schema: { $ref: "#/components/schemas/Notifier" } } }
 
   schemas:
     Backend:
@@ -471,7 +621,7 @@ components:
         exclude_larger_than: { type: string, example: 2G }
     Repository:
       type: object
-      required: [id, name, backend, location, env, secrets, has_password, extended, host, compression, exclude_larger_than, initialized_at, created_at, updated_at, paths, retention, schedules]
+      required: [id, name, backend, location, env, secrets, has_password, extended, host, compression, exclude_larger_than, initialized_at, created_at, updated_at, paths, retention, schedules, healthcheck, hooks]
       properties:
         id: { type: integer }
         name: { type: string }
@@ -494,11 +644,81 @@ components:
           type: array
           items:
             type: object
-            required: [job, cron, enabled]
+            required: [job, cron, enabled, next_run]
             properties:
               job: { type: string, enum: [backup, forget, check] }
               cron: { type: string }
               enabled: { type: boolean }
+              next_run: { type: [string, "null"], format: date-time, description: When it runs next; null when disabled }
+        healthcheck:
+          description: The Healthchecks check pinged by backups; null when unset
+          oneOf:
+            - type: object
+              required: [host]
+              properties:
+                host: { type: string }
+            - type: "null"
+        hooks: { type: array, items: { $ref: "#/components/schemas/Hook" }, description: Run around backups, before hooks first }
+    Hook:
+      type: object
+      required: [id, event, kind, command, host, timeout_seconds]
+      properties:
+        id: { type: integer }
+        event: { type: string, enum: [before, success, failure] }
+        kind: { type: string, enum: [command, webhook] }
+        command: { type: string, description: The shell command; empty for a webhook }
+        host: { type: string, description: The webhook's host, as its URL is not returned; empty for a command }
+        timeout_seconds: { type: integer }
+    HookInput:
+      type: object
+      required: [event, kind]
+      properties:
+        id: { type: integer, description: An existing webhook whose URL to keep when url is empty }
+        event: { type: string, enum: [before, success, failure] }
+        kind: { type: string, enum: [command, webhook] }
+        command: { type: string }
+        url: { type: string, writeOnly: true }
+        timeout_seconds: { type: integer, minimum: 1, maximum: 86400, default: 300 }
+    Notifier:
+      type: object
+      required: [id, name, service, on_failure, on_success, on_missed, enabled, created_at]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        service: { type: string, description: The URL scheme, such as ntfy or discord }
+        on_failure: { type: boolean }
+        on_success: { type: boolean }
+        on_missed: { type: boolean, description: A scheduled backup more than an hour late }
+        enabled: { type: boolean }
+        created_at: { type: string, format: date-time }
+    Diff:
+      type: object
+      required: [changes, stats]
+      properties:
+        changes:
+          type: array
+          items:
+            type: object
+            required: [path, modifier]
+            properties:
+              path: { type: string, description: Directories end with / }
+              modifier: { type: string, enum: ["+", "-", M, T, U], description: 'Added, removed, content changed, type changed, metadata changed' }
+        stats:
+          type: object
+          required: [changed_files, added, removed]
+          properties:
+            source_snapshot: { type: string }
+            target_snapshot: { type: string }
+            changed_files: { type: integer }
+            added: { $ref: "#/components/schemas/DiffCount" }
+            removed: { $ref: "#/components/schemas/DiffCount" }
+    DiffCount:
+      type: object
+      required: [files, dirs, bytes]
+      properties:
+        files: { type: integer }
+        dirs: { type: integer }
+        bytes: { type: integer }
     Paths:
       type: object
       required: [include, exclude]

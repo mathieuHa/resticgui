@@ -23,7 +23,7 @@ jobs:
       - name: Generated queries are up to date
         run: sqlc diff -f internal/store/sqlc.yaml
       - name: Test
-        run: go test -race ./internal/... -coverprofile=coverage.out
+        run: go test -race ./cmd/... ./internal/... -coverprofile=coverage.out
       - name: Coverage
         run: go tool cover -func=coverage.out | tail -1
       - name: Release scripts
@@ -54,7 +54,6 @@ jobs:
     env:
       RESTIC_VERSION: "0.19.1"
       RESTIC_BIN: ${{ github.workspace }}/bin/restic
-      RESTICGUI_BIN: ${{ github.workspace }}/bin/resticgui
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -70,22 +69,20 @@ jobs:
           mkdir -p bin
           curl -fsSL "https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_amd64.bz2" | bunzip2 > bin/restic
           chmod +x bin/restic
-      - name: Build the binary with the web UI
-        run: |
-          cd front && npm ci && npm run build && cd ..
-          cp -r front/build/. internal/webui/ui/
-          CGO_ENABLED=0 go build -o bin/resticgui ./cmd/resticgui
-      - name: Install Chromium
+      - name: Install the web dependencies
         working-directory: front
-        run: npx playwright install --with-deps chromium
+        run: npm ci
+      # in the Playwright container, so that the screenshots match the
+      # committed ones; make e2edocker ARGS=--update-snapshots refreshes them
       - name: End-to-end tests
-        working-directory: front
-        run: npx playwright test
+        run: make e2edocker RESTIC_BIN="$RESTIC_BIN"
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
-          path: front/playwright-report
+          path: |
+            front/playwright-report
+            front/test-results
           retention-days: 7
 
   integration:

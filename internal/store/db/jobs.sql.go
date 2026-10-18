@@ -111,6 +111,56 @@ func (q *Queries) GetJob(ctx context.Context, id int64) (Job, error) {
 	return i, err
 }
 
+const lastJobs = `-- name: LastJobs :many
+SELECT j.id, j.repository_id, j.kind, j."trigger", j.status, j.created_at, j.started_at, j.finished_at, j.snapshot_id, j.summary, j.error, j.exit_code, j.log_excerpt, j.params FROM jobs j
+WHERE j.id IN (
+    SELECT max(id) FROM jobs WHERE status NOT IN ('queued', 'running') GROUP BY repository_id, kind
+    UNION
+    SELECT max(id) FROM jobs WHERE status = 'succeeded' GROUP BY repository_id, kind
+)
+ORDER BY j.repository_id, j.kind, j.id
+`
+
+// the latest finished job of each kind for each repository, and the latest
+// successful one, for the metrics endpoint and missed-backup alerts
+func (q *Queries) LastJobs(ctx context.Context) ([]Job, error) {
+	rows, err := q.db.QueryContext(ctx, lastJobs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Job{}
+	for rows.Next() {
+		var i Job
+		if err := rows.Scan(
+			&i.ID,
+			&i.RepositoryID,
+			&i.Kind,
+			&i.Trigger,
+			&i.Status,
+			&i.CreatedAt,
+			&i.StartedAt,
+			&i.FinishedAt,
+			&i.SnapshotID,
+			&i.Summary,
+			&i.Error,
+			&i.ExitCode,
+			&i.LogExcerpt,
+			&i.Params,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listJobsForRepository = `-- name: ListJobsForRepository :many
 SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params FROM jobs WHERE repository_id = ? ORDER BY id DESC LIMIT ? OFFSET ?
 `

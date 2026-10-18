@@ -16,6 +16,7 @@ import (
 
 	"github.com/mathieuHa/resticgui/internal/auth"
 	"github.com/mathieuHa/resticgui/internal/jobs"
+	"github.com/mathieuHa/resticgui/internal/notify"
 	"github.com/mathieuHa/resticgui/internal/restic"
 	"github.com/mathieuHa/resticgui/internal/secrets"
 	"github.com/mathieuHa/resticgui/internal/store"
@@ -34,6 +35,8 @@ type Restic interface {
 	Forget(ctx context.Context, repo *restic.Repo, opts restic.ForgetOptions) ([]restic.ForgetGroup, error)
 	ForgetSnapshots(ctx context.Context, repo *restic.Repo, ids []string, prune bool) error
 	Dump(ctx context.Context, repo *restic.Repo, snapshotID, path, archive string, w io.Writer) error
+	Diff(ctx context.Context, repo *restic.Repo, from, to string) (*restic.Diff, error)
+	Exists(ctx context.Context, repo *restic.Repo) (bool, error)
 }
 
 // Reloader is told when schedules change; *scheduler.Scheduler implements it.
@@ -56,6 +59,12 @@ type Server struct {
 	Auth *auth.Auth
 	// Version is the ResticGUI version, "dev" for a build that is not a release.
 	Version string
+	// Notify sends the test messages of notifiers.
+	Notify *notify.Service
+	// HookCommands allows command hooks (hooks.commands in the configuration).
+	HookCommands bool
+	// Metrics says whether /metrics is served, for GET /settings.
+	Metrics bool
 }
 
 //go:embed openapi.yaml
@@ -72,9 +81,17 @@ func (s *Server) Register(public gin.IRouter) {
 	}
 
 	r.GET("/backends", s.listBackends)
+	r.GET("/settings", s.settings)
+
+	r.GET("/notifiers", s.listNotifiers)
+	r.POST("/notifiers", s.createNotifier)
+	r.PUT("/notifiers/:id", s.updateNotifier)
+	r.DELETE("/notifiers/:id", s.deleteNotifier)
+	r.POST("/notifiers/:id/test", s.testNotifier)
 
 	r.GET("/repositories", s.listRepositories)
 	r.POST("/repositories", s.createRepository)
+	r.POST("/repositories/probe", s.probe)
 	r.GET("/repositories/:id", s.getRepository)
 	r.PUT("/repositories/:id", s.updateRepository)
 	r.DELETE("/repositories/:id", s.deleteRepository)
@@ -84,12 +101,16 @@ func (s *Server) Register(public gin.IRouter) {
 	r.POST("/repositories/:id/retention/preview", s.previewRetention)
 	r.PUT("/repositories/:id/schedules/:job", s.putSchedule)
 	r.DELETE("/repositories/:id/schedules/:job", s.deleteSchedule)
+	r.PUT("/repositories/:id/healthcheck", s.putHealthcheck)
+	r.DELETE("/repositories/:id/healthcheck", s.deleteHealthcheck)
+	r.PUT("/repositories/:id/hooks", s.putHooks)
 	r.POST("/repositories/:id/jobs", s.startJob)
 	r.GET("/repositories/:id/snapshots", s.listSnapshots)
 	r.DELETE("/repositories/:id/snapshots/:snapshot", s.forgetSnapshot)
 	r.GET("/repositories/:id/snapshots/:snapshot/files", s.listFiles)
 	r.GET("/repositories/:id/snapshots/:snapshot/find", s.findFiles)
 	r.GET("/repositories/:id/snapshots/:snapshot/download", s.download)
+	r.GET("/repositories/:id/snapshots/:snapshot/diff", s.diff)
 	r.POST("/repositories/:id/snapshots/:snapshot/restore", s.restore)
 	r.GET("/repositories/:id/stats", s.stats)
 	r.GET("/fs", s.browse)

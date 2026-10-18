@@ -232,6 +232,199 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Optional features the configuration turns on */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Command hooks are allowed (hooks.commands) */
+                            hook_commands: boolean;
+                            /** @description Prometheus metrics are served at /metrics (metrics.enabled) */
+                            metrics: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the notifiers
+         * @description Notifiers alert about every repository. Their URLs are never returned.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Notifiers */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Notifier"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Add a notifier */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["NotifierInput"];
+            responses: {
+                201: components["responses"]["Notifier"];
+                400: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifiers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change a notifier
+         * @description An empty url keeps the current one.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["NotifierInput"];
+            responses: {
+                200: components["responses"]["Notifier"];
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        post?: never;
+        /** Remove a notifier */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Removed */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifiers/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a test message */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sent */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["Error"];
+                502: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/fs": {
         parameters: {
             query?: never;
@@ -318,6 +511,52 @@ export interface paths {
             requestBody: components["requestBodies"]["RepositoryInput"];
             responses: {
                 201: components["responses"]["Repository"];
+                400: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repositories/probe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Look at a repository location before adding it
+         * @description Says whether a restic repository exists there and opens with the password, and lists its newest snapshot. Nothing is saved.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["RepositoryInput"];
+            responses: {
+                /** @description What is there */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            exists: boolean;
+                            /** @description Every snapshot */
+                            snapshots: number;
+                            latest: components["schemas"]["Snapshot"] | null;
+                        };
+                    };
+                };
                 400: components["responses"]["Error"];
                 409: components["responses"]["Error"];
             };
@@ -612,6 +851,108 @@ export interface paths {
                 404: components["responses"]["Error"];
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repositories/{id}/healthcheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Ping a Healthchecks check on every backup
+         * @description The URL is pinged with /start, then itself or /fail. It is never returned, only its host.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: uri
+                         * @example https://hc-ping.com/your-uuid
+                         */
+                        url: string;
+                    };
+                };
+            };
+            responses: {
+                200: components["responses"]["Repository"];
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        post?: never;
+        /** Stop pinging Healthchecks */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: components["responses"]["Repository"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repositories/{id}/hooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace the hooks run around backups
+         * @description Hooks of one event run in the order given. A webhook sent back with its id and no url keeps its URL.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["HookInput"][];
+                };
+            };
+            responses: {
+                200: components["responses"]["Repository"];
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -968,6 +1309,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/repositories/{id}/snapshots/{snapshot}/diff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+                /** @description A snapshot ID (8 to 64 hex characters) or "latest" */
+                snapshot: components["parameters"]["snapshot"];
+            };
+            cookie?: never;
+        };
+        /** What changed from this snapshot to another */
+        get: {
+            parameters: {
+                query: {
+                    to: string;
+                };
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                    /** @description A snapshot ID (8 to 64 hex characters) or "latest" */
+                    snapshot: components["parameters"]["snapshot"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The changes */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Diff"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/repositories/{id}/snapshots/{snapshot}/restore": {
         parameters: {
             query?: never;
@@ -1245,7 +1634,78 @@ export interface components {
                 job: "backup" | "forget" | "check";
                 cron: string;
                 enabled: boolean;
+                /**
+                 * Format: date-time
+                 * @description When it runs next; null when disabled
+                 */
+                next_run: string | null;
             }[];
+            /** @description The Healthchecks check pinged by backups; null when unset */
+            healthcheck: {
+                host: string;
+            } | null;
+            /** @description Run around backups */
+            hooks: components["schemas"]["Hook"][];
+        };
+        Hook: {
+            id: number;
+            /** @enum {string} */
+            event: "before" | "success" | "failure";
+            /** @enum {string} */
+            kind: "command" | "webhook";
+            /** @description The shell command; empty for a webhook */
+            command: string;
+            /** @description The webhook's host */
+            host: string;
+            timeout_seconds: number;
+        };
+        HookInput: {
+            /** @description An existing webhook whose URL to keep when url is empty */
+            id?: number;
+            /** @enum {string} */
+            event: "before" | "success" | "failure";
+            /** @enum {string} */
+            kind: "command" | "webhook";
+            command?: string;
+            url?: string;
+            /** @default 300 */
+            timeout_seconds: number;
+        };
+        Notifier: {
+            id: number;
+            name: string;
+            /** @description The URL scheme */
+            service: string;
+            on_failure: boolean;
+            on_success: boolean;
+            /** @description A scheduled backup more than an hour late */
+            on_missed: boolean;
+            enabled: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        Diff: {
+            changes: {
+                /** @description Directories end with / */
+                path: string;
+                /**
+                 * @description Added, removed, content changed, type changed, metadata changed
+                 * @enum {string}
+                 */
+                modifier: "+" | "-" | "M" | "T" | "U";
+            }[];
+            stats: {
+                source_snapshot?: string;
+                target_snapshot?: string;
+                changed_files: number;
+                added: components["schemas"]["DiffCount"];
+                removed: components["schemas"]["DiffCount"];
+            };
+        };
+        DiffCount: {
+            files: number;
+            dirs: number;
+            bytes: number;
         };
         Paths: {
             /** @description Absolute paths inside the allowed roots */
@@ -1391,6 +1851,15 @@ export interface components {
                 "application/json": components["schemas"]["Job"];
             };
         };
+        /** @description The notifier */
+        Notifier: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Notifier"];
+            };
+        };
     };
     parameters: {
         id: number;
@@ -1401,6 +1870,22 @@ export interface components {
         RepositoryInput: {
             content: {
                 "application/json": components["schemas"]["RepositoryInput"];
+            };
+        };
+        NotifierInput: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /**
+                     * @description A Shoutrrr URL, required on create; empty keeps it
+                     * @example ntfy://ntfy.sh/my-backups
+                     */
+                    url?: string;
+                    on_failure?: boolean;
+                    on_success?: boolean;
+                    on_missed?: boolean;
+                    enabled?: boolean;
+                };
             };
         };
     };

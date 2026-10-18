@@ -478,6 +478,34 @@ func (r *Runner) Stats(ctx context.Context, repo *Repo, mode, snapshotID string)
 	return &s, nil
 }
 
+// Diff lists what changed from snapshot from to snapshot to.
+func (r *Runner) Diff(ctx context.Context, repo *Repo, from, to string) (*Diff, error) {
+	d := &Diff{Changes: []DiffChange{}}
+	var decodeErr error
+	err := r.run(ctx, repo, call{command: "diff", args: []string{"--json", "--", from, to}, onLine: func(line []byte) {
+		var err error
+		switch messageType(line) {
+		case "change":
+			var c DiffChange
+			if err = json.Unmarshal(line, &c); err == nil {
+				d.Changes = append(d.Changes, c)
+			}
+		case "statistics":
+			err = json.Unmarshal(line, &d.Stats)
+		}
+		if err != nil && decodeErr == nil {
+			decodeErr = err
+		}
+	}})
+	if err != nil {
+		return nil, err
+	}
+	if decodeErr != nil {
+		return nil, fmt.Errorf("restic diff: decode output: %w", decodeErr)
+	}
+	return d, nil
+}
+
 // Dump writes a file, or a directory as an archive ("tar" or "zip"), from a
 // snapshot to w.
 func (r *Runner) Dump(ctx context.Context, repo *Repo, snapshotID, path, archive string, w io.Writer) error {

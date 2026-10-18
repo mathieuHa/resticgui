@@ -8,3 +8,7 @@ internal/webui/ui
 front/test-results
 front/playwright-report
 __pycache__
+docs/node_modules
+docs/.vitepress/cache
+docs/.vitepress/dist
+docs/public/openapi.yaml

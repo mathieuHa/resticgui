@@ -18,6 +18,14 @@ export type Snapshot = Schemas['Snapshot'];
 export type FileNode = Schemas['Node'];
 export type FindMatch = Schemas['FindMatch'];
 export type Stats = Schemas['Stats'];
+export type Notifier = Schemas['Notifier'];
+export type NotifierInput = components['requestBodies']['NotifierInput']['content']['application/json'];
+export type Hook = Schemas['Hook'];
+export type HookInput = Schemas['HookInput'];
+export type Diff = Schemas['Diff'];
+export type DiffChange = Diff['changes'][number];
+export type Settings = { hook_commands: boolean; metrics: boolean };
+export type Probe = { exists: boolean; snapshots: number; latest: Snapshot | null };
 export type Session = { auth_enabled: boolean; authenticated: boolean; username?: string };
 export type RetentionPreview = {
   keep: (Snapshot & { matches?: string[] })[];
@@ -96,11 +104,19 @@ export const api = {
   logout: () => request<void>('POST', '/auth/logout'),
 
   backends: () => request<Backend[]>('GET', '/backends'),
+  settings: () => request<Settings>('GET', '/settings'),
+
+  notifiers: () => request<Notifier[]>('GET', '/notifiers'),
+  createNotifier: (input: NotifierInput) => request<Notifier>('POST', '/notifiers', { body: input }),
+  updateNotifier: (id: number, input: NotifierInput) => request<Notifier>('PUT', `/notifiers/${id}`, { body: input }),
+  deleteNotifier: (id: number) => request<void>('DELETE', `/notifiers/${id}`),
+  testNotifier: (id: number) => request<void>('POST', `/notifiers/${id}/test`),
   browse: (path?: string) => request<Entry[]>('GET', '/fs', { query: { path } }),
 
   repositories: () => request<Repository[]>('GET', '/repositories'),
   repository: (id: number) => request<Repository>('GET', repo(id)),
   createRepository: (input: RepositoryInput) => request<Repository>('POST', '/repositories', { body: input }),
+  probe: (input: RepositoryInput) => request<Probe>('POST', '/repositories/probe', { body: input }),
   updateRepository: (id: number, input: RepositoryInput) => request<Repository>('PUT', repo(id), { body: input }),
   deleteRepository: (id: number) => request<void>('DELETE', repo(id)),
   setPaths: (id: number, paths: Paths) => request<Repository>('PUT', `${repo(id)}/paths`, { body: paths }),
@@ -112,6 +128,9 @@ export const api = {
   setSchedule: (id: number, job: ScheduledJob, cron: string, enabled = true) =>
     request<Repository>('PUT', `${repo(id)}/schedules/${job}`, { body: { cron, enabled } }),
   deleteSchedule: (id: number, job: ScheduledJob) => request<Repository>('DELETE', `${repo(id)}/schedules/${job}`),
+  setHealthcheck: (id: number, url: string) => request<Repository>('PUT', `${repo(id)}/healthcheck`, { body: { url } }),
+  deleteHealthcheck: (id: number) => request<Repository>('DELETE', `${repo(id)}/healthcheck`),
+  setHooks: (id: number, hooks: HookInput[]) => request<Repository>('PUT', `${repo(id)}/hooks`, { body: hooks }),
   startJob: (id: number, kind: Exclude<JobKind, 'restore'>) =>
     request<Job>('POST', `${repo(id)}/jobs`, { body: { kind } }),
   stats: (id: number, snapshot?: string) => request<Stats>('GET', `${repo(id)}/stats`, { query: { snapshot } }),
@@ -126,6 +145,7 @@ export const api = {
     request<FindMatch[]>('GET', `${snap(id, snapshot)}/find`, { query: { pattern } }),
   downloadURL: (id: number, snapshot: string, path: string, archive: 'zip' | 'tar' | 'none') =>
     apiURL(`${snap(id, snapshot)}/download`, { path, archive }),
+  diff: (id: number, from: string, to: string) => request<Diff>('GET', `${snap(id, from)}/diff`, { query: { to } }),
   restore: (id: number, snapshot: string, target: string, include: string[] = []) =>
     request<Job>('POST', `${snap(id, snapshot)}/restore`, { body: { target, include } }),
 

@@ -6,7 +6,13 @@
   import { page } from '$app/state';
   import { api, onUnauthorized, type Session } from '#lib/api/client.ts';
   import { attempt, jobs } from '#lib/app.svelte.ts';
+  import Logo from '#lib/components/Logo.svelte';
+  import ThemeToggle from '#lib/components/ThemeToggle.svelte';
   import Toasts from '#lib/components/Toasts.svelte';
+  import Bell from '@lucide/svelte/icons/bell';
+  import LogOut from '@lucide/svelte/icons/log-out';
+  import Plus from '@lucide/svelte/icons/plus';
+  import WifiOff from '@lucide/svelte/icons/wifi-off';
 
   let { children } = $props();
 
@@ -62,25 +68,31 @@
   }
 </script>
 
-<div class="bg-base-200 min-h-screen">
-  <nav class="navbar bg-base-100 shadow-sm">
-    <div class="flex-1">
-      <a class="btn btn-ghost text-xl" href={resolve('/')}>ResticGUI</a>
-    </div>
-    {#if allowed}
-      <div class="flex items-center gap-2">
-        {#if !jobs.connected}
-          <span class="badge badge-warning badge-sm" title="Live updates are reconnecting">offline</span>
-        {/if}
-        <a class="btn btn-primary btn-sm" href={resolve('/repositories/new')}>New repository</a>
+<div class="bg-base-200 flex min-h-screen flex-col">
+  <nav class="bg-base-100/85 border-base-300 sticky top-0 z-30 border-b backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2">
+      <a class="flex items-center gap-2 rounded-lg pr-2 text-lg font-semibold" href={resolve('/')}>
+        <Logo />
+        ResticGUI
+      </a>
+      <div class="flex-1"></div>
+      {#if allowed && !jobs.connected}
+        <span class="badge badge-warning badge-sm gap-1" title="Live updates are reconnecting"><WifiOff class="size-3" aria-hidden="true" />offline</span>
+      {/if}
+      <ThemeToggle />
+      {#if allowed}
+        <a class="btn btn-ghost btn-sm btn-square" href={resolve('/notifications')} aria-label="Notifications" title="Notifications"><Bell class="size-4" aria-hidden="true" /></a>
+        <a class="btn btn-primary btn-sm" href={resolve('/repositories/new')} aria-label="New repository"><Plus class="size-4" aria-hidden="true" /><span class="hidden sm:inline">New repository</span></a>
         {#if session?.auth_enabled}
-          <button class="btn btn-ghost btn-sm" onclick={logout}>Log out {session.username}</button>
+          <button class="btn btn-ghost btn-sm" onclick={logout} aria-label="Log out {session.username}" title="Log out {session.username}">
+            <LogOut class="size-4" aria-hidden="true" /><span class="hidden sm:inline">{session.username}</span>
+          </button>
         {/if}
-      </div>
-    {/if}
+      {/if}
+    </div>
   </nav>
 
-  <main class="mx-auto max-w-6xl p-4">
+  <main class="mx-auto w-full max-w-6xl flex-1 p-4">
     {#if failed}
       <div class="alert alert-error">
         <span>Cannot reach the ResticGUI server: {failed}</span>
@@ -94,7 +106,7 @@
   </main>
 
   {#if version}
-    <footer class="text-base-content/60 p-4 text-center text-xs">ResticGUI {version}</footer>
+    <footer class="text-base-content/70 p-4 text-center text-xs">ResticGUI {version}</footer>
   {/if}
 </div>
 

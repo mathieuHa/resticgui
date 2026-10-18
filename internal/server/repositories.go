@@ -43,6 +43,10 @@ type RepositoryDTO struct {
 	Paths             PathsDTO          `json:"paths"`
 	Retention         *RetentionDTO     `json:"retention"`
 	Schedules         []ScheduleDTO     `json:"schedules"`
+	// Healthcheck is the Healthchecks check pinged by backups, null when unset.
+	Healthcheck *HealthcheckDTO `json:"healthcheck"`
+	// Hooks run around backups, in order.
+	Hooks []HookDTO `json:"hooks"`
 }
 
 type PathsDTO struct {
@@ -65,6 +69,8 @@ type ScheduleDTO struct {
 	Job     string `json:"job"`
 	Cron    string `json:"cron"`
 	Enabled bool   `json:"enabled"`
+	// NextRun is when the schedule fires next; null when it is disabled.
+	NextRun *time.Time `json:"next_run"`
 }
 
 // RepositoryInput creates or replaces a repository's settings.
@@ -206,7 +212,15 @@ func (s *Server) repositoryDTO(ctx context.Context, r db.Repository) (Repository
 		return RepositoryDTO{}, err
 	}
 	for _, sc := range schedules {
-		dto.Schedules = append(dto.Schedules, ScheduleDTO{Job: sc.Job, Cron: sc.Cron, Enabled: sc.Enabled})
+		out := ScheduleDTO{Job: sc.Job, Cron: sc.Cron, Enabled: sc.Enabled}
+		if spec, err := scheduler.Parse(sc.Cron); err == nil && sc.Enabled {
+			next := spec.Next(time.Now()).UTC()
+			out.NextRun = &next
+		}
+		dto.Schedules = append(dto.Schedules, out)
+	}
+	if err := s.monitoringDTO(ctx, &dto); err != nil {
+		return RepositoryDTO{}, err
 	}
 	return dto, nil
 }

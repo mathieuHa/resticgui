@@ -1,0 +1,19 @@
+# ResticGUI's settings, mounted at /opt/config.yaml.
+# All of them: https://docs.resticgui.com/reference/configuration
+server:
+  ip: 0.0.0.0
+  port: 3030
+store:
+  path: /opt/db/resticgui.sqlite
+  # the key comes from the resticgui-key Secret ($RESTICGUI_SECRET_KEY)
+  key_file: /opt/db/resticgui.key
+  legacy_path: ""
+restic:
+  bin: /usr/bin/restic
+paths:
+  # what the pod may back up and restore into: the volumes mounted under /backup
+  roots: [/backup]
+auth:
+  username: admin
+  # resticgui hash-password; required as soon as the Service is reachable by others
+  password_hash: ""

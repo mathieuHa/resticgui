@@ -1,0 +1,14 @@
+{
+  "name": "resticgui-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "openapi": "cp ../internal/server/openapi.yaml public/openapi.yaml",
+    "dev": "npm run openapi && vitepress dev",
+    "build": "npm run openapi && vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "1.6.4"
+  }
+}

@@ -36,6 +36,7 @@ type fakeRestic struct {
 	backup   *restic.BackupResult
 	groups   []restic.ForgetGroup
 	check    *restic.CheckSummary
+	stats    restic.Stats
 }
 
 func (f *fakeRestic) do(ctx context.Context, kind string, repo *restic.Repo, opts any) error {
@@ -93,6 +94,14 @@ func (f *fakeRestic) Restore(ctx context.Context, repo *restic.Repo, opts restic
 		return nil, err
 	}
 	return &restic.RestoreSummary{FilesRestored: 4, TotalFiles: 4}, nil
+}
+
+// Stats answers the refresh after a job; it is not recorded as a call.
+func (f *fakeRestic) Stats(ctx context.Context, repo *restic.Repo, mode, snapshotID string) (*restic.Stats, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	s := f.stats
+	return &s, nil
 }
 
 // gate blocks the restic calls of a test until released, and reports which

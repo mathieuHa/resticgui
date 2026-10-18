@@ -1,0 +1,23 @@
+[Unit]
+Description=ResticGUI, a web interface for restic backups
+Documentation=https://docs.resticgui.com
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+# root, so that backups can read every file; see the docs to run it as
+# another user
+User=root
+WorkingDirectory=/etc/resticgui
+ExecStart=/usr/local/bin/resticgui
+Restart=on-failure
+RestartSec=5
+Environment=GIN_MODE=release
+# schedules follow this time zone
+#Environment=TZ=Europe/Paris
+StateDirectory=resticgui
+CacheDirectory=resticgui
+Environment=RESTIC_CACHE_DIR=/var/cache/resticgui
+
+[Install]
+WantedBy=multi-user.target

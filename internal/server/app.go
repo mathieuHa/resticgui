@@ -12,8 +12,11 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/mathieuHa/resticgui/internal/auth"
+	"github.com/mathieuHa/resticgui/internal/hooks"
 	"github.com/mathieuHa/resticgui/internal/jobs"
 	"github.com/mathieuHa/resticgui/internal/legacy"
+	"github.com/mathieuHa/resticgui/internal/metrics"
+	"github.com/mathieuHa/resticgui/internal/notify"
 	"github.com/mathieuHa/resticgui/internal/restic"
 	"github.com/mathieuHa/resticgui/internal/scheduler"
 	"github.com/mathieuHa/resticgui/internal/secrets"
@@ -42,6 +45,12 @@ type Config struct {
 	PasswordHash string
 	// Version is reported by GET /version.
 	Version string
+	// HookCommands allows command hooks, which run with ResticGUI's rights.
+	HookCommands bool
+	// Metrics serves Prometheus metrics at /metrics, behind MetricsToken
+	// (a bearer token) when it is set.
+	Metrics      bool
+	MetricsToken string
 }
 
 // App is the running API: store, job manager and scheduler.
@@ -89,7 +98,8 @@ func Start(ctx context.Context, cfg Config, router gin.IRouter) (*App, error) {
 		log.Info().Str("version", version).Msg("restic found")
 	}
 
-	manager := jobs.New(st, box, runner, jobs.NewBroker(), jobs.Options{Workers: cfg.Workers})
+	broker := jobs.NewBroker()
+	manager := jobs.New(st, box, runner, broker, jobs.Options{Workers: cfg.Workers, Hooks: hooks.Runner{Commands: cfg.HookCommands}})
 	if n, err := manager.Recover(ctx); err != nil {
 		st.Close()
 		return nil, err
@@ -97,17 +107,33 @@ func Start(ctx context.Context, cfg Config, router gin.IRouter) (*App, error) {
 		log.Warn().Int64("jobs", n).Msg("marked jobs left unfinished by the previous run as interrupted")
 	}
 	sched := scheduler.New(st, manager, nil)
+	alerts := &notify.Service{Store: st, Box: box, Events: broker, Busy: manager.Busy}
 
 	runCtx, stop := context.WithCancel(context.Background())
 	app := &App{Store: st, Jobs: manager, stopped: make(chan struct{}), stop: stop}
+	notified := make(chan struct{})
+	go func() {
+		defer close(notified)
+		alerts.Run(runCtx)
+	}()
 	go func() {
 		defer close(app.stopped)
+		defer func() { <-notified }()
 		if cfg.Schedule {
 			_ = sched.Run(runCtx)
 		}
 	}()
 
-	(&Server{Store: st, Box: box, Restic: runner, Jobs: manager, Scheduler: sched, Roots: roots, Auth: guard, Version: cfg.Version}).Register(router.Group(BasePath))
+	if cfg.Metrics {
+		if cfg.MetricsToken == "" && guard.Enabled() {
+			log.Warn().Msg("metrics.token is not set: /metrics is open to anyone who can reach it")
+		}
+		router.GET("/metrics", gin.WrapH(metrics.Handler(st, cfg.MetricsToken)))
+	}
+	(&Server{
+		Store: st, Box: box, Restic: runner, Jobs: manager, Scheduler: sched, Roots: roots, Auth: guard, Version: cfg.Version,
+		Notify: alerts, HookCommands: cfg.HookCommands, Metrics: cfg.Metrics,
+	}).Register(router.Group(BasePath))
 	return app, nil
 }
 
