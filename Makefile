@@ -5,17 +5,10 @@ WEBDIR=front
 RESTICVERSION=0.19.1
 RESTICSRCURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${GOARCH}.bz2
 TAG?=dev
-CI_REGISTRY_IMAGE?=resticgui
+IMAGE?=resticgui
 CI?=false
-BASEDOCKERIMAGE?=alpine:latest
-NODEVERSION?=24-alpine
-ALPINEDOCKERIMAGE?=alpine:latest
-UBUNTUDOCKERIMAGE?=ubuntu:latest
-GOVERSION?=1.27.2
 GOOS?=linux
 GOARCH?=amd64
-TARGETARCH?=amd64
-DOCKERFILE?=Dockerfile
 
 # OS Detection
 ifeq ($(OS),Windows_NT)
@@ -118,24 +111,14 @@ buildweb: installweb ## Build the frontend in dist dir
 	npm run build --prefix $(BUILDDIR)/$(WEBDIR) && \
     cp -r $(BUILDDIR)/$(WEBDIR)/build $(DISTDIR)/
 
-builddocker: ## Build the docker image (needs auth for gitlab registry)
-ifeq ($(CI), true)
-	docker pull ${CI_REGISTRY_IMAGE}:${TAG} || true
-endif
-	DOCKER_BUILDKIT=1 docker build -t $(CI_REGISTRY_IMAGE):$(TAG) . \
-	-f $(DOCKERFILE) \
-	--build-arg BASEDOCKERIMAGE=$(UBUNTUDOCKERIMAGE) \
-	--build-arg GOVERSION=$(GOVERSION) \
-	--build-arg TARGETARCH=$(TARGETARCH)
+builddocker: ## Build the container image for this machine as $(IMAGE):$(TAG)
+	docker build -t $(IMAGE):$(TAG) --build-arg VERSION=$(TAG) .
 
+smokedocker: builddocker ## Smoke-test the container image: UI, API and one backup
+	scripts/smoke-image.sh $(IMAGE):$(TAG) "" $(TAG)
 
-pushdocker: builddocker ## Push the built docker image to gitlab registry
-ifeq ($(CI), true)
-	docker push $(CI_REGISTRY_IMAGE):$(TAG)
-endif
-
-rundocker: ## Run the docker container locally
-	docker run --rm -d --name resticgui -p "8000:3030" $(CI_REGISTRY_IMAGE):$(TAG)
+rundocker: ## Run the container image locally on http://localhost:8000/ui
+	docker run --rm -d --name resticgui -p "8000:3030" $(IMAGE):$(TAG)
 
 run: ## Run resticgui binary listening on localhost:8080
 	cd ${DISTDIR}/ && ./resticgui-${GOARCH}${EXT}

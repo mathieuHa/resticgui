@@ -1,0 +1,154 @@
+name: Release
+
+# Run it from the Actions tab with the version to release: it tags main,
+# publishes the versioned images and drafts a GitHub Release with the
+# binaries. Pushing a v* tag yourself starts the same steps.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, such as 1.4.2 or 1.5.0-rc.1
+        type: string
+        required: true
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency: release
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # creates the tag
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check the version
+        id: version
+        env:
+          INPUT: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            tag=$GITHUB_REF_NAME
+          else
+            [ "$GITHUB_REF" = refs/heads/main ] || { echo "::error::releases are made from main"; exit 1; }
+            tag=v${INPUT#v}
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              echo "::error::$tag already exists"; exit 1
+            fi
+            latest=$(git tag --list 'v*' | scripts/semver.py max)
+            if [ -n "$latest" ] && ! scripts/semver.py gt "$tag" "$latest"; then
+              echo "::error::$tag is not greater than $latest"; exit 1
+            fi
+          fi
+          scripts/semver.py valid "$tag" || { echo "::error::$tag is not a version like v1.4.2 or v1.5.0-rc.1"; exit 1; }
+          version=${tag#v}
+          case "$version" in *-*) prerelease=true ;; *) prerelease=false ;; esac
+          {
+            echo "tag=$tag"
+            echo "version=$version"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+      - name: Tag main
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        # a tag made with GITHUB_TOKEN starts no workflow, so the build
+        # below is called from this run
+        run: gh api "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$TAG" -f "sha=$GITHUB_SHA"
+
+  image:
+    needs: prepare
+    uses: ./.github/workflows/image.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+    with:
+      ref: ${{ needs.prepare.outputs.tag }}
+      version: ${{ needs.prepare.outputs.version }}
+      fail-on-critical: true
+
+  binaries:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build the web UI
+        working-directory: front
+        run: npm ci && npm run build
+      - name: Build the binaries
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          cp -r front/build/. internal/webui/ui/
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 linux/arm/7 darwin/amd64 darwin/arm64 windows/amd64; do
+            os=${target%%/*}; rest=${target#*/}; arch=${rest%%/*}; arm=
+            [ "$arch" = arm ] && arm=${rest#*/}
+            name=resticgui_${VERSION}_${os}_${arch}${arm:+v$arm}
+            [ "$os" = windows ] && name=$name.exe
+            GOOS=$os GOARCH=$arch GOARM=$arm CGO_ENABLED=0 \
+              go build -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "dist/$name" ./cmd/resticgui
+          done
+          (cd dist && sha256sum resticgui_* > SHA256SUMS && cat SHA256SUMS)
+      - uses: actions/upload-artifact@v7
+        with:
+          name: binaries
+          path: dist/
+
+  release:
+    needs: [prepare, image, binaries]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: binaries
+          path: dist
+      - name: SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: ghcr.io/mathieuha/resticgui@${{ needs.image.outputs.digest }}
+          format: spdx-json
+          output-file: dist/resticgui_${{ needs.prepare.outputs.version }}.spdx.json
+          upload-artifact: false
+      - name: Draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+          DIGEST: ${{ needs.image.outputs.digest }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # published from the GitHub UI, which made the tag
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+            exit 0
+          fi
+          notes=$(printf 'Image: `ghcr.io/mathieuha/resticgui:%s` (`%s`), for linux/amd64, linux/arm64 and linux/arm/v7.\n\nVerify it with `cosign verify ghcr.io/mathieuha/resticgui@%s --certificate-identity-regexp "^https://github.com/%s/" --certificate-oidc-issuer https://token.actions.githubusercontent.com`.' \
+            "${TAG#v}" "$DIGEST" "$DIGEST" "$GITHUB_REPOSITORY")
+          flags=
+          [ "$PRERELEASE" = true ] && flags=--prerelease
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
+            --generate-notes --notes "$notes" --title "$TAG" $flags

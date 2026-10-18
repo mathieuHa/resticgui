@@ -1,84 +1,66 @@
-ARG NODEVERSION=24-alpine
-ARG BASEDOCKERIMAGE=ubuntu:noble
-ARG GOVERSION=1.27-alpine
-ARG TARGETARCH=amd64
+# syntax=docker/dockerfile:1
+# ResticGUI with restic, on Alpine. Build for several platforms with
+#   docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 .
+# The web UI and the Go binary are built on the build machine and
+# cross-compiled; only the last stage runs on the target platform.
 
-FROM docker.io/node:${NODEVERSION} as BuilderWeb
+ARG NODE_VERSION=24
+ARG GO_VERSION=1.27
+ARG ALPINE_VERSION=3.24
 
-COPY front/ /front
-
+FROM --platform=$BUILDPLATFORM docker.io/library/node:${NODE_VERSION}-alpine AS web
 WORKDIR /front
-
+COPY front/package.json front/package-lock.json ./
 RUN npm ci
-
+COPY front/ ./
 RUN npm run build
 
-ARG BASEDOCKERIMAGE
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:${GO_VERSION}-alpine AS go
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd cmd
+COPY internal internal
+COPY --from=web /front/build internal/webui/ui
+ARG TARGETOS TARGETARCH TARGETVARIANT
+ARG VERSION=dev
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} CGO_ENABLED=0 \
+    go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/resticgui ./cmd/resticgui
 
-FROM docker.io/${BASEDOCKERIMAGE} as BuilderRestic
-
+# restic's release binary (armv7 is linux_arm), checked against its SHA256SUMS
+FROM --platform=$BUILDPLATFORM docker.io/library/alpine:${ALPINE_VERSION} AS restic
+ARG RESTIC_VERSION=0.19.1
 ARG TARGETARCH
-ARG RESTICVERSION=0.19.1
-ARG RESTICURL=https://github.com/restic/restic/releases/download/v${RESTICVERSION}/restic_${RESTICVERSION}_linux_${TARGETARCH}.bz2
-ARG BUILDDIR=./build
+RUN apk add --no-cache curl bzip2
+WORKDIR /dl
+RUN set -eu; \
+    file="restic_${RESTIC_VERSION}_linux_${TARGETARCH}.bz2"; \
+    base="https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}"; \
+    curl -fsSLO "$base/$file"; \
+    curl -fsSLO "$base/SHA256SUMS"; \
+    grep " $file\$" SHA256SUMS | sha256sum -c -; \
+    bunzip2 -c "$file" > /restic; \
+    chmod 755 /restic
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    openssl \
-    bzip2
-
-RUN mkdir -p ${BUILDDIR}
-RUN curl \
-    --request GET -sL \
-    --url ${RESTICURL} \
-    --output ${BUILDDIR}/restic.bz2
-
-RUN bzip2 -d ${BUILDDIR}/restic.bz2
-
-RUN	cp "${BUILDDIR}/restic" /restic
-
-ARG GOVERSION
-ARG TARGETARCH
-
-FROM docker.io/golang:${GOVERSION} as BuilderResticGui
-
-ARG BUILDDIR=./build
-
-RUN mkdir -p ${BUILDDIR}
-
-COPY . ${BUILDDIR}
-
-COPY --from=BuilderWeb /front/build ${BUILDDIR}/internal/webui/ui
-
-WORKDIR ${BUILDDIR}
-
-RUN cd cmd/resticgui && GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -o /resticgui -ldflags '-w -s'
-
-ARG BASEDOCKERIMAGE
-
-FROM docker.io/${BASEDOCKERIMAGE}
-
-ARG RESTICGUIVERSION="0.2.0"
-
-LABEL "hanotaux.mathieu.vendor"="MHX"
-LABEL version=${RESTICGUIVERSION}
-LABEL description="This image contains Restic and Resticgui webserver"
-
-EXPOSE 3030
-
+FROM docker.io/library/alpine:${ALPINE_VERSION}
+ARG VERSION=dev
+# ca-certificates for the cloud backends, openssh-client for sftp, tzdata
+# so that schedules follow TZ
+RUN apk add --no-cache ca-certificates openssh-client tzdata
+COPY --from=restic /restic /usr/bin/restic
+COPY --from=go /out/resticgui /opt/resticgui
+COPY cmd/resticgui/config-docker.yaml /opt/config.yaml
+RUN mkdir -p /opt/db
 WORKDIR /opt
-
 ENV GIN_MODE=release
-
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY cmd/resticgui/config-docker.yaml ./config.yaml
-
-COPY --from=BuilderRestic --chmod=700 /restic /usr/bin/restic
-COPY --from=BuilderResticGui /resticgui resticgui
-
-RUN mkdir /opt/db
-
+EXPOSE 3030
+# the store and its key
+VOLUME ["/opt/db"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+    CMD wget -q -O /dev/null http://127.0.0.1:3030/api/v2/version || exit 1
+LABEL org.opencontainers.image.title="ResticGUI" \
+      org.opencontainers.image.description="A web interface for restic backups" \
+      org.opencontainers.image.source="https://github.com/mathieuHa/resticgui" \
+      org.opencontainers.image.licenses="GPL-3.0-only" \
+      org.opencontainers.image.version="${VERSION}"
 CMD ["/opt/resticgui"]

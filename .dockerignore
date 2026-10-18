@@ -1,3 +1,12 @@
+.git
+.github
 build
-# dist
+dist
+images
+front/node_modules
+front/.svelte-kit
+front/build
+front/test-results
+front/playwright-report
+internal/webui/ui
 testdata

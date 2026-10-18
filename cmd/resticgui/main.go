@@ -24,9 +24,15 @@ import (
 	"github.com/mathieuHa/resticgui/internal/webui"
 )
 
+// version is set at build time with -ldflags "-X main.version=1.2.3".
+var version = "dev"
+
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "version", "--version":
+			fmt.Println(version)
+			return
 		case "migrate-legacy":
 			os.Exit(legacy.Main(os.Args[2:], os.Stdout, os.Stderr))
 		case "hash-password":
@@ -36,6 +42,7 @@ func main() {
 
 	Config.InitConfig()
 	Logs.Initlogs()
+	log.Info().Str("version", version).Msg("resticgui starting")
 
 	viper.SetDefault("server.ip", "127.0.0.1")
 	viper.SetDefault("server.port", 3001)
@@ -66,6 +73,7 @@ func main() {
 		Roots:          viper.GetStringSlice("paths.roots"),
 		Username:       viper.GetString("auth.username"),
 		PasswordHash:   viper.GetString("auth.password_hash"),
+		Version:        version,
 	}, router)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot start")

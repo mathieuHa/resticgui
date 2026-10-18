@@ -1,10 +1,15 @@
-version: '3'
-
 services:
   resticgui:
-    build: 
-      context: .
-      dockerfile: Dockerfile.alpine
+    image: ghcr.io/mathieuha/resticgui:latest
+    # or build it from this checkout:
+    # build: .
     restart: unless-stopped
     ports:
-      - 3001:3030
+      - 127.0.0.1:3001:3030
+    volumes:
+      - resticgui:/opt/db
+      # the folders to back up, for example:
+      # - /home:/backup/home:ro
+
+volumes:
+  resticgui:
