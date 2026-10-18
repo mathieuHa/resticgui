@@ -120,23 +120,9 @@ auth:
 A public demo environment is available at [demo.resticgui.com](https://demo.resticgui.com)  
 It is reinitialized every hour and do not persist data between restarts. 
 
-## Similar projects
-
-ResticGUI is one of several web and desktop front-ends for restic. If it does not fit your needs, these are worth a look, and they inspire parts of our roadmap:
-
-| Project | Kind | License |
-|---|---|---|
-| [Backrest](https://github.com/garethgeorge/backrest) | Web UI and orchestrator, Go | GPL-3.0 |
-| [Zerobyte](https://github.com/nicotsx/zerobyte) | Self-hosted web app, TypeScript | AGPL-3.0 |
-| [restic-browser](https://github.com/emuell/restic-browser) | Desktop snapshot browser, Tauri | MIT |
-| [Resticity](https://github.com/ad-on-is/resticity) | Desktop app, Wails (archived) | GPL-3.0 |
-| [resticprofile](https://github.com/creativeprojects/resticprofile) | CLI configuration wrapper | GPL-3.0 |
-
-What sets ResticGUI apart: a single static binary with the UI embedded, a dry-run preview of what a retention policy will delete, live progress over Server-Sent Events, and a documented OpenAPI.
-
 ## Roadmap
 
-Ideas we plan to work on, roughly in this order. Suggestions are welcome in the issues.
+Features we plan to work on, roughly in this order. Suggestions are welcome in the issues.
 
 - **Dashboard**: last backup status and age per repository, next run, size over time, success/failure history.
 - **Notifications**: alerts on failure, success or a missed schedule through [Shoutrrr](https://github.com/containrrr/shoutrrr) URLs (ntfy, Gotify, Discord, Slack, Telegram, email) and Healthchecks.io pings.
