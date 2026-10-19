@@ -113,11 +113,12 @@ type RepositoryStat struct {
 }
 
 type Schedule struct {
-	ID           int64
-	RepositoryID int64
-	Job          string
-	Cron         string
-	Enabled      bool
+	ID             int64
+	RepositoryID   int64
+	Job            string
+	Cron           string
+	Enabled        bool
+	ReadDataSubset string
 }
 
 type Session struct {

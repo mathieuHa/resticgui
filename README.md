@@ -19,6 +19,9 @@ repositories that the restic command line can always read.
 - **Retention** with a preview of which snapshots each rule keeps and which it
   removes, and prune afterwards.
 - **Live progress** of every backup, and a history of every run with its log.
+- **Maintenance** without the command line: a check that reads part of the
+  data, stale locks, index and snapshot repair, the format upgrade and a
+  password change, each destructive one behind a confirmation.
 - **Browse, download and restore** files and folders from any snapshot, and see
   what changed between two snapshots.
 - **Notifications** by ntfy, Gotify, Discord, Slack, Telegram, email and more,
@@ -82,6 +85,10 @@ The retention preview:
 
 ![The retention preview](images/ui-retention.png)
 
+The maintenance tools:
+
+![The maintenance tools](images/ui-maintenance.png)
+
 The screenshots come from a demo server with made-up data. To take them again,
 run make screenshots (it needs Docker).
 
@@ -97,8 +104,6 @@ retention policies: see [upgrading](https://docs.resticgui.com/reference/upgradi
 
 ## Roadmap
 
-- **Maintenance tools**: unlock, repair, a partial data check and a password
-  change, from the interface.
 - **Copy to a second repository** with restic copy, for 3-2-1 backups.
 - **Configuration from environment variables** for container deployments.
 

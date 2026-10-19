@@ -551,3 +551,102 @@ func messageType(line []byte) string {
 	}
 	return m.Type
 }
+
+// RepairIndex builds the index again from the pack files in the repository.
+func (r *Runner) RepairIndex(ctx context.Context, repo *Repo) error {
+	return r.run(ctx, repo, call{command: "repair", args: []string{"index"}, stdout: io.Discard})
+}
+
+var modifiedSnapshots = regexp.MustCompile(`^modified (\d+) snapshots`)
+
+// RepairSnapshots rewrites the snapshots that refer to data missing from the
+// repository, without what cannot be read, and forgets the damaged
+// originals. It returns how many snapshots it changed.
+func (r *Runner) RepairSnapshots(ctx context.Context, repo *Repo) (int, error) {
+	modified := 0
+	err := r.run(ctx, repo, call{command: "repair", args: []string{"snapshots", "--forget"}, onLine: func(line []byte) {
+		if m := modifiedSnapshots.FindSubmatch(bytes.TrimSpace(line)); m != nil {
+			modified, _ = strconv.Atoi(string(m[1]))
+		}
+	}})
+	return modified, err
+}
+
+// Migrations lists the migrations restic can apply to the repository, such
+// as "upgrade_repo_v2" for a repository of format version 1.
+func (r *Runner) Migrations(ctx context.Context, repo *Repo) ([]string, error) {
+	names := []string{}
+	err := r.run(ctx, repo, call{command: "migrate", onLine: func(line []byte) {
+		// "available migrations:", then a "  name<TAB>description" line each
+		if len(line) > 0 && (line[0] == ' ' || line[0] == '\t') {
+			if name, _, ok := strings.Cut(strings.TrimSpace(string(line)), "\t"); ok {
+				names = append(names, name)
+			}
+		}
+	}})
+	if err != nil {
+		return nil, err
+	}
+	return names, nil
+}
+
+// Migrate applies one migration. restic answers an unknown name with exit
+// code 0, so the name must come from Migrations.
+func (r *Runner) Migrate(ctx context.Context, repo *Repo, name string) error {
+	applied := false
+	err := r.run(ctx, repo, call{command: "migrate", args: []string{"--", name}, onLine: func(line []byte) {
+		if string(bytes.TrimSpace(line)) == "migration "+name+": success" {
+			applied = true
+		}
+	}})
+	if err == nil && !applied {
+		return fmt.Errorf("restic migrate: %s was not applied", name)
+	}
+	return err
+}
+
+// Key is one of the keys that open a repository, each with its password.
+type Key struct {
+	ID string `json:"id"`
+	// Current is the key the password of the call opened.
+	Current  bool   `json:"current"`
+	UserName string `json:"userName"`
+	HostName string `json:"hostName"`
+	Created  string `json:"created"`
+}
+
+// Keys lists the repository's keys.
+func (r *Runner) Keys(ctx context.Context, repo *Repo) ([]Key, error) {
+	var out bytes.Buffer
+	if err := r.run(ctx, repo, call{command: "key", args: []string{"list", "--json"}, stdout: &out}); err != nil {
+		return nil, err
+	}
+	keys := []Key{}
+	if err := json.Unmarshal(out.Bytes(), &keys); err != nil {
+		return nil, fmt.Errorf("restic key list: decode output: %w", err)
+	}
+	return keys, nil
+}
+
+// AddKey adds a key opened by password. The repository's own password goes
+// on opening it, until RemoveKey removes its key.
+func (r *Runner) AddKey(ctx context.Context, repo *Repo, password string) error {
+	if password == "" {
+		return errors.New("restic key add: the new password is empty")
+	}
+	dir, err := os.MkdirTemp("", "resticgui-key-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+	file := filepath.Join(dir, "password")
+	if err := os.WriteFile(file, []byte(password), 0o600); err != nil {
+		return err
+	}
+	return r.run(ctx, repo, call{command: "key", args: []string{"add", "--new-password-file", file}, stdout: io.Discard})
+}
+
+// RemoveKey removes a key; restic refuses to remove the one repo opens with.
+func (r *Runner) RemoveKey(ctx context.Context, repo *Repo, id string) error {
+	return r.run(ctx, repo, call{command: "key", args: []string{"remove", "--", id}, stdout: io.Discard})
+}

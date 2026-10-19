@@ -42,6 +42,7 @@ export default defineConfig({
           { text: 'Retention', link: '/features/retention' },
           { text: 'Browse and restore', link: '/features/restore' },
           { text: 'Compare snapshots', link: '/features/compare' },
+          { text: 'Maintenance', link: '/features/maintenance' },
           { text: 'Existing repositories', link: '/features/connect' },
           { text: 'Notifications', link: '/features/notifications' },
           { text: 'Hooks', link: '/features/hooks' },

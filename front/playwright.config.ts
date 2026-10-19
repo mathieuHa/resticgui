@@ -48,7 +48,7 @@ export default defineConfig({
     },
     {
       name: 'reliability',
-      testMatch: 'reliability.spec.ts',
+      testMatch: ['reliability.spec.ts', 'maintenance.spec.ts'],
       use: { baseURL: `http://127.0.0.1:${RELIABILITY_PORT}` },
     },
     // the main flow again with the system asking for less motion

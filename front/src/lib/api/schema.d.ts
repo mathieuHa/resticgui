@@ -849,6 +849,11 @@ export interface paths {
                         cron: string;
                         /** @default true */
                         enabled?: boolean;
+                        /**
+                         * @description How much data the check reads, as restic's --read-data-subset: a share (10%), a part (1/5) or a size (500M); empty reads none
+                         * @example 10%
+                         */
+                        read_data_subset?: string;
                     };
                 };
             };
@@ -994,7 +999,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Start a job now */
+        /**
+         * Start a job now
+         * @description repair_index builds the index again from the pack files; repair_snapshots rewrites the snapshots that refer to missing data without it and forgets the damaged ones; migrate upgrades a repository of format version 1 to version 2. A password changes with POST /repositories/{id}/password.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -1008,9 +1016,58 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** @enum {string} */
-                        kind: "init" | "backup" | "forget" | "prune" | "check" | "unlock";
+                        kind: "init" | "backup" | "forget" | "prune" | "check" | "unlock" | "repair_index" | "repair_snapshots" | "migrate";
                         /** @description The plan a backup or forget runs; it can be left out when the repository has one plan */
                         plan_id?: number;
+                        /**
+                         * @description How much data the check reads, as restic's --read-data-subset: a share (10%), a part (1/5) or a size (500M); empty reads none
+                         * @example 10%
+                         */
+                        read_data_subset?: string;
+                    };
+                };
+            };
+            responses: {
+                202: components["responses"]["Job"];
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repositories/{id}/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the repository's password
+         * @description Starts a change_password job. It adds a restic key for the new password, saves the new password, then removes the key of the old one; other keys stay. The job cannot be cancelled. The new password is kept in memory only, never in the job.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: password */
+                        password: string;
                     };
                 };
             };
@@ -1730,6 +1787,11 @@ export interface components {
              * @description When it runs next; null when disabled
              */
             next_run: string | null;
+            /**
+             * @description How much data the check reads, as restic's --read-data-subset: a share (10%), a part (1/5) or a size (500M); empty reads none
+             * @example 10%
+             */
+            read_data_subset?: string;
         };
         ScheduleInput: {
             /** @enum {string} */
@@ -1830,7 +1892,7 @@ export interface components {
             /** @description The plan of a backup or forget job */
             plan_id: number | null;
             /** @enum {string} */
-            kind: "init" | "backup" | "forget" | "prune" | "check" | "unlock" | "restore";
+            kind: "init" | "backup" | "forget" | "prune" | "check" | "unlock" | "restore" | "repair_index" | "repair_snapshots" | "migrate" | "change_password";
             /** @enum {string} */
             trigger: "manual" | "schedule";
             /** @enum {string} */

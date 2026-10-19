@@ -6,8 +6,10 @@
   import Modal from '#lib/components/Modal.svelte';
   import RepositoryForm from '#lib/components/RepositoryForm.svelte';
   import ScheduleEditor from '#lib/components/ScheduleEditor.svelte';
+  import Maintenance from './Maintenance.svelte';
   import Monitoring from './Monitoring.svelte';
   import PlanSettings from './PlanSettings.svelte';
+  import { SUBSETS } from '#lib/jobtext.ts';
   import { draftOf, problems, toInput } from '#lib/repository.ts';
 
   import Plus from '@lucide/svelte/icons/plus';
@@ -20,6 +22,7 @@
   let draft = $state(draftOf(initial));
   const check = initial.schedules.find((x) => x.job === 'check');
   let checkCron = $state(check?.enabled ? check.cron : null);
+  let checkSubset = $state(check?.read_data_subset ?? '');
   let adding = $state(false);
   let confirmDelete = $state(false);
   let errors = $state<string[]>([]);
@@ -40,7 +43,7 @@
 
   async function saveCheck() {
     await attempt(async () => {
-      if (checkCron) onsaved(await api.setCheckSchedule(repo.id, checkCron));
+      if (checkCron) onsaved(await api.setCheckSchedule(repo.id, checkCron, checkSubset));
       else if (repo.schedules.some((s) => s.job === 'check')) onsaved(await api.deleteCheckSchedule(repo.id));
       notify('Integrity check saved');
     }, 'Could not save the integrity check');
@@ -92,9 +95,20 @@
     <div class="card-body">
       <h2 class="card-title text-base">Integrity check</h2>
       <ScheduleEditor label="Check the repository's integrity" bind:value={checkCron} />
+      {#if checkCron}
+        <label class="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <span class="text-sm">Also read</span>
+          <select class="select select-sm" bind:value={checkSubset} aria-label="Data the scheduled check reads">
+            {#each SUBSETS as [value, label] (value)}<option {value}>{label}</option>{/each}
+          </select>
+        </label>
+        <p class="text-base-content/70 text-xs">Reading data finds damaged files, but downloads them from the storage. Each check reads another random part.</p>
+      {/if}
       <div class="card-actions justify-end"><button class="btn btn-primary btn-sm" onclick={saveCheck}>Save check</button></div>
     </div>
   </section>
+
+  <Maintenance {repo} />
 
   <Monitoring {repo} {onsaved} />
 

@@ -70,6 +70,44 @@ func TestIntegrationJobs(t *testing.T) {
 	require.NoError(t, json.Unmarshal([]byte(forget.Summary), &summary))
 	assert.Equal(t, ForgetSummary{Kept: 1, Removed: 1, Pruned: true}, summary)
 	run(KindCheck)
+
+	// the maintenance tools
+	check, err := e.manager.EnqueueCheck(ctx, repo.ID, CheckParams{ReadDataSubset: "50%"})
+	require.NoError(t, err)
+	require.Equal(t, string(StatusSucceeded), e.waitDone(t, check.ID).Status)
+	run(KindUnlock)
+	run(KindRepairIndex)
+	assert.JSONEq(t, `{"modified":0}`, run(KindRepairSnapshots).Summary)
+	assert.JSONEq(t, `{"applied":[]}`, run(KindMigrate).Summary, "restic makes version 2 repositories")
+
+	change, err := e.manager.EnqueuePasswordChange(ctx, repo.ID, "a new password")
+	require.NoError(t, err)
+	done := e.waitDone(t, change.ID)
+	require.Equal(t, string(StatusSucceeded), done.Status, "%s\n%s", done.Error, done.LogExcerpt)
+	assert.Empty(t, done.Error)
+	assert.Equal(t, "a new password", e.password(t, repo.ID))
+	// the jobs go on with the new password, and the old one opens nothing
+	run(KindBackup)
+	stored, err := e.store.GetRepository(ctx, repo.ID)
+	require.NoError(t, err)
+	target, err := ResticRepo(e.box, stored)
+	require.NoError(t, err)
+	target.Password = "integration"
+	_, err = restic.NewRunner(bin).Keys(ctx, target)
+	assert.ErrorIs(t, err, restic.ErrWrongPassword)
+}
+
+// waitDone waits for a job to end, for the slow jobs of real restic.
+func (e *env) waitDone(t *testing.T, id int64) db.Job {
+	t.Helper()
+	var job db.Job
+	require.Eventually(t, func() bool {
+		var err error
+		job, err = e.store.GetJob(context.Background(), id)
+		require.NoError(t, err)
+		return job.FinishedAt != nil
+	}, 2*time.Minute, 50*time.Millisecond)
+	return job
 }
 
 // Two plans back up into one repository with real restic, and the

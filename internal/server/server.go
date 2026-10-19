@@ -105,6 +105,7 @@ func (s *Server) Register(public gin.IRouter) {
 	r.DELETE("/repositories/:id/healthcheck", s.deleteHealthcheck)
 	r.PUT("/repositories/:id/hooks", s.putHooks)
 	r.POST("/repositories/:id/jobs", s.startJob)
+	r.POST("/repositories/:id/password", s.changePassword)
 	r.GET("/repositories/:id/snapshots", s.listSnapshots)
 	r.DELETE("/repositories/:id/snapshots/:snapshot", s.forgetSnapshot)
 	r.GET("/repositories/:id/snapshots/:snapshot/files", s.listFiles)

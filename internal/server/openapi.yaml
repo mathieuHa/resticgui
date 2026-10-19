@@ -315,6 +315,7 @@ paths:
               properties:
                 cron: { type: string, description: 'Five cron fields or a descriptor such as "@daily" or "@every 6h"', example: "30 2 * * *" }
                 enabled: { type: boolean, default: true }
+                read_data_subset: { type: string, example: "10%", description: "How much data the check reads, as restic's --read-data-subset: a share (10%), a part (1/5) or a size (500M); empty reads none" }
       responses:
         "200": { $ref: "#/components/responses/Repository" }
         "400": { $ref: "#/components/responses/Error" }
@@ -367,6 +368,10 @@ paths:
     parameters: [{ $ref: "#/components/parameters/id" }]
     post:
       summary: Start a job now
+      description: >-
+        repair_index builds the index again from the pack files; repair_snapshots rewrites the snapshots
+        that refer to missing data without it and forgets the damaged ones; migrate upgrades a repository
+        of format version 1 to version 2. A password changes with POST /repositories/{id}/password.
       requestBody:
         required: true
         content:
@@ -375,8 +380,31 @@ paths:
               type: object
               required: [kind]
               properties:
-                kind: { type: string, enum: [init, backup, forget, prune, check, unlock] }
+                kind: { type: string, enum: [init, backup, forget, prune, check, unlock, repair_index, repair_snapshots, migrate] }
                 plan_id: { type: integer, description: The plan a backup or forget runs; it can be left out when the repository has one plan }
+                read_data_subset: { type: string, example: "10%", description: "How much data the check reads, as restic's --read-data-subset: a share (10%), a part (1/5) or a size (500M); empty reads none" }
+      responses:
+        "202": { $ref: "#/components/responses/Job" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/password:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      summary: Change the repository's password
+      description: >-
+        Starts a change_password job. It adds a restic key for the new password, saves the new password,
+        then removes the key of the old one; other keys stay. The job cannot be cancelled. The new password
+        is kept in memory only, never in the job.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, format: password, writeOnly: true, minLength: 1 }
       responses:
         "202": { $ref: "#/components/responses/Job" }
         "400": { $ref: "#/components/responses/Error" }
@@ -736,6 +764,7 @@ components:
         cron: { type: string }
         enabled: { type: boolean }
         next_run: { type: [string, "null"], format: date-time, description: When it runs next; null when disabled }
+        read_data_subset: { type: string, example: "10%", description: "How much data the check reads, as restic's --read-data-subset: a share (10%), a part (1/5) or a size (500M); empty reads none" }
     ScheduleInput:
       type: object
       required: [job, cron]
@@ -810,7 +839,7 @@ components:
         id: { type: integer }
         repository_id: { type: integer }
         plan_id: { type: [integer, "null"], description: The plan of a backup or forget job }
-        kind: { type: string, enum: [init, backup, forget, prune, check, unlock, restore] }
+        kind: { type: string, enum: [init, backup, forget, prune, check, unlock, restore, repair_index, repair_snapshots, migrate, change_password] }
         trigger: { type: string, enum: [manual, schedule] }
         status: { type: string, enum: [queued, running, succeeded, failed, cancelled, interrupted] }
         created_at: { type: string, format: date-time }

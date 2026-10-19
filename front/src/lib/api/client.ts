@@ -129,15 +129,20 @@ export const api = {
   previewRetention: (id: number, planId: number, retention: Retention) =>
     request<RetentionPreview>('POST', `${repo(id)}/plans/${planId}/retention/preview`, { body: retention }),
   /** a repository schedules its integrity check; plans schedule their backups */
-  setCheckSchedule: (id: number, cron: string, enabled = true) =>
-    request<Repository>('PUT', `${repo(id)}/schedules/check`, { body: { cron, enabled } }),
+  setCheckSchedule: (id: number, cron: string, readDataSubset = '') =>
+    request<Repository>('PUT', `${repo(id)}/schedules/check`, { body: { cron, enabled: true, read_data_subset: readDataSubset } }),
   deleteCheckSchedule: (id: number) => request<Repository>('DELETE', `${repo(id)}/schedules/check`),
   setHealthcheck: (id: number, url: string) => request<Repository>('PUT', `${repo(id)}/healthcheck`, { body: { url } }),
   deleteHealthcheck: (id: number) => request<Repository>('DELETE', `${repo(id)}/healthcheck`),
   setHooks: (id: number, hooks: HookInput[]) => request<Repository>('PUT', `${repo(id)}/hooks`, { body: hooks }),
   /** a backup or forget runs a plan: planId, or the only one of the repository */
-  startJob: (id: number, kind: Exclude<JobKind, 'restore'>, planId?: number) =>
+  startJob: (id: number, kind: Exclude<JobKind, 'restore' | 'change_password'>, planId?: number) =>
     request<Job>('POST', `${repo(id)}/jobs`, { body: { kind, plan_id: planId } }),
+  /** a check that also reads some of the data, as restic's --read-data-subset */
+  startCheck: (id: number, readDataSubset: string) =>
+    request<Job>('POST', `${repo(id)}/jobs`, { body: { kind: 'check', read_data_subset: readDataSubset || undefined } }),
+  /** starts a job that changes the password in restic, then in ResticGUI */
+  changePassword: (id: number, password: string) => request<Job>('POST', `${repo(id)}/password`, { body: { password } }),
   stats: (id: number, snapshot?: string) => request<Stats>('GET', `${repo(id)}/stats`, { query: { snapshot } }),
 
   snapshots: (id: number, all = false) =>

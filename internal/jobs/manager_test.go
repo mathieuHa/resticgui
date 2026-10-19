@@ -38,6 +38,12 @@ type fakeRestic struct {
 	groups   []restic.ForgetGroup
 	check    *restic.CheckSummary
 	stats    restic.Stats
+	// modified is what RepairSnapshots answers, migrations what Migrations does
+	modified   int
+	migrations []string
+	// keys maps the passwords that open the repository to their key IDs;
+	// nil opens it with any password
+	keys map[string]string
 }
 
 func (f *fakeRestic) do(ctx context.Context, kind string, repo *restic.Repo, opts any) error {
@@ -103,6 +109,62 @@ func (f *fakeRestic) Stats(ctx context.Context, repo *restic.Repo, mode, snapsho
 	defer f.mu.Unlock()
 	s := f.stats
 	return &s, nil
+}
+
+func (f *fakeRestic) RepairIndex(ctx context.Context, repo *restic.Repo) error {
+	return f.do(ctx, "repair index", repo, nil)
+}
+
+func (f *fakeRestic) RepairSnapshots(ctx context.Context, repo *restic.Repo) (int, error) {
+	return f.modified, f.do(ctx, "repair snapshots", repo, nil)
+}
+
+func (f *fakeRestic) Migrations(ctx context.Context, repo *restic.Repo) ([]string, error) {
+	return f.migrations, f.do(ctx, "migrations", repo, nil)
+}
+
+func (f *fakeRestic) Migrate(ctx context.Context, repo *restic.Repo, name string) error {
+	return f.do(ctx, "migrate", repo, name)
+}
+
+func (f *fakeRestic) Keys(ctx context.Context, repo *restic.Repo) ([]restic.Key, error) {
+	if err := f.do(ctx, "key list", repo, nil); err != nil {
+		return nil, err
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if _, ok := f.keys[repo.Password]; !ok {
+		return nil, restic.ErrWrongPassword
+	}
+	var keys []restic.Key
+	for password, id := range f.keys {
+		keys = append(keys, restic.Key{ID: id, Current: password == repo.Password})
+	}
+	return keys, nil
+}
+
+func (f *fakeRestic) AddKey(ctx context.Context, repo *restic.Repo, password string) error {
+	if err := f.do(ctx, "key add", repo, password); err != nil {
+		return err
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.keys[password] = "key-" + password
+	return nil
+}
+
+func (f *fakeRestic) RemoveKey(ctx context.Context, repo *restic.Repo, id string) error {
+	if err := f.do(ctx, "key remove", repo, id); err != nil {
+		return err
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	for password, k := range f.keys {
+		if k == id {
+			delete(f.keys, password)
+		}
+	}
+	return nil
 }
 
 // gate blocks the restic calls of a test until released, and reports which

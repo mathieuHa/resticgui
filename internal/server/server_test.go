@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -47,6 +48,11 @@ type fakeRestic struct {
 	exists    bool
 	existsErr error
 	diff      *restic.Diff
+	checks    []restic.CheckOptions
+	modified  int
+	// keys holds the IDs of the repository's keys; the current one is the
+	// password's own
+	keys []string
 }
 
 func (f *fakeRestic) Exists(_ context.Context, repo *restic.Repo) (bool, error) {
@@ -139,8 +145,49 @@ func (f *fakeRestic) Backup(ctx context.Context, _ *restic.Repo, _ restic.Backup
 func (f *fakeRestic) Restore(ctx context.Context, _ *restic.Repo, _ restic.RestoreOptions, _ func(restic.RestoreStatus)) (*restic.RestoreSummary, error) {
 	return &restic.RestoreSummary{}, f.wait(ctx)
 }
-func (f *fakeRestic) Check(ctx context.Context, _ *restic.Repo, _ restic.CheckOptions) (*restic.CheckSummary, error) {
+func (f *fakeRestic) Check(ctx context.Context, _ *restic.Repo, opts restic.CheckOptions) (*restic.CheckSummary, error) {
+	f.mu.Lock()
+	f.checks = append(f.checks, opts)
+	f.mu.Unlock()
 	return &restic.CheckSummary{}, f.wait(ctx)
+}
+func (f *fakeRestic) RepairIndex(ctx context.Context, _ *restic.Repo) error {
+	f.record("repair index")
+	return f.wait(ctx)
+}
+func (f *fakeRestic) RepairSnapshots(ctx context.Context, _ *restic.Repo) (int, error) {
+	f.record("repair snapshots")
+	return f.modified, f.wait(ctx)
+}
+func (f *fakeRestic) Migrations(ctx context.Context, _ *restic.Repo) ([]string, error) {
+	return []string{"upgrade_repo_v2"}, f.wait(ctx)
+}
+func (f *fakeRestic) Migrate(ctx context.Context, _ *restic.Repo, name string) error {
+	f.record("migrate " + name)
+	return f.wait(ctx)
+}
+func (f *fakeRestic) Keys(ctx context.Context, repo *restic.Repo) ([]restic.Key, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	keys := []restic.Key{}
+	for _, id := range f.keys {
+		keys = append(keys, restic.Key{ID: id, Current: id == "key of "+repo.Password})
+	}
+	return keys, nil
+}
+func (f *fakeRestic) AddKey(ctx context.Context, _ *restic.Repo, password string) error {
+	f.record("key add")
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.keys = append(f.keys, "key of "+password)
+	return nil
+}
+func (f *fakeRestic) RemoveKey(ctx context.Context, _ *restic.Repo, id string) error {
+	f.record("key remove " + id)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.keys = slices.DeleteFunc(f.keys, func(k string) bool { return k == id })
+	return nil
 }
 
 type reloads struct{ n atomic.Int32 }
