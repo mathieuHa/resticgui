@@ -1,0 +1,78 @@
+# Dependency updates. Minor and patch updates come grouped, one pull request
+# per ecosystem and folder each Monday; a major update comes on its own, as
+# it may need code changes. Security updates do not wait for Monday: they
+# come as soon as an advisory is published (repository settings, Code
+# security, Dependabot security updates).
+version: 2
+
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Paris
+    groups:
+      go:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+
+  # govulncheck and gosec, which CI runs from these modules
+  - package-ecosystem: gomod
+    directories: [/tools/gosec, /tools/govulncheck]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Paris
+    # the tools pin their own dependencies; only the tools themselves move
+    allow:
+      - dependency-type: direct
+    groups:
+      tools:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
+
+  # the web interface and the documentation site
+  - package-ecosystem: npm
+    directories: [/front, /docs]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Paris
+    groups:
+      npm:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Paris
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
+
+  # the Node, Go and Alpine images the Dockerfile builds on
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Paris
+    groups:
+      images:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps

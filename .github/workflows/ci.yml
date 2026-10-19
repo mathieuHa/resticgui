@@ -28,6 +28,8 @@ jobs:
         run: go tool cover -func=coverage.out | tail -1
       - name: Release scripts
         run: python3 scripts/semver_test.py
+      - name: Dependabot configuration
+        run: pipx run check-jsonschema==0.38.2 --builtin-schema vendor.dependabot .github/dependabot.yml
 
   front:
     runs-on: ubuntu-latest

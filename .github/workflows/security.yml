@@ -23,7 +23,7 @@ jobs:
         with:
           go-version-file: go.mod
       # only vulnerabilities in code the binary actually calls
-      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+      - run: go tool -modfile=tools/govulncheck/go.mod govulncheck ./...
 
   gosec:
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
         with:
           go-version-file: go.mod
       # each accepted finding carries a #nosec comment saying why
-      - run: go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -quiet -exclude-generated ./...
+      - run: go tool -modfile=tools/gosec/go.mod gosec -quiet -exclude-generated ./...
 
   semgrep:
     runs-on: ubuntu-latest

@@ -3,19 +3,17 @@
 #   docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 .
 # The web UI and the Go binary are built on the build machine and
 # cross-compiled; only the last stage runs on the target platform.
+# The base images are written out, not build arguments, so that Dependabot
+# can update them.
 
-ARG NODE_VERSION=24
-ARG GO_VERSION=1.27
-ARG ALPINE_VERSION=3.24
-
-FROM --platform=$BUILDPLATFORM docker.io/library/node:${NODE_VERSION}-alpine AS web
+FROM --platform=$BUILDPLATFORM docker.io/library/node:24-alpine AS web
 WORKDIR /front
 COPY front/package.json front/package-lock.json ./
 RUN npm ci
 COPY front/ ./
 RUN npm run build
 
-FROM --platform=$BUILDPLATFORM docker.io/library/golang:${GO_VERSION}-alpine AS go
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.27-alpine AS go
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -28,7 +26,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} CGO_ENABLED=0 \
     go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/resticgui ./cmd/resticgui
 
 # restic's release binary (armv7 is linux_arm), checked against its SHA256SUMS
-FROM --platform=$BUILDPLATFORM docker.io/library/alpine:${ALPINE_VERSION} AS restic
+FROM --platform=$BUILDPLATFORM docker.io/library/alpine:3.24 AS restic
 ARG RESTIC_VERSION=0.19.1
 ARG TARGETARCH
 RUN apk add --no-cache curl bzip2
@@ -42,7 +40,7 @@ RUN set -eu; \
     bunzip2 -c "$file" > /restic; \
     chmod 755 /restic
 
-FROM docker.io/library/alpine:${ALPINE_VERSION}
+FROM docker.io/library/alpine:3.24
 ARG VERSION=dev
 # ca-certificates for the cloud backends, openssh-client for sftp, tzdata
 # so that schedules follow TZ
