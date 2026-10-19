@@ -1,5 +1,5 @@
-// Package scheduler enqueues the jobs of the schedules table when their cron
-// expression comes due.
+// Package scheduler enqueues the jobs of the repositories' and plans'
+// schedules when their cron expression comes due.
 package scheduler
 
 import (
@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/mathieuHa/resticgui/internal/jobs"
+	"github.com/mathieuHa/resticgui/internal/store"
 	"github.com/mathieuHa/resticgui/internal/store/db"
 )
 
@@ -40,12 +41,12 @@ func (realClock) After(d time.Duration) <-chan time.Time { return time.After(d) 
 
 // Enqueuer starts jobs; *jobs.Manager implements it.
 type Enqueuer interface {
-	Enqueue(ctx context.Context, repositoryID int64, kind jobs.Kind, trigger jobs.Trigger) (db.Job, error)
+	Enqueue(ctx context.Context, repositoryID, planID int64, kind jobs.Kind, trigger jobs.Trigger) (db.Job, error)
 }
 
 // Source lists the enabled schedules; *store.Store implements it.
 type Source interface {
-	ListEnabledSchedules(ctx context.Context) ([]db.Schedule, error)
+	EnabledSchedules(ctx context.Context) ([]store.Schedule, error)
 }
 
 // Scheduler runs the enabled schedules. Runs missed while resticgui was
@@ -74,7 +75,7 @@ func (s *Scheduler) Reload() {
 }
 
 type entry struct {
-	schedule db.Schedule
+	schedule store.Schedule
 	spec     cron.Schedule
 	next     time.Time
 }
@@ -105,7 +106,7 @@ func (s *Scheduler) Run(ctx context.Context) error {
 }
 
 func (s *Scheduler) load(ctx context.Context) []entry {
-	schedules, err := s.source.ListEnabledSchedules(ctx)
+	schedules, err := s.source.EnabledSchedules(ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("scheduler: cannot list schedules")
 		return nil
@@ -115,7 +116,7 @@ func (s *Scheduler) load(ctx context.Context) []entry {
 	for _, sc := range schedules {
 		spec, err := Parse(sc.Cron)
 		if err != nil {
-			log.Error().Err(err).Int64("repository", sc.RepositoryID).Str("job", sc.Job).Msg("scheduler: skipping schedule")
+			log.Error().Err(err).Int64("repository", sc.RepositoryID).Int64("plan", sc.PlanID).Str("job", sc.Job).Msg("scheduler: skipping schedule")
 			continue
 		}
 		entries = append(entries, entry{schedule: sc, spec: spec, next: spec.Next(now)})
@@ -133,9 +134,9 @@ func earliest(entries []entry) (time.Time, bool) {
 	return t, !t.IsZero()
 }
 
-func (s *Scheduler) fire(ctx context.Context, sc db.Schedule) {
-	job, err := s.enqueue.Enqueue(ctx, sc.RepositoryID, jobs.Kind(sc.Job), jobs.TriggerSchedule)
-	l := log.With().Int64("repository", sc.RepositoryID).Str("job", sc.Job).Logger()
+func (s *Scheduler) fire(ctx context.Context, sc store.Schedule) {
+	job, err := s.enqueue.Enqueue(ctx, sc.RepositoryID, sc.PlanID, jobs.Kind(sc.Job), jobs.TriggerSchedule)
+	l := log.With().Int64("repository", sc.RepositoryID).Int64("plan", sc.PlanID).Str("job", sc.Job).Logger()
 	switch {
 	case errors.Is(err, jobs.ErrAlreadyQueued):
 		l.Warn().Msg("scheduler: previous run still queued or running, skipping")

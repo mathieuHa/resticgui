@@ -21,3 +21,21 @@ spec:
   tls:
     - hosts: [backup.example.com]
       secretName: resticgui-tls
+---
+# lets the ingress controller through the NetworkPolicy of resticgui.yaml;
+# change the namespace to your controller's
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: resticgui-from-ingress
+  labels: {app.kubernetes.io/name: resticgui}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: resticgui}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: ingress-nginx}
+      ports:
+        - {port: http}

@@ -26,9 +26,19 @@ spec:
     metadata:
       labels: {app.kubernetes.io/name: resticgui}
     spec:
+      securityContext:
+        seccompProfile: {type: RuntimeDefault}
       containers:
         - name: resticgui
           image: ghcr.io/mathieuha/resticgui:latest
+          # root, to read the files of every volume it backs up and restore
+          # them with their owners, but with only those rights
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN, DAC_OVERRIDE, DAC_READ_SEARCH, FOWNER, FSETID]
           ports:
             - {name: http, containerPort: 3030}
           env:
@@ -41,6 +51,7 @@ spec:
           volumeMounts:
             - {name: db, mountPath: /opt/db}
             - {name: config, mountPath: /opt/config.yaml, subPath: config.yaml, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
             # what to back up, for example a volume of another application:
             # - {name: data, mountPath: /backup/data, readOnly: true}
           readinessProbe:
@@ -58,6 +69,8 @@ spec:
           persistentVolumeClaim: {claimName: resticgui-db}
         - name: config
           configMap: {name: resticgui-config}
+        - name: tmp
+          emptyDir: {}
         # - name: data
         #   persistentVolumeClaim: {claimName: my-app-data}
 ---
@@ -70,3 +83,16 @@ spec:
   selector: {app.kubernetes.io/name: resticgui}
   ports:
     - {name: http, port: 80, targetPort: http}
+---
+# Nothing in the cluster may connect to ResticGUI: reach it with
+# kubectl port-forward, or allow your ingress controller (see ingress.yaml).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: resticgui
+  labels: {app.kubernetes.io/name: resticgui}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: resticgui}
+  policyTypes: [Ingress]
+  ingress: []

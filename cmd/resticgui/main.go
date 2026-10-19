@@ -5,9 +5,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -56,7 +58,7 @@ func main() {
 	viper.SetDefault("metrics.enabled", false)
 
 	router := gin.New()
-	router.Use(server.Logger(), server.Recovery())
+	router.Use(server.Logger(), server.Recovery(), server.SecurityHeaders())
 	ui := gin.WrapH(webui.Handler(webui.UI, "/ui"))
 	router.GET("/ui", ui)
 	router.GET("/ui/*path", ui)
@@ -65,6 +67,7 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "/ui")
 	})
 
+	addr := net.JoinHostPort(viper.GetString("server.ip"), strconv.Itoa(viper.GetInt("server.port")))
 	app, err := server.Start(context.Background(), server.Config{
 		Database:       viper.GetString("store.path"),
 		LegacyDatabase: viper.GetString("store.legacy_path"),
@@ -79,12 +82,13 @@ func main() {
 		HookCommands:   viper.GetBool("hooks.commands"),
 		Metrics:        viper.GetBool("metrics.enabled"),
 		MetricsToken:   viper.GetString("metrics.token"),
+		Listen:         addr,
+		AllowedHosts:   viper.GetStringSlice("server.allowed_hosts"),
 	}, router)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot start")
 	}
 
-	addr := fmt.Sprintf("%s:%d", viper.GetString("server.ip"), viper.GetInt("server.port"))
 	httpServer := &http.Server{
 		Handler:           router,
 		Addr:              addr,

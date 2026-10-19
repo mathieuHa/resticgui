@@ -55,7 +55,9 @@ type Run struct {
 	Event        string `json:"event"`
 	RepositoryID int64  `json:"repository_id"`
 	Repository   string `json:"repository"`
-	JobID        int64  `json:"job_id"`
+	// Plan is the name of the backup plan that ran.
+	Plan  string `json:"plan"`
+	JobID int64  `json:"job_id"`
 	// Status is the job's status after it ran: succeeded or failed.
 	Status     string `json:"status,omitempty"`
 	SnapshotID string `json:"snapshot_id,omitempty"`
@@ -107,11 +109,14 @@ func (r Runner) command(ctx context.Context, command string, run Run) ([]string,
 	if shell == "" {
 		shell = "/bin/sh"
 	}
+	// #nosec G204 -- running the configured command is the point of a command
+	// hook; they are off unless hooks.commands is set
 	cmd := exec.CommandContext(ctx, shell, "-c", command)
-	cmd.Env = append(os.Environ(),
+	cmd.Env = append(hookEnv(),
 		"RESTICGUI_EVENT="+run.Event,
 		"RESTICGUI_REPOSITORY_ID="+strconv.FormatInt(run.RepositoryID, 10),
 		"RESTICGUI_REPOSITORY="+run.Repository,
+		"RESTICGUI_PLAN="+run.Plan,
 		"RESTICGUI_JOB_ID="+strconv.FormatInt(run.JobID, 10),
 		"RESTICGUI_STATUS="+run.Status,
 		"RESTICGUI_SNAPSHOT_ID="+run.SnapshotID,
@@ -119,11 +124,13 @@ func (r Runner) command(ctx context.Context, command string, run Run) ([]string,
 	)
 	// a command that leaves children holding its output open still ends
 	cmd.WaitDelay = 2 * time.Second
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
+	// a timeout ends the command's children too
+	killGroup(cmd)
+	buf := &tail{max: maxOutputBytes}
+	cmd.Stdout = buf
+	cmd.Stderr = buf
 	err := cmd.Run()
-	out := lastLines(&buf, MaxOutputLines)
+	out := lastLines(bytes.NewReader(buf.b), MaxOutputLines)
 	var exit *exec.ExitError
 	if errors.As(err, &exit) && ctx.Err() == nil {
 		return out, fmt.Errorf("exited with code %d", exit.ExitCode())
@@ -144,7 +151,7 @@ func (r Runner) webhook(ctx context.Context, url string, run Run) ([]string, err
 	req.Header.Set("User-Agent", "ResticGUI")
 	client := r.HTTP
 	if client == nil {
-		client = http.DefaultClient
+		client = noRedirects
 	}
 	res, err := client.Do(req)
 	if err != nil {
@@ -162,6 +169,46 @@ func (r Runner) webhook(ctx context.Context, url string, run Run) ([]string, err
 		return out, fmt.Errorf("answered %s", res.Status)
 	}
 	return out, nil
+}
+
+// noRedirects posts webhooks without following redirects, so that a hook
+// cannot be bounced to an address of the server's network.
+var noRedirects = &http.Client{
+	CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+}
+
+// hookEnv is ResticGUI's environment without its own settings, among which
+// the key that decrypts every stored password.
+func hookEnv() []string {
+	var env []string
+	for _, kv := range os.Environ() {
+		if !strings.HasPrefix(kv, "RESTICGUI_") {
+			env = append(env, kv)
+		}
+	}
+	return env
+}
+
+// maxOutputBytes is how much of a command's output is kept, its end.
+const maxOutputBytes = 256 << 10
+
+// tail keeps the last max bytes written to it.
+type tail struct {
+	max int
+	b   []byte
+}
+
+func (t *tail) Write(p []byte) (int, error) {
+	n := len(p)
+	if len(p) >= t.max {
+		t.b = append(t.b[:0], p[len(p)-t.max:]...)
+		return n, nil
+	}
+	if over := len(t.b) + len(p) - t.max; over > 0 {
+		t.b = append(t.b[:0], t.b[over:]...)
+	}
+	t.b = append(t.b, p...)
+	return n, nil
 }
 
 func lastLines(r io.Reader, n int) []string {

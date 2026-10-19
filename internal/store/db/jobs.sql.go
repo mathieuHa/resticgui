@@ -10,11 +10,12 @@ import (
 )
 
 const createJob = `-- name: CreateJob :one
-INSERT INTO jobs (repository_id, kind, trigger, params) VALUES (?, ?, ?, ?) RETURNING id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params
+INSERT INTO jobs (repository_id, plan_id, kind, trigger, params) VALUES (?, ?, ?, ?, ?) RETURNING id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params, plan_id
 `
 
 type CreateJobParams struct {
 	RepositoryID int64
+	PlanID       *int64
 	Kind         string
 	Trigger      string
 	Params       string
@@ -23,6 +24,7 @@ type CreateJobParams struct {
 func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
 	row := q.db.QueryRowContext(ctx, createJob,
 		arg.RepositoryID,
+		arg.PlanID,
 		arg.Kind,
 		arg.Trigger,
 		arg.Params,
@@ -43,6 +45,7 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		&i.ExitCode,
 		&i.LogExcerpt,
 		&i.Params,
+		&i.PlanID,
 	)
 	return i, err
 }
@@ -86,7 +89,7 @@ func (q *Queries) FinishJob(ctx context.Context, arg FinishJobParams) (int64, er
 }
 
 const getJob = `-- name: GetJob :one
-SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params FROM jobs WHERE id = ?
+SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params, plan_id FROM jobs WHERE id = ?
 `
 
 func (q *Queries) GetJob(ctx context.Context, id int64) (Job, error) {
@@ -107,12 +110,13 @@ func (q *Queries) GetJob(ctx context.Context, id int64) (Job, error) {
 		&i.ExitCode,
 		&i.LogExcerpt,
 		&i.Params,
+		&i.PlanID,
 	)
 	return i, err
 }
 
 const lastJobs = `-- name: LastJobs :many
-SELECT j.id, j.repository_id, j.kind, j."trigger", j.status, j.created_at, j.started_at, j.finished_at, j.snapshot_id, j.summary, j.error, j.exit_code, j.log_excerpt, j.params FROM jobs j
+SELECT j.id, j.repository_id, j.kind, j."trigger", j.status, j.created_at, j.started_at, j.finished_at, j.snapshot_id, j.summary, j.error, j.exit_code, j.log_excerpt, j.params, j.plan_id FROM jobs j
 WHERE j.id IN (
     SELECT max(id) FROM jobs WHERE status NOT IN ('queued', 'running') GROUP BY repository_id, kind
     UNION
@@ -147,6 +151,7 @@ func (q *Queries) LastJobs(ctx context.Context) ([]Job, error) {
 			&i.ExitCode,
 			&i.LogExcerpt,
 			&i.Params,
+			&i.PlanID,
 		); err != nil {
 			return nil, err
 		}
@@ -162,7 +167,7 @@ func (q *Queries) LastJobs(ctx context.Context) ([]Job, error) {
 }
 
 const listJobsForRepository = `-- name: ListJobsForRepository :many
-SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params FROM jobs WHERE repository_id = ? ORDER BY id DESC LIMIT ? OFFSET ?
+SELECT id, repository_id, kind, "trigger", status, created_at, started_at, finished_at, snapshot_id, summary, error, exit_code, log_excerpt, params, plan_id FROM jobs WHERE repository_id = ? ORDER BY id DESC LIMIT ? OFFSET ?
 `
 
 type ListJobsForRepositoryParams struct {
@@ -195,6 +200,7 @@ func (q *Queries) ListJobsForRepository(ctx context.Context, arg ListJobsForRepo
 			&i.ExitCode,
 			&i.LogExcerpt,
 			&i.Params,
+			&i.PlanID,
 		); err != nil {
 			return nil, err
 		}

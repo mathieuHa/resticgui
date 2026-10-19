@@ -1,6 +1,6 @@
 -- name: CreateRepository :one
-INSERT INTO repositories (name, backend, location, options, secrets, host, compression, exclude_larger_than)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO repositories (name, backend, location, options, secrets, host)
+VALUES (?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- name: GetRepository :one
@@ -19,8 +19,6 @@ SET name                = sqlc.arg(name),
     location            = sqlc.arg(location),
     options             = sqlc.arg(options),
     host                = sqlc.arg(host),
-    compression         = sqlc.arg(compression),
-    exclude_larger_than = sqlc.arg(exclude_larger_than),
     updated_at          = CURRENT_TIMESTAMP
 WHERE id = sqlc.arg(id)
 RETURNING *;

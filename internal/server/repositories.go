@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,24 +25,25 @@ import (
 // RepositoryDTO is a repository as the API returns it. It never carries the
 // password or the values of secret variables, only which ones are set.
 type RepositoryDTO struct {
-	ID                int64             `json:"id"`
-	Name              string            `json:"name"`
-	Backend           string            `json:"backend"`
-	Location          string            `json:"location"`
-	Env               map[string]string `json:"env"`
-	Secrets           []string          `json:"secrets"`
-	HasPassword       bool              `json:"has_password"`
-	CACert            string            `json:"cacert,omitempty"`
-	Extended          map[string]string `json:"extended"`
-	Host              string            `json:"host"`
-	Compression       string            `json:"compression"`
-	ExcludeLargerThan string            `json:"exclude_larger_than"`
-	InitializedAt     *time.Time        `json:"initialized_at"`
-	CreatedAt         time.Time         `json:"created_at"`
-	UpdatedAt         time.Time         `json:"updated_at"`
-	Paths             PathsDTO          `json:"paths"`
-	Retention         *RetentionDTO     `json:"retention"`
-	Schedules         []ScheduleDTO     `json:"schedules"`
+	ID            int64             `json:"id"`
+	Name          string            `json:"name"`
+	Backend       string            `json:"backend"`
+	Location      string            `json:"location"`
+	Env           map[string]string `json:"env"`
+	Secrets       []string          `json:"secrets"`
+	HasPassword   bool              `json:"has_password"`
+	CACert        string            `json:"cacert,omitempty"`
+	Extended      map[string]string `json:"extended"`
+	Host          string            `json:"host"`
+	InitializedAt *time.Time        `json:"initialized_at"`
+	CreatedAt     time.Time         `json:"created_at"`
+	UpdatedAt     time.Time         `json:"updated_at"`
+	// Plans say what is backed up into the repository, in the order they
+	// were made.
+	Plans []PlanDTO `json:"plans"`
+	// Schedules holds the integrity check's; backups and retention are
+	// scheduled by plan.
+	Schedules []ScheduleDTO `json:"schedules"`
 	// Healthcheck is the Healthchecks check pinged by backups, null when unset.
 	Healthcheck *HealthcheckDTO `json:"healthcheck"`
 	// Hooks run around backups, in order.
@@ -82,12 +83,10 @@ type RepositoryInput struct {
 	Password string            `json:"password"`
 	Env      map[string]string `json:"env"`
 	// Secrets replaces the secret variables; omitted (null) on update keeps them.
-	Secrets           *map[string]string `json:"secrets"`
-	CACert            string             `json:"cacert"`
-	Extended          map[string]string  `json:"extended"`
-	Host              string             `json:"host"`
-	Compression       string             `json:"compression"`
-	ExcludeLargerThan string             `json:"exclude_larger_than"`
+	Secrets  *map[string]string `json:"secrets"`
+	CACert   string             `json:"cacert"`
+	Extended map[string]string  `json:"extended"`
+	Host     string             `json:"host"`
 }
 
 var (
@@ -97,10 +96,10 @@ var (
 )
 
 // validate checks the input against the secrets that will be stored.
-func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, roots Roots) error {
+func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, roots Roots, commands bool) error {
 	var errs []error
 	if in.Backend == "local" && filepath.IsAbs(in.Location) {
-		if err := roots.Check(in.Location); err != nil {
+		if err := roots.checkLinks(in.Location); err != nil {
 			errs = append(errs, fmt.Errorf("location: %w", err))
 		}
 	}
@@ -113,22 +112,22 @@ func (in *RepositoryInput) validate(secretEnv map[string]string, creating bool, 
 	if err := backends.Validate(in.Backend, in.Location, in.Env, secretEnv); err != nil {
 		errs = append(errs, err)
 	}
-	if in.Compression == "" {
-		in.Compression = "auto"
-	}
-	if in.Compression != "auto" && in.Compression != "off" && in.Compression != "max" {
-		errs = append(errs, errors.New("compression is one of auto, off, max"))
-	}
-	if in.ExcludeLargerThan != "" && !sizePattern.MatchString(in.ExcludeLargerThan) {
-		errs = append(errs, errors.New("exclude_larger_than is a size such as 500M or 2G"))
-	}
-	if in.CACert != "" && !filepath.IsAbs(in.CACert) {
+	if in.CACert != "" && (!filepath.IsAbs(in.CACert) || strings.ContainsFunc(in.CACert, unicode.IsControl)) {
 		errs = append(errs, errors.New("cacert is an absolute path"))
 	}
 	for _, k := range sortedKeys(in.Extended) {
 		if !extendedKey.MatchString(k) {
 			errs = append(errs, fmt.Errorf("extended option %q is not a restic option name such as s3.storage-class", k))
 		}
+	}
+	env := map[string]string{}
+	for _, m := range []map[string]string{in.Env, secretEnv} {
+		for k, v := range m {
+			env[k] = v
+		}
+	}
+	if found := restic.CommandOptions(in.Location, in.Extended, env); len(found) > 0 && !commands {
+		errs = append(errs, fmt.Errorf("%s would run a program with ResticGUI's rights, which needs hooks.commands: true in the configuration", strings.Join(found, ", ")))
 	}
 	return errors.Join(errs...)
 }
@@ -174,10 +173,9 @@ func (s *Server) repositoryDTO(ctx context.Context, r db.Repository) (Repository
 		ID: r.ID, Name: r.Name, Backend: r.Backend, Location: r.Location,
 		Env: opts.Env, Secrets: sortedKeys(sec.Env), HasPassword: sec.Password != "",
 		CACert: opts.CACert, Extended: opts.Extended,
-		Host: r.Host, Compression: r.Compression, ExcludeLargerThan: r.ExcludeLargerThan,
+		Host:          r.Host,
 		InitializedAt: r.InitializedAt, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt,
-		Paths:     PathsDTO{Include: []string{}, Exclude: []string{}},
-		Schedules: []ScheduleDTO{},
+		Plans: []PlanDTO{}, Schedules: []ScheduleDTO{},
 	}
 	if dto.Env == nil {
 		dto.Env = map[string]string{}
@@ -186,38 +184,23 @@ func (s *Server) repositoryDTO(ctx context.Context, r db.Repository) (Repository
 		dto.Extended = map[string]string{}
 	}
 
-	paths, err := s.Store.ListPaths(ctx, r.ID)
+	plans, err := s.Store.ListPlans(ctx, r.ID)
 	if err != nil {
 		return RepositoryDTO{}, err
 	}
-	for _, p := range paths {
-		if p.Kind == "exclude" {
-			dto.Paths.Exclude = append(dto.Paths.Exclude, p.Path)
-		} else {
-			dto.Paths.Include = append(dto.Paths.Include, p.Path)
+	for _, p := range plans {
+		plan, err := s.planDTO(ctx, p)
+		if err != nil {
+			return RepositoryDTO{}, err
 		}
-	}
-	ret, err := s.Store.GetRetention(ctx, r.ID)
-	switch {
-	case err == nil:
-		dto.Retention = &RetentionDTO{
-			KeepLast: ret.KeepLast, KeepHourly: ret.KeepHourly, KeepDaily: ret.KeepDaily, KeepWeekly: ret.KeepWeekly,
-			KeepMonthly: ret.KeepMonthly, KeepYearly: ret.KeepYearly, KeepWithin: ret.KeepWithin, Prune: ret.Prune,
-		}
-	case !errors.Is(err, sql.ErrNoRows):
-		return RepositoryDTO{}, err
+		dto.Plans = append(dto.Plans, plan)
 	}
 	schedules, err := s.Store.ListSchedules(ctx, r.ID)
 	if err != nil {
 		return RepositoryDTO{}, err
 	}
 	for _, sc := range schedules {
-		out := ScheduleDTO{Job: sc.Job, Cron: sc.Cron, Enabled: sc.Enabled}
-		if spec, err := scheduler.Parse(sc.Cron); err == nil && sc.Enabled {
-			next := spec.Next(time.Now()).UTC()
-			out.NextRun = &next
-		}
-		dto.Schedules = append(dto.Schedules, out)
+		dto.Schedules = append(dto.Schedules, scheduleDTO(sc.Job, sc.Cron, sc.Enabled))
 	}
 	if err := s.monitoringDTO(ctx, &dto); err != nil {
 		return RepositoryDTO{}, err
@@ -275,7 +258,7 @@ func (s *Server) createRepository(c *gin.Context) {
 	if in.Secrets != nil {
 		secretEnv = *in.Secrets
 	}
-	if err := in.validate(secretEnv, true, s.Roots); err != nil {
+	if err := in.validate(secretEnv, true, s.Roots, s.HookCommands); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -291,7 +274,7 @@ func (s *Server) createRepository(c *gin.Context) {
 	}
 	r, err := s.Store.CreateRepository(c.Request.Context(), db.CreateRepositoryParams{
 		Name: in.Name, Backend: in.Backend, Location: in.Location, Options: options, Secrets: sealed,
-		Host: in.Host, Compression: in.Compression, ExcludeLargerThan: in.ExcludeLargerThan,
+		Host: in.Host,
 	})
 	if isUniqueViolation(err) {
 		fail(c, http.StatusConflict, fmt.Sprintf("a repository named %q already exists", in.Name))
@@ -332,7 +315,7 @@ func (s *Server) updateRepository(c *gin.Context) {
 	if in.Password != "" {
 		sec.Password = in.Password
 	}
-	if err := in.validate(sec.Env, false, s.Roots); err != nil {
+	if err := in.validate(sec.Env, false, s.Roots, s.HookCommands); err != nil {
 		invalid(c, err)
 		return
 	}
@@ -349,7 +332,7 @@ func (s *Server) updateRepository(c *gin.Context) {
 	err = s.Store.InTx(ctx, func(q *db.Queries) error {
 		if _, err := q.UpdateRepository(ctx, db.UpdateRepositoryParams{
 			ID: id, Name: in.Name, Backend: in.Backend, Location: in.Location, Options: options,
-			Host: in.Host, Compression: in.Compression, ExcludeLargerThan: in.ExcludeLargerThan,
+			Host: in.Host,
 		}); err != nil {
 			return err
 		}
@@ -399,67 +382,6 @@ func (s *Server) exists(c *gin.Context, id int64) bool {
 	return true
 }
 
-func (s *Server) putPaths(c *gin.Context) {
-	id, ok := repositoryID(c)
-	if !ok {
-		return
-	}
-	var in PathsDTO
-	if err := c.ShouldBindJSON(&in); err != nil {
-		invalid(c, err)
-		return
-	}
-	var errs []error
-	for _, p := range in.Include {
-		if err := s.Roots.Check(p); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	for _, p := range in.Exclude {
-		if strings.TrimSpace(p) == "" {
-			errs = append(errs, errors.New("an exclude pattern is empty"))
-		}
-	}
-	if err := errors.Join(errs...); err != nil {
-		invalid(c, err)
-		return
-	}
-	if !s.exists(c, id) {
-		return
-	}
-	ctx := c.Request.Context()
-	err := s.Store.InTx(ctx, func(q *db.Queries) error {
-		if err := q.DeletePaths(ctx, id); err != nil {
-			return err
-		}
-		for kind, paths := range map[string][]string{"include": in.Include, "exclude": in.Exclude} {
-			for _, p := range dedupe(paths) {
-				if _, err := q.AddPath(ctx, db.AddPathParams{RepositoryID: id, Path: p, Kind: kind}); err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		internal(c, err)
-		return
-	}
-	s.respondRepository(c, http.StatusOK, id)
-}
-
-func dedupe(list []string) []string {
-	seen := map[string]bool{}
-	var out []string
-	for _, v := range list {
-		if !seen[v] {
-			seen[v] = true
-			out = append(out, v)
-		}
-	}
-	return out
-}
-
 // policy validates the retention rules and returns them as restic's.
 func (in RetentionDTO) policy() (restic.Policy, error) {
 	var errs []error
@@ -496,104 +418,14 @@ type KeptSnapshot struct {
 	Matches []string `json:"matches"`
 }
 
-// previewRetention runs "restic forget --dry-run" with the given policy,
-// which need not be saved yet, on the snapshots a forget job would consider.
-func (s *Server) previewRetention(c *gin.Context) {
-	id, ok := repositoryID(c)
-	if !ok {
-		return
-	}
-	var in RetentionDTO
-	if err := c.ShouldBindJSON(&in); err != nil {
-		invalid(c, err)
-		return
-	}
-	policy, err := in.policy()
-	if err != nil {
-		invalid(c, err)
-		return
-	}
-	ctx := c.Request.Context()
-	r, err := s.Store.GetRepository(ctx, id)
-	if err != nil {
-		notFound(c, err, "repository")
-		return
-	}
-	target, err := s.resticRepo(r)
-	if err != nil {
-		internal(c, err)
-		return
-	}
-	opts := jobs.ForgetOptions(r, policy)
-	opts.DryRun = true
-	groups, err := s.Restic.Forget(ctx, target, opts)
-	if err != nil {
-		resticFailure(c, err)
-		return
-	}
-	out := RetentionPreview{Keep: []KeptSnapshot{}, Remove: []restic.Snapshot{}}
-	for _, g := range groups {
-		matches := map[string][]string{}
-		for _, reason := range g.Reasons {
-			matches[reason.Snapshot.ID] = reason.Matches
-		}
-		for _, snap := range g.Keep {
-			out.Keep = append(out.Keep, KeptSnapshot{Snapshot: snap, Matches: matches[snap.ID]})
-		}
-		out.Remove = append(out.Remove, g.Remove...)
-	}
-	sort.Slice(out.Keep, func(i, j int) bool { return out.Keep[i].Time.After(out.Keep[j].Time) })
-	sort.Slice(out.Remove, func(i, j int) bool { return out.Remove[i].Time.After(out.Remove[j].Time) })
-	c.JSON(http.StatusOK, out)
-}
-
-func (s *Server) putRetention(c *gin.Context) {
-	id, ok := repositoryID(c)
-	if !ok {
-		return
-	}
-	var in RetentionDTO
-	if err := c.ShouldBindJSON(&in); err != nil {
-		invalid(c, err)
-		return
-	}
-	if _, err := in.policy(); err != nil {
-		invalid(c, err)
-		return
-	}
-	if !s.exists(c, id) {
-		return
-	}
-	if _, err := s.Store.UpsertRetention(c.Request.Context(), db.UpsertRetentionParams{
-		RepositoryID: id, KeepLast: in.KeepLast, KeepHourly: in.KeepHourly, KeepDaily: in.KeepDaily,
-		KeepWeekly: in.KeepWeekly, KeepMonthly: in.KeepMonthly, KeepYearly: in.KeepYearly,
-		KeepWithin: in.KeepWithin, Prune: in.Prune,
-	}); err != nil {
-		internal(c, err)
-		return
-	}
-	s.respondRepository(c, http.StatusOK, id)
-}
-
-func (s *Server) deleteRetention(c *gin.Context) {
-	id, ok := repositoryID(c)
-	if !ok || !s.exists(c, id) {
-		return
-	}
-	if _, err := s.Store.DeleteRetention(c.Request.Context(), id); err != nil {
-		internal(c, err)
-		return
-	}
-	s.respondRepository(c, http.StatusOK, id)
-}
-
+// scheduleJob reads the :job of a repository's schedule: only the check,
+// since backups and retention are scheduled by plan.
 func scheduleJob(c *gin.Context) (string, bool) {
 	job := c.Param("job")
-	switch jobs.Kind(job) {
-	case jobs.KindBackup, jobs.KindForget, jobs.KindCheck:
+	if jobs.Kind(job) == jobs.KindCheck {
 		return job, true
 	}
-	fail(c, http.StatusBadRequest, "a schedule runs backup, forget or check")
+	fail(c, http.StatusBadRequest, "a repository schedules its check; backups and retention are scheduled in its plans")
 	return "", false
 }
 
@@ -654,13 +486,20 @@ func (s *Server) startJob(c *gin.Context) {
 	}
 	var in struct {
 		Kind jobs.Kind `json:"kind"`
+		// PlanID is the plan a backup or forget runs; it can be left out
+		// when the repository has only one.
+		PlanID int64 `json:"plan_id"`
 	}
 	if err := c.ShouldBindJSON(&in); err != nil {
 		invalid(c, err)
 		return
 	}
-	job, err := s.Jobs.Enqueue(c.Request.Context(), id, in.Kind, jobs.TriggerManual)
+	job, err := s.Jobs.Enqueue(c.Request.Context(), id, in.PlanID, in.Kind, jobs.TriggerManual)
 	switch {
+	case errors.Is(err, jobs.ErrPlanRequired):
+		fail(c, http.StatusBadRequest, "plan_id is required: "+strings.TrimPrefix(err.Error(), jobs.ErrPlanRequired.Error()+": "))
+	case errors.Is(err, jobs.ErrPlanNotFound):
+		fail(c, http.StatusNotFound, "plan not found")
 	case errors.Is(err, jobs.ErrUnknownKind):
 		fail(c, http.StatusBadRequest, "kind is one of init, backup, forget, prune, check, unlock")
 	case errors.Is(err, jobs.ErrRepositoryNotFound):
@@ -690,8 +529,9 @@ func (s *Server) listSnapshots(c *gin.Context) {
 		internal(c, err)
 		return
 	}
-	filter := restic.SnapshotFilter{Host: r.Host, Tags: []string{jobs.Tag(r.ID)}}
-	if c.Query("all") == "true" {
+	all := c.Query("all") == "true"
+	filter := restic.SnapshotFilter{Host: r.Host}
+	if all {
 		// also snapshots made outside resticgui, such as by restic on the command line
 		filter = restic.SnapshotFilter{}
 	}
@@ -699,6 +539,16 @@ func (s *Server) listSnapshots(c *gin.Context) {
 	if err != nil {
 		resticFailure(c, err)
 		return
+	}
+	if !all {
+		// the snapshots of every plan, also deleted ones
+		mine := snaps[:0]
+		for _, snap := range snaps {
+			if jobs.OfRepository(r.ID, snap.Tags) {
+				mine = append(mine, snap)
+			}
+		}
+		snaps = mine
 	}
 	if r.InitializedAt == nil {
 		if err := s.Store.MarkRepositoryInitialized(ctx, r.ID); err != nil {

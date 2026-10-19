@@ -34,7 +34,7 @@ func createRepository(t *testing.T, s *Store, name string) db.Repository {
 	t.Helper()
 	r, err := s.CreateRepository(context.Background(), db.CreateRepositoryParams{
 		Name: name, Backend: "local", Location: "/srv/restic/" + name, Options: "{}",
-		Secrets: []byte("sealed"), Compression: "auto",
+		Secrets: []byte("sealed"),
 	})
 	require.NoError(t, err)
 	return r
@@ -48,9 +48,24 @@ func TestMigrationsUpDownUp(t *testing.T) {
 
 	version, err := migrator.GetDBVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, 3, version)
+	assert.EqualValues(t, 5, version)
 
 	// each down step works on its own
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	var plans int
+	require.NoError(t, s.DB.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name LIKE 'plan%'`).Scan(&plans))
+	assert.Zero(t, plans)
+
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	version, err = migrator.GetDBVersion(ctx)
+	require.NoError(t, err)
+	assert.EqualValues(t, 3, version)
+	var sessions int
+	require.NoError(t, s.DB.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'sessions'`).Scan(&sessions))
+	assert.Zero(t, sessions)
+
 	_, err = migrator.Down(ctx)
 	require.NoError(t, err)
 	version, err = migrator.GetDBVersion(ctx)
@@ -92,14 +107,13 @@ func TestRepositoryConstraints(t *testing.T) {
 	s := openTestStore(t)
 	createRepository(t, s, "docs")
 
-	base := db.CreateRepositoryParams{Backend: "local", Location: "/x", Options: "{}", Secrets: []byte("s"), Compression: "auto"}
+	base := db.CreateRepositoryParams{Backend: "local", Location: "/x", Options: "{}", Secrets: []byte("s")}
 	tests := map[string]func(p *db.CreateRepositoryParams){
-		"duplicate name":      func(p *db.CreateRepositoryParams) { p.Name = "docs" },
-		"empty name":          func(p *db.CreateRepositoryParams) { p.Name = "" },
-		"unknown backend":     func(p *db.CreateRepositoryParams) { p.Name = "a"; p.Backend = "ftp" },
-		"empty location":      func(p *db.CreateRepositoryParams) { p.Name = "b"; p.Location = "" },
-		"invalid options":     func(p *db.CreateRepositoryParams) { p.Name = "c"; p.Options = "{not json" },
-		"unknown compression": func(p *db.CreateRepositoryParams) { p.Name = "d"; p.Compression = "zstd" },
+		"duplicate name":  func(p *db.CreateRepositoryParams) { p.Name = "docs" },
+		"empty name":      func(p *db.CreateRepositoryParams) { p.Name = "" },
+		"unknown backend": func(p *db.CreateRepositoryParams) { p.Name = "a"; p.Backend = "ftp" },
+		"empty location":  func(p *db.CreateRepositoryParams) { p.Name = "b"; p.Location = "" },
+		"invalid options": func(p *db.CreateRepositoryParams) { p.Name = "c"; p.Options = "{not json" },
 	}
 	for name, mutate := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -118,7 +132,7 @@ func TestUpdateRepository(t *testing.T) {
 
 	updated, err := s.UpdateRepository(ctx, db.UpdateRepositoryParams{
 		ID: r.ID, Name: "documents", Backend: "s3", Location: "s3:s3.amazonaws.com/docs",
-		Options: `{"env":{"AWS_DEFAULT_REGION":"eu-west-3"}}`, Compression: "max",
+		Options: `{"env":{"AWS_DEFAULT_REGION":"eu-west-3"}}`,
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "documents", updated.Name)
@@ -142,13 +156,10 @@ func TestDeleteRepositoryCascades(t *testing.T) {
 	other := createRepository(t, s, "other")
 
 	for _, id := range []int64{r.ID, other.ID} {
-		_, err := s.AddPath(ctx, db.AddPathParams{RepositoryID: id, Path: "/data", Kind: "include"})
+		savePlan(t, s, id, "Documents")
+		_, err := s.UpsertSchedule(ctx, db.UpsertScheduleParams{RepositoryID: id, Job: "check", Cron: "0 2 * * *", Enabled: true})
 		require.NoError(t, err)
-		_, err = s.UpsertSchedule(ctx, db.UpsertScheduleParams{RepositoryID: id, Job: "backup", Cron: "0 2 * * *", Enabled: true})
-		require.NoError(t, err)
-		_, err = s.UpsertRetention(ctx, db.UpsertRetentionParams{RepositoryID: id, KeepLast: 3, Prune: true})
-		require.NoError(t, err)
-		_, err = s.CreateJob(ctx, db.CreateJobParams{RepositoryID: id, Kind: "backup", Trigger: "manual", Params: "{}"})
+		_, err = s.CreateJob(ctx, db.CreateJobParams{RepositoryID: id, Kind: "check", Trigger: "manual", Params: "{}"})
 		require.NoError(t, err)
 	}
 
@@ -156,7 +167,7 @@ func TestDeleteRepositoryCascades(t *testing.T) {
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, n)
 
-	for table, want := range map[string]int{"paths": 1, "schedules": 1, "retention": 1, "jobs": 1} {
+	for table, want := range map[string]int{"plans": 1, "plan_paths": 1, "plan_schedules": 1, "plan_retention": 1, "schedules": 1, "jobs": 1} {
 		var count int
 		require.NoError(t, s.DB.QueryRowContext(ctx, "SELECT count(*) FROM "+table).Scan(&count))
 		assert.Equal(t, want, count, table)
@@ -165,38 +176,97 @@ func TestDeleteRepositoryCascades(t *testing.T) {
 
 func TestForeignKeysAreEnforced(t *testing.T) {
 	s := openTestStore(t)
-	_, err := s.AddPath(context.Background(), db.AddPathParams{RepositoryID: 42, Path: "/data", Kind: "include"})
+	err := s.AddPlanPath(context.Background(), db.AddPlanPathParams{PlanID: 42, Path: "/data", Kind: "include"})
 	assert.ErrorContains(t, err, "FOREIGN KEY")
 }
 
-func TestPaths(t *testing.T) {
+func savePlan(t *testing.T, s *Store, repositoryID int64, name string) db.Plan {
+	t.Helper()
+	var plan db.Plan
+	require.NoError(t, s.InTx(context.Background(), func(q *db.Queries) error {
+		var err error
+		plan, err = SavePlan(context.Background(), q, repositoryID, 0, Plan{
+			Name: name, Include: []string{"/data"},
+			Schedules: []db.PlanSchedule{{Job: "backup", Cron: "0 2 * * *", Enabled: true}},
+			Retention: &db.PlanRetention{KeepLast: 3, Prune: true},
+		})
+		return err
+	}))
+	return plan
+}
+
+func TestPlans(t *testing.T) {
 	ctx := context.Background()
 	s := openTestStore(t)
 	r := createRepository(t, s, "docs")
 
-	for _, p := range []db.AddPathParams{
-		{RepositoryID: r.ID, Path: "/home/me", Kind: "include"},
-		{RepositoryID: r.ID, Path: "/home/me/.cache", Kind: "exclude"},
-		{RepositoryID: r.ID, Path: "/etc", Kind: "include"},
-	} {
-		_, err := s.AddPath(ctx, p)
-		require.NoError(t, err)
-	}
-	_, err := s.AddPath(ctx, db.AddPathParams{RepositoryID: r.ID, Path: "/etc", Kind: "include"})
-	assert.Error(t, err, "duplicate path")
-	_, err = s.AddPath(ctx, db.AddPathParams{RepositoryID: r.ID, Path: "/opt", Kind: "maybe"})
-	assert.Error(t, err, "unknown kind")
+	var plan db.Plan
+	require.NoError(t, s.InTx(ctx, func(q *db.Queries) error {
+		var err error
+		plan, err = SavePlan(ctx, q, r.ID, 0, Plan{
+			Name: "Home", Tags: []string{"laptop"},
+			Options: PlanOptions{Compression: "max", OneFileSystem: true, LimitUpload: 512},
+			Include: []string{"/home/me", "/etc", "/etc"}, Exclude: []string{"/home/me/.cache"},
+			Schedules: []db.PlanSchedule{{Job: "backup", Cron: "@hourly", Enabled: true}, {Job: "forget", Cron: "0 4 * * 0", Enabled: false}},
+			Retention: &db.PlanRetention{KeepDaily: 7, KeepWithin: "30d", Prune: true},
+		})
+		return err
+	}))
+	assert.Regexp(t, `^resticgui:\d+:[0-9a-f]{8}$`, plan.Tag)
 
-	paths, err := s.ListPaths(ctx, r.ID)
+	paths, err := s.ListPlanPaths(ctx, plan.ID)
 	require.NoError(t, err)
 	var got []string
 	for _, p := range paths {
 		got = append(got, p.Kind+":"+p.Path)
 	}
-	assert.Equal(t, []string{"exclude:/home/me/.cache", "include:/etc", "include:/home/me"}, got)
+	assert.Equal(t, []string{"exclude:/home/me/.cache", "include:/etc", "include:/home/me"}, got, "duplicates are dropped")
+	opts, err := DecodePlanOptions(plan.Options)
+	require.NoError(t, err)
+	assert.Equal(t, PlanOptions{Compression: "max", OneFileSystem: true, LimitUpload: 512, ExcludeIfPresent: []string{}}, opts)
+	tags, err := DecodeTags(plan.Tags)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"laptop"}, tags)
 
-	require.NoError(t, s.DeletePaths(ctx, r.ID))
-	paths, err = s.ListPaths(ctx, r.ID)
+	enabled, err := s.EnabledSchedules(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, []Schedule{{RepositoryID: r.ID, PlanID: plan.ID, Job: "backup", Cron: "@hourly"}}, enabled)
+
+	// saving replaces everything but the tag
+	require.NoError(t, s.InTx(ctx, func(q *db.Queries) error {
+		updated, err := SavePlan(ctx, q, r.ID, plan.ID, Plan{Name: "Home folder", Include: []string{"/home/me"}})
+		assert.Equal(t, plan.Tag, updated.Tag)
+		return err
+	}))
+	schedules, err := s.ListPlanSchedules(ctx, plan.ID)
+	require.NoError(t, err)
+	assert.Empty(t, schedules)
+	_, err = s.GetPlanRetention(ctx, plan.ID)
+	assert.ErrorIs(t, err, sql.ErrNoRows)
+
+	err = s.InTx(ctx, func(q *db.Queries) error {
+		_, err := SavePlan(ctx, q, r.ID, 0, Plan{Name: "Home folder"})
+		return err
+	})
+	assert.Error(t, err, "names are unique within a repository")
+	other := createRepository(t, s, "other")
+	savePlan(t, s, other.ID, "Home folder")
+
+	err = s.InTx(ctx, func(q *db.Queries) error {
+		_, err := SavePlan(ctx, q, r.ID, plan.ID, Plan{Name: "x", Retention: &db.PlanRetention{KeepLast: -1}})
+		return err
+	})
+	assert.Error(t, err, "negative counts are rejected")
+	err = s.InTx(ctx, func(q *db.Queries) error {
+		_, err := SavePlan(ctx, q, r.ID, plan.ID, Plan{Name: "x", Schedules: []db.PlanSchedule{{Job: "check", Cron: "@daily"}}})
+		return err
+	})
+	assert.Error(t, err, "a check is scheduled on the repository")
+
+	n, err := s.DeletePlan(ctx, plan.ID)
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, n)
+	paths, err = s.ListPlanPaths(ctx, plan.ID)
 	require.NoError(t, err)
 	assert.Empty(t, paths)
 }
@@ -229,24 +299,6 @@ func TestSchedules(t *testing.T) {
 	n, err := s.DeleteSchedule(ctx, db.DeleteScheduleParams{RepositoryID: r.ID, Job: "forget"})
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, n)
-}
-
-func TestRetention(t *testing.T) {
-	ctx := context.Background()
-	s := openTestStore(t)
-	r := createRepository(t, s, "docs")
-
-	_, err := s.GetRetention(ctx, r.ID)
-	assert.True(t, errors.Is(err, sql.ErrNoRows))
-
-	_, err = s.UpsertRetention(ctx, db.UpsertRetentionParams{RepositoryID: r.ID, KeepDaily: 7, Prune: true})
-	require.NoError(t, err)
-	got, err := s.UpsertRetention(ctx, db.UpsertRetentionParams{RepositoryID: r.ID, KeepHourly: 24, KeepYearly: 2, KeepWithin: "30d"})
-	require.NoError(t, err)
-	assert.Equal(t, db.Retention{RepositoryID: r.ID, KeepHourly: 24, KeepYearly: 2, KeepWithin: "30d"}, got)
-
-	_, err = s.UpsertRetention(ctx, db.UpsertRetentionParams{RepositoryID: r.ID, KeepLast: -1})
-	assert.Error(t, err, "negative counts are rejected")
 }
 
 func TestJobLifecycle(t *testing.T) {
@@ -330,7 +382,7 @@ func TestInTxRollsBack(t *testing.T) {
 
 	err := s.InTx(ctx, func(q *db.Queries) error {
 		_, err := q.CreateRepository(ctx, db.CreateRepositoryParams{
-			Name: "rolled-back", Backend: "local", Location: "/x", Options: "{}", Secrets: []byte("s"), Compression: "auto",
+			Name: "rolled-back", Backend: "local", Location: "/x", Options: "{}", Secrets: []byte("s"),
 		})
 		require.NoError(t, err)
 		return boom
@@ -341,7 +393,7 @@ func TestInTxRollsBack(t *testing.T) {
 
 	require.NoError(t, s.InTx(ctx, func(q *db.Queries) error {
 		_, err := q.CreateRepository(ctx, db.CreateRepositoryParams{
-			Name: "committed", Backend: "local", Location: "/x", Options: "{}", Secrets: []byte("s"), Compression: "auto",
+			Name: "committed", Backend: "local", Location: "/x", Options: "{}", Secrets: []byte("s"),
 		})
 		return err
 	}))
@@ -358,7 +410,7 @@ func TestSecretsAreStoredEncrypted(t *testing.T) {
 	sealed, err := SealSecrets(box, in)
 	require.NoError(t, err)
 	r, err := s.CreateRepository(ctx, db.CreateRepositoryParams{
-		Name: "s3", Backend: "s3", Location: "s3:s3.amazonaws.com/b", Options: "{}", Secrets: sealed, Compression: "auto",
+		Name: "s3", Backend: "s3", Location: "s3:s3.amazonaws.com/b", Options: "{}", Secrets: sealed,
 	})
 	require.NoError(t, err)
 
@@ -413,4 +465,95 @@ func TestRepositoryMonitoringGoesWithTheRepository(t *testing.T) {
 	stats, err = s.ListRepositoryStats(ctx)
 	require.NoError(t, err)
 	assert.Empty(t, stats)
+}
+
+// A database of phase 8, with a repository set up the way it was then,
+// upgrades to one plan holding its settings, and back.
+func TestMigrationTurnsRepositorySettingsIntoAPlan(t *testing.T) {
+	ctx := context.Background()
+	conn, err := sql.Open("sqlite", dsn(filepath.Join(t.TempDir(), "resticgui.db")))
+	require.NoError(t, err)
+	conn.SetMaxOpenConns(1)
+	t.Cleanup(func() { conn.Close() })
+	migrator, err := newMigrator(conn)
+	require.NoError(t, err)
+	_, err = migrator.UpTo(ctx, 3)
+	require.NoError(t, err)
+
+	for _, stmt := range []string{
+		`INSERT INTO repositories (id, name, backend, location, secrets, host, compression, exclude_larger_than)
+		 VALUES (7, 'photos', 'local', '/srv/photos', x'00', 'nas', 'max', '2G'), (8, 'empty', 'local', '/srv/empty', x'00', '', 'auto', '')`,
+		`INSERT INTO paths (repository_id, path, kind) VALUES (7, '/photos', 'include'), (7, '*.tmp', 'exclude')`,
+		`INSERT INTO schedules (repository_id, job, cron, enabled) VALUES (7, 'backup', '30 2 * * *', 1), (7, 'forget', '0 4 * * 0', 0), (7, 'check', '@monthly', 1)`,
+		`INSERT INTO retention (repository_id, keep_daily, keep_within, prune) VALUES (7, 7, '1y', 0)`,
+		`INSERT INTO jobs (repository_id, kind, trigger, status) VALUES (7, 'backup', 'schedule', 'succeeded'), (7, 'check', 'manual', 'succeeded')`,
+	} {
+		_, err := conn.ExecContext(ctx, stmt)
+		require.NoError(t, err, stmt)
+	}
+
+	_, err = migrator.Up(ctx)
+	require.NoError(t, err)
+	q := db.New(conn)
+	plans, err := q.ListPlans(ctx, 7)
+	require.NoError(t, err)
+	require.Len(t, plans, 1)
+	plan := plans[0]
+	assert.Equal(t, "Default", plan.Name)
+	assert.Equal(t, "resticgui:7", plan.Tag, "the tag of the snapshots made so far")
+	opts, err := DecodePlanOptions(plan.Options)
+	require.NoError(t, err)
+	assert.Equal(t, "max", opts.Compression)
+	assert.Equal(t, "2G", opts.ExcludeLargerThan)
+	paths, err := q.ListPlanPaths(ctx, plan.ID)
+	require.NoError(t, err)
+	assert.Len(t, paths, 2)
+	schedules, err := q.ListPlanSchedules(ctx, plan.ID)
+	require.NoError(t, err)
+	assert.Equal(t, []db.PlanSchedule{
+		{PlanID: plan.ID, Job: "backup", Cron: "30 2 * * *", Enabled: true},
+		{PlanID: plan.ID, Job: "forget", Cron: "0 4 * * 0", Enabled: false},
+	}, schedules)
+	repoSchedules, err := q.ListSchedules(ctx, 7)
+	require.NoError(t, err)
+	require.Len(t, repoSchedules, 1)
+	assert.Equal(t, "check", repoSchedules[0].Job, "the check stays on the repository")
+	ret, err := q.GetPlanRetention(ctx, plan.ID)
+	require.NoError(t, err)
+	assert.Equal(t, db.PlanRetention{PlanID: plan.ID, KeepDaily: 7, KeepWithin: "1y"}, ret)
+	history, err := q.ListJobsForRepository(ctx, db.ListJobsForRepositoryParams{RepositoryID: 7, Limit: 10})
+	require.NoError(t, err)
+	require.Len(t, history, 2)
+	assert.Nil(t, history[0].PlanID, "a check belongs to no plan")
+	require.NotNil(t, history[1].PlanID)
+	assert.Equal(t, plan.ID, *history[1].PlanID)
+	empty, err := q.ListPlans(ctx, 8)
+	require.NoError(t, err)
+	assert.Len(t, empty, 1, "every repository gets its plan")
+
+	// a second plan is lost going down; the first one's settings come back
+	require.NoError(t, (&Store{Queries: q, DB: conn}).InTx(ctx, func(tx *db.Queries) error {
+		_, err := SavePlan(ctx, tx, 7, 0, Plan{Name: "Videos", Include: []string{"/videos"}})
+		return err
+	}))
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	var compression, larger string
+	require.NoError(t, conn.QueryRowContext(ctx, `SELECT compression, exclude_larger_than FROM repositories WHERE id = 7`).Scan(&compression, &larger))
+	assert.Equal(t, []string{"max", "2G"}, []string{compression, larger})
+	var restored []string
+	rows, err := conn.QueryContext(ctx, `SELECT kind || ':' || path FROM paths WHERE repository_id = 7 ORDER BY kind, path`)
+	require.NoError(t, err)
+	for rows.Next() {
+		var p string
+		require.NoError(t, rows.Scan(&p))
+		restored = append(restored, p)
+	}
+	require.NoError(t, rows.Err())
+	assert.Equal(t, []string{"exclude:*.tmp", "include:/photos"}, restored)
+	var count int
+	require.NoError(t, conn.QueryRowContext(ctx, `SELECT count(*) FROM schedules WHERE repository_id = 7`).Scan(&count))
+	assert.Equal(t, 3, count)
+	require.NoError(t, conn.QueryRowContext(ctx, `SELECT keep_daily FROM retention WHERE repository_id = 7`).Scan(&count))
+	assert.Equal(t, 7, count)
 }

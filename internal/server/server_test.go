@@ -247,10 +247,8 @@ func TestCreateAndGetRepository(t *testing.T) {
 	assert.Equal(t, map[string]string{"AWS_DEFAULT_REGION": "eu-west-3", "AWS_ACCESS_KEY_ID": "AKIAEXAMPLE"}, created.Env)
 	assert.Equal(t, []string{"AWS_SECRET_ACCESS_KEY"}, created.Secrets)
 	assert.True(t, created.HasPassword)
-	assert.Equal(t, "auto", created.Compression)
 	assert.Nil(t, created.InitializedAt)
-	assert.Equal(t, PathsDTO{Include: []string{}, Exclude: []string{}}, created.Paths)
-	assert.Nil(t, created.Retention)
+	assert.Equal(t, []PlanDTO{}, created.Plans, "plans are added after")
 	assert.Empty(t, created.Schedules)
 
 	status, body := a.do(http.MethodGet, "/repositories/"+itoa(created.ID), nil)
@@ -272,10 +270,9 @@ func TestCreateAndGetRepository(t *testing.T) {
 func TestCreateRepositoryValidation(t *testing.T) {
 	a := newAPI(t)
 	status, body := a.do(http.MethodPost, "/repositories", map[string]any{
-		"backend": "s3", "location": "/not/s3", "compression": "fast",
-		"env":                 map[string]string{"LD_PRELOAD": "/tmp/x.so"},
-		"exclude_larger_than": "big",
-		"extended":            map[string]string{"--no-lock": "true"},
+		"backend": "s3", "location": "/not/s3",
+		"env":      map[string]string{"LD_PRELOAD": "/tmp/x.so"},
+		"extended": map[string]string{"--no-lock": "true"},
 	})
 	require.Equal(t, http.StatusBadRequest, status)
 	var e apiError
@@ -283,14 +280,31 @@ func TestCreateRepositoryValidation(t *testing.T) {
 	details := strings.Join(e.Details, "\n")
 	for _, want := range []string{
 		"name is required", "password is required", `a s3 location starts with "s3:"`,
-		"LD_PRELOAD", "AWS_SECRET_ACCESS_KEY is required", "compression is one of",
-		"exclude_larger_than", `extended option "--no-lock"`,
+		"LD_PRELOAD", "AWS_SECRET_ACCESS_KEY is required", `extended option "--no-lock"`,
 	} {
 		assert.Contains(t, details, want)
 	}
 
 	status, _ = a.do(http.MethodPost, "/repositories", "not an object")
 	assert.Equal(t, http.StatusBadRequest, status)
+}
+
+func TestOptionsThatRunProgramsNeedCommandHooks(t *testing.T) {
+	sftp := map[string]any{
+		"name": "sftp", "backend": "sftp", "location": "sftp:nas:/backups", "password": "pw",
+		"extended": map[string]string{"sftp.command": "sh -c 'id > /tmp/owned'"},
+	}
+	a := newAPI(t)
+	for _, path := range []string{"/repositories", "/repositories/probe"} {
+		status, body := a.do(http.MethodPost, path, sftp)
+		require.Equal(t, http.StatusBadRequest, status, path)
+		assert.Contains(t, string(body), "sftp.command would run a program", path)
+	}
+	assert.Nil(t, a.restic.filters, "nothing was run")
+
+	allowed := newAPI(t, func(s *Server) { s.HookCommands = true })
+	status, body := allowed.do(http.MethodPost, "/repositories", sftp)
+	assert.Equal(t, http.StatusCreated, status, string(body))
 }
 
 func TestUpdateRepositoryKeepsOrReplacesSecrets(t *testing.T) {
@@ -302,13 +316,11 @@ func TestUpdateRepositoryKeepsOrReplacesSecrets(t *testing.T) {
 	in := s3Input("photos-renamed")
 	delete(in, "password")
 	delete(in, "secrets")
-	in["compression"] = "max"
 	status, body := a.do(http.MethodPut, path, in)
 	require.Equal(t, http.StatusOK, status, string(body))
 	var updated RepositoryDTO
 	a.decode(body, &updated)
 	assert.Equal(t, "photos-renamed", updated.Name)
-	assert.Equal(t, "max", updated.Compression)
 	assert.Equal(t, []string{"AWS_SECRET_ACCESS_KEY"}, updated.Secrets)
 	sec := a.secrets(repo.ID)
 	assert.Equal(t, password, sec.Password)
@@ -345,136 +357,6 @@ func (a *api) secrets(id int64) store.RepositorySecrets {
 	sec, err := store.OpenSecrets(box, r.Secrets)
 	require.NoError(a.t, err)
 	return sec
-}
-
-func TestPaths(t *testing.T) {
-	a := newAPI(t)
-	repo := a.create("photos")
-	path := "/repositories/" + itoa(repo.ID) + "/paths"
-
-	status, body := a.do(http.MethodPut, path, PathsDTO{Include: []string{"relative/dir"}, Exclude: []string{" "}})
-	require.Equal(t, http.StatusBadRequest, status)
-	assert.Contains(t, string(body), `\"relative/dir\" is not an absolute path`)
-	assert.Contains(t, string(body), "an exclude pattern is empty")
-
-	status, body = a.do(http.MethodPut, path, PathsDTO{
-		Include: []string{"/home/me/Pictures", "/home/me/Documents", "/home/me/Pictures"},
-		Exclude: []string{"*.tmp"},
-	})
-	require.Equal(t, http.StatusOK, status, string(body))
-	var dto RepositoryDTO
-	a.decode(body, &dto)
-	assert.Equal(t, PathsDTO{Include: []string{"/home/me/Documents", "/home/me/Pictures"}, Exclude: []string{"*.tmp"}}, dto.Paths)
-
-	status, body = a.do(http.MethodPut, path, PathsDTO{Include: []string{"/srv"}})
-	require.Equal(t, http.StatusOK, status)
-	a.decode(body, &dto)
-	assert.Equal(t, PathsDTO{Include: []string{"/srv"}, Exclude: []string{}}, dto.Paths, "PUT replaces every path")
-
-	status, _ = a.do(http.MethodPut, "/repositories/999/paths", PathsDTO{})
-	assert.Equal(t, http.StatusNotFound, status)
-}
-
-func TestRetention(t *testing.T) {
-	a := newAPI(t)
-	repo := a.create("photos")
-	path := "/repositories/" + itoa(repo.ID) + "/retention"
-
-	status, body := a.do(http.MethodPut, path, RetentionDTO{})
-	require.Equal(t, http.StatusBadRequest, status)
-	assert.Contains(t, string(body), "must keep something")
-	status, body = a.do(http.MethodPut, path, RetentionDTO{KeepDaily: -1, KeepWithin: "a while"})
-	require.Equal(t, http.StatusBadRequest, status)
-	assert.Contains(t, string(body), "keep_daily cannot be negative")
-	assert.Contains(t, string(body), "keep_within is a duration")
-
-	want := RetentionDTO{KeepDaily: 7, KeepWeekly: 4, KeepYearly: 3, KeepWithin: "1y6m", Prune: true}
-	status, body = a.do(http.MethodPut, path, want)
-	require.Equal(t, http.StatusOK, status, string(body))
-	var dto RepositoryDTO
-	a.decode(body, &dto)
-	assert.Equal(t, &want, dto.Retention)
-
-	status, body = a.do(http.MethodDelete, path, nil)
-	require.Equal(t, http.StatusOK, status)
-	a.decode(body, &dto)
-	assert.Nil(t, dto.Retention)
-}
-
-func TestRetentionPreview(t *testing.T) {
-	a := newAPI(t)
-	repo := a.create("photos")
-	path := "/repositories/" + itoa(repo.ID) + "/retention/preview"
-	day := func(d int) time.Time { return time.Date(2026, 10, d, 2, 30, 0, 0, time.UTC) }
-	a.restic.groups = []restic.ForgetGroup{{
-		Keep:    []restic.Snapshot{{ID: "aaaa1111", Time: day(1)}, {ID: "cccc3333", Time: day(3)}},
-		Remove:  []restic.Snapshot{{ID: "bbbb2222", Time: day(2)}},
-		Reasons: []restic.KeepReason{{Snapshot: restic.Snapshot{ID: "cccc3333"}, Matches: []string{"daily snapshot"}}},
-	}}
-
-	status, body := a.do(http.MethodPost, path, RetentionDTO{})
-	assert.Equal(t, http.StatusBadRequest, status, "an empty policy is refused before restic runs")
-	assert.Contains(t, string(body), "must keep something")
-	assert.Empty(t, a.restic.forgets)
-
-	status, body = a.do(http.MethodPost, path, RetentionDTO{KeepDaily: 2})
-	require.Equal(t, http.StatusOK, status, string(body))
-	var preview RetentionPreview
-	a.decode(body, &preview)
-	require.Len(t, preview.Keep, 2)
-	assert.Equal(t, "cccc3333", preview.Keep[0].ID, "newest first")
-	assert.Equal(t, []string{"daily snapshot"}, preview.Keep[0].Matches)
-	require.Len(t, preview.Remove, 1)
-	assert.Equal(t, "bbbb2222", preview.Remove[0].ID)
-
-	require.Len(t, a.restic.forgets, 1)
-	opts := a.restic.forgets[0]
-	assert.True(t, opts.DryRun, "a preview never forgets anything")
-	assert.False(t, opts.Prune)
-	assert.Equal(t, restic.Policy{KeepDaily: 2}, opts.Policy)
-	assert.Equal(t, []string{jobs.Tag(repo.ID)}, opts.Filter.Tags, "same snapshots as a forget job")
-	assert.Equal(t, "host,tags", opts.GroupBy)
-
-	a.restic.err = restic.ErrRepositoryNotFound
-	status, _ = a.do(http.MethodPost, path, RetentionDTO{KeepDaily: 2})
-	assert.Equal(t, http.StatusConflict, status)
-	status, _ = a.do(http.MethodPost, "/repositories/999/retention/preview", RetentionDTO{KeepDaily: 2})
-	assert.Equal(t, http.StatusNotFound, status)
-}
-
-func TestSchedules(t *testing.T) {
-	a := newAPI(t)
-	repo := a.create("photos")
-	base := "/repositories/" + itoa(repo.ID) + "/schedules/"
-
-	status, _ := a.do(http.MethodPut, base+"restore", map[string]any{"cron": "@daily"})
-	assert.Equal(t, http.StatusBadRequest, status)
-	status, body := a.do(http.MethodPut, base+"backup", map[string]any{"cron": "every day"})
-	assert.Equal(t, http.StatusBadRequest, status)
-	assert.Contains(t, string(body), "invalid schedule")
-	assert.EqualValues(t, 0, a.reloads.n.Load())
-
-	status, body = a.do(http.MethodPut, base+"backup", map[string]any{"cron": "30 2 * * *"})
-	require.Equal(t, http.StatusOK, status, string(body))
-	status, body = a.do(http.MethodPut, base+"forget", map[string]any{"cron": "@weekly", "enabled": false})
-	require.Equal(t, http.StatusOK, status, string(body))
-	var dto RepositoryDTO
-	a.decode(body, &dto)
-	require.Len(t, dto.Schedules, 2)
-	next := dto.Schedules[0].NextRun
-	require.NotNil(t, next, "an enabled schedule says when it runs next")
-	assert.Equal(t, 2, next.Local().Hour(), "cron runs in the server's time zone")
-	assert.Equal(t, 30, next.Local().Minute())
-	assert.WithinDuration(t, time.Now(), *next, 24*time.Hour)
-	dto.Schedules[0].NextRun = nil
-	assert.Equal(t, []ScheduleDTO{{Job: "backup", Cron: "30 2 * * *", Enabled: true}, {Job: "forget", Cron: "@weekly", Enabled: false}}, dto.Schedules)
-	assert.EqualValues(t, 2, a.reloads.n.Load(), "the scheduler reloads after each change")
-
-	status, body = a.do(http.MethodDelete, base+"backup", nil)
-	require.Equal(t, http.StatusOK, status)
-	a.decode(body, &dto)
-	assert.Equal(t, []ScheduleDTO{{Job: "forget", Cron: "@weekly", Enabled: false}}, dto.Schedules)
-	assert.EqualValues(t, 3, a.reloads.n.Load())
 }
 
 func TestJobsAndDelete(t *testing.T) {
@@ -526,20 +408,28 @@ func TestSnapshots(t *testing.T) {
 	a := newAPI(t)
 	repo := a.create("photos")
 	path := "/repositories/" + itoa(repo.ID) + "/snapshots"
-	a.restic.snapshots = []restic.Snapshot{{ID: "abc", ShortID: "abc"}}
+	tag := jobs.Tag(repo.ID)
+	a.restic.snapshots = []restic.Snapshot{
+		{ID: "before-plans", Tags: []string{tag}},
+		{ID: "of-a-plan", Tags: []string{"work", tag + ":0a1b2c3d"}},
+		{ID: "by-hand", Tags: []string{"manual"}},
+		{ID: "another-repository", Tags: []string{tag + "0:0a1b2c3d"}},
+	}
 	require.Nil(t, repo.InitializedAt)
 
 	status, body := a.do(http.MethodGet, path, nil)
 	require.Equal(t, http.StatusOK, status, string(body))
 	var snaps []restic.Snapshot
 	a.decode(body, &snaps)
-	assert.Equal(t, a.restic.snapshots, snaps)
+	assert.Equal(t, a.restic.snapshots[:2], snaps, "the snapshots of every plan, also deleted ones")
 	_, body = a.do(http.MethodGet, "/repositories/"+itoa(repo.ID), nil)
 	a.decode(body, &repo)
 	assert.NotNil(t, repo.InitializedAt, "listing snapshots shows the repository exists")
-	status, _ = a.do(http.MethodGet, path+"?all=true", nil)
+	status, body = a.do(http.MethodGet, path+"?all=true", nil)
 	require.Equal(t, http.StatusOK, status)
-	assert.Equal(t, []restic.SnapshotFilter{{Host: "nas", Tags: []string{jobs.Tag(repo.ID)}}, {}}, a.restic.filters)
+	a.decode(body, &snaps)
+	assert.Len(t, snaps, 4)
+	assert.Equal(t, []restic.SnapshotFilter{{Host: "nas"}, {}}, a.restic.filters)
 
 	a.restic.err = &restic.Error{Command: "snapshots", ExitCode: 12}
 	status, body = a.do(http.MethodGet, path, nil)

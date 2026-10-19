@@ -2,9 +2,12 @@ package server
 
 import (
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"unicode"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,7 +86,25 @@ func TestDownload(t *testing.T) {
 	require.NoError(t, err)
 	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, `attachment; filename="docs.zip"`, resp.Header.Get("Content-Disposition"))
+	assert.Equal(t, `attachment; filename=docs.zip`, resp.Header.Get("Content-Disposition"))
+	assert.Equal(t, "application/octet-stream", resp.Header.Get("Content-Type"), "a backed-up page is never rendered")
+
+	// hostile names stay one quoted or encoded parameter
+	for name, want := range map[string]string{
+		`a "b".txt`:                `attachment; filename="a \"b\".txt"`,
+		"été.txt":                  `attachment; filename*=utf-8''%C3%A9t%C3%A9.txt`,
+		"x\r\nSet-Cookie: a=b.txt": "",
+	} {
+		resp, err := http.Get(a.srv.URL + BasePath + base + "?archive=none&path=" + url.QueryEscape("/docs/"+name))
+		require.NoError(t, err)
+		resp.Body.Close()
+		got := resp.Header.Get("Content-Disposition")
+		if want != "" {
+			assert.Equal(t, want, got, name)
+		}
+		assert.Empty(t, resp.Header.Get("Set-Cookie"), name)
+	}
+	a.restic.calls = a.restic.calls[:1]
 
 	status, _ := a.do(http.MethodGet, base+"?path=/docs/a.txt&archive=none", nil)
 	assert.Equal(t, http.StatusOK, status)
@@ -138,12 +159,12 @@ func TestRootsLimitPathsAndLocations(t *testing.T) {
 	var repo RepositoryDTO
 	a.decode(body, &repo)
 
-	paths := "/repositories/" + itoa(repo.ID) + "/paths"
-	status, body = a.do(http.MethodPut, paths, PathsDTO{Include: []string{filepath.Join(root, "..", "escape")}})
+	plans := "/repositories/" + itoa(repo.ID) + "/plans"
+	status, body = a.do(http.MethodPost, plans, planInput("Escape", filepath.Join(root, "..", "escape")))
 	require.Equal(t, http.StatusBadRequest, status)
 	assert.Contains(t, string(body), "outside the allowed directories")
-	status, _ = a.do(http.MethodPut, paths, PathsDTO{Include: []string{filepath.Join(root, "data")}})
-	assert.Equal(t, http.StatusOK, status)
+	status, _ = a.do(http.MethodPost, plans, planInput("Data", filepath.Join(root, "data")))
+	assert.Equal(t, http.StatusCreated, status)
 }
 
 func TestBrowse(t *testing.T) {
@@ -188,4 +209,58 @@ func TestRoots(t *testing.T) {
 	assert.NoError(t, Roots(nil).Check("/anything"))
 	_, err = NewRoots([]string{"relative"})
 	assert.Error(t, err)
+}
+
+func TestRootsRefuseNewlinesAndLinksOutside(t *testing.T) {
+	root := t.TempDir()
+	outside := t.TempDir()
+	require.NoError(t, os.Symlink(outside, filepath.Join(root, "escape")))
+	require.NoError(t, os.Mkdir(filepath.Join(root, "inside"), 0o755))
+	require.NoError(t, os.Symlink(filepath.Join(root, "inside"), filepath.Join(root, "alias")))
+	a := newAPI(t, func(s *Server) { s.Roots = Roots{root} })
+	repo := a.create("photos")
+	plans := "/repositories/" + itoa(repo.ID) + "/plans"
+
+	for _, p := range []string{
+		filepath.Join(root, "x") + "\n/etc", // restic reads the paths one per line
+		filepath.Join(root, "escape"),
+		filepath.Join(root, "escape", "not", "yet", "there"),
+	} {
+		status, body := a.do(http.MethodPost, plans, planInput("Bad", p))
+		assert.Equal(t, http.StatusBadRequest, status, p)
+		assert.NotContains(t, string(body), `"paths"`, p)
+	}
+	for i, p := range []string{filepath.Join(root, "alias"), filepath.Join(root, "alias", "new")} {
+		status, body := a.do(http.MethodPost, plans, planInput("Good "+itoa(int64(i)), p))
+		assert.Equal(t, http.StatusCreated, status, string(body))
+	}
+
+	a.restic.snapshots = []restic.Snapshot{{ID: "abcdef12"}}
+	status, body := a.do(http.MethodPost, "/repositories/"+itoa(repo.ID)+"/snapshots/abcdef12/restore",
+		map[string]any{"target": filepath.Join(root, "escape", "restored")})
+	assert.Equal(t, http.StatusBadRequest, status, string(body))
+	assert.Contains(t, string(body), "leads outside the allowed directories")
+}
+
+func FuzzRootsCheck(f *testing.F) {
+	for _, p := range []string{"/srv/data/x", "/srv/data/../etc", "/srv/database", "/srv/data\n/etc", "/srv//data/./a", "relative", "/"} {
+		f.Add(p)
+	}
+	roots, err := NewRoots([]string{"/srv/data", "/home"})
+	require.NoError(f, err)
+	f.Fuzz(func(t *testing.T, p string) {
+		if roots.Check(p) != nil {
+			return
+		}
+		clean := filepath.Clean(p)
+		if strings.ContainsFunc(p, unicode.IsControl) {
+			t.Fatalf("%q accepted with a control character", p)
+		}
+		if clean != "/srv/data" && clean != "/home" && !strings.HasPrefix(clean, "/srv/data/") && !strings.HasPrefix(clean, "/home/") {
+			t.Fatalf("%q accepted, cleaned to %q outside the roots", p, clean)
+		}
+		if roots.Check(clean) != nil {
+			t.Fatalf("%q accepted but not its clean form %q", p, clean)
+		}
+	})
 }

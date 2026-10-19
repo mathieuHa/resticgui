@@ -5,6 +5,9 @@ logs:
 server:
   ip: "127.0.0.1"
   port: 3001
+  # host names the server is reached by without a login, besides IP
+  # addresses and localhost; others are refused against DNS rebinding
+  allowed_hosts: []
 
 store:
   # SQLite database, created on the first start

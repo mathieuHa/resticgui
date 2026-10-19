@@ -41,6 +41,7 @@ type Job struct {
 	ExitCode     *int64
 	LogExcerpt   string
 	Params       string
+	PlanID       *int64
 }
 
 type Notifier struct {
@@ -55,26 +56,53 @@ type Notifier struct {
 	CreatedAt time.Time
 }
 
-type Path struct {
+type Plan struct {
 	ID           int64
 	RepositoryID int64
-	Path         string
-	Kind         string
+	Name         string
+	Tag          string
+	Tags         string
+	Options      string
+	CreatedAt    time.Time
+}
+
+type PlanPath struct {
+	ID     int64
+	PlanID int64
+	Path   string
+	Kind   string
+}
+
+type PlanRetention struct {
+	PlanID      int64
+	KeepLast    int64
+	KeepHourly  int64
+	KeepDaily   int64
+	KeepWeekly  int64
+	KeepMonthly int64
+	KeepYearly  int64
+	KeepWithin  string
+	Prune       bool
+}
+
+type PlanSchedule struct {
+	PlanID  int64
+	Job     string
+	Cron    string
+	Enabled bool
 }
 
 type Repository struct {
-	ID                int64
-	Name              string
-	Backend           string
-	Location          string
-	Options           string
-	Secrets           []byte
-	Host              string
-	Compression       string
-	ExcludeLargerThan string
-	InitializedAt     *time.Time
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ID            int64
+	Name          string
+	Backend       string
+	Location      string
+	Options       string
+	Secrets       []byte
+	Host          string
+	InitializedAt *time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type RepositoryStat struct {
@@ -84,22 +112,17 @@ type RepositoryStat struct {
 	UpdatedAt    time.Time
 }
 
-type Retention struct {
-	RepositoryID int64
-	KeepLast     int64
-	KeepHourly   int64
-	KeepDaily    int64
-	KeepWeekly   int64
-	KeepMonthly  int64
-	KeepYearly   int64
-	KeepWithin   string
-	Prune        bool
-}
-
 type Schedule struct {
 	ID           int64
 	RepositoryID int64
 	Job          string
 	Cron         string
 	Enabled      bool
+}
+
+type Session struct {
+	TokenHash  []byte
+	Principal  string
+	CreatedAt  int64
+	LastSeenAt int64
 }

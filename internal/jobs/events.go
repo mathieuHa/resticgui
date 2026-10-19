@@ -13,14 +13,16 @@ const (
 // Event is published on every job status change and, for backups, on
 // progress. It is what the /events stream carries.
 type Event struct {
-	Type         string    `json:"-"`
-	JobID        int64     `json:"job_id"`
-	RepositoryID int64     `json:"repository_id"`
-	Kind         Kind      `json:"kind"`
-	Status       Status    `json:"status"`
-	Progress     *Progress `json:"progress,omitempty"`
-	SnapshotID   string    `json:"snapshot_id,omitempty"`
-	Error        string    `json:"error,omitempty"`
+	Type         string `json:"-"`
+	JobID        int64  `json:"job_id"`
+	RepositoryID int64  `json:"repository_id"`
+	// PlanID is the plan of a backup or forget job.
+	PlanID     *int64    `json:"plan_id,omitempty"`
+	Kind       Kind      `json:"kind"`
+	Status     Status    `json:"status"`
+	Progress   *Progress `json:"progress,omitempty"`
+	SnapshotID string    `json:"snapshot_id,omitempty"`
+	Error      string    `json:"error,omitempty"`
 }
 
 // Progress is the part of restic's backup status shown to users.

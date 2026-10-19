@@ -6,8 +6,8 @@ others are removed by `restic forget`, and their space freed by
 
 ## Rules
 
-Turn on **Remove old snapshots** in the repository's settings and set any
-of:
+Each [backup plan](/features/backups#backup-plans) has its own policy. Turn
+on **Remove old snapshots** in the plan's settings and set any of:
 
 | Rule | Keeps |
 | --- | --- |
@@ -35,5 +35,5 @@ would be removed.
 
 The **Apply the retention policy automatically** schedule runs it, such as
 every Sunday at 04:00. It only applies to the snapshots ResticGUI made for
-this repository: snapshots made by restic on the command line, or by
+this plan, whatever their paths: snapshots made by restic on the command line, or by
 another host, are left alone.

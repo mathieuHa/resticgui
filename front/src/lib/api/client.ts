@@ -6,7 +6,10 @@ export type Repository = Schemas['Repository'];
 export type RepositoryInput = Schemas['RepositoryInput'];
 export type Paths = Schemas['Paths'];
 export type Retention = Schemas['Retention'];
-export type Schedule = Repository['schedules'][number];
+export type Plan = Schemas['Plan'];
+export type PlanInput = Schemas['PlanInput'];
+export type PlanOptions = Schemas['PlanOptions'];
+export type Schedule = Schemas['Schedule'];
 export type ScheduledJob = Schedule['job'];
 export type Job = Schemas['Job'];
 export type JobKind = Job['kind'];
@@ -119,20 +122,22 @@ export const api = {
   probe: (input: RepositoryInput) => request<Probe>('POST', '/repositories/probe', { body: input }),
   updateRepository: (id: number, input: RepositoryInput) => request<Repository>('PUT', repo(id), { body: input }),
   deleteRepository: (id: number) => request<void>('DELETE', repo(id)),
-  setPaths: (id: number, paths: Paths) => request<Repository>('PUT', `${repo(id)}/paths`, { body: paths }),
-  setRetention: (id: number, retention: Retention) =>
-    request<Repository>('PUT', `${repo(id)}/retention`, { body: retention }),
-  deleteRetention: (id: number) => request<Repository>('DELETE', `${repo(id)}/retention`),
-  previewRetention: (id: number, retention: Retention) =>
-    request<RetentionPreview>('POST', `${repo(id)}/retention/preview`, { body: retention }),
-  setSchedule: (id: number, job: ScheduledJob, cron: string, enabled = true) =>
-    request<Repository>('PUT', `${repo(id)}/schedules/${job}`, { body: { cron, enabled } }),
-  deleteSchedule: (id: number, job: ScheduledJob) => request<Repository>('DELETE', `${repo(id)}/schedules/${job}`),
+  createPlan: (id: number, plan: PlanInput) => request<Plan>('POST', `${repo(id)}/plans`, { body: plan }),
+  updatePlan: (id: number, planId: number, plan: PlanInput) =>
+    request<Plan>('PUT', `${repo(id)}/plans/${planId}`, { body: plan }),
+  deletePlan: (id: number, planId: number) => request<void>('DELETE', `${repo(id)}/plans/${planId}`),
+  previewRetention: (id: number, planId: number, retention: Retention) =>
+    request<RetentionPreview>('POST', `${repo(id)}/plans/${planId}/retention/preview`, { body: retention }),
+  /** a repository schedules its integrity check; plans schedule their backups */
+  setCheckSchedule: (id: number, cron: string, enabled = true) =>
+    request<Repository>('PUT', `${repo(id)}/schedules/check`, { body: { cron, enabled } }),
+  deleteCheckSchedule: (id: number) => request<Repository>('DELETE', `${repo(id)}/schedules/check`),
   setHealthcheck: (id: number, url: string) => request<Repository>('PUT', `${repo(id)}/healthcheck`, { body: { url } }),
   deleteHealthcheck: (id: number) => request<Repository>('DELETE', `${repo(id)}/healthcheck`),
   setHooks: (id: number, hooks: HookInput[]) => request<Repository>('PUT', `${repo(id)}/hooks`, { body: hooks }),
-  startJob: (id: number, kind: Exclude<JobKind, 'restore'>) =>
-    request<Job>('POST', `${repo(id)}/jobs`, { body: { kind } }),
+  /** a backup or forget runs a plan: planId, or the only one of the repository */
+  startJob: (id: number, kind: Exclude<JobKind, 'restore'>, planId?: number) =>
+    request<Job>('POST', `${repo(id)}/jobs`, { body: { kind, plan_id: planId } }),
   stats: (id: number, snapshot?: string) => request<Stats>('GET', `${repo(id)}/stats`, { query: { snapshot } }),
 
   snapshots: (id: number, all = false) =>

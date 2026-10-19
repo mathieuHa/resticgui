@@ -10,20 +10,18 @@ import (
 )
 
 const createRepository = `-- name: CreateRepository :one
-INSERT INTO repositories (name, backend, location, options, secrets, host, compression, exclude_larger_than)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, name, backend, location, options, secrets, host, compression, exclude_larger_than, initialized_at, created_at, updated_at
+INSERT INTO repositories (name, backend, location, options, secrets, host)
+VALUES (?, ?, ?, ?, ?, ?)
+RETURNING id, name, backend, location, options, secrets, host, initialized_at, created_at, updated_at
 `
 
 type CreateRepositoryParams struct {
-	Name              string
-	Backend           string
-	Location          string
-	Options           string
-	Secrets           []byte
-	Host              string
-	Compression       string
-	ExcludeLargerThan string
+	Name     string
+	Backend  string
+	Location string
+	Options  string
+	Secrets  []byte
+	Host     string
 }
 
 func (q *Queries) CreateRepository(ctx context.Context, arg CreateRepositoryParams) (Repository, error) {
@@ -34,8 +32,6 @@ func (q *Queries) CreateRepository(ctx context.Context, arg CreateRepositoryPara
 		arg.Options,
 		arg.Secrets,
 		arg.Host,
-		arg.Compression,
-		arg.ExcludeLargerThan,
 	)
 	var i Repository
 	err := row.Scan(
@@ -46,8 +42,6 @@ func (q *Queries) CreateRepository(ctx context.Context, arg CreateRepositoryPara
 		&i.Options,
 		&i.Secrets,
 		&i.Host,
-		&i.Compression,
-		&i.ExcludeLargerThan,
 		&i.InitializedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -68,7 +62,7 @@ func (q *Queries) DeleteRepository(ctx context.Context, id int64) (int64, error)
 }
 
 const getRepository = `-- name: GetRepository :one
-SELECT id, name, backend, location, options, secrets, host, compression, exclude_larger_than, initialized_at, created_at, updated_at FROM repositories WHERE id = ?
+SELECT id, name, backend, location, options, secrets, host, initialized_at, created_at, updated_at FROM repositories WHERE id = ?
 `
 
 func (q *Queries) GetRepository(ctx context.Context, id int64) (Repository, error) {
@@ -82,8 +76,6 @@ func (q *Queries) GetRepository(ctx context.Context, id int64) (Repository, erro
 		&i.Options,
 		&i.Secrets,
 		&i.Host,
-		&i.Compression,
-		&i.ExcludeLargerThan,
 		&i.InitializedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -92,7 +84,7 @@ func (q *Queries) GetRepository(ctx context.Context, id int64) (Repository, erro
 }
 
 const getRepositoryByName = `-- name: GetRepositoryByName :one
-SELECT id, name, backend, location, options, secrets, host, compression, exclude_larger_than, initialized_at, created_at, updated_at FROM repositories WHERE name = ?
+SELECT id, name, backend, location, options, secrets, host, initialized_at, created_at, updated_at FROM repositories WHERE name = ?
 `
 
 func (q *Queries) GetRepositoryByName(ctx context.Context, name string) (Repository, error) {
@@ -106,8 +98,6 @@ func (q *Queries) GetRepositoryByName(ctx context.Context, name string) (Reposit
 		&i.Options,
 		&i.Secrets,
 		&i.Host,
-		&i.Compression,
-		&i.ExcludeLargerThan,
 		&i.InitializedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -116,7 +106,7 @@ func (q *Queries) GetRepositoryByName(ctx context.Context, name string) (Reposit
 }
 
 const listRepositories = `-- name: ListRepositories :many
-SELECT id, name, backend, location, options, secrets, host, compression, exclude_larger_than, initialized_at, created_at, updated_at FROM repositories ORDER BY name
+SELECT id, name, backend, location, options, secrets, host, initialized_at, created_at, updated_at FROM repositories ORDER BY name
 `
 
 func (q *Queries) ListRepositories(ctx context.Context) ([]Repository, error) {
@@ -136,8 +126,6 @@ func (q *Queries) ListRepositories(ctx context.Context) ([]Repository, error) {
 			&i.Options,
 			&i.Secrets,
 			&i.Host,
-			&i.Compression,
-			&i.ExcludeLargerThan,
 			&i.InitializedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -171,22 +159,18 @@ SET name                = ?1,
     location            = ?3,
     options             = ?4,
     host                = ?5,
-    compression         = ?6,
-    exclude_larger_than = ?7,
     updated_at          = CURRENT_TIMESTAMP
-WHERE id = ?8
-RETURNING id, name, backend, location, options, secrets, host, compression, exclude_larger_than, initialized_at, created_at, updated_at
+WHERE id = ?6
+RETURNING id, name, backend, location, options, secrets, host, initialized_at, created_at, updated_at
 `
 
 type UpdateRepositoryParams struct {
-	Name              string
-	Backend           string
-	Location          string
-	Options           string
-	Host              string
-	Compression       string
-	ExcludeLargerThan string
-	ID                int64
+	Name     string
+	Backend  string
+	Location string
+	Options  string
+	Host     string
+	ID       int64
 }
 
 func (q *Queries) UpdateRepository(ctx context.Context, arg UpdateRepositoryParams) (Repository, error) {
@@ -196,8 +180,6 @@ func (q *Queries) UpdateRepository(ctx context.Context, arg UpdateRepositoryPara
 		arg.Location,
 		arg.Options,
 		arg.Host,
-		arg.Compression,
-		arg.ExcludeLargerThan,
 		arg.ID,
 	)
 	var i Repository
@@ -209,8 +191,6 @@ func (q *Queries) UpdateRepository(ctx context.Context, arg UpdateRepositoryPara
 		&i.Options,
 		&i.Secrets,
 		&i.Host,
-		&i.Compression,
-		&i.ExcludeLargerThan,
 		&i.InitializedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

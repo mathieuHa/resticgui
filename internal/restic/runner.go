@@ -49,7 +49,43 @@ type Runner struct {
 	WaitDelay time.Duration
 	// StderrLines is how many trailing stderr lines are kept. Zero means 50.
 	StderrLines int
+	// AllowCommands lets a repository run programs of its choosing through
+	// restic (see CommandOptions). Off, such repositories are refused.
+	AllowCommands bool
 }
+
+// commandOptions are the restic options that name a program for restic to
+// run, or its arguments.
+var commandOptions = map[string]bool{
+	"sftp.command": true, "sftp.args": true,
+	"rclone.program": true, "rclone.args": true,
+}
+
+// CommandOptions returns why a repository would make restic run a program
+// of its choosing: the options that name one, an rclone location carrying an
+// inline backend definition (rclone::sftp,ssh=...) and an rclone
+// configuration file of its choosing, whose settings can name a program
+// too. Empty means none.
+func CommandOptions(location string, options, env map[string]string) []string {
+	var found []string
+	for k := range options {
+		if commandOptions[strings.ToLower(k)] {
+			found = append(found, k)
+		}
+	}
+	sort.Strings(found)
+	if strings.HasPrefix(location, "rclone::") {
+		found = append(found, "an rclone location defining its backend inline")
+	}
+	if env["RCLONE_CONFIG"] != "" {
+		found = append(found, "RCLONE_CONFIG")
+	}
+	return found
+}
+
+// ErrCommandsOff is returned for a repository that would run a program
+// while Runner.AllowCommands is off.
+var ErrCommandsOff = errors.New("this repository runs a program (sftp.command, rclone.program and the like), which needs hooks.commands: true in the configuration")
 
 // NewRunner returns a Runner with the defaults used by ResticGUI.
 func NewRunner(bin string) *Runner {
@@ -155,6 +191,9 @@ func (r *Runner) run(ctx context.Context, repo *Repo, c call) error {
 	// with "--" followed by snapshot IDs or paths
 	args := []string{c.command}
 	if repo != nil {
+		if !r.AllowCommands && len(CommandOptions(repo.Location, repo.Options, repo.Env)) > 0 {
+			return &Error{Command: c.command, ExitCode: -1, Message: ErrCommandsOff.Error(), cause: ErrCommandsOff}
+		}
 		args = append(args, repoFlags(repo)...)
 		if r.RetryLock > 0 {
 			args = append(args, "--retry-lock", r.RetryLock.String())
@@ -162,6 +201,8 @@ func (r *Runner) run(ctx context.Context, repo *Repo, c call) error {
 	}
 	args = append(args, c.args...)
 
+	// #nosec G204 -- restic.bin from the configuration; user values are
+	// separate arguments, after "--" where they could look like flags
 	cmd := exec.CommandContext(ctx, bin, args...)
 	cmd.Env = r.environment(repo)
 	// SIGINT lets restic release its repository lock before exiting.
@@ -308,8 +349,15 @@ func (s *stderrTail) Write(p []byte) (int, error) {
 		s.add(string(s.partial[:i]))
 		s.partial = s.partial[i+1:]
 	}
+	// stderr carries messages, not data: a line without end is cut short
+	if len(s.partial) > maxStderrLine {
+		s.partial = append(s.partial[:0], s.partial[len(s.partial)-maxStderrLine:]...)
+	}
 	return len(p), nil
 }
+
+// maxStderrLine bounds the memory an endless stderr line takes.
+const maxStderrLine = 64 << 10
 
 func (s *stderrTail) add(line string) {
 	line = strings.TrimSpace(ansiEscape.ReplaceAllString(line, ""))

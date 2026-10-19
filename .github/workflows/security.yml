@@ -1,0 +1,79 @@
+name: Security
+
+# Scans the code and the dependencies, and fuzzes the code that handles
+# untrusted input. A fixable finding of high severity fails the run. The
+# image is scanned by Trivy in the Image workflow.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # new advisories appear without a commit
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # only vulnerabilities in code the binary actually calls
+      - run: go tool -modfile=tools/govulncheck/go.mod govulncheck ./...
+
+  gosec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # each accepted finding carries a #nosec comment saying why
+      - run: go tool -modfile=tools/gosec/go.mod gosec -quiet -exclude-generated ./...
+
+  semgrep:
+    runs-on: ubuntu-latest
+    container: semgrep/semgrep:1.181.0
+    steps:
+      - uses: actions/checkout@v7
+      - run: >-
+          semgrep scan --metrics=off --error --severity ERROR
+          --config p/golang --config p/typescript --config p/secrets
+          --exclude front/node_modules --exclude docs/node_modules
+
+  npm-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # the web interface and its build tools; the docs site is static and
+      # only runs its tools on a developer's machine
+      - run: npm audit --audit-level=high
+
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Fuzz
+        run: |
+          for target in FuzzRootsCheck:./internal/server FuzzLineWriter:./internal/restic FuzzStderrTail:./internal/restic FuzzDecode:./internal/restic; do
+            go test "${target#*:}" -run '^$' -fuzz "^${target%%:*}\$" -fuzztime 30s
+          done
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: fuzz-failures
+          path: internal/**/testdata/fuzz
+          retention-days: 7

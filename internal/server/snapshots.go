@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"mime"
 	"net/http"
 	"path"
 	"regexp"
@@ -171,7 +172,7 @@ func (s *Server) restore(c *gin.Context) {
 		return
 	}
 	var errs []error
-	if err := s.Roots.Check(in.Target); err != nil {
+	if err := s.Roots.checkLinks(in.Target); err != nil {
 		errs = append(errs, fmt.Errorf("target: %w", err))
 	}
 	for _, p := range in.Include {
@@ -206,7 +207,7 @@ func (w *lazyWriter) Write(p []byte) (int, error) {
 	if !w.started {
 		w.started = true
 		w.c.Header("Content-Type", "application/octet-stream")
-		w.c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", w.filename))
+		w.c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": w.filename}))
 		w.c.Status(http.StatusOK)
 	}
 	return w.c.Writer.Write(p)
@@ -241,7 +242,7 @@ func (s *Server) download(c *gin.Context) {
 	err := s.Restic.Dump(c.Request.Context(), target, snapshot, p, archive, w)
 	if err == nil && !w.started {
 		// an empty file
-		w.Write(nil)
+		_, _ = w.Write(nil)
 	}
 	if err != nil {
 		if w.started {

@@ -64,7 +64,7 @@ func (m *Manager) runHooks(ctx context.Context, list []hooks.Hook, event string,
 // withHooks runs a backup between the repository's hooks: before hooks
 // first (a failure fails the job without backing up), then the success or
 // failure hooks with the outcome. Their output goes to the job log.
-func (m *Manager) withHooks(ctx context.Context, job db.Job, repo db.Repository, backup func() outcome) outcome {
+func (m *Manager) withHooks(ctx context.Context, job db.Job, repo db.Repository, plan db.Plan, backup func() outcome) outcome {
 	list, err := m.loadHooks(ctx, repo.ID)
 	if err != nil {
 		return failed(err)
@@ -72,7 +72,7 @@ func (m *Manager) withHooks(ctx context.Context, job db.Job, repo db.Repository,
 	if len(list) == 0 {
 		return backup()
 	}
-	run := hooks.Run{RepositoryID: repo.ID, Repository: repo.Name, JobID: job.ID}
+	run := hooks.Run{RepositoryID: repo.ID, Repository: repo.Name, Plan: plan.Name, JobID: job.ID}
 	var log []string
 	var out outcome
 	if err := m.runHooks(ctx, list, hooks.Before, run, &log); err != nil {

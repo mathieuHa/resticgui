@@ -4,14 +4,14 @@
   import { ms } from '#lib/motion.ts';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
-  import { api, type Backend, type Paths, type Probe, type Retention } from '#lib/api/client.ts';
+  import { api, type Backend, type Probe } from '#lib/api/client.ts';
   import { jobs, notify, notifyError } from '#lib/app.svelte.ts';
-  import PathsEditor from '#lib/components/PathsEditor.svelte';
+  import PlanEditor from '#lib/components/PlanEditor.svelte';
   import RepositoryForm from '#lib/components/RepositoryForm.svelte';
-  import RetentionEditor from '#lib/components/RetentionEditor.svelte';
   import ScheduleEditor from '#lib/components/ScheduleEditor.svelte';
+  import { newPlanDraft, planProblems, toPlanInput } from '#lib/plan.ts';
   import { BACKEND_LABELS, newDraft, problems, toInput } from '#lib/repository.ts';
-  import { describeRetention, isEmpty, normalize, suggested } from '#lib/retention.ts';
+  import { describeRetention } from '#lib/retention.ts';
   import { describe, parse } from '#lib/schedule.ts';
 
   const STEPS = ['Storage', 'What to back up', 'When', 'Review'];
@@ -19,11 +19,7 @@
   let backends = $state<Backend[]>([]);
   let draft = $state(newDraft());
   let isNew = $state(true);
-  let paths: Paths = $state({ include: [], exclude: [] });
-  let backupCron: string | null = $state('30 2 * * *');
-  let retentionOn = $state(true);
-  let retention: Retention = $state(suggested());
-  let forgetCron: string | null = $state('0 4 * * 0');
+  let plan = $state(newPlanDraft());
   let checkCron: string | null = $state(null);
   let saving = $state(false);
   let shown = $state<string[]>([]);
@@ -41,8 +37,7 @@
   const backend = $derived(backends.find((b) => b.name === draft.backend));
   const stepProblems = $derived.by(() => {
     if (step === 0) return problems(draft, backend, true);
-    if (step === 1) return paths.include.length ? [] : ['Add at least one folder or file to back up'];
-    if (step === 2 && retentionOn && isEmpty(retention)) return ['Set at least one retention rule, or turn retention off'];
+    if (step === 1 || step === 2) return planProblems(plan);
     return [];
   });
 
@@ -68,8 +63,8 @@
       }
       found = isNew ? null : probe;
       const latest = probe.latest;
-      if (latest && !paths.include.length) {
-        paths = { include: [...latest.paths], exclude: [] };
+      if (latest && !plan.paths.include.length) {
+        plan.paths = { include: [...latest.paths], exclude: [] };
         prefilled = true;
       }
       if (latest && !draft.host.trim()) draft.host = latest.hostname;
@@ -88,13 +83,8 @@
     try {
       const repo = await api.createRepository(toInput(draft, backend));
       id = repo.id;
-      await api.setPaths(id, $state.snapshot(paths));
-      if (backupCron) await api.setSchedule(id, 'backup', backupCron);
-      if (retentionOn) {
-        await api.setRetention(id, normalize($state.snapshot(retention)));
-        if (forgetCron) await api.setSchedule(id, 'forget', forgetCron);
-      }
-      if (checkCron) await api.setSchedule(id, 'check', checkCron);
+      await api.createPlan(id, toPlanInput($state.snapshot(plan)));
+      if (checkCron) await api.setCheckSchedule(id, checkCron);
       if (isNew) jobs.add([await api.startJob(id, 'init')]);
       // listing the snapshots marks a connected repository ready
       else await api.snapshots(id, true);
@@ -144,18 +134,12 @@
           {/if}
         </div>
       {/if}
-      <PathsEditor bind:value={paths} />
+      <p class="text-base-content/70 text-sm">
+        A plan says what to back up and when. You can add more plans later, such as photos every day and documents every hour, all in this repository.
+      </p>
+      <PlanEditor bind:draft={plan} show="what" />
     {:else if step === 2}
-      <ScheduleEditor label="Back up automatically" bind:value={backupCron} />
-      <div class="divider my-0"></div>
-      <label class="label cursor-pointer gap-3">
-        <input type="checkbox" class="toggle toggle-sm" bind:checked={retentionOn} />
-        <span class="text-base-content font-medium">Remove old snapshots</span>
-      </label>
-      {#if retentionOn}
-        <RetentionEditor bind:value={retention} />
-        <ScheduleEditor label="Apply the retention policy automatically" bind:value={forgetCron} />
-      {/if}
+      <PlanEditor bind:draft={plan} show="when" />
       <div class="divider my-0"></div>
       <ScheduleEditor label="Check the repository's integrity" bind:value={checkCron} />
     {:else}
@@ -163,11 +147,12 @@
         <dt class="text-base-content/70">Name</dt><dd>{draft.name}</dd>
         <dt class="text-base-content/70">Storage</dt><dd>{BACKEND_LABELS[draft.backend]} · <span class="font-mono">{draft.location}</span></dd>
         <dt class="text-base-content/70">Repository</dt><dd>{isNew ? 'Created now with restic init' : `Already exists, with ${found?.snapshots ?? 0} snapshots`}</dd>
-        <dt class="text-base-content/70">Backs up</dt><dd class="font-mono">{paths.include.join(', ')}</dd>
-        {#if paths.exclude.length}<dt class="text-base-content/70">Excludes</dt><dd class="font-mono">{paths.exclude.join(', ')}</dd>{/if}
-        <dt class="text-base-content/70">Backups</dt><dd>{backupCron ? describe(parse(backupCron)) : 'Only when started by hand'}</dd>
+        <dt class="text-base-content/70">Plan</dt><dd>{plan.name}</dd>
+        <dt class="text-base-content/70">Backs up</dt><dd class="font-mono">{plan.paths.include.join(', ')}</dd>
+        {#if plan.paths.exclude.length}<dt class="text-base-content/70">Excludes</dt><dd class="font-mono">{plan.paths.exclude.join(', ')}</dd>{/if}
+        <dt class="text-base-content/70">Backups</dt><dd>{plan.backupCron ? describe(parse(plan.backupCron)) : 'Only when started by hand'}</dd>
         <dt class="text-base-content/70">Retention</dt>
-        <dd>{retentionOn ? describeRetention(retention) : 'Keep everything'}{retentionOn && forgetCron ? `, ${describe(parse(forgetCron)).toLowerCase()}` : ''}</dd>
+        <dd>{plan.retentionOn ? describeRetention(plan.retention) : 'Keep everything'}{plan.retentionOn && plan.forgetCron ? `, ${describe(parse(plan.forgetCron)).toLowerCase()}` : ''}</dd>
         <dt class="text-base-content/70">Check</dt><dd>{checkCron ? describe(parse(checkCron)) : 'Only when started by hand'}</dd>
       </dl>
     {/if}

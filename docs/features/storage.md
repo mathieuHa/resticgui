@@ -35,8 +35,6 @@ Under **Advanced**:
 - **Host name in snapshots**: the host name recorded in the snapshots. ResticGUI uses the
   machine's name by default. Set it to keep a series of snapshots going when
   the container or the machine changes name.
-- **Compression**: `auto` (default), `max` or `off`.
-- **Skip files larger than**: such as `2G`, for `--exclude-larger-than`.
 - **CA certificate file**: the path of a PEM file, such as
   `/etc/ssl/my-ca.pem`, for a server whose certificate comes from a private
   authority, such as a REST server or S3 on your network.

@@ -15,6 +15,7 @@ file: they are set in the web interface and kept in the database.
 | Key | Default | What it does |
 | --- | --- | --- |
 | `server.ip` | `127.0.0.1` | Address to listen on. `0.0.0.0` listens on every address: set a password first. |
+| `server.allowed_hosts` | `[]` | Without a login, the host names the server answers to besides IP addresses and `localhost`, such as `[backup.lan]`. Other names are refused, so that a web page cannot reach the API through a domain that resolves to this machine (DNS rebinding). Not needed with a password. |
 | `server.port` | `3001` | Port of the web interface and the API. The images use `3030`. |
 | `store.path` | `resticgui.sqlite` | The SQLite database, created on the first start. |
 | `store.key_file` | `resticgui.key` | The key that encrypts repository passwords and credentials, created on the first start. `$RESTICGUI_SECRET_KEY` (a base64 32-byte key) takes its place when set. |

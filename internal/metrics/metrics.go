@@ -5,6 +5,7 @@ package metrics
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -137,7 +138,7 @@ func Handler(st *store.Store, token string) http.Handler {
 		return h
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer "+token {
+		if subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")), []byte("Bearer "+token)) != 1 {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="resticgui metrics"`)
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return

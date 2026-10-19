@@ -433,7 +433,7 @@ func (s *Server) probe(c *gin.Context) {
 	if in.Secrets != nil {
 		secretEnv = *in.Secrets
 	}
-	if err := in.validate(secretEnv, true, s.Roots); err != nil {
+	if err := in.validate(secretEnv, true, s.Roots, s.HookCommands); err != nil {
 		invalid(c, err)
 		return
 	}

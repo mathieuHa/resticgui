@@ -15,8 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/mathieuHa/resticgui/internal/store/db"
 )
 
 func newServer(t *testing.T, e *env) *httptest.Server {
@@ -47,8 +45,7 @@ func TestHTTPBackupCancelAndList(t *testing.T) {
 	e.restic.run = g.run
 	srv := newServer(t, e)
 	repo := e.repository(t, "r")
-	_, err := e.store.AddPath(context.Background(), db.AddPathParams{RepositoryID: repo.ID, Path: "/data", Kind: "include"})
-	require.NoError(t, err)
+	e.addPath(t, repo.ID, "/data", "include")
 
 	resp, body := do(t, http.MethodPost, srv.URL+"/repositories/"+strconv.FormatInt(repo.ID, 10)+"/backup")
 	require.Equal(t, http.StatusAccepted, resp.StatusCode, string(body))
@@ -139,7 +136,7 @@ func TestHTTPEventStream(t *testing.T) {
 	assert.Equal(t, ": ping", next(), "heartbeat while idle")
 	assert.Equal(t, "", next())
 
-	job, err := e.manager.Enqueue(context.Background(), repo.ID, KindCheck, TriggerManual)
+	job, err := e.manager.Enqueue(context.Background(), repo.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	var statuses []Status
 	for len(statuses) < 3 {

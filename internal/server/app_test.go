@@ -32,9 +32,12 @@ func TestStartAndClose(t *testing.T) {
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()
-	r.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, BasePath+"/repositories", nil))
+	r.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "http://127.0.0.1"+BasePath+"/repositories", nil))
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.JSONEq(t, `[]`, rec.Body.String())
+	rec = httptest.NewRecorder()
+	r.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "http://rebind.example"+BasePath+"/repositories", nil))
+	assert.Equal(t, http.StatusMisdirectedRequest, rec.Code, "without a login, only known host names")
 	info, err := os.Stat(filepath.Join(dir, "resticgui.key"))
 	require.NoError(t, err)
 	assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
@@ -57,7 +60,7 @@ func startApp(t *testing.T, cfg Config) (*gin.Engine, *App, error) {
 
 func get(r http.Handler, path string) *httptest.ResponseRecorder {
 	rec := httptest.NewRecorder()
-	r.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+	r.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "http://127.0.0.1"+path, nil))
 	return rec
 }
 
@@ -86,7 +89,7 @@ func TestStartImportsTheLegacyDatabaseOnce(t *testing.T) {
 	imported := len(repos)
 	// remove one, which a second import would bring back
 	rec := httptest.NewRecorder()
-	r.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, BasePath+"/repositories/"+itoa(repos[0].ID), nil))
+	r.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, "http://127.0.0.1"+BasePath+"/repositories/"+itoa(repos[0].ID), nil))
 	require.Equal(t, http.StatusNoContent, rec.Code, rec.Body.String())
 	require.NoError(t, app.Close())
 
