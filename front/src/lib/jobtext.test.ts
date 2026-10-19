@@ -6,6 +6,7 @@ import { summarize } from './jobtext';
 const job = (kind: Job['kind'], summary: Record<string, unknown>, params: Record<string, unknown> = {}): Job => ({
   id: 1,
   repository_id: 1,
+  plan_id: null,
   kind,
   trigger: 'manual',
   status: 'succeeded',

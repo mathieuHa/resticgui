@@ -1,5 +1,5 @@
 -- name: CreateJob :one
-INSERT INTO jobs (repository_id, kind, trigger, params) VALUES (?, ?, ?, ?) RETURNING *;
+INSERT INTO jobs (repository_id, plan_id, kind, trigger, params) VALUES (?, ?, ?, ?, ?) RETURNING *;
 
 -- name: GetJob :one
 SELECT * FROM jobs WHERE id = ?;

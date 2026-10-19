@@ -16,25 +16,28 @@ import (
 
 // JobDTO is a job as the API returns it.
 type JobDTO struct {
-	ID           int64           `json:"id"`
-	RepositoryID int64           `json:"repository_id"`
-	Kind         Kind            `json:"kind"`
-	Trigger      Trigger         `json:"trigger"`
-	Status       Status          `json:"status"`
-	CreatedAt    time.Time       `json:"created_at"`
-	StartedAt    *time.Time      `json:"started_at"`
-	FinishedAt   *time.Time      `json:"finished_at"`
-	SnapshotID   string          `json:"snapshot_id,omitempty"`
-	Summary      json.RawMessage `json:"summary"`
-	Error        string          `json:"error,omitempty"`
-	ExitCode     *int64          `json:"exit_code,omitempty"`
-	LogExcerpt   string          `json:"log_excerpt,omitempty"`
-	Params       json.RawMessage `json:"params"`
+	ID           int64 `json:"id"`
+	RepositoryID int64 `json:"repository_id"`
+	// PlanID is the plan a backup or forget job ran for; null for the other
+	// kinds.
+	PlanID     *int64          `json:"plan_id"`
+	Kind       Kind            `json:"kind"`
+	Trigger    Trigger         `json:"trigger"`
+	Status     Status          `json:"status"`
+	CreatedAt  time.Time       `json:"created_at"`
+	StartedAt  *time.Time      `json:"started_at"`
+	FinishedAt *time.Time      `json:"finished_at"`
+	SnapshotID string          `json:"snapshot_id,omitempty"`
+	Summary    json.RawMessage `json:"summary"`
+	Error      string          `json:"error,omitempty"`
+	ExitCode   *int64          `json:"exit_code,omitempty"`
+	LogExcerpt string          `json:"log_excerpt,omitempty"`
+	Params     json.RawMessage `json:"params"`
 }
 
 func NewJobDTO(j db.Job) JobDTO {
 	return JobDTO{
-		ID: j.ID, RepositoryID: j.RepositoryID, Kind: Kind(j.Kind), Trigger: Trigger(j.Trigger), Status: Status(j.Status),
+		ID: j.ID, RepositoryID: j.RepositoryID, PlanID: j.PlanID, Kind: Kind(j.Kind), Trigger: Trigger(j.Trigger), Status: Status(j.Status),
 		CreatedAt: j.CreatedAt, StartedAt: j.StartedAt, FinishedAt: j.FinishedAt,
 		SnapshotID: j.SnapshotID, Summary: json.RawMessage(j.Summary), Error: j.Error, ExitCode: j.ExitCode, LogExcerpt: j.LogExcerpt,
 		Params: json.RawMessage(j.Params),
@@ -78,8 +81,10 @@ func (h *Handler) backup(c *gin.Context) {
 	if !ok {
 		return
 	}
-	job, err := h.Manager.Enqueue(c.Request.Context(), id, KindBackup, TriggerManual)
+	job, err := h.Manager.Enqueue(c.Request.Context(), id, 0, KindBackup, TriggerManual)
 	switch {
+	case errors.Is(err, ErrPlanRequired):
+		c.JSON(http.StatusBadRequest, gin.H{"error": "the repository has several plans, or none: start the backup of a plan with POST /repositories/{id}/jobs"})
 	case errors.Is(err, ErrRepositoryNotFound):
 		c.JSON(http.StatusNotFound, gin.H{"error": "repository not found"})
 	case errors.Is(err, ErrClosed):

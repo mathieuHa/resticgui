@@ -34,8 +34,6 @@ describe('repository drafts', () => {
       cacert: '',
       extended: { 's3.storage-class': 'STANDARD_IA' },
       host: '',
-      compression: 'auto',
-      exclude_larger_than: '',
     });
   });
 
@@ -50,15 +48,12 @@ describe('repository drafts', () => {
       has_password: true,
       extended: { 's3.connections': '8' },
       host: '',
-      compression: 'max',
-      exclude_larger_than: '2G',
     } as unknown as Repository;
     const d = draftOf(repo);
     expect(d.extended).toBe('s3.connections=8');
     const input = toInput(d, s3);
     expect(input).not.toHaveProperty('password');
     expect(input).not.toHaveProperty('secrets');
-    expect(input.compression).toBe('max');
     expect(problems(d, s3, false)).toEqual([]);
   });
 

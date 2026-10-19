@@ -45,9 +45,10 @@ type imported struct {
 	repo      db.Repository
 	options   store.RepositoryOptions
 	secrets   store.RepositorySecrets
+	plan      store.PlanOptions
 	paths     []string
-	schedules map[string]db.Schedule
-	retention *db.Retention
+	schedules map[string]db.PlanSchedule
+	retention *db.PlanRetention
 }
 
 func load(t *testing.T, s *store.Store, name string) imported {
@@ -55,22 +56,29 @@ func load(t *testing.T, s *store.Store, name string) imported {
 	ctx := context.Background()
 	r, err := s.GetRepositoryByName(ctx, name)
 	require.NoError(t, err)
-	out := imported{repo: r, schedules: map[string]db.Schedule{}}
+	out := imported{repo: r, schedules: map[string]db.PlanSchedule{}}
 	out.options, err = store.DecodeOptions(r.Options)
 	require.NoError(t, err)
 	out.secrets, err = store.OpenSecrets(testBox(t), r.Secrets)
 	require.NoError(t, err)
-	paths, err := s.ListPaths(ctx, r.ID)
+	plans, err := s.ListPlans(ctx, r.ID)
+	require.NoError(t, err)
+	require.Len(t, plans, 1, "one plan per v0.1 repository")
+	plan := plans[0]
+	out.plan, err = store.DecodePlanOptions(plan.Options)
+	require.NoError(t, err)
+	paths, err := s.ListPlanPaths(ctx, plan.ID)
 	require.NoError(t, err)
 	for _, p := range paths {
 		out.paths = append(out.paths, p.Kind+":"+p.Path)
 	}
-	schedules, err := s.ListSchedules(ctx, r.ID)
+	schedules, err := s.ListPlanSchedules(ctx, plan.ID)
 	require.NoError(t, err)
 	for _, sc := range schedules {
 		out.schedules[sc.Job] = sc
 	}
-	if ret, err := s.GetRetention(ctx, r.ID); err == nil {
+	if ret, err := s.GetPlanRetention(ctx, plan.ID); err == nil {
+		ret.PlanID = 0
 		out.retention = &ret
 	}
 	return out
@@ -89,7 +97,7 @@ func TestImportFixture(t *testing.T) {
 		r := load(t, s, "local-docs")
 		assert.Equal(t, "local", r.repo.Backend)
 		assert.Equal(t, "/srv/restic/docs", r.repo.Location)
-		assert.Equal(t, "2G", r.repo.ExcludeLargerThan)
+		assert.Equal(t, "2G", r.plan.ExcludeLargerThan)
 		assert.Nil(t, r.repo.InitializedAt, "v0.1's initiated flag is not trusted")
 		assert.Equal(t, store.RepositorySecrets{Password: "docs-password"}, r.secrets)
 		assert.Equal(t, []string{"exclude:/home/me/docs/tmp", "include:/home/me/docs"}, r.paths)
@@ -98,7 +106,7 @@ func TestImportFixture(t *testing.T) {
 		assert.Equal(t, "0 4 * * 0", r.schedules["forget"].Cron)
 		assert.True(t, r.schedules["forget"].Enabled)
 		require.NotNil(t, r.retention)
-		assert.Equal(t, db.Retention{RepositoryID: r.repo.ID, KeepLast: 5, KeepDaily: 7, KeepWeekly: 4, KeepMonthly: 6, Prune: true}, *r.retention)
+		assert.Equal(t, db.PlanRetention{KeepLast: 5, KeepDaily: 7, KeepWeekly: 4, KeepMonthly: 6, Prune: true}, *r.retention)
 	})
 
 	t.Run("aws s3", func(t *testing.T) {
@@ -114,7 +122,7 @@ func TestImportFixture(t *testing.T) {
 		assert.Equal(t, "@every 1h30m0s", r.schedules["backup"].Cron)
 		assert.False(t, r.schedules["backup"].Enabled, "inactive repository keeps its schedule disabled")
 		require.NotNil(t, r.retention)
-		assert.Equal(t, db.Retention{RepositoryID: r.repo.ID, KeepLast: 10, KeepHourly: 1, KeepDaily: 1, KeepWeekly: 1, KeepMonthly: 1, Prune: true}, *r.retention)
+		assert.Equal(t, db.PlanRetention{KeepLast: 10, KeepHourly: 1, KeepDaily: 1, KeepWeekly: 1, KeepMonthly: 1, Prune: true}, *r.retention)
 	})
 
 	t.Run("b2", func(t *testing.T) {
@@ -164,7 +172,7 @@ func TestImportIsAllOrNothing(t *testing.T) {
 	ctx := context.Background()
 	s := openStore(t)
 	_, err := s.CreateRepository(ctx, db.CreateRepositoryParams{
-		Name: "b2-archive", Backend: "local", Location: "/already/here", Options: "{}", Secrets: []byte("x"), Compression: "auto",
+		Name: "b2-archive", Backend: "local", Location: "/already/here", Options: "{}", Secrets: []byte("x"),
 	})
 	require.NoError(t, err)
 

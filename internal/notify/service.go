@@ -51,7 +51,7 @@ type Service struct {
 	CheckEvery time.Duration
 
 	mu sync.Mutex
-	// alerted holds, per repository, the due time of the last missed backup
+	// alerted holds, per plan, the due time of the last missed backup
 	// already reported, so that it is reported once.
 	alerted map[int64]time.Time
 	wg      sync.WaitGroup
@@ -148,8 +148,26 @@ func (s *Service) Handle(ctx context.Context, e jobs.Event) {
 	if err != nil {
 		return
 	}
-	title, body := describe(repo, job)
+	title, body := describe(s.subject(ctx, repo, job.PlanID), job)
 	s.notify(ctx, event, title, body)
+}
+
+// subject names what a job ran on: the repository, and the plan when the
+// repository has several.
+func (s *Service) subject(ctx context.Context, repo db.Repository, planID *int64) string {
+	if planID == nil {
+		return repo.Name
+	}
+	plans, err := s.Store.ListPlans(ctx, repo.ID)
+	if err != nil || len(plans) < 2 {
+		return repo.Name
+	}
+	for _, p := range plans {
+		if p.ID == *planID {
+			return fmt.Sprintf("%s (%s)", repo.Name, p.Name)
+		}
+	}
+	return repo.Name
 }
 
 // notify sends to every enabled notifier that wants event.
@@ -246,30 +264,31 @@ func Ping(ctx context.Context, client *http.Client, pingURL, body string) error 
 
 var kindNames = map[jobs.Kind]string{jobs.KindBackup: "Backup", jobs.KindForget: "Retention", jobs.KindPrune: "Prune", jobs.KindCheck: "Check"}
 
-// describe returns a notification's title and body for a finished job.
-func describe(repo db.Repository, job db.Job) (string, string) {
+// describe returns a notification's title and body for a finished job of
+// what subject names.
+func describe(subject string, job db.Job) (string, string) {
 	name := kindNames[jobs.Kind(job.Kind)]
 	switch jobs.Status(job.Status) {
 	case jobs.StatusSucceeded:
-		body := fmt.Sprintf("%s of %s succeeded.", name, repo.Name)
+		body := fmt.Sprintf("%s of %s succeeded.", name, subject)
 		var sum restic.BackupSummary
 		if job.Kind == string(jobs.KindBackup) && json.Unmarshal([]byte(job.Summary), &sum) == nil && sum.SnapshotID != "" {
 			body = fmt.Sprintf("Backup of %s succeeded: snapshot %.8s, %d new and %d changed files, %s added in %s.",
-				repo.Name, sum.SnapshotID, sum.FilesNew, sum.FilesChanged, Bytes(sum.DataAdded), (time.Duration(sum.TotalDuration * float64(time.Second))).Round(time.Second))
+				subject, sum.SnapshotID, sum.FilesNew, sum.FilesChanged, Bytes(sum.DataAdded), (time.Duration(sum.TotalDuration * float64(time.Second))).Round(time.Second))
 		}
 		if job.Error != "" {
 			body += "\n" + job.Error
 		}
-		return fmt.Sprintf("✅ %s of %s succeeded", name, repo.Name), body
+		return fmt.Sprintf("✅ %s of %s succeeded", name, subject), body
 	case jobs.StatusInterrupted:
-		return fmt.Sprintf("⚠️ %s of %s was interrupted", name, repo.Name),
-			fmt.Sprintf("%s of %s stopped because ResticGUI stopped. It runs again at its next scheduled time.", name, repo.Name)
+		return fmt.Sprintf("⚠️ %s of %s was interrupted", name, subject),
+			fmt.Sprintf("%s of %s stopped because ResticGUI stopped. It runs again at its next scheduled time.", name, subject)
 	default:
-		body := fmt.Sprintf("%s of %s failed", name, repo.Name)
+		body := fmt.Sprintf("%s of %s failed", name, subject)
 		if job.Error != "" {
 			body += ": " + job.Error
 		}
-		return fmt.Sprintf("❌ %s of %s failed", name, repo.Name), body + "."
+		return fmt.Sprintf("❌ %s of %s failed", name, subject), body + "."
 	}
 }
 
@@ -287,23 +306,23 @@ func Bytes(n uint64) string {
 	return fmt.Sprintf("%.1f %ciB", float64(n)/float64(div), "KMGTPE"[exp])
 }
 
-// CheckMissed reports, once each, the scheduled backups that are more than
-// Grace late with no backup run since they were due.
+// CheckMissed reports, once each, the scheduled backups of plans that are
+// more than Grace late with no backup of the plan run since they were due.
 func (s *Service) CheckMissed(ctx context.Context) {
 	s.init()
-	schedules, err := s.Store.ListEnabledSchedules(ctx)
+	schedules, err := s.Store.ListEnabledPlanSchedules(ctx)
 	if err != nil {
 		return
 	}
-	last, err := s.Store.LastJobs(ctx)
+	last, err := s.Store.LastPlanBackups(ctx)
 	if err != nil {
 		return
 	}
-	// the end of the last backup that ran (whatever its outcome), per repository
+	// the end of the last backup that ran (whatever its outcome), per plan
 	ran := map[int64]time.Time{}
 	for _, j := range last {
-		if j.Kind == string(jobs.KindBackup) && j.FinishedAt != nil && j.FinishedAt.After(ran[j.RepositoryID]) {
-			ran[j.RepositoryID] = *j.FinishedAt
+		if j.FinishedAt != nil {
+			ran[*j.PlanID] = *j.FinishedAt
 		}
 	}
 	now := s.Now()
@@ -315,12 +334,12 @@ func (s *Service) CheckMissed(ctx context.Context) {
 		if err != nil {
 			continue
 		}
-		repo, err := s.Store.GetRepository(ctx, sc.RepositoryID)
+		plan, err := s.Store.GetPlan(ctx, sc.PlanID)
 		if err != nil {
 			continue
 		}
-		since := repo.CreatedAt
-		if t, ok := ran[repo.ID]; ok {
+		since := plan.CreatedAt
+		if t, ok := ran[plan.ID]; ok {
 			since = t
 		}
 		due := spec.Next(since)
@@ -328,15 +347,20 @@ func (s *Service) CheckMissed(ctx context.Context) {
 			continue
 		}
 		s.mu.Lock()
-		already := s.alerted[repo.ID].Equal(due)
-		s.alerted[repo.ID] = due
+		already := s.alerted[plan.ID].Equal(due)
+		s.alerted[plan.ID] = due
 		s.mu.Unlock()
 		if already {
 			continue
 		}
-		title := fmt.Sprintf("⏰ Backup of %s did not run", repo.Name)
+		repo, err := s.Store.GetRepository(ctx, sc.RepositoryID)
+		if err != nil {
+			continue
+		}
+		subject := s.subject(ctx, repo, &plan.ID)
+		title := fmt.Sprintf("⏰ Backup of %s did not run", subject)
 		body := fmt.Sprintf("The backup of %s was due at %s and has not run. Is ResticGUI able to reach the repository, and was it running then?",
-			repo.Name, due.Local().Format("Mon 2 Jan 15:04"))
+			subject, due.Local().Format("Mon 2 Jan 15:04"))
 		s.notify(ctx, EventMissed, title, body)
 	}
 }

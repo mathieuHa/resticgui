@@ -167,3 +167,33 @@ test('preview retention, then forget the snapshot', async ({ page }) => {
   await page.getByRole('dialog').getByRole('button', { name: 'Forget' }).click();
   await expect(page.getByText('No snapshot yet.')).toBeVisible();
 });
+
+test('a second plan backs up into the same repository', async ({ page }) => {
+  await page.goto('/ui/');
+  await page.getByRole('link', { name: 'Documents' }).first().click();
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: 'Add a plan' }).click();
+  const form = page.getByRole('region', { name: 'New plan' });
+  await form.getByRole('button', { name: 'Add plan' }).click();
+  await expect(form).toContainText('Give the plan a name');
+  await form.getByTestId('plan-name').fill('Default');
+  await form.getByPlaceholder('/or/type/a/path').fill(`${root}/data/docs`);
+  await form.getByRole('button', { name: 'Add', exact: true }).click();
+  await form.getByRole('button', { name: 'Add plan' }).click();
+  await expect(form).toContainText('Another plan is already named Default');
+  await form.getByTestId('plan-name').fill('Notes');
+  await form.getByRole('button', { name: 'Add plan' }).click();
+  await expect(page.getByRole('region', { name: 'Plan Notes' })).toBeVisible();
+
+  // both plans at once, each into its own snapshot
+  await page.getByRole('button', { name: 'Back up now' }).click();
+  await page.getByTestId('backup-menu').getByRole('button', { name: 'All plans' }).click();
+  await page.getByRole('tab', { name: 'Snapshots' }).click();
+  const plans = page.getByTestId('snapshot-plan');
+  await expect(plans).toHaveCount(2, { timeout: 30_000 });
+  expect((await plans.allInnerTexts()).sort()).toEqual(['Default', 'Notes']);
+
+  await page.getByRole('tab', { name: 'Overview' }).click();
+  await expect(page.getByTestId('plan-summary')).toHaveCount(2);
+  await expect(page.getByTestId('plan-summary').filter({ hasText: 'Notes' })).toContainText(`${root}/data/docs`);
+});

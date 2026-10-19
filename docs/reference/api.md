@@ -29,6 +29,25 @@ job=$(curl -fsS -b cookies -H 'Content-Type: application/json' \
 curl -fsS -b cookies "$api/jobs/$job" | jq '{status, summary}'
 ```
 
+A repository with several backup plans needs the plan to back up,
+`plan_id`, one of the ids its `plans` list:
+
+```sh
+curl -fsS -b cookies "$api/repositories/1" | jq '.plans[] | {id, name}'
+curl -fsS -b cookies -H 'Content-Type: application/json' \
+  -d '{"kind":"backup","plan_id":2}' "$api/repositories/1/jobs"
+```
+
+Add a plan that backs up a folder every hour:
+
+```sh
+curl -fsS -b cookies -H 'Content-Type: application/json' -d '{
+  "name": "Documents",
+  "paths": {"include": ["/home/me/Documents"], "exclude": []},
+  "schedules": [{"job": "backup", "cron": "0 * * * *"}]
+}' "$api/repositories/1/plans"
+```
+
 List the snapshots, and download a folder of the newest one as a zip:
 
 ```sh

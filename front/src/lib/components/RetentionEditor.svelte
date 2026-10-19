@@ -4,23 +4,25 @@
   import { dateTime } from '#lib/format.ts';
   import { COUNT_RULES, isEmpty, normalize } from '#lib/retention.ts';
 
-  // Edits a retention policy; with a repository id it can preview the policy.
+  // Edits a retention policy; for a saved plan it can preview the policy.
   let {
     value = $bindable(),
     repositoryId,
+    planId,
   }: {
     value: Retention;
     repositoryId?: number;
+    planId?: number;
   } = $props();
 
   let preview: RetentionPreview | null = $state(null);
   let previewing = $state(false);
 
   async function runPreview() {
-    if (!repositoryId) return;
+    if (!repositoryId || !planId) return;
     previewing = true;
     try {
-      preview = await api.previewRetention(repositoryId, normalize($state.snapshot(value)));
+      preview = await api.previewRetention(repositoryId, planId, normalize($state.snapshot(value)));
     } catch (err) {
       notifyError(err, 'Could not preview the policy');
     } finally {
@@ -51,7 +53,7 @@
     <p class="text-warning text-sm">Set at least one rule.</p>
   {/if}
 
-  {#if repositoryId}
+  {#if repositoryId && planId}
     <div>
       <button type="button" class="btn btn-sm" onclick={runPreview} disabled={previewing || isEmpty(value)}>
         {previewing ? 'Checking snapshots…' : 'Preview'}

@@ -1,5 +1,6 @@
-import type { Job, Repository } from './api/client';
+import type { Job, Plan, Repository } from './api/client';
 import { isActive } from './jobs.svelte';
+import { ready } from './plan';
 import { parse, type Preset } from './schedule';
 
 /** How a repository is doing, worst first in DASHBOARD_ORDER. */
@@ -31,26 +32,33 @@ export function periodHours(p: Preset): number {
 }
 
 /**
- * The state of a repository from its jobs (any order). A scheduled backup is
- * late when the last good one is older than one and a half periods, plus an
- * hour for a backup that is slow to finish.
+ * The state of a plan from the jobs of its repository (any order). A
+ * scheduled backup is late when the last good one is older than one and a
+ * half periods, plus an hour for a backup that is slow to finish.
  */
-export function health(repo: Repository, jobs: Job[], now = Date.now()): Health {
-  if (jobs.some((j) => isActive(j.status))) return 'running';
-  if (!repo.initialized_at || repo.paths.include.length === 0) return 'setup';
+export function planHealth(plan: Plan, jobs: Job[], now = Date.now()): Health {
   const backups = jobs
-    .filter((j) => j.kind === 'backup' && j.status !== 'cancelled' && j.finished_at)
+    .filter((j) => j.kind === 'backup' && j.plan_id === plan.id && j.status !== 'cancelled' && j.finished_at)
     .sort((a, b) => Date.parse(b.finished_at!) - Date.parse(a.finished_at!));
   const last = backups[0];
   if (last && (last.status === 'failed' || last.status === 'interrupted')) return 'failed';
   const good = backups.find((j) => j.status === 'succeeded');
   if (!good) return 'never';
-  const schedule = repo.schedules.find((s) => s.job === 'backup' && s.enabled);
+  const schedule = plan.schedules.find((s) => s.job === 'backup' && s.enabled);
   if (schedule) {
     const allowed = periodHours(parse(schedule.cron)) * 1.5 * HOUR + HOUR;
     if (now - Date.parse(good.finished_at!) > allowed) return 'late';
   }
   return 'ok';
+}
+
+/** The state of a repository: the worst of its plans'. */
+export function health(repo: Repository, jobs: Job[], now = Date.now()): Health {
+  if (jobs.some((j) => isActive(j.status))) return 'running';
+  const plans = ready(repo);
+  if (!repo.initialized_at || plans.length === 0) return 'setup';
+  const states = plans.map((p) => planHealth(p, jobs, now));
+  return DASHBOARD_ORDER.find((h) => states.includes(h)) ?? 'ok';
 }
 
 /** One sentence for the top of the dashboard. */

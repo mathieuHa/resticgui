@@ -25,7 +25,7 @@ func seed(t *testing.T) *store.Store {
 	require.NoError(t, err)
 	t.Cleanup(func() { st.Close() })
 	repo := func(name string) db.Repository {
-		r, err := st.CreateRepository(ctx, db.CreateRepositoryParams{Name: name, Backend: "local", Location: "/srv/" + name, Options: "{}", Secrets: []byte("x"), Compression: "auto"})
+		r, err := st.CreateRepository(ctx, db.CreateRepositoryParams{Name: name, Backend: "local", Location: "/srv/" + name, Options: "{}", Secrets: []byte("x")})
 		require.NoError(t, err)
 		return r
 	}

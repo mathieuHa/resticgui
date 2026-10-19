@@ -652,98 +652,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/repositories/{id}/paths": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: components["parameters"]["id"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** Replace the backup paths and exclude patterns */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: components["parameters"]["id"];
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["Paths"];
-                };
-            };
-            responses: {
-                200: components["responses"]["Repository"];
-                400: components["responses"]["Error"];
-                404: components["responses"]["Error"];
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/repositories/{id}/retention": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: components["parameters"]["id"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** Set the retention policy */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: components["parameters"]["id"];
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["Retention"];
-                };
-            };
-            responses: {
-                200: components["responses"]["Repository"];
-                400: components["responses"]["Error"];
-                404: components["responses"]["Error"];
-            };
-        };
-        post?: never;
-        /** Remove the retention policy */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: components["parameters"]["id"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["Repository"];
-                404: components["responses"]["Error"];
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/repositories/{id}/retention/preview": {
+    "/repositories/{id}/plans": {
         parameters: {
             query?: never;
             header?: never;
@@ -755,8 +664,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Show what a retention policy would keep and remove
-         * @description Runs restic forget --dry-run on the snapshots a forget job would consider. The policy need not be saved.
+         * Add a backup plan
+         * @description A plan says what to back up into the repository, how, when and how long to keep it. A repository has as many as needed, deduplicated together.
          */
         post: {
             parameters: {
@@ -764,6 +673,112 @@ export interface paths {
                 header?: never;
                 path: {
                     id: components["parameters"]["id"];
+                };
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["PlanInput"];
+            responses: {
+                201: components["responses"]["Plan"];
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repositories/{id}/plans/{plan}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+                plan: components["parameters"]["plan"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace a plan
+         * @description Everything is replaced but the plan's tag, so its retention goes on applying to the snapshots it made.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                    plan: components["parameters"]["plan"];
+                };
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["PlanInput"];
+            responses: {
+                200: components["responses"]["Plan"];
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        post?: never;
+        /**
+         * Delete a plan
+         * @description Its snapshots stay in the repository.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                    plan: components["parameters"]["plan"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["Error"];
+                409: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repositories/{id}/plans/{plan}/retention/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+                plan: components["parameters"]["plan"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Show what a retention policy would keep and remove
+         * @description Runs restic forget --dry-run on the snapshots a forget job of the plan would consider. The policy need not be saved.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["id"];
+                    plan: components["parameters"]["plan"];
                 };
                 cookie?: never;
             };
@@ -805,19 +820,22 @@ export interface paths {
             header?: never;
             path: {
                 id: components["parameters"]["id"];
-                job: "backup" | "forget" | "check";
+                job: "check";
             };
             cookie?: never;
         };
         get?: never;
-        /** Set when a job runs */
+        /**
+         * Set when the integrity check runs
+         * @description Backups and retention are scheduled in plans.
+         */
         put: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
                     id: components["parameters"]["id"];
-                    job: "backup" | "forget" | "check";
+                    job: "check";
                 };
                 cookie?: never;
             };
@@ -848,7 +866,7 @@ export interface paths {
                 header?: never;
                 path: {
                     id: components["parameters"]["id"];
-                    job: "backup" | "forget" | "check";
+                    job: "check";
                 };
                 cookie?: never;
             };
@@ -991,6 +1009,8 @@ export interface paths {
                     "application/json": {
                         /** @enum {string} */
                         kind: "init" | "backup" | "forget" | "prune" | "check" | "unlock";
+                        /** @description The plan a backup or forget runs; it can be left out when the repository has one plan */
+                        plan_id?: number;
                     };
                 };
             };
@@ -1017,7 +1037,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Back up now */
+        /**
+         * Back up now
+         * @description Backs up the repository's only plan; a repository with several needs POST /repositories/{id}/jobs with a plan_id.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -1030,6 +1053,7 @@ export interface paths {
             requestBody?: never;
             responses: {
                 202: components["responses"]["Job"];
+                400: components["responses"]["Error"];
                 404: components["responses"]["Error"];
             };
         };
@@ -1602,13 +1626,6 @@ export interface components {
                 [key: string]: string;
             };
             host?: string;
-            /**
-             * @default auto
-             * @enum {string}
-             */
-            compression: "auto" | "off" | "max";
-            /** @example 2G */
-            exclude_larger_than?: string;
         };
         Repository: {
             id: number;
@@ -1626,27 +1643,16 @@ export interface components {
                 [key: string]: string;
             };
             host: string;
-            compression: string;
-            exclude_larger_than: string;
             /** Format: date-time */
             initialized_at: string | null;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
-            paths: components["schemas"]["Paths"];
-            retention: components["schemas"]["Retention"] | null;
-            schedules: {
-                /** @enum {string} */
-                job: "backup" | "forget" | "check";
-                cron: string;
-                enabled: boolean;
-                /**
-                 * Format: date-time
-                 * @description When it runs next; null when disabled
-                 */
-                next_run: string | null;
-            }[];
+            /** @description What is backed up */
+            plans: components["schemas"]["Plan"][];
+            /** @description The integrity check's schedule */
+            schedules: components["schemas"]["Schedule"][];
             /** @description The Healthchecks check pinged by backups; null when unset */
             healthcheck: {
                 host: string;
@@ -1714,6 +1720,93 @@ export interface components {
             dirs: number;
             bytes: number;
         };
+        Schedule: {
+            /** @enum {string} */
+            job: "backup" | "forget" | "check";
+            cron: string;
+            enabled: boolean;
+            /**
+             * Format: date-time
+             * @description When it runs next; null when disabled
+             */
+            next_run: string | null;
+        };
+        ScheduleInput: {
+            /** @enum {string} */
+            job: "backup" | "forget";
+            /**
+             * @description Five cron fields or a descriptor such as "@daily" or "@every 6h"
+             * @example 30 2 * * *
+             */
+            cron: string;
+            /** @default true */
+            enabled: boolean;
+        };
+        PlanOptions: {
+            /**
+             * @default auto
+             * @enum {string}
+             */
+            compression: "auto" | "off" | "max";
+            /**
+             * @description Skip files above this size; empty for none
+             * @example 2G
+             */
+            exclude_larger_than: string;
+            /** @description Stay on the file system of each path */
+            one_file_system: boolean;
+            /** @description Skip folders holding a CACHEDIR.TAG file */
+            exclude_caches: boolean;
+            /**
+             * @description Skip folders holding a file of one of these names
+             * @example [
+             *       ".nobackup"
+             *     ]
+             */
+            exclude_if_present: string[];
+            /** @description KiB/s; 0 for no limit */
+            limit_upload: number;
+            /** @description KiB/s; 0 for no limit */
+            limit_download: number;
+        };
+        Plan: {
+            id: number;
+            name: string;
+            /** @description Put on every snapshot of the plan; its retention only applies to snapshots with this tag */
+            tag: string;
+            /** @description More tags put on its snapshots */
+            tags: string[];
+            paths: components["schemas"]["Paths"];
+            options: components["schemas"]["PlanOptions"];
+            schedules: components["schemas"]["Schedule"][];
+            /** @description Null when every snapshot is kept */
+            retention: components["schemas"]["Retention"] | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PlanInput: {
+            /** @description Unique in the repository */
+            name: string;
+            tags?: string[];
+            paths: components["schemas"]["Paths"];
+            options?: {
+                /**
+                 * @default auto
+                 * @enum {string}
+                 */
+                compression: "auto" | "off" | "max";
+                /** @example 2G */
+                exclude_larger_than?: string;
+                one_file_system?: boolean;
+                exclude_caches?: boolean;
+                exclude_if_present?: string[];
+                limit_upload?: number;
+                limit_download?: number;
+            };
+            schedules?: components["schemas"]["ScheduleInput"][];
+            /** @description Null keeps every snapshot; a forget schedule needs one */
+            retention?: components["schemas"]["Retention"] | null;
+        };
         Paths: {
             /** @description Absolute paths inside the allowed roots */
             include: string[];
@@ -1734,6 +1827,8 @@ export interface components {
         Job: {
             id: number;
             repository_id: number;
+            /** @description The plan of a backup or forget job */
+            plan_id: number | null;
             /** @enum {string} */
             kind: "init" | "backup" | "forget" | "prune" | "check" | "unlock" | "restore";
             /** @enum {string} */
@@ -1763,6 +1858,8 @@ export interface components {
         Event: {
             job_id: number;
             repository_id: number;
+            /** @description The plan of a backup or forget job */
+            plan_id?: number;
             kind: string;
             status: string;
             snapshot_id?: string;
@@ -1849,6 +1946,15 @@ export interface components {
                 "application/json": components["schemas"]["Repository"];
             };
         };
+        /** @description The plan */
+        Plan: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Plan"];
+            };
+        };
         /** @description The job */
         Job: {
             headers: {
@@ -1870,6 +1976,7 @@ export interface components {
     };
     parameters: {
         id: number;
+        plan: number;
         /** @description A snapshot ID (8 to 64 hex characters) or "latest" */
         snapshot: string;
     };
@@ -1877,6 +1984,11 @@ export interface components {
         RepositoryInput: {
             content: {
                 "application/json": components["schemas"]["RepositoryInput"];
+            };
+        };
+        PlanInput: {
+            content: {
+                "application/json": components["schemas"]["PlanInput"];
             };
         };
         NotifierInput: {

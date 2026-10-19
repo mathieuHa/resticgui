@@ -8,8 +8,10 @@ package store
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -143,4 +145,162 @@ func DecodeOptions(s string) (RepositoryOptions, error) {
 	var o RepositoryOptions
 	err := json.Unmarshal([]byte(s), &o)
 	return o, err
+}
+
+// PlanOptions is how a plan runs restic backup, stored as JSON in
+// plans.options.
+type PlanOptions struct {
+	// Compression is "auto", "off" or "max".
+	Compression string `json:"compression"`
+	// ExcludeLargerThan skips files above a size such as "500M"; empty for none.
+	ExcludeLargerThan string `json:"exclude_larger_than"`
+	// OneFileSystem stays on the file system of each path (--one-file-system).
+	OneFileSystem bool `json:"one_file_system"`
+	// ExcludeCaches skips folders holding a CACHEDIR.TAG file.
+	ExcludeCaches bool `json:"exclude_caches"`
+	// ExcludeIfPresent skips folders holding a file of one of these names.
+	ExcludeIfPresent []string `json:"exclude_if_present"`
+	// LimitUpload and LimitDownload cap the transfer rate in KiB/s; 0 for none.
+	LimitUpload   int `json:"limit_upload"`
+	LimitDownload int `json:"limit_download"`
+}
+
+// DecodePlanOptions parses plans.options, filling in the defaults.
+func DecodePlanOptions(s string) (PlanOptions, error) {
+	var o PlanOptions
+	err := json.Unmarshal([]byte(s), &o)
+	if o.Compression == "" {
+		o.Compression = "auto"
+	}
+	if o.ExcludeIfPresent == nil {
+		o.ExcludeIfPresent = []string{}
+	}
+	return o, err
+}
+
+// DecodeTags parses plans.tags.
+func DecodeTags(s string) ([]string, error) {
+	tags := []string{}
+	err := json.Unmarshal([]byte(s), &tags)
+	return tags, err
+}
+
+// Plan is everything a plan holds but its identity: what SavePlan writes.
+type Plan struct {
+	Name    string
+	Tags    []string
+	Options PlanOptions
+	Include []string
+	Exclude []string
+	// Schedules are the plan's backup and forget schedules; the others are
+	// removed.
+	Schedules []db.PlanSchedule
+	// Retention is nil for a plan that keeps every snapshot.
+	Retention *db.PlanRetention
+}
+
+// newPlanTag returns the tag of a new plan's snapshots: random, since a
+// plan's name can change and the tag must not.
+func newPlanTag(repositoryID int64) (string, error) {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("resticgui:%d:%s", repositoryID, hex.EncodeToString(b)), nil
+}
+
+// SavePlan creates a plan of a repository when id is 0, or replaces plan id.
+// Run it in a transaction, from InTx.
+func SavePlan(ctx context.Context, q *db.Queries, repositoryID, id int64, p Plan) (db.Plan, error) {
+	if p.Tags == nil {
+		p.Tags = []string{}
+	}
+	if p.Options.ExcludeIfPresent == nil {
+		p.Options.ExcludeIfPresent = []string{}
+	}
+	tags, err := json.Marshal(p.Tags)
+	if err != nil {
+		return db.Plan{}, err
+	}
+	options, err := json.Marshal(p.Options)
+	if err != nil {
+		return db.Plan{}, err
+	}
+	var plan db.Plan
+	if id == 0 {
+		tag, err := newPlanTag(repositoryID)
+		if err != nil {
+			return db.Plan{}, err
+		}
+		plan, err = q.CreatePlan(ctx, db.CreatePlanParams{RepositoryID: repositoryID, Name: p.Name, Tag: tag, Tags: string(tags), Options: string(options)})
+		if err != nil {
+			return db.Plan{}, err
+		}
+	} else {
+		plan, err = q.UpdatePlan(ctx, db.UpdatePlanParams{ID: id, Name: p.Name, Tags: string(tags), Options: string(options)})
+		if err != nil {
+			return db.Plan{}, err
+		}
+		for _, clear := range []func(context.Context, int64) error{q.DeletePlanPaths, q.DeletePlanSchedules, q.DeletePlanRetention} {
+			if err := clear(ctx, id); err != nil {
+				return db.Plan{}, err
+			}
+		}
+	}
+	for kind, paths := range map[string][]string{"include": p.Include, "exclude": p.Exclude} {
+		seen := map[string]bool{}
+		for _, path := range paths {
+			if seen[path] {
+				continue
+			}
+			seen[path] = true
+			if err := q.AddPlanPath(ctx, db.AddPlanPathParams{PlanID: plan.ID, Path: path, Kind: kind}); err != nil {
+				return db.Plan{}, err
+			}
+		}
+	}
+	for _, s := range p.Schedules {
+		if err := q.UpsertPlanSchedule(ctx, db.UpsertPlanScheduleParams{PlanID: plan.ID, Job: s.Job, Cron: s.Cron, Enabled: s.Enabled}); err != nil {
+			return db.Plan{}, err
+		}
+	}
+	if r := p.Retention; r != nil {
+		if err := q.UpsertPlanRetention(ctx, db.UpsertPlanRetentionParams{
+			PlanID: plan.ID, KeepLast: r.KeepLast, KeepHourly: r.KeepHourly, KeepDaily: r.KeepDaily, KeepWeekly: r.KeepWeekly,
+			KeepMonthly: r.KeepMonthly, KeepYearly: r.KeepYearly, KeepWithin: r.KeepWithin, Prune: r.Prune,
+		}); err != nil {
+			return db.Plan{}, err
+		}
+	}
+	return plan, nil
+}
+
+// Schedule is an enabled schedule: a repository's check, or a plan's backup
+// or forget.
+type Schedule struct {
+	RepositoryID int64
+	// PlanID is 0 for a repository's schedule.
+	PlanID int64
+	Job    string
+	Cron   string
+}
+
+// EnabledSchedules lists the schedules the scheduler runs.
+func (s *Store) EnabledSchedules(ctx context.Context) ([]Schedule, error) {
+	repos, err := s.ListEnabledSchedules(ctx)
+	if err != nil {
+		return nil, err
+	}
+	plans, err := s.ListEnabledPlanSchedules(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Schedule, 0, len(repos)+len(plans))
+	for _, r := range repos {
+		out = append(out, Schedule{RepositoryID: r.RepositoryID, Job: r.Job, Cron: r.Cron})
+	}
+	for _, p := range plans {
+		out = append(out, Schedule{RepositoryID: p.RepositoryID, PlanID: p.PlanID, Job: p.Job, Cron: p.Cron})
+	}
+	return out, nil
 }

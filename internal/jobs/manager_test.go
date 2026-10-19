@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -184,10 +185,38 @@ func (e *env) repository(t *testing.T, name string) db.Repository {
 	require.NoError(t, err)
 	r, err := e.store.CreateRepository(context.Background(), db.CreateRepositoryParams{
 		Name: name, Backend: "s3", Location: "s3:example.com/" + name, Options: options,
-		Secrets: sealed, Host: "nas", Compression: "max", ExcludeLargerThan: "1G",
+		Secrets: sealed, Host: "nas",
 	})
 	require.NoError(t, err)
+	e.addPlan(t, r.ID, "Default", store.PlanOptions{Compression: "max", ExcludeLargerThan: "1G"})
 	return r
+}
+
+// addPlan adds a plan to a repository, with no paths yet.
+func (e *env) addPlan(t *testing.T, repositoryID int64, name string, opts store.PlanOptions) db.Plan {
+	t.Helper()
+	var plan db.Plan
+	require.NoError(t, e.store.InTx(context.Background(), func(q *db.Queries) error {
+		var err error
+		plan, err = store.SavePlan(context.Background(), q, repositoryID, 0, store.Plan{Name: name, Options: opts})
+		return err
+	}))
+	return plan
+}
+
+// plan returns the first plan of a repository.
+func (e *env) plan(t *testing.T, repositoryID int64) db.Plan {
+	t.Helper()
+	plans, err := e.store.ListPlans(context.Background(), repositoryID)
+	require.NoError(t, err)
+	require.NotEmpty(t, plans)
+	return plans[0]
+}
+
+// addPath adds a path to the first plan of a repository.
+func (e *env) addPath(t *testing.T, repositoryID int64, path, kind string) {
+	t.Helper()
+	require.NoError(t, e.store.AddPlanPath(context.Background(), db.AddPlanPathParams{PlanID: e.plan(t, repositoryID).ID, Path: path, Kind: kind}))
 }
 
 func (e *env) waitStatus(t *testing.T, jobID int64, want Status) db.Job {
@@ -206,23 +235,21 @@ func TestBackupJob(t *testing.T) {
 	ctx := context.Background()
 	e := newEnv(t, Options{})
 	repo := e.repository(t, "photos")
-	for _, p := range []db.AddPathParams{
-		{RepositoryID: repo.ID, Path: "/home/me/Pictures", Kind: "include"},
-		{RepositoryID: repo.ID, Path: "/home/me/Pictures/.cache", Kind: "exclude"},
-		{RepositoryID: repo.ID, Path: "/home/me/Documents", Kind: "include"},
-	} {
-		_, err := e.store.AddPath(ctx, p)
-		require.NoError(t, err)
-	}
+	e.addPath(t, repo.ID, "/home/me/Pictures", "include")
+	e.addPath(t, repo.ID, "/home/me/Pictures/.cache", "exclude")
+	e.addPath(t, repo.ID, "/home/me/Documents", "include")
+	plan := e.plan(t, repo.ID)
 	e.restic.progress = []restic.BackupStatus{{PercentDone: 0.5, FilesDone: 1, TotalFiles: 2, BytesDone: 10, TotalBytes: 20}}
 	e.restic.backup = &restic.BackupResult{Summary: &restic.BackupSummary{SnapshotID: "abc123", TotalDuration: 1.5}}
 	events, unsubscribe := e.events.Subscribe(16)
 	defer unsubscribe()
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	assert.Equal(t, "queued", job.Status)
 	assert.Equal(t, "manual", job.Trigger)
+	require.NotNil(t, job.PlanID, "the repository's only plan")
+	assert.Equal(t, plan.ID, *job.PlanID)
 
 	done := e.waitStatus(t, job.ID, StatusSucceeded)
 	assert.Equal(t, "abc123", done.SnapshotID)
@@ -245,10 +272,11 @@ func TestBackupJob(t *testing.T) {
 	assert.Equal(t, restic.BackupOptions{
 		Paths:             []string{"/home/me/Documents", "/home/me/Pictures"},
 		Excludes:          []string{"/home/me/Pictures/.cache"},
-		Tags:              []string{Tag(repo.ID)},
+		Tags:              []string{plan.Tag},
 		Host:              "nas",
 		ExcludeLargerThan: "1G",
 		Compression:       "max",
+		ExcludeIfPresent:  []string{},
 	}, calls[0].Opts)
 
 	var got []Event
@@ -260,7 +288,7 @@ func TestBackupJob(t *testing.T) {
 			t.Fatalf("missing events, got %+v", got)
 		}
 	}
-	base := Event{JobID: job.ID, RepositoryID: repo.ID, Kind: KindBackup}
+	base := Event{JobID: job.ID, RepositoryID: repo.ID, PlanID: &plan.ID, Kind: KindBackup}
 	want := []Event{base, base, base, base}
 	want[0].Type, want[0].Status = EventStatus, StatusQueued
 	want[1].Type, want[1].Status = EventStatus, StatusRunning
@@ -273,13 +301,12 @@ func TestBackupJob(t *testing.T) {
 func TestProgressIsThrottled(t *testing.T) {
 	e := newEnv(t, Options{ProgressInterval: time.Hour})
 	repo := e.repository(t, "r")
-	_, err := e.store.AddPath(context.Background(), db.AddPathParams{RepositoryID: repo.ID, Path: "/data", Kind: "include"})
-	require.NoError(t, err)
+	e.addPath(t, repo.ID, "/data", "include")
 	e.restic.progress = make([]restic.BackupStatus, 50)
 	events, unsubscribe := e.events.Subscribe(64)
 	defer unsubscribe()
 
-	job, err := e.manager.Enqueue(context.Background(), repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(context.Background(), repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	e.waitStatus(t, job.ID, StatusSucceeded)
 	progress := 0
@@ -307,8 +334,7 @@ func drain(ch <-chan Event) <-chan Event {
 func TestIncompleteBackupSucceedsWithError(t *testing.T) {
 	e := newEnv(t, Options{})
 	repo := e.repository(t, "r")
-	_, err := e.store.AddPath(context.Background(), db.AddPathParams{RepositoryID: repo.ID, Path: "/data", Kind: "include"})
-	require.NoError(t, err)
+	e.addPath(t, repo.ID, "/data", "include")
 	e.restic.backup = &restic.BackupResult{
 		Summary: &restic.BackupSummary{SnapshotID: "partial1"},
 		Errors:  []restic.BackupError{{Item: "/data/locked.db", Message: "permission denied"}},
@@ -317,7 +343,7 @@ func TestIncompleteBackupSucceedsWithError(t *testing.T) {
 		return &restic.Error{Command: "backup", ExitCode: 3}
 	}
 
-	job, err := e.manager.Enqueue(context.Background(), repo.ID, KindBackup, TriggerManual)
+	job, err := e.manager.Enqueue(context.Background(), repo.ID, 0, KindBackup, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusSucceeded)
 	assert.Equal(t, "partial1", done.SnapshotID)
@@ -333,7 +359,7 @@ func TestFailedJobRecordsResticError(t *testing.T) {
 		return &restic.Error{Command: "check", ExitCode: 12, Message: "wrong password or no key found", Stderr: []string{"line 1", "wrong password or no key found"}}
 	}
 
-	job, err := e.manager.Enqueue(context.Background(), repo.ID, KindCheck, TriggerManual)
+	job, err := e.manager.Enqueue(context.Background(), repo.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusFailed)
 	assert.Equal(t, "restic check: exit code 12: wrong password or no key found", done.Error)
@@ -347,19 +373,19 @@ func TestForgetJobUsesRetention(t *testing.T) {
 	e := newEnv(t, Options{})
 	repo := e.repository(t, "r")
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindForget, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindForget, TriggerManual)
 	require.NoError(t, err)
 	done := e.waitStatus(t, job.ID, StatusFailed)
 	assert.Equal(t, ErrNoRetention.Error(), done.Error)
 	assert.Empty(t, e.restic.Calls(), "restic is not called without a policy")
 
-	_, err = e.store.UpsertRetention(ctx, db.UpsertRetentionParams{RepositoryID: repo.ID, KeepDaily: 7, KeepYearly: 2, KeepWithin: "30d", Prune: true})
-	require.NoError(t, err)
+	plan := e.plan(t, repo.ID)
+	require.NoError(t, e.store.UpsertPlanRetention(ctx, db.UpsertPlanRetentionParams{PlanID: plan.ID, KeepDaily: 7, KeepYearly: 2, KeepWithin: "30d", Prune: true}))
 	e.restic.groups = []restic.ForgetGroup{
 		{Keep: make([]restic.Snapshot, 3), Remove: make([]restic.Snapshot, 2)},
 		{Keep: make([]restic.Snapshot, 1)},
 	}
-	job, err = e.manager.Enqueue(ctx, repo.ID, KindForget, TriggerSchedule)
+	job, err = e.manager.Enqueue(ctx, repo.ID, 0, KindForget, TriggerSchedule)
 	require.NoError(t, err)
 	done = e.waitStatus(t, job.ID, StatusSucceeded)
 	assert.JSONEq(t, `{"kept":4,"removed":2,"pruned":true}`, done.Summary)
@@ -368,8 +394,8 @@ func TestForgetJobUsesRetention(t *testing.T) {
 	require.Len(t, calls, 1)
 	assert.Equal(t, restic.ForgetOptions{
 		Policy:  restic.Policy{KeepDaily: 7, KeepYearly: 2, KeepWithin: "30d"},
-		Filter:  restic.SnapshotFilter{Host: "nas", Tags: []string{Tag(repo.ID)}},
-		GroupBy: "host,tags",
+		Filter:  restic.SnapshotFilter{Host: "nas", Tags: []string{plan.Tag}},
+		GroupBy: "host",
 		Prune:   true,
 	}, calls[0].Opts)
 }
@@ -380,7 +406,7 @@ func TestInitJobMarksRepositoryInitialized(t *testing.T) {
 	repo := e.repository(t, "r")
 	require.Nil(t, repo.InitializedAt)
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindInit, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindInit, TriggerManual)
 	require.NoError(t, err)
 	e.waitStatus(t, job.ID, StatusSucceeded)
 	repo, err = e.store.GetRepository(ctx, repo.ID)
@@ -397,7 +423,7 @@ func TestSucceededJobsMarkRepositoryInitialized(t *testing.T) {
 		return r.InitializedAt != nil
 	}
 	run := func(id int64, kind Kind, want Status) {
-		job, err := e.manager.Enqueue(ctx, id, kind, TriggerManual)
+		job, err := e.manager.Enqueue(ctx, id, 0, kind, TriggerManual)
 		require.NoError(t, err)
 		e.waitStatus(t, job.ID, want)
 	}
@@ -422,7 +448,7 @@ func TestOtherKinds(t *testing.T) {
 	repo := e.repository(t, "r")
 	e.restic.check = &restic.CheckSummary{NumErrors: 0}
 	for _, kind := range []Kind{KindPrune, KindCheck, KindUnlock} {
-		job, err := e.manager.Enqueue(context.Background(), repo.ID, kind, TriggerManual)
+		job, err := e.manager.Enqueue(context.Background(), repo.ID, 0, kind, TriggerManual)
 		require.NoError(t, err)
 		e.waitStatus(t, job.ID, StatusSucceeded)
 	}
@@ -438,13 +464,27 @@ func TestEnqueueErrors(t *testing.T) {
 	e := newEnv(t, Options{})
 	repo := e.repository(t, "r")
 
-	_, err := e.manager.Enqueue(ctx, repo.ID, "restore", TriggerManual)
+	_, err := e.manager.Enqueue(ctx, repo.ID, 0, "restore", TriggerManual)
 	assert.ErrorIs(t, err, ErrUnknownKind)
-	_, err = e.manager.Enqueue(ctx, 999, KindBackup, TriggerManual)
+	_, err = e.manager.Enqueue(ctx, 999, 0, KindBackup, TriggerManual)
+	assert.ErrorIs(t, err, ErrRepositoryNotFound)
+	_, err = e.manager.Enqueue(ctx, 999, 0, KindCheck, TriggerManual)
 	assert.ErrorIs(t, err, ErrRepositoryNotFound)
 
+	// a backup or forget names its plan once there are several
+	e.addPlan(t, repo.ID, "Videos", store.PlanOptions{})
+	_, err = e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
+	assert.ErrorIs(t, err, ErrPlanRequired)
+	_, err = e.manager.Enqueue(ctx, repo.ID, 0, KindForget, TriggerManual)
+	assert.ErrorIs(t, err, ErrPlanRequired)
+	other := e.repository(t, "other")
+	_, err = e.manager.Enqueue(ctx, repo.ID, e.plan(t, other.ID).ID, KindBackup, TriggerManual)
+	assert.ErrorIs(t, err, ErrPlanNotFound, "a plan of another repository")
+	_, err = e.manager.Enqueue(ctx, repo.ID, 12345, KindBackup, TriggerManual)
+	assert.ErrorIs(t, err, ErrPlanNotFound)
+
 	e.manager.Close()
-	_, err = e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerManual)
+	_, err = e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerManual)
 	assert.ErrorIs(t, err, ErrClosed)
 }
 
@@ -455,9 +495,9 @@ func TestJobsOfOneRepositoryRunInOrder(t *testing.T) {
 	e.restic.run = g.run
 	repo := e.repository(t, "r")
 
-	first, err := e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerManual)
+	first, err := e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
-	second, err := e.manager.Enqueue(ctx, repo.ID, KindPrune, TriggerManual)
+	second, err := e.manager.Enqueue(ctx, repo.ID, 0, KindPrune, TriggerManual)
 	require.NoError(t, err)
 
 	g.waitStarted(t)
@@ -488,14 +528,14 @@ func TestRepositoriesRunInParallelUpToWorkers(t *testing.T) {
 	e.restic.run = g.run
 	a, b, c := e.repository(t, "a"), e.repository(t, "b"), e.repository(t, "c")
 
-	jobA, err := e.manager.Enqueue(ctx, a.ID, KindCheck, TriggerManual)
+	jobA, err := e.manager.Enqueue(ctx, a.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
-	jobB, err := e.manager.Enqueue(ctx, b.ID, KindCheck, TriggerManual)
+	jobB, err := e.manager.Enqueue(ctx, b.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	started := []string{g.waitStarted(t), g.waitStarted(t)}
 	assert.ElementsMatch(t, []string{a.Location, b.Location}, started, "two repositories run at once")
 
-	jobC, err := e.manager.Enqueue(ctx, c.ID, KindCheck, TriggerManual)
+	jobC, err := e.manager.Enqueue(ctx, c.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	g.assertNoStart(t)
 
@@ -515,15 +555,15 @@ func TestScheduledJobSkippedWhileSameKindPending(t *testing.T) {
 	e.restic.run = g.run
 	repo := e.repository(t, "r")
 
-	running, err := e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerSchedule)
+	running, err := e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerSchedule)
 	require.NoError(t, err)
 	g.waitStarted(t)
-	_, err = e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerSchedule)
+	_, err = e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerSchedule)
 	assert.ErrorIs(t, err, ErrAlreadyQueued)
 
-	other, err := e.manager.Enqueue(ctx, repo.ID, KindPrune, TriggerSchedule)
+	other, err := e.manager.Enqueue(ctx, repo.ID, 0, KindPrune, TriggerSchedule)
 	require.NoError(t, err, "another kind is queued")
-	manual, err := e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerManual)
+	manual, err := e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err, "a manual run is always queued")
 
 	for _, id := range []int64{running.ID, other.ID, manual.ID} {
@@ -542,7 +582,7 @@ func TestCancelRunningJob(t *testing.T) {
 	e.restic.run = g.run
 	repo := e.repository(t, "r")
 
-	job, err := e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerManual)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	g.waitStarted(t)
 	require.NoError(t, e.manager.Cancel(ctx, job.ID))
@@ -558,10 +598,10 @@ func TestCancelQueuedJob(t *testing.T) {
 	e.restic.run = g.run
 	repo := e.repository(t, "r")
 
-	first, err := e.manager.Enqueue(ctx, repo.ID, KindCheck, TriggerManual)
+	first, err := e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	g.waitStarted(t)
-	queued, err := e.manager.Enqueue(ctx, repo.ID, KindPrune, TriggerManual)
+	queued, err := e.manager.Enqueue(ctx, repo.ID, 0, KindPrune, TriggerManual)
 	require.NoError(t, err)
 	require.NoError(t, e.manager.Cancel(ctx, queued.ID))
 	e.waitStatus(t, queued.ID, StatusCancelled)
@@ -584,12 +624,12 @@ func TestCloseInterruptsJobs(t *testing.T) {
 	e.restic.run = g.run
 	a, b := e.repository(t, "a"), e.repository(t, "b")
 
-	running, err := e.manager.Enqueue(ctx, a.ID, KindCheck, TriggerManual)
+	running, err := e.manager.Enqueue(ctx, a.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
 	g.waitStarted(t)
-	waitingForWorker, err := e.manager.Enqueue(ctx, b.ID, KindCheck, TriggerManual)
+	waitingForWorker, err := e.manager.Enqueue(ctx, b.ID, 0, KindCheck, TriggerManual)
 	require.NoError(t, err)
-	queued, err := e.manager.Enqueue(ctx, a.ID, KindPrune, TriggerManual)
+	queued, err := e.manager.Enqueue(ctx, a.ID, 0, KindPrune, TriggerManual)
 	require.NoError(t, err)
 
 	e.manager.Close()
@@ -649,7 +689,7 @@ func TestRestoreJob(t *testing.T) {
 	events, unsubscribe := e.events.Subscribe(16)
 	defer unsubscribe()
 
-	_, err := e.manager.Enqueue(ctx, repo.ID, KindRestore, TriggerManual)
+	_, err := e.manager.Enqueue(ctx, repo.ID, 0, KindRestore, TriggerManual)
 	assert.ErrorIs(t, err, ErrUnknownKind, "a restore needs its parameters")
 	_, err = e.manager.EnqueueRestore(ctx, repo.ID, RestoreParams{SnapshotID: "abc"})
 	assert.Error(t, err)
@@ -673,4 +713,78 @@ func TestRestoreJob(t *testing.T) {
 		}
 	}
 	assert.Equal(t, &Progress{PercentDone: 0.25, FilesDone: 1, TotalFiles: 4}, progress)
+}
+
+// Two plans back up into one repository: each with its paths, options and
+// tag, and the retention of one leaves the other's snapshots alone.
+func TestTwoPlansOfOneRepository(t *testing.T) {
+	ctx := context.Background()
+	e := newEnv(t, Options{})
+	g := newGate()
+	e.restic.run = g.run
+	repo := e.repository(t, "home")
+	photos := e.plan(t, repo.ID)
+	docs := e.addPlan(t, repo.ID, "Documents", store.PlanOptions{OneFileSystem: true, LimitUpload: 100, ExcludeIfPresent: []string{".nobackup"}})
+	require.NoError(t, e.store.InTx(ctx, func(q *db.Queries) error {
+		_, err := store.SavePlan(ctx, q, repo.ID, docs.ID, store.Plan{
+			Name: "Documents", Tags: []string{"work"}, Include: []string{"/docs"},
+			Options:   store.PlanOptions{OneFileSystem: true, LimitUpload: 100, ExcludeIfPresent: []string{".nobackup"}},
+			Retention: &db.PlanRetention{KeepLast: 2},
+		})
+		return err
+	}))
+	e.addPath(t, repo.ID, "/photos", "include")
+
+	first, err := e.manager.Enqueue(ctx, repo.ID, photos.ID, KindBackup, TriggerSchedule)
+	require.NoError(t, err)
+	g.waitStarted(t)
+	// a scheduled backup of the other plan is not a duplicate: it waits its turn
+	second, err := e.manager.Enqueue(ctx, repo.ID, docs.ID, KindBackup, TriggerSchedule)
+	require.NoError(t, err)
+	_, err = e.manager.Enqueue(ctx, repo.ID, photos.ID, KindBackup, TriggerSchedule)
+	assert.ErrorIs(t, err, ErrAlreadyQueued, "the same plan is")
+	g.assertNoStart(t)
+	g.release <- struct{}{}
+	g.waitStarted(t)
+	g.release <- struct{}{}
+	e.waitStatus(t, first.ID, StatusSucceeded)
+	e.waitStatus(t, second.ID, StatusSucceeded)
+
+	forget, err := e.manager.Enqueue(ctx, repo.ID, docs.ID, KindForget, TriggerManual)
+	require.NoError(t, err)
+	g.waitStarted(t)
+	g.release <- struct{}{}
+	e.waitStatus(t, forget.ID, StatusSucceeded)
+
+	calls := e.restic.Calls()
+	require.Len(t, calls, 3)
+	assert.Equal(t, []string{"/photos"}, calls[0].Opts.(restic.BackupOptions).Paths)
+	assert.Equal(t, []string{photos.Tag}, calls[0].Opts.(restic.BackupOptions).Tags)
+	assert.Equal(t, restic.BackupOptions{
+		Paths: []string{"/docs"}, Tags: []string{docs.Tag, "work"}, Host: "nas", Compression: "auto",
+		OneFileSystem: true, LimitUpload: 100, ExcludeIfPresent: []string{".nobackup"},
+	}, calls[1].Opts)
+	assert.Equal(t, restic.SnapshotFilter{Host: "nas", Tags: []string{docs.Tag}}, calls[2].Opts.(restic.ForgetOptions).Filter)
+	assert.True(t, OfRepository(repo.ID, []string{docs.Tag}))
+	assert.True(t, OfRepository(repo.ID, []string{"x", Tag(repo.ID)}))
+	assert.False(t, OfRepository(repo.ID, []string{fmt.Sprintf("resticgui:%d0", repo.ID)}))
+}
+
+func TestBackupOfADeletedPlanFails(t *testing.T) {
+	ctx := context.Background()
+	e := newEnv(t, Options{})
+	g := newGate()
+	e.restic.run = g.run
+	repo := e.repository(t, "r")
+	blocker, err := e.manager.Enqueue(ctx, repo.ID, 0, KindCheck, TriggerManual)
+	require.NoError(t, err)
+	g.waitStarted(t)
+	job, err := e.manager.Enqueue(ctx, repo.ID, 0, KindBackup, TriggerManual)
+	require.NoError(t, err)
+	_, err = e.store.DeletePlan(ctx, *job.PlanID)
+	require.NoError(t, err)
+	g.release <- struct{}{}
+	e.waitStatus(t, blocker.ID, StatusSucceeded)
+	done := e.waitStatus(t, job.ID, StatusFailed)
+	assert.Contains(t, done.Error, "plan not found")
 }

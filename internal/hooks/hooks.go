@@ -55,7 +55,9 @@ type Run struct {
 	Event        string `json:"event"`
 	RepositoryID int64  `json:"repository_id"`
 	Repository   string `json:"repository"`
-	JobID        int64  `json:"job_id"`
+	// Plan is the name of the backup plan that ran.
+	Plan  string `json:"plan"`
+	JobID int64  `json:"job_id"`
 	// Status is the job's status after it ran: succeeded or failed.
 	Status     string `json:"status,omitempty"`
 	SnapshotID string `json:"snapshot_id,omitempty"`
@@ -114,6 +116,7 @@ func (r Runner) command(ctx context.Context, command string, run Run) ([]string,
 		"RESTICGUI_EVENT="+run.Event,
 		"RESTICGUI_REPOSITORY_ID="+strconv.FormatInt(run.RepositoryID, 10),
 		"RESTICGUI_REPOSITORY="+run.Repository,
+		"RESTICGUI_PLAN="+run.Plan,
 		"RESTICGUI_JOB_ID="+strconv.FormatInt(run.JobID, 10),
 		"RESTICGUI_STATUS="+run.Status,
 		"RESTICGUI_SNAPSHOT_ID="+run.SnapshotID,

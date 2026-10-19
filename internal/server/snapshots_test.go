@@ -159,12 +159,12 @@ func TestRootsLimitPathsAndLocations(t *testing.T) {
 	var repo RepositoryDTO
 	a.decode(body, &repo)
 
-	paths := "/repositories/" + itoa(repo.ID) + "/paths"
-	status, body = a.do(http.MethodPut, paths, PathsDTO{Include: []string{filepath.Join(root, "..", "escape")}})
+	plans := "/repositories/" + itoa(repo.ID) + "/plans"
+	status, body = a.do(http.MethodPost, plans, planInput("Escape", filepath.Join(root, "..", "escape")))
 	require.Equal(t, http.StatusBadRequest, status)
 	assert.Contains(t, string(body), "outside the allowed directories")
-	status, _ = a.do(http.MethodPut, paths, PathsDTO{Include: []string{filepath.Join(root, "data")}})
-	assert.Equal(t, http.StatusOK, status)
+	status, _ = a.do(http.MethodPost, plans, planInput("Data", filepath.Join(root, "data")))
+	assert.Equal(t, http.StatusCreated, status)
 }
 
 func TestBrowse(t *testing.T) {
@@ -219,20 +219,20 @@ func TestRootsRefuseNewlinesAndLinksOutside(t *testing.T) {
 	require.NoError(t, os.Symlink(filepath.Join(root, "inside"), filepath.Join(root, "alias")))
 	a := newAPI(t, func(s *Server) { s.Roots = Roots{root} })
 	repo := a.create("photos")
-	paths := "/repositories/" + itoa(repo.ID) + "/paths"
+	plans := "/repositories/" + itoa(repo.ID) + "/plans"
 
 	for _, p := range []string{
 		filepath.Join(root, "x") + "\n/etc", // restic reads the paths one per line
 		filepath.Join(root, "escape"),
 		filepath.Join(root, "escape", "not", "yet", "there"),
 	} {
-		status, body := a.do(http.MethodPut, paths, PathsDTO{Include: []string{p}})
+		status, body := a.do(http.MethodPost, plans, planInput("Bad", p))
 		assert.Equal(t, http.StatusBadRequest, status, p)
 		assert.NotContains(t, string(body), `"paths"`, p)
 	}
-	for _, p := range []string{filepath.Join(root, "alias"), filepath.Join(root, "alias", "new")} {
-		status, body := a.do(http.MethodPut, paths, PathsDTO{Include: []string{p}})
-		assert.Equal(t, http.StatusOK, status, string(body))
+	for i, p := range []string{filepath.Join(root, "alias"), filepath.Join(root, "alias", "new")} {
+		status, body := a.do(http.MethodPost, plans, planInput("Good "+itoa(int64(i)), p))
+		assert.Equal(t, http.StatusCreated, status, string(body))
 	}
 
 	a.restic.snapshots = []restic.Snapshot{{ID: "abcdef12"}}

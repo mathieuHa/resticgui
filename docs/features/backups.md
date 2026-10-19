@@ -1,8 +1,22 @@
 # What and when to back up
 
+## Backup plans
+
+A plan says what to back up and when: its folders, exclusions, options,
+schedule and retention. A repository has one plan, named Default, and can
+have more: back up your documents every hour and your photos every night
+into the same repository, where data shared by both is stored once.
+
+Each plan tags its snapshots with its own tag, so its retention policy only
+removes its own snapshots, and the **Snapshots** tab shows which plan made
+each one. Add, change or delete plans in the repository's **Settings**,
+under **Backup plans**. Deleting a plan keeps its snapshots; no retention
+policy removes them any more, so forget them by hand when you no longer
+need them.
+
 ## Folders and exclusions
 
-Each repository has a list of folders and files to back up, and exclude
+Each plan has a list of folders and files to back up, and exclude
 patterns. Pick folders with the browser or type their paths. Patterns follow
 restic's `--exclude` rules, one per line:
 
@@ -17,20 +31,33 @@ The browser and the API only accept paths under the folders the
 configuration allows, `paths.roots`. Leave it empty to allow every path, for
 example on a desktop where ResticGUI runs as your user.
 
-Change them later in the repository's **Settings**, under **What to back
-up**. The snapshots stay in the same series: ResticGUI groups them by host
-and repository, not by paths, so retention keeps working when you add a
-folder.
+Change them later in the plan's settings. The snapshots stay in the same
+series: ResticGUI groups them by host and plan, not by paths, so retention
+keeps working when you add a folder.
+
+## Backup options
+
+**Backup options**, in each plan, hold the restic options of its backups:
+
+| Option | restic |
+| --- | --- |
+| Tags | `--tag`, more tags for the plan's snapshots |
+| Compression: `auto`, `max` or `off` | `--compression` |
+| Skip files larger than, such as `2G` | `--exclude-larger-than` |
+| Upload and download limits, in KiB/s | `--limit-upload`, `--limit-download` |
+| Stay on one file system | `--one-file-system` |
+| Skip cache folders | `--exclude-caches` |
+| Skip folders that contain a file named | `--exclude-if-present` |
 
 ## Schedules
 
-Each repository has three schedules, all optional:
+Each plan has two schedules, and the repository one, all optional:
 
-| Schedule | Runs | Typical |
-| --- | --- | --- |
-| Back up automatically | `restic backup` | Every day at 02:30, or every hour |
-| Apply the retention policy | `restic forget`, and `prune` if chosen | Every Sunday at 04:00 |
-| Check the repository's integrity | `restic check` | The first day of the month |
+| Schedule | Of | Runs | Typical |
+| --- | --- | --- | --- |
+| Back up automatically | A plan | `restic backup` | Every day at 02:30, or every hour |
+| Apply the retention policy | A plan | `restic forget`, and `prune` if chosen | Every Sunday at 04:00 |
+| Check the repository's integrity | The repository | `restic check` | The first day of the month |
 
 Choose every hour, every few hours, every day, some days of the week, a day
 of the month, or type a cron expression:
@@ -53,8 +80,9 @@ you about it.
 
 ## Run now
 
-**Back up now** starts a backup whatever the schedule. **More** holds the
-other jobs: apply the retention policy, prune, check, unlock a repository
+**Back up now** starts a backup whatever the schedule: of the plan, or,
+when the repository has several, of one plan or all of them. **More** holds
+the other jobs: apply the retention policy, prune, check, unlock a repository
 left locked by a crashed restic, and create the repository if it does not
 exist yet.
 

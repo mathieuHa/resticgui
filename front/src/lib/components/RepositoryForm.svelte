@@ -110,18 +110,6 @@
   <div class="collapse-arrow bg-base-200 collapse {advanced ? 'collapse-open' : ''}">
     <button type="button" class="collapse-title text-left text-sm font-medium" onclick={() => (advanced = !advanced)}>Advanced</button>
     <div class="collapse-content flex flex-col gap-3">
-      <label class="select select-sm w-full">
-        <span class="label">Compression</span>
-        <select bind:value={draft.compression}>
-          <option value="auto">auto</option>
-          <option value="max">max</option>
-          <option value="off">off</option>
-        </select>
-      </label>
-      <label class="input input-sm w-full">
-        <span class="label">Skip files larger than</span>
-        <input placeholder="e.g. 2G" bind:value={draft.exclude_larger_than} />
-      </label>
       <label class="input input-sm w-full">
         <span class="label">Host name in snapshots</span>
         <input placeholder="this machine's name" bind:value={draft.host} />

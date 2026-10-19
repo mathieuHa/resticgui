@@ -10,6 +10,7 @@
   import { backupPoints } from '#lib/charts.ts';
   import { bytes, relative } from '#lib/format.ts';
   import { health } from '#lib/health.ts';
+  import { nextBackup, ready } from '#lib/plan.ts';
   import { BACKEND_LABELS } from '#lib/repository.ts';
 
   import BackendIcon from './BackendIcon.svelte';
@@ -25,7 +26,8 @@
   const status = $derived(health(r, list, now));
   const lastBackup = $derived(list.find((j) => j.kind === 'backup' && j.finished_at && j.status !== 'cancelled'));
   const lastGood = $derived(list.find((j) => j.kind === 'backup' && j.status === 'succeeded'));
-  const schedule = $derived(r.schedules.find((s) => s.job === 'backup' && s.enabled));
+  const plans = $derived(ready(r));
+  const next = $derived(nextBackup(r));
   const points = $derived(backupPoints(list, 20));
   const summary = $derived((lastGood?.summary ?? {}) as { total_bytes_processed?: number; total_files_processed?: number });
   const href = $derived(resolve('/repositories/[id]', { id: String(r.id) }));
@@ -42,8 +44,11 @@
     return () => clearTimeout(t);
   });
 
+  // backs up every plan that has something to back up
   async function backup() {
-    await attempt(async () => jobs.add([await api.startJob(r.id, 'backup')]), 'Could not start the backup');
+    await attempt(async () => {
+      for (const p of plans) jobs.add([await api.startJob(r.id, 'backup', p.id)]);
+    }, 'Could not start the backup');
   }
   async function init() {
     await attempt(async () => jobs.add([await api.startJob(r.id, 'init')]), 'Could not create the repository');
@@ -71,7 +76,7 @@
       <Checklist
         steps={[
           { title: 'Create the repository in restic', done: !!r.initialized_at, action: initAction },
-          { title: 'Choose what to back up', done: r.paths.include.length > 0, action: pathsAction },
+          { title: 'Choose what to back up', done: plans.length > 0, action: pathsAction },
           { title: 'Run the first backup', done: !!lastGood, action: backupAction },
         ]}
       />
@@ -87,7 +92,7 @@
         <div class="text-base-content/70 mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           <span class="flex items-center gap-1.5">
             <Calendar class="size-4" aria-hidden="true" />
-            {#if schedule?.next_run}Next <time datetime={schedule.next_run}>{relative(schedule.next_run, now)}</time>{:else}By hand only{/if}
+            {#if next}Next <time datetime={next}>{relative(next, now)}</time>{:else}By hand only{/if}
           </span>
           {#if summary.total_bytes_processed !== undefined}
             <span class="flex items-center gap-1.5">
@@ -108,8 +113,8 @@
       <button
         class="btn btn-primary btn-sm"
         onclick={backup}
-        disabled={!!active || r.paths.include.length === 0 || !r.initialized_at}
-        title={r.paths.include.length === 0 ? 'Choose what to back up in Settings' : ''}
+        disabled={!!active || plans.length === 0 || !r.initialized_at}
+        title={plans.length === 0 ? 'Choose what to back up in Settings' : plans.length > 1 ? `Backs up its ${plans.length} plans` : ''}
       >
         <Play class="size-4" aria-hidden="true" />Back up now
       </button>

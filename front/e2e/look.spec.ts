@@ -12,7 +12,9 @@ const root = e2eRoot(LOOK_PORT);
 test.describe.configure({ mode: 'serial' });
 
 // what changes between runs: times, durations, sizes, ids and the charts
-const dynamic = (page: Page) => [page.locator('time'), page.locator('.tabular'), page.locator('.font-mono'), page.getByTestId('chart')];
+// (visible ones only: a field in a closed section would mask what is over it)
+const dynamic = (page: Page) =>
+  [page.locator('time'), page.locator('.tabular'), page.locator('.font-mono'), page.getByTestId('chart')].map((l) => l.filter({ visible: true }));
 
 async function look(page: Page, name: string) {
   const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
@@ -54,9 +56,13 @@ async function repository(request: APIRequestContext, name: string, paths: strin
   expect(res.status()).toBe(201);
   const { id } = await res.json();
   if (paths.length)
-    await request.put(`/api/v2/repositories/${id}/paths`, {
-      data: { include: paths, exclude: [] },
-    });
+    expect(
+      (
+        await request.post(`/api/v2/repositories/${id}/plans`, {
+          data: { name: 'Default', paths: { include: paths, exclude: [] }, schedules: [{ job: 'backup', cron: '30 2 * * *' }] },
+        })
+      ).status(),
+    ).toBe(201);
   return id as number;
 }
 
@@ -71,9 +77,6 @@ test('dashboard', async ({ page, request }) => {
   await run(request, photos, 'init');
   await run(request, photos, 'backup');
   await run(request, photos, 'backup');
-  await request.put(`/api/v2/repositories/${photos}/schedules/backup`, {
-    data: { cron: '30 2 * * *', enabled: true },
-  });
   const docs = await repository(request, 'Documents', []);
   await run(request, docs, 'init');
 
@@ -91,7 +94,11 @@ test('dashboard', async ({ page, request }) => {
 
 test('repository overview, runs and snapshots', async ({ page }) => {
   const base = `/ui/repositories/${photos}`;
-  await both(page, 'overview', base, (p) => expect(p.getByTestId('chart')).toHaveCount(3));
+  await both(page, 'overview', base, async (p) => {
+    await expect(p.getByTestId('chart')).toHaveCount(3);
+    // the sizes come from restic stats, after the page
+    await expect(p.locator('.skeleton')).toHaveCount(0);
+  });
   await both(page, 'runs', `${base}?tab=runs`, (p) => expect(p.getByTestId('run-history').getByRole('listitem')).toHaveCount(3));
   await both(page, 'snapshots', `${base}?tab=snapshots`, (p) => expect(p.getByTestId('snapshots').locator('tbody tr')).toHaveCount(2));
 

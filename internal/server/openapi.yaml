@@ -231,44 +231,46 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
 
-  /repositories/{id}/paths:
-    parameters: [{ $ref: "#/components/parameters/id" }]
-    put:
-      summary: Replace the backup paths and exclude patterns
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/Paths" }
-      responses:
-        "200": { $ref: "#/components/responses/Repository" }
-        "400": { $ref: "#/components/responses/Error" }
-        "404": { $ref: "#/components/responses/Error" }
-
-  /repositories/{id}/retention:
-    parameters: [{ $ref: "#/components/parameters/id" }]
-    put:
-      summary: Set the retention policy
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/Retention" }
-      responses:
-        "200": { $ref: "#/components/responses/Repository" }
-        "400": { $ref: "#/components/responses/Error" }
-        "404": { $ref: "#/components/responses/Error" }
-    delete:
-      summary: Remove the retention policy
-      responses:
-        "200": { $ref: "#/components/responses/Repository" }
-        "404": { $ref: "#/components/responses/Error" }
-
-  /repositories/{id}/retention/preview:
+  /repositories/{id}/plans:
     parameters: [{ $ref: "#/components/parameters/id" }]
     post:
+      summary: Add a backup plan
+      description: A plan says what to back up into the repository, how, when and how long to keep it. A repository has as many as needed, deduplicated together.
+      requestBody: { $ref: "#/components/requestBodies/PlanInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Plan" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/plans/{plan}:
+    parameters:
+      - { $ref: "#/components/parameters/id" }
+      - { $ref: "#/components/parameters/plan" }
+    put:
+      summary: Replace a plan
+      description: Everything is replaced but the plan's tag, so its retention goes on applying to the snapshots it made.
+      requestBody: { $ref: "#/components/requestBodies/PlanInput" }
+      responses:
+        "200": { $ref: "#/components/responses/Plan" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Delete a plan
+      description: Its snapshots stay in the repository.
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /repositories/{id}/plans/{plan}/retention/preview:
+    parameters:
+      - { $ref: "#/components/parameters/id" }
+      - { $ref: "#/components/parameters/plan" }
+    post:
       summary: Show what a retention policy would keep and remove
-      description: Runs restic forget --dry-run on the snapshots a forget job would consider. The policy need not be saved.
+      description: Runs restic forget --dry-run on the snapshots a forget job of the plan would consider. The policy need not be saved.
       requestBody:
         required: true
         content:
@@ -299,9 +301,10 @@ paths:
   /repositories/{id}/schedules/{job}:
     parameters:
       - { $ref: "#/components/parameters/id" }
-      - { name: job, in: path, required: true, schema: { type: string, enum: [backup, forget, check] } }
+      - { name: job, in: path, required: true, schema: { type: string, enum: [check] } }
     put:
-      summary: Set when a job runs
+      summary: Set when the integrity check runs
+      description: Backups and retention are scheduled in plans.
       requestBody:
         required: true
         content:
@@ -373,6 +376,7 @@ paths:
               required: [kind]
               properties:
                 kind: { type: string, enum: [init, backup, forget, prune, check, unlock] }
+                plan_id: { type: integer, description: The plan a backup or forget runs; it can be left out when the repository has one plan }
       responses:
         "202": { $ref: "#/components/responses/Job" }
         "400": { $ref: "#/components/responses/Error" }
@@ -382,8 +386,10 @@ paths:
     parameters: [{ $ref: "#/components/parameters/id" }]
     post:
       summary: Back up now
+      description: Backs up the repository's only plan; a repository with several needs POST /repositories/{id}/jobs with a plan_id.
       responses:
         "202": { $ref: "#/components/responses/Job" }
+        "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
   /repositories/{id}/stats:
@@ -550,6 +556,7 @@ components:
 
   parameters:
     id: { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+    plan: { name: plan, in: path, required: true, schema: { type: integer, minimum: 1 } }
     snapshot:
       name: snapshot
       in: path
@@ -563,6 +570,12 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/RepositoryInput" }
+
+    PlanInput:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/PlanInput" }
 
     NotifierInput:
       required: true
@@ -593,6 +606,9 @@ components:
     Repository:
       description: The repository
       content: { application/json: { schema: { $ref: "#/components/schemas/Repository" } } }
+    Plan:
+      description: The plan
+      content: { application/json: { schema: { $ref: "#/components/schemas/Plan" } } }
     Job:
       description: The job
       content: { application/json: { schema: { $ref: "#/components/schemas/Job" } } }
@@ -624,11 +640,9 @@ components:
         cacert: { type: string }
         extended: { type: object, additionalProperties: { type: string }, description: 'restic -o options, such as s3.storage-class' }
         host: { type: string }
-        compression: { type: string, enum: [auto, off, max], default: auto }
-        exclude_larger_than: { type: string, example: 2G }
     Repository:
       type: object
-      required: [id, name, backend, location, env, secrets, has_password, extended, host, compression, exclude_larger_than, initialized_at, created_at, updated_at, paths, retention, schedules, healthcheck, hooks]
+      required: [id, name, backend, location, env, secrets, has_password, extended, host, initialized_at, created_at, updated_at, plans, schedules, healthcheck, hooks]
       properties:
         id: { type: integer }
         name: { type: string }
@@ -640,23 +654,11 @@ components:
         cacert: { type: string }
         extended: { type: object, additionalProperties: { type: string } }
         host: { type: string }
-        compression: { type: string }
-        exclude_larger_than: { type: string }
         initialized_at: { type: [string, "null"], format: date-time }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
-        paths: { $ref: "#/components/schemas/Paths" }
-        retention: { oneOf: [{ $ref: "#/components/schemas/Retention" }, { type: "null" }] }
-        schedules:
-          type: array
-          items:
-            type: object
-            required: [job, cron, enabled, next_run]
-            properties:
-              job: { type: string, enum: [backup, forget, check] }
-              cron: { type: string }
-              enabled: { type: boolean }
-              next_run: { type: [string, "null"], format: date-time, description: When it runs next; null when disabled }
+        plans: { type: array, items: { $ref: "#/components/schemas/Plan" }, description: What is backed up, in the order the plans were made }
+        schedules: { type: array, items: { $ref: "#/components/schemas/Schedule" }, description: The integrity check's schedule }
         healthcheck:
           description: The Healthchecks check pinged by backups; null when unset
           oneOf:
@@ -726,6 +728,64 @@ components:
         files: { type: integer }
         dirs: { type: integer }
         bytes: { type: integer }
+    Schedule:
+      type: object
+      required: [job, cron, enabled, next_run]
+      properties:
+        job: { type: string, enum: [backup, forget, check] }
+        cron: { type: string }
+        enabled: { type: boolean }
+        next_run: { type: [string, "null"], format: date-time, description: When it runs next; null when disabled }
+    ScheduleInput:
+      type: object
+      required: [job, cron]
+      properties:
+        job: { type: string, enum: [backup, forget] }
+        cron: { type: string, description: 'Five cron fields or a descriptor such as "@daily" or "@every 6h"', example: "30 2 * * *" }
+        enabled: { type: boolean, default: true }
+    PlanOptions:
+      type: object
+      required: [compression, exclude_larger_than, one_file_system, exclude_caches, exclude_if_present, limit_upload, limit_download]
+      properties:
+        compression: { type: string, enum: [auto, off, max], default: auto }
+        exclude_larger_than: { type: string, example: 2G, description: Skip files above this size; empty for none }
+        one_file_system: { type: boolean, description: Stay on the file system of each path }
+        exclude_caches: { type: boolean, description: Skip folders holding a CACHEDIR.TAG file }
+        exclude_if_present: { type: array, items: { type: string }, description: Skip folders holding a file of one of these names, example: [".nobackup"] }
+        limit_upload: { type: integer, minimum: 0, description: KiB/s; 0 for no limit }
+        limit_download: { type: integer, minimum: 0, description: KiB/s; 0 for no limit }
+    Plan:
+      type: object
+      required: [id, name, tag, tags, paths, options, schedules, retention, created_at]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        tag: { type: string, description: Put on every snapshot of the plan; its retention only applies to snapshots with this tag }
+        tags: { type: array, items: { type: string }, description: More tags put on its snapshots }
+        paths: { $ref: "#/components/schemas/Paths" }
+        options: { $ref: "#/components/schemas/PlanOptions" }
+        schedules: { type: array, items: { $ref: "#/components/schemas/Schedule" } }
+        retention: { oneOf: [{ $ref: "#/components/schemas/Retention" }, { type: "null" }], description: Null when every snapshot is kept }
+        created_at: { type: string, format: date-time }
+    PlanInput:
+      type: object
+      required: [name, paths]
+      properties:
+        name: { type: string, description: Unique in the repository }
+        tags: { type: array, items: { type: string }, maxItems: 20 }
+        paths: { $ref: "#/components/schemas/Paths" }
+        options:
+          type: object
+          properties:
+            compression: { type: string, enum: [auto, off, max], default: auto }
+            exclude_larger_than: { type: string, example: 2G }
+            one_file_system: { type: boolean }
+            exclude_caches: { type: boolean }
+            exclude_if_present: { type: array, items: { type: string } }
+            limit_upload: { type: integer, minimum: 0 }
+            limit_download: { type: integer, minimum: 0 }
+        schedules: { type: array, items: { $ref: "#/components/schemas/ScheduleInput" } }
+        retention: { oneOf: [{ $ref: "#/components/schemas/Retention" }, { type: "null" }], description: Null keeps every snapshot; a forget schedule needs one }
     Paths:
       type: object
       required: [include, exclude]
@@ -745,10 +805,11 @@ components:
         prune: { type: boolean }
     Job:
       type: object
-      required: [id, repository_id, kind, trigger, status, created_at, started_at, finished_at, summary, params]
+      required: [id, repository_id, plan_id, kind, trigger, status, created_at, started_at, finished_at, summary, params]
       properties:
         id: { type: integer }
         repository_id: { type: integer }
+        plan_id: { type: [integer, "null"], description: The plan of a backup or forget job }
         kind: { type: string, enum: [init, backup, forget, prune, check, unlock, restore] }
         trigger: { type: string, enum: [manual, schedule] }
         status: { type: string, enum: [queued, running, succeeded, failed, cancelled, interrupted] }
@@ -767,6 +828,7 @@ components:
       properties:
         job_id: { type: integer }
         repository_id: { type: integer }
+        plan_id: { type: integer, description: The plan of a backup or forget job }
         kind: { type: string }
         status: { type: string }
         snapshot_id: { type: string }

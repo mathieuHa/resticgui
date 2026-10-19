@@ -61,8 +61,8 @@ func TestIntegrationAPI(t *testing.T) {
 	var repo RepositoryDTO
 	a.decode(body, &repo)
 	base := "/repositories/" + itoa(repo.ID)
-	status, _ = a.do(http.MethodPut, base+"/paths", PathsDTO{Include: []string{src}})
-	require.Equal(t, http.StatusOK, status)
+	status, body = a.do(http.MethodPost, base+"/plans", planInput("Everything", src))
+	require.Equal(t, http.StatusCreated, status, string(body))
 
 	run := func(kind string) jobs.JobDTO {
 		t.Helper()

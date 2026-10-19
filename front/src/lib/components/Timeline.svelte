@@ -8,7 +8,7 @@
   import Sparkles from '@lucide/svelte/icons/sparkles';
   import { slide } from 'svelte/transition';
 
-  import { api, type Job } from '#lib/api/client.ts';
+  import { api, type Job, type Plan } from '#lib/api/client.ts';
   import { jobs, notifyError } from '#lib/app.svelte.ts';
   import { duration, elapsed } from '#lib/format.ts';
   import { isActive } from '#lib/jobs.svelte.ts';
@@ -20,7 +20,9 @@
   import JobProgress from './JobProgress.svelte';
 
   // Everything that ran on a repository, grouped by day, newest first.
-  let { repositoryId }: { repositoryId: number } = $props();
+  // plans name the plan of backups and retention runs when there are several
+  let { repositoryId, plans = [] }: { repositoryId: number; plans?: Plan[] } = $props();
+  const planName = (job: Job) => (plans.length > 1 ? plans.find((p) => p.id === job.plan_id)?.name : undefined);
 
   const PAGE = 25;
   let loaded = $state(0);
@@ -78,6 +80,7 @@
               onclick={() => (expanded = expanded === job.id ? null : job.id)}
             >
               <span class="font-medium">{KIND_LABELS[job.kind]}</span>
+              {#if planName(job)}<span class="badge badge-outline badge-sm" data-testid="job-plan">{planName(job)}</span>{/if}
               <JobBadge status={job.status} />
               {#if job.trigger === 'schedule'}<span class="badge badge-ghost badge-xs">scheduled</span>{/if}
               <span class="min-w-0 flex-1 truncate text-sm {job.error ? 'text-error' : 'text-base-content/80'}">{job.error || summarize(job)}</span>

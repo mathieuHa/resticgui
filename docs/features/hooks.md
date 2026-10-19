@@ -26,7 +26,7 @@ start a service, or to tell another system how it went.
 ## What a hook receives
 
 A command gets these environment variables; a webhook gets the same values
-as a JSON body (`event`, `repository_id`, `repository`, `job_id`, `status`,
+as a JSON body (`event`, `repository_id`, `repository`, `plan`, `job_id`, `status`,
 `snapshot_id`, `error`):
 
 | Variable                  | Value |
@@ -34,6 +34,7 @@ as a JSON body (`event`, `repository_id`, `repository`, `job_id`, `status`,
 | `RESTICGUI_EVENT`         | `before`, `success` or `failure` |
 | `RESTICGUI_REPOSITORY_ID` | The repository's id |
 | `RESTICGUI_REPOSITORY`    | The repository's name |
+| `RESTICGUI_PLAN`          | The backup plan's name |
 | `RESTICGUI_JOB_ID`        | The backup job's id |
 | `RESTICGUI_STATUS`        | `succeeded` or `failed`; empty before the backup |
 | `RESTICGUI_SNAPSHOT_ID`   | The new snapshot, after a successful backup |

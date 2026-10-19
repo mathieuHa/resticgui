@@ -23,8 +23,7 @@ echo "ResticGUI $(curl -fsS "$api/version" | jq -r .version) answers at $base/ui
 post() { curl -fsS -X "$1" -H 'Content-Type: application/json' -d "$3" "$api$2"; }
 
 id=$(post POST /repositories "{\"name\":\"Quick start\",\"backend\":\"local\",\"location\":\"$repository\",\"password\":\"quick start password\"}" | jq -r .id)
-post PUT "/repositories/$id/paths" "{\"include\":[\"$source\"],\"exclude\":[]}" >/dev/null
-post PUT "/repositories/$id/schedules/backup" '{"cron":"30 2 * * *","enabled":true}' >/dev/null
+post POST "/repositories/$id/plans" "{\"name\":\"Default\",\"paths\":{\"include\":[\"$source\"],\"exclude\":[]},\"schedules\":[{\"job\":\"backup\",\"cron\":\"30 2 * * *\"}]}" >/dev/null
 
 run() {
 	job=$(post POST "/repositories/$id/jobs" "{\"kind\":\"$1\"}" | jq -r .id)
