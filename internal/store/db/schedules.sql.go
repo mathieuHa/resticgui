@@ -27,7 +27,7 @@ func (q *Queries) DeleteSchedule(ctx context.Context, arg DeleteScheduleParams) 
 }
 
 const listEnabledSchedules = `-- name: ListEnabledSchedules :many
-SELECT id, repository_id, job, cron, enabled FROM schedules WHERE enabled ORDER BY repository_id, job
+SELECT id, repository_id, job, cron, enabled, read_data_subset FROM schedules WHERE enabled ORDER BY repository_id, job
 `
 
 func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) {
@@ -45,6 +45,7 @@ func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) 
 			&i.Job,
 			&i.Cron,
 			&i.Enabled,
+			&i.ReadDataSubset,
 		); err != nil {
 			return nil, err
 		}
@@ -60,7 +61,7 @@ func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) 
 }
 
 const listSchedules = `-- name: ListSchedules :many
-SELECT id, repository_id, job, cron, enabled FROM schedules WHERE repository_id = ? ORDER BY job
+SELECT id, repository_id, job, cron, enabled, read_data_subset FROM schedules WHERE repository_id = ? ORDER BY job
 `
 
 func (q *Queries) ListSchedules(ctx context.Context, repositoryID int64) ([]Schedule, error) {
@@ -78,6 +79,7 @@ func (q *Queries) ListSchedules(ctx context.Context, repositoryID int64) ([]Sche
 			&i.Job,
 			&i.Cron,
 			&i.Enabled,
+			&i.ReadDataSubset,
 		); err != nil {
 			return nil, err
 		}
@@ -93,17 +95,18 @@ func (q *Queries) ListSchedules(ctx context.Context, repositoryID int64) ([]Sche
 }
 
 const upsertSchedule = `-- name: UpsertSchedule :one
-INSERT INTO schedules (repository_id, job, cron, enabled)
-VALUES (?, ?, ?, ?)
-ON CONFLICT (repository_id, job) DO UPDATE SET cron = excluded.cron, enabled = excluded.enabled
-RETURNING id, repository_id, job, cron, enabled
+INSERT INTO schedules (repository_id, job, cron, enabled, read_data_subset)
+VALUES (?, ?, ?, ?, ?)
+ON CONFLICT (repository_id, job) DO UPDATE SET cron = excluded.cron, enabled = excluded.enabled, read_data_subset = excluded.read_data_subset
+RETURNING id, repository_id, job, cron, enabled, read_data_subset
 `
 
 type UpsertScheduleParams struct {
-	RepositoryID int64
-	Job          string
-	Cron         string
-	Enabled      bool
+	RepositoryID   int64
+	Job            string
+	Cron           string
+	Enabled        bool
+	ReadDataSubset string
 }
 
 func (q *Queries) UpsertSchedule(ctx context.Context, arg UpsertScheduleParams) (Schedule, error) {
@@ -112,6 +115,7 @@ func (q *Queries) UpsertSchedule(ctx context.Context, arg UpsertScheduleParams) 
 		arg.Job,
 		arg.Cron,
 		arg.Enabled,
+		arg.ReadDataSubset,
 	)
 	var i Schedule
 	err := row.Scan(
@@ -120,6 +124,7 @@ func (q *Queries) UpsertSchedule(ctx context.Context, arg UpsertScheduleParams) 
 		&i.Job,
 		&i.Cron,
 		&i.Enabled,
+		&i.ReadDataSubset,
 	)
 	return i, err
 }

@@ -48,9 +48,15 @@ func TestMigrationsUpDownUp(t *testing.T) {
 
 	version, err := migrator.GetDBVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, 5, version)
+	assert.EqualValues(t, 6, version)
 
 	// each down step works on its own
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	var subset int
+	require.NoError(t, s.DB.QueryRowContext(ctx, `SELECT count(*) FROM pragma_table_info('schedules') WHERE name = 'read_data_subset'`).Scan(&subset))
+	assert.Zero(t, subset)
+
 	_, err = migrator.Down(ctx)
 	require.NoError(t, err)
 	var plans int
@@ -536,7 +542,7 @@ func TestMigrationTurnsRepositorySettingsIntoAPlan(t *testing.T) {
 		_, err := SavePlan(ctx, tx, 7, 0, Plan{Name: "Videos", Include: []string{"/videos"}})
 		return err
 	}))
-	_, err = migrator.Down(ctx)
+	_, err = migrator.DownTo(ctx, 4)
 	require.NoError(t, err)
 	var compression, larger string
 	require.NoError(t, conn.QueryRowContext(ctx, `SELECT compression, exclude_larger_than FROM repositories WHERE id = 7`).Scan(&compression, &larger))
@@ -556,4 +562,55 @@ func TestMigrationTurnsRepositorySettingsIntoAPlan(t *testing.T) {
 	assert.Equal(t, 3, count)
 	require.NoError(t, conn.QueryRowContext(ctx, `SELECT keep_daily FROM retention WHERE repository_id = 7`).Scan(&count))
 	assert.Equal(t, 7, count)
+}
+
+func TestMigrationAddsTheMaintenanceJobs(t *testing.T) {
+	ctx := context.Background()
+	conn, err := sql.Open("sqlite", dsn(filepath.Join(t.TempDir(), "resticgui.db")))
+	require.NoError(t, err)
+	conn.SetMaxOpenConns(1)
+	t.Cleanup(func() { conn.Close() })
+	migrator, err := newMigrator(conn)
+	require.NoError(t, err)
+	_, err = migrator.UpTo(ctx, 5)
+	require.NoError(t, err)
+	for _, stmt := range []string{
+		`INSERT INTO repositories (id, name, backend, location, secrets) VALUES (7, 'photos', 'local', '/srv/photos', x'00')`,
+		`INSERT INTO schedules (repository_id, job, cron) VALUES (7, 'check', '@monthly')`,
+		`INSERT INTO jobs (repository_id, plan_id, kind, trigger, status, summary, params) VALUES (7, 7, 'backup', 'schedule', 'succeeded', '{"files_new":1}', '{}')`,
+	} {
+		_, err := conn.ExecContext(ctx, stmt)
+		require.NoError(t, err, stmt)
+	}
+	_, err = conn.ExecContext(ctx, `INSERT INTO jobs (repository_id, kind, trigger) VALUES (7, 'repair_index', 'manual')`)
+	require.Error(t, err, "not a kind yet")
+
+	_, err = migrator.Up(ctx)
+	require.NoError(t, err)
+	q := db.New(conn)
+	history, err := q.ListJobsForRepository(ctx, db.ListJobsForRepositoryParams{RepositoryID: 7, Limit: 10})
+	require.NoError(t, err)
+	require.Len(t, history, 1, "the history is kept")
+	assert.Equal(t, "backup", history[0].Kind)
+	assert.JSONEq(t, `{"files_new":1}`, history[0].Summary)
+	require.NotNil(t, history[0].PlanID)
+	for _, kind := range []string{"repair_index", "repair_snapshots", "migrate", "change_password"} {
+		_, err := q.CreateJob(ctx, db.CreateJobParams{RepositoryID: 7, Kind: kind, Trigger: "manual", Params: "{}"})
+		require.NoError(t, err, kind)
+	}
+	schedules, err := q.ListSchedules(ctx, 7)
+	require.NoError(t, err)
+	assert.Equal(t, "", schedules[0].ReadDataSubset)
+
+	// going down drops the runs of the new kinds only
+	_, err = migrator.Down(ctx)
+	require.NoError(t, err)
+	var count int
+	require.NoError(t, conn.QueryRowContext(ctx, `SELECT count(*) FROM jobs`).Scan(&count))
+	assert.Equal(t, 1, count)
+	// the cascade from repositories still works on the table made again
+	_, err = conn.ExecContext(ctx, `DELETE FROM repositories WHERE id = 7`)
+	require.NoError(t, err)
+	require.NoError(t, conn.QueryRowContext(ctx, `SELECT count(*) FROM jobs`).Scan(&count))
+	assert.Zero(t, count)
 }

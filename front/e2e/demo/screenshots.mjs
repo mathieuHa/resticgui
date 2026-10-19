@@ -229,6 +229,12 @@ async function shots({ photos, documents }) {
   await shot('ui-hooks', page.locator('section').filter({ has: page.getByRole('heading', { name: 'Hooks' }) }));
 
   await theme('light');
+  await page.goto(repo(photos, 'settings'));
+  const maintenance = page.getByTestId('maintenance');
+  await maintenance.getByLabel('Data the check reads').selectOption('10%');
+  await shot('ui-maintenance', maintenance);
+
+  await theme('light');
   await page.goto(repo(photos, 'snapshots'));
   await page.getByTestId('snapshots').getByRole('button', { name: 'Browse' }).first().click();
   const files = page.getByTestId('snapshot-browser');

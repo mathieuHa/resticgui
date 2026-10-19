@@ -59,7 +59,7 @@ Each plan has two schedules, and the repository one, all optional:
 | --- | --- | --- | --- |
 | Back up automatically | A plan | `restic backup` | Every day at 02:30, or every hour |
 | Apply the retention policy | A plan | `restic forget`, and `prune` if chosen | Every Sunday at 04:00 |
-| Check the repository's integrity | The repository | `restic check` | The first day of the month |
+| Check the repository's integrity | The repository | `restic check`, reading [some of the data](/features/maintenance#check-the-data) if chosen | The first day of the month |
 
 Choose every hour, every few hours, every day, some days of the week, a day
 of the month, or type a cron expression:
@@ -86,7 +86,8 @@ you about it.
 when the repository has several, of one plan or all of them. **More** holds
 the other jobs: apply the retention policy, prune, check, unlock a repository
 left locked by a crashed restic, and create the repository if it does not
-exist yet.
+exist yet. The [maintenance tools](/features/maintenance), such as a check
+that reads data, a repair or a password change, are in **Settings**.
 
 Jobs run one at a time per repository, and up to `jobs.workers` at once
 across repositories. A running job shows its progress live, files and

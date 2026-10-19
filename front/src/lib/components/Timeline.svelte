@@ -2,10 +2,13 @@
   import Archive from '@lucide/svelte/icons/archive';
   import ArchiveRestore from '@lucide/svelte/icons/archive-restore';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
+  import CircleArrowUp from '@lucide/svelte/icons/circle-arrow-up';
+  import KeyRound from '@lucide/svelte/icons/key-round';
   import LockOpen from '@lucide/svelte/icons/lock-open';
   import Scissors from '@lucide/svelte/icons/scissors';
   import ShieldCheck from '@lucide/svelte/icons/shield-check';
   import Sparkles from '@lucide/svelte/icons/sparkles';
+  import Wrench from '@lucide/svelte/icons/wrench';
   import { slide } from 'svelte/transition';
 
   import { api, type Job, type Plan } from '#lib/api/client.ts';
@@ -50,7 +53,19 @@
 
   const days = $derived(byDay(jobs.list(repositoryId)));
 
-  const ICONS = { backup: Archive, restore: ArchiveRestore, forget: Scissors, prune: Scissors, check: ShieldCheck, unlock: LockOpen, init: Sparkles };
+  const ICONS = {
+    backup: Archive,
+    restore: ArchiveRestore,
+    forget: Scissors,
+    prune: Scissors,
+    check: ShieldCheck,
+    unlock: LockOpen,
+    init: Sparkles,
+    repair_index: Wrench,
+    repair_snapshots: Wrench,
+    migrate: CircleArrowUp,
+    change_password: KeyRound,
+  };
   const DOT: Record<Job['status'], string> = {
     queued: 'bg-base-300 text-base-content',
     running: 'bg-info text-info-content',
@@ -70,6 +85,8 @@
         {#each day.jobs as job (job.id)}
           {@const Icon = ICONS[job.kind]}
           {@const open = expanded === job.id || isActive(job.status)}
+          <!-- a failed check says how many errors it found, and what to do; restic's error is in the details -->
+          {@const line = job.kind === 'check' && job.status === 'failed' ? summarize(job) || job.error : job.error || summarize(job)}
           <li class="relative pb-3 pl-6 last:pb-0">
             <span class="ring-base-100 absolute top-1.5 -left-3 grid size-6 place-items-center rounded-full ring-4 {DOT[job.status]}" aria-hidden="true">
               <Icon class="size-3.5" />
@@ -83,7 +100,7 @@
               {#if planName(job)}<span class="badge badge-outline badge-sm" data-testid="job-plan">{planName(job)}</span>{/if}
               <JobBadge status={job.status} />
               {#if job.trigger === 'schedule'}<span class="badge badge-ghost badge-xs">scheduled</span>{/if}
-              <span class="min-w-0 flex-1 truncate text-sm {job.error ? 'text-error' : 'text-base-content/80'}">{job.error || summarize(job)}</span>
+              <span class="min-w-0 flex-1 truncate text-sm {job.error ? 'text-error' : 'text-base-content/80'}">{line}</span>
               <span class="tabular text-base-content/70 text-xs whitespace-nowrap">
                 <time datetime={job.started_at ?? job.created_at}>{time.format(Date.parse(job.started_at ?? job.created_at))}</time>
                 {#if job.finished_at}· {duration(elapsed(job.started_at, job.finished_at))}{/if}
@@ -96,6 +113,7 @@
                   <JobProgress {job} />
                 {:else}
                   <div class="flex flex-col gap-1 text-xs">
+                    {#if job.error && line !== job.error}<div class="text-error">{job.error}</div>{/if}
                     {#if job.snapshot_id}<div>Snapshot <span class="font-mono">{job.snapshot_id.slice(0, 8)}</span></div>{/if}
                     {#if job.exit_code !== undefined}<div>restic exited with code {job.exit_code}</div>{/if}
                     {#if job.log_excerpt}

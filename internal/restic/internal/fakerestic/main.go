@@ -33,7 +33,8 @@ type Scenario struct {
 type Invocation struct {
 	Args []string          `json:"args"`
 	Env  map[string]string `json:"env"`
-	// Files holds the content of files passed with --files-from-verbatim and --exclude-file.
+	// Files holds the content of files passed with --files-from-verbatim,
+	// --exclude-file and --new-password-file.
 	Files     map[string]string `json:"files"`
 	GotSigint bool              `json:"got_sigint"`
 }
@@ -53,7 +54,7 @@ func main() {
 		inv.Env[k] = v
 	}
 	for i, a := range inv.Args {
-		if (a == "--files-from-verbatim" || a == "--exclude-file") && i+1 < len(inv.Args) {
+		if (a == "--files-from-verbatim" || a == "--exclude-file" || a == "--new-password-file") && i+1 < len(inv.Args) {
 			content, _ := os.ReadFile(inv.Args[i+1])
 			inv.Files[a] = string(content)
 		}

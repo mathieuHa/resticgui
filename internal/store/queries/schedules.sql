@@ -1,7 +1,7 @@
 -- name: UpsertSchedule :one
-INSERT INTO schedules (repository_id, job, cron, enabled)
-VALUES (?, ?, ?, ?)
-ON CONFLICT (repository_id, job) DO UPDATE SET cron = excluded.cron, enabled = excluded.enabled
+INSERT INTO schedules (repository_id, job, cron, enabled, read_data_subset)
+VALUES (?, ?, ?, ?, ?)
+ON CONFLICT (repository_id, job) DO UPDATE SET cron = excluded.cron, enabled = excluded.enabled, read_data_subset = excluded.read_data_subset
 RETURNING *;
 
 -- name: ListSchedules :many

@@ -101,7 +101,7 @@
     loadRepo();
     const unsubscribe = jobs.onChange((job) => {
       if (job.repository_id !== id || job.status !== 'succeeded') return;
-      if (['backup', 'forget', 'prune', 'init'].includes(job.kind)) {
+      if (['backup', 'forget', 'prune', 'init', 'repair_snapshots'].includes(job.kind)) {
         loadRepo();
         if (snapshots) loadSnapshots();
         if (stats || statsError) loadStats();

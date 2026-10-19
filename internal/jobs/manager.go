@@ -12,6 +12,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -38,11 +40,22 @@ const (
 	KindUnlock Kind = "unlock"
 	// KindRestore restores a snapshot, as described by its RestoreParams.
 	KindRestore Kind = "restore"
+	// KindRepairIndex builds the index again from the pack files.
+	KindRepairIndex Kind = "repair_index"
+	// KindRepairSnapshots rewrites the snapshots that refer to missing data
+	// without it, and forgets the damaged ones.
+	KindRepairSnapshots Kind = "repair_snapshots"
+	// KindMigrate upgrades the repository to format version 2, when it is 1.
+	KindMigrate Kind = "migrate"
+	// KindChangePassword changes the repository's password, as given to
+	// EnqueuePasswordChange.
+	KindChangePassword Kind = "change_password"
 )
 
 func (k Kind) valid() bool {
 	switch k {
-	case KindInit, KindBackup, KindForget, KindPrune, KindCheck, KindUnlock, KindRestore:
+	case KindInit, KindBackup, KindForget, KindPrune, KindCheck, KindUnlock, KindRestore,
+		KindRepairIndex, KindRepairSnapshots, KindMigrate, KindChangePassword:
 		return true
 	}
 	return false
@@ -124,6 +137,13 @@ type Restic interface {
 	Check(ctx context.Context, repo *restic.Repo, opts restic.CheckOptions) (*restic.CheckSummary, error)
 	Restore(ctx context.Context, repo *restic.Repo, opts restic.RestoreOptions, onProgress func(restic.RestoreStatus)) (*restic.RestoreSummary, error)
 	Stats(ctx context.Context, repo *restic.Repo, mode, snapshotID string) (*restic.Stats, error)
+	RepairIndex(ctx context.Context, repo *restic.Repo) error
+	RepairSnapshots(ctx context.Context, repo *restic.Repo) (int, error)
+	Migrations(ctx context.Context, repo *restic.Repo) ([]string, error)
+	Migrate(ctx context.Context, repo *restic.Repo, name string) error
+	Keys(ctx context.Context, repo *restic.Repo) ([]restic.Key, error)
+	AddKey(ctx context.Context, repo *restic.Repo, password string) error
+	RemoveKey(ctx context.Context, repo *restic.Repo, id string) error
 }
 
 // RestoreParams says what a restore job restores, and where.
@@ -131,6 +151,23 @@ type RestoreParams struct {
 	SnapshotID string   `json:"snapshot_id"`
 	Target     string   `json:"target"`
 	Include    []string `json:"include,omitempty"`
+}
+
+// CheckParams says how much data a check job reads.
+type CheckParams struct {
+	// ReadDataSubset is restic's --read-data-subset: "10%", "1/5" or a size
+	// such as "500M". Empty reads no data, only the structure.
+	ReadDataSubset string `json:"read_data_subset,omitempty"`
+}
+
+var subsetPattern = regexp.MustCompile(`^([1-9][0-9]*/[1-9][0-9]*|[0-9]+(\.[0-9]+)?%|[1-9][0-9]*[KMGT]?)$`)
+
+// ValidSubset checks a --read-data-subset value; empty is valid.
+func ValidSubset(subset string) error {
+	if subset == "" || subsetPattern.MatchString(subset) {
+		return nil
+	}
+	return fmt.Errorf("read_data_subset %q is not a share such as 10%%, a part such as 1/5, or a size such as 500M", subset)
 }
 
 // Options configures a Manager.
@@ -172,6 +209,9 @@ type repoQueue struct {
 
 type task struct {
 	job db.Job
+	// password is the new password of a change_password job, kept in memory
+	// only: a job interrupted by a restart is not run again
+	password string
 	// cancel and cancelled are set once the task starts and guarded by Manager.mu
 	cancel    context.CancelFunc
 	cancelled bool
@@ -215,8 +255,15 @@ func (m *Manager) Recover(ctx context.Context) (int64, error) {
 // A backup or forget runs a plan: planID, or the repository's only plan
 // when planID is 0.
 func (m *Manager) Enqueue(ctx context.Context, repositoryID, planID int64, kind Kind, trigger Trigger) (db.Job, error) {
-	if kind == KindRestore {
+	switch kind {
+	case KindRestore:
 		return db.Job{}, fmt.Errorf("%w: a restore needs EnqueueRestore", ErrUnknownKind)
+	case KindChangePassword:
+		return db.Job{}, fmt.Errorf("%w: a password change needs EnqueuePasswordChange", ErrUnknownKind)
+	case KindCheck:
+		if trigger == TriggerSchedule {
+			return m.scheduledCheck(ctx, repositoryID)
+		}
 	}
 	var plan *int64
 	if byPlan(kind) {
@@ -226,7 +273,49 @@ func (m *Manager) Enqueue(ctx context.Context, repositoryID, planID int64, kind 
 		}
 		plan = &id
 	}
-	return m.enqueue(ctx, repositoryID, plan, kind, trigger, "{}")
+	return m.enqueue(ctx, repositoryID, plan, kind, trigger, "{}", "")
+}
+
+// scheduledCheck queues the check of a repository's schedule, reading as
+// much data as the schedule says.
+func (m *Manager) scheduledCheck(ctx context.Context, repositoryID int64) (db.Job, error) {
+	var p CheckParams
+	schedules, err := m.store.ListSchedules(ctx, repositoryID)
+	if err != nil {
+		return db.Job{}, err
+	}
+	for _, s := range schedules {
+		if Kind(s.Job) == KindCheck {
+			p.ReadDataSubset = s.ReadDataSubset
+		}
+	}
+	return m.enqueueCheck(ctx, repositoryID, TriggerSchedule, p)
+}
+
+// EnqueueCheck queues a manual check that reads some of the data.
+func (m *Manager) EnqueueCheck(ctx context.Context, repositoryID int64, p CheckParams) (db.Job, error) {
+	return m.enqueueCheck(ctx, repositoryID, TriggerManual, p)
+}
+
+func (m *Manager) enqueueCheck(ctx context.Context, repositoryID int64, trigger Trigger, p CheckParams) (db.Job, error) {
+	if err := ValidSubset(p.ReadDataSubset); err != nil {
+		return db.Job{}, err
+	}
+	params, err := json.Marshal(p)
+	if err != nil {
+		return db.Job{}, err
+	}
+	return m.enqueue(ctx, repositoryID, nil, KindCheck, trigger, string(params), "")
+}
+
+// EnqueuePasswordChange queues the change of a repository's password. The
+// job adds a key for the new password, saves it in place of the old one,
+// then removes the old key.
+func (m *Manager) EnqueuePasswordChange(ctx context.Context, repositoryID int64, password string) (db.Job, error) {
+	if password == "" {
+		return db.Job{}, errors.New("jobs: the new password is empty")
+	}
+	return m.enqueue(ctx, repositoryID, nil, KindChangePassword, TriggerManual, "{}", password)
 }
 
 // plan checks that planID is a plan of the repository, or finds its only
@@ -261,10 +350,10 @@ func (m *Manager) EnqueueRestore(ctx context.Context, repositoryID int64, p Rest
 	if err != nil {
 		return db.Job{}, err
 	}
-	return m.enqueue(ctx, repositoryID, nil, KindRestore, TriggerManual, string(params))
+	return m.enqueue(ctx, repositoryID, nil, KindRestore, TriggerManual, string(params), "")
 }
 
-func (m *Manager) enqueue(ctx context.Context, repositoryID int64, planID *int64, kind Kind, trigger Trigger, params string) (db.Job, error) {
+func (m *Manager) enqueue(ctx context.Context, repositoryID int64, planID *int64, kind Kind, trigger Trigger, params, password string) (db.Job, error) {
 	if !kind.valid() {
 		return db.Job{}, fmt.Errorf("%w: %q", ErrUnknownKind, kind)
 	}
@@ -295,7 +384,7 @@ func (m *Manager) enqueue(ctx context.Context, repositoryID int64, planID *int64
 		}
 		return db.Job{}, err
 	}
-	q.pending = append(q.pending, &task{job: job})
+	q.pending = append(q.pending, &task{job: job, password: password})
 	m.publish(job, EventStatus, StatusQueued, nil)
 	m.dispatch(repositoryID)
 	return job, nil
@@ -430,8 +519,10 @@ func (m *Manager) run(ctx context.Context, t *task) {
 	}
 	m.publish(t.job, EventStatus, StatusRunning, nil)
 
-	out := m.execute(ctx, t.job)
-	if ctx.Err() != nil {
+	out := m.execute(ctx, t.job, t.password)
+	// a password change runs to its end, so that the saved password is
+	// always one that opens the repository
+	if ctx.Err() != nil && Kind(t.job.Kind) != KindChangePassword {
 		log := out.stderr
 		out = m.stopped(t, out.err)
 		if len(out.stderr) == 0 {
@@ -448,7 +539,7 @@ func (m *Manager) run(ctx context.Context, t *task) {
 // changesSnapshots reports whether a job of kind changes the snapshot count
 // or the size of the repository.
 func changesSnapshots(kind Kind) bool {
-	return kind == KindBackup || kind == KindForget || kind == KindPrune || kind == KindInit
+	return kind == KindBackup || kind == KindForget || kind == KindPrune || kind == KindInit || kind == KindRepairSnapshots
 }
 
 // refreshStats records the snapshot count and size of a repository for the
@@ -552,8 +643,9 @@ func (m *Manager) publish(job db.Job, typ string, status Status, p *Progress) {
 	m.events.Publish(Event{Type: typ, JobID: job.ID, RepositoryID: job.RepositoryID, PlanID: job.PlanID, Kind: Kind(job.Kind), Status: status, Progress: p})
 }
 
-// execute runs the restic command of a job.
-func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
+// execute runs the restic command of a job; password is the new password of
+// a change_password job.
+func (m *Manager) execute(ctx context.Context, job db.Job, password string) outcome {
 	repo, err := m.store.GetRepository(ctx, job.RepositoryID)
 	if err != nil {
 		return failed(err)
@@ -591,7 +683,11 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 			return failed(err)
 		}
 	case KindCheck:
-		summary, err := m.restic.Check(ctx, target, restic.CheckOptions{})
+		var p CheckParams
+		if err := json.Unmarshal([]byte(job.Params), &p); err != nil {
+			return failed(fmt.Errorf("check parameters: %w", err))
+		}
+		summary, err := m.restic.Check(ctx, target, restic.CheckOptions{ReadDataSubset: p.ReadDataSubset})
 		if err != nil {
 			out := failed(err)
 			out.summary = summary
@@ -604,6 +700,21 @@ func (m *Manager) execute(ctx context.Context, job db.Job) outcome {
 		}
 	case KindRestore:
 		return m.restore(ctx, job, target)
+	case KindRepairIndex:
+		if err := m.restic.RepairIndex(ctx, target); err != nil {
+			return failed(err)
+		}
+	case KindRepairSnapshots:
+		n, err := m.restic.RepairSnapshots(ctx, target)
+		if err != nil {
+			return failed(err)
+		}
+		return outcome{status: StatusSucceeded, summary: RepairSummary{Modified: n}}
+	case KindMigrate:
+		return m.migrate(ctx, target)
+	case KindChangePassword:
+		// not cancellable: see run
+		return m.changePassword(context.WithoutCancel(ctx), repo, target, password)
 	default:
 		return failed(fmt.Errorf("%w: %q", ErrUnknownKind, job.Kind))
 	}
@@ -772,4 +883,95 @@ func ForgetOptions(repo db.Repository, plan db.Plan, policy restic.Policy) resti
 		Filter:  restic.SnapshotFilter{Host: repo.Host, Tags: []string{plan.Tag}},
 		GroupBy: "host",
 	}
+}
+
+// RepairSummary is the summary recorded for a repair_snapshots job.
+type RepairSummary struct {
+	// Modified is how many snapshots were rewritten or removed.
+	Modified int `json:"modified"`
+}
+
+// formatV2 is the migration from repository format version 1 to 2, which
+// brings compression. It is the only one ResticGUI applies.
+const formatV2 = "upgrade_repo_v2"
+
+// MigrateSummary is the summary recorded for a migrate job.
+type MigrateSummary struct {
+	// Applied lists the migrations applied, empty when the repository
+	// already had the latest format.
+	Applied []string `json:"applied"`
+}
+
+func (m *Manager) migrate(ctx context.Context, target *restic.Repo) outcome {
+	available, err := m.restic.Migrations(ctx, target)
+	if err != nil {
+		return failed(err)
+	}
+	summary := MigrateSummary{Applied: []string{}}
+	if slices.Contains(available, formatV2) {
+		if err := m.restic.Migrate(ctx, target, formatV2); err != nil {
+			return failed(err)
+		}
+		summary.Applied = append(summary.Applied, formatV2)
+	}
+	return outcome{status: StatusSucceeded, summary: summary}
+}
+
+// changePassword adds a key for password, saves password as the
+// repository's, then removes the key of the old password. Whatever step
+// fails, the saved password opens the repository.
+func (m *Manager) changePassword(ctx context.Context, repo db.Repository, target *restic.Repo, password string) outcome {
+	keys, err := m.restic.Keys(ctx, target)
+	if err != nil {
+		return failed(err)
+	}
+	old := currentKey(keys)
+	if old == "" {
+		return failed(errors.New("restic did not say which key the current password opens"))
+	}
+	if err := m.restic.AddKey(ctx, target, password); err != nil {
+		return failed(err)
+	}
+	next := *target
+	next.Password = password
+
+	if err := m.savePassword(ctx, repo, password); err != nil {
+		// the old password goes on opening the repository: take the new key away
+		if keys, kerr := m.restic.Keys(ctx, &next); kerr == nil && currentKey(keys) != "" {
+			_ = m.restic.RemoveKey(ctx, target, currentKey(keys))
+		}
+		return failed(fmt.Errorf("could not save the new password, the old one is kept: %w", err))
+	}
+	if err := m.restic.RemoveKey(ctx, &next, old); err != nil {
+		out := failed(fmt.Errorf("the new password is saved, but the old one still opens the repository: %w", err))
+		out.status = StatusSucceeded
+		return out
+	}
+	return outcome{status: StatusSucceeded}
+}
+
+func currentKey(keys []restic.Key) string {
+	for _, k := range keys {
+		if k.Current {
+			return k.ID
+		}
+	}
+	return ""
+}
+
+func (m *Manager) savePassword(ctx context.Context, repo db.Repository, password string) error {
+	sec, err := store.OpenSecrets(m.box, repo.Secrets)
+	if err != nil {
+		return err
+	}
+	sec.Password = password
+	sealed, err := store.SealSecrets(m.box, sec)
+	if err != nil {
+		return err
+	}
+	n, err := m.store.UpdateRepositorySecrets(ctx, db.UpdateRepositorySecretsParams{ID: repo.ID, Secrets: sealed})
+	if err == nil && n == 0 {
+		err = ErrRepositoryNotFound
+	}
+	return err
 }

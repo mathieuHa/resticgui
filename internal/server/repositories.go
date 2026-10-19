@@ -72,6 +72,9 @@ type ScheduleDTO struct {
 	Enabled bool   `json:"enabled"`
 	// NextRun is when the schedule fires next; null when it is disabled.
 	NextRun *time.Time `json:"next_run"`
+	// ReadDataSubset is how much data a scheduled check reads, as restic's
+	// --read-data-subset; empty reads none.
+	ReadDataSubset string `json:"read_data_subset,omitempty"`
 }
 
 // RepositoryInput creates or replaces a repository's settings.
@@ -200,7 +203,9 @@ func (s *Server) repositoryDTO(ctx context.Context, r db.Repository) (Repository
 		return RepositoryDTO{}, err
 	}
 	for _, sc := range schedules {
-		dto.Schedules = append(dto.Schedules, scheduleDTO(sc.Job, sc.Cron, sc.Enabled))
+		sdto := scheduleDTO(sc.Job, sc.Cron, sc.Enabled)
+		sdto.ReadDataSubset = sc.ReadDataSubset
+		dto.Schedules = append(dto.Schedules, sdto)
 	}
 	if err := s.monitoringDTO(ctx, &dto); err != nil {
 		return RepositoryDTO{}, err
@@ -439,8 +444,9 @@ func (s *Server) putSchedule(c *gin.Context) {
 		return
 	}
 	var in struct {
-		Cron    string `json:"cron"`
-		Enabled *bool  `json:"enabled"`
+		Cron           string `json:"cron"`
+		Enabled        *bool  `json:"enabled"`
+		ReadDataSubset string `json:"read_data_subset"`
 	}
 	if err := c.ShouldBindJSON(&in); err != nil {
 		invalid(c, err)
@@ -450,11 +456,15 @@ func (s *Server) putSchedule(c *gin.Context) {
 		invalid(c, err)
 		return
 	}
+	if err := jobs.ValidSubset(in.ReadDataSubset); err != nil {
+		invalid(c, err)
+		return
+	}
 	if !s.exists(c, id) {
 		return
 	}
 	enabled := in.Enabled == nil || *in.Enabled
-	if _, err := s.Store.UpsertSchedule(c.Request.Context(), db.UpsertScheduleParams{RepositoryID: id, Job: job, Cron: in.Cron, Enabled: enabled}); err != nil {
+	if _, err := s.Store.UpsertSchedule(c.Request.Context(), db.UpsertScheduleParams{RepositoryID: id, Job: job, Cron: in.Cron, Enabled: enabled, ReadDataSubset: in.ReadDataSubset}); err != nil {
 		internal(c, err)
 		return
 	}
@@ -489,19 +499,61 @@ func (s *Server) startJob(c *gin.Context) {
 		// PlanID is the plan a backup or forget runs; it can be left out
 		// when the repository has only one.
 		PlanID int64 `json:"plan_id"`
+		// ReadDataSubset is how much data a check reads.
+		ReadDataSubset string `json:"read_data_subset"`
 	}
 	if err := c.ShouldBindJSON(&in); err != nil {
 		invalid(c, err)
 		return
 	}
-	job, err := s.Jobs.Enqueue(c.Request.Context(), id, in.PlanID, in.Kind, jobs.TriggerManual)
+	if in.ReadDataSubset != "" && in.Kind != jobs.KindCheck {
+		fail(c, http.StatusBadRequest, "read_data_subset is only for a check")
+		return
+	}
+	if err := jobs.ValidSubset(in.ReadDataSubset); err != nil {
+		invalid(c, err)
+		return
+	}
+	var job db.Job
+	var err error
+	if in.Kind == jobs.KindCheck {
+		job, err = s.Jobs.EnqueueCheck(c.Request.Context(), id, jobs.CheckParams{ReadDataSubset: in.ReadDataSubset})
+	} else {
+		job, err = s.Jobs.Enqueue(c.Request.Context(), id, in.PlanID, in.Kind, jobs.TriggerManual)
+	}
+	s.respondJob(c, job, err)
+}
+
+// changePassword starts a job changing the repository's password, in
+// restic and in ResticGUI.
+func (s *Server) changePassword(c *gin.Context) {
+	id, ok := repositoryID(c)
+	if !ok {
+		return
+	}
+	var in struct {
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&in); err != nil {
+		invalid(c, err)
+		return
+	}
+	if in.Password == "" {
+		fail(c, http.StatusBadRequest, "password is required")
+		return
+	}
+	job, err := s.Jobs.EnqueuePasswordChange(c.Request.Context(), id, in.Password)
+	s.respondJob(c, job, err)
+}
+
+func (s *Server) respondJob(c *gin.Context, job db.Job, err error) {
 	switch {
 	case errors.Is(err, jobs.ErrPlanRequired):
 		fail(c, http.StatusBadRequest, "plan_id is required: "+strings.TrimPrefix(err.Error(), jobs.ErrPlanRequired.Error()+": "))
 	case errors.Is(err, jobs.ErrPlanNotFound):
 		fail(c, http.StatusNotFound, "plan not found")
 	case errors.Is(err, jobs.ErrUnknownKind):
-		fail(c, http.StatusBadRequest, "kind is one of init, backup, forget, prune, check, unlock")
+		fail(c, http.StatusBadRequest, "kind is one of init, backup, forget, prune, check, unlock, repair_index, repair_snapshots, migrate")
 	case errors.Is(err, jobs.ErrRepositoryNotFound):
 		fail(c, http.StatusNotFound, "repository not found")
 	case errors.Is(err, jobs.ErrClosed):

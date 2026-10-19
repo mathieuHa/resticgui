@@ -48,6 +48,27 @@ curl -fsS -b cookies -H 'Content-Type: application/json' -d '{
 }' "$api/repositories/1/plans"
 ```
 
+Check the repository and read a tenth of its data, then rebuild its index
+and repair its snapshots (the kinds `repair_index`, `repair_snapshots` and
+`migrate` are the [maintenance tools](/features/maintenance)):
+
+```sh
+curl -fsS -b cookies -H 'Content-Type: application/json' \
+  -d '{"kind":"check","read_data_subset":"10%"}' "$api/repositories/1/jobs"
+curl -fsS -b cookies -H 'Content-Type: application/json' \
+  -d '{"kind":"repair_index"}' "$api/repositories/1/jobs"
+curl -fsS -b cookies -H 'Content-Type: application/json' \
+  -d '{"kind":"repair_snapshots"}' "$api/repositories/1/jobs"
+```
+
+Change the repository's password, read from a file rather than typed on the
+command line:
+
+```sh
+jq -n --rawfile p new-password.txt '{password: ($p | rtrimstr("\n"))}' |
+  curl -fsS -b cookies -H 'Content-Type: application/json' -d @- "$api/repositories/1/password"
+```
+
 List the snapshots, and download a folder of the newest one as a zip:
 
 ```sh
