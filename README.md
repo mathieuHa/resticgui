@@ -1,242 +1,136 @@
-# ResticGui
+# ResticGUI
 
-A smart GUI for Restic [github.com/restic/restic](https://github.com/restic/restic)
+A web interface for [restic](https://restic.net): set up backups, see that they
+run, and get your files back, from a browser. Your backups stay plain restic
+repositories that the restic command line can always read.
 
-It features a complete web interface that ease configuration of:
-- scheduling backups
-- retention policy
-- storage provider configuration
-- selecting paths from file tree navigation
+**Documentation: [docs.resticgui.com](https://docs.resticgui.com)**
 
-The following actions are supported:
-- listing Snapshots
-- removing specific Snapshot
-- show statistics of a specific Snapshot
-- search for files in a Snapshot
-- dowloading files or directories from a Snapshot
+![The dashboard](images/ui-dashboard-light.png)
 
-The following storage providers are supported:
-- `local`
-- `AWS S3`
-- `B2`
-- `Minio S3`
+## What it does
 
-This ResticGUI version works with Restic version `0.12.1` or more.  
-Restic must be installed and present in the $PATH if run as a single binary.
+- **Repositories** on a local disk, Amazon S3 and S3-compatible storage,
+  Backblaze B2, a REST server, SFTP, rclone, Azure Blob Storage or Google Cloud
+  Storage. Create a new one or connect one you already use.
+- **Backup plans**: several sets of folders in one repository, each with its
+  own schedule, exclusions, restic options and retention, such as photos every
+  night and documents every hour, with identical data stored once.
+- **Retention** with a preview of which snapshots each rule keeps and which it
+  removes, and prune afterwards.
+- **Live progress** of every backup, and a history of every run with its log.
+- **Browse, download and restore** files and folders from any snapshot, and see
+  what changed between two snapshots.
+- **Notifications** by ntfy, Gotify, Discord, Slack, Telegram, email and more,
+  Healthchecks.io pings, and **hooks**: a command or a webhook before and after
+  each backup.
+- **Prometheus metrics** with a ready-made Grafana dashboard.
+- A login, encrypted credentials, and a light and a dark theme that work on a
+  phone.
 
-## ScreenShots
+## Quick start
 
-### File Tree Navigation
-![file tree navigation](/images/resticgui-file-tree-navigation-v011.png "File Tree Navigation")
+With Docker, mount the folders to back up and a folder for the repositories:
 
-### Repository General View
-![general repository view](/images/resticgui-general-view-v011.png "Repository General View")
-
-### Repository Snapshot List
-![snapshot list view](/images/resticgui-snapshot-list.png "Snapshot List View")
-
-### Repository Snapshot Explore
-![snapshot files view](/images/resticgui-snapshot-files-view-v011.png "Snapshot Explore View")
-
-## Install
-
-### Run as binary
-
-Download the last stable release [0.1.2](https://gitlab.com/resticgui/resticgui/-/releases/v0.1.2)
-
-> Uncompress  
-
-```bash
-mkdir /opt
-tar -xvzf resticgui-ce54653c-amd64.tar.gz -C /opt/resticgui
+```sh
+docker run -d --name resticgui --restart unless-stopped \
+  -p 127.0.0.1:3001:3030 \
+  -v resticgui:/opt/db \
+  -v /home:/backup/home:ro \
+  -v /srv/restic:/repositories \
+  ghcr.io/mathieuha/resticgui:latest
 ```
 
-> Run
+Open http://127.0.0.1:3001/ui/ and click **New repository**: choose where the
+backups go (for this example, a local folder under /repositories), pick the
+folders to back up under /backup/home, and keep the suggested schedule. Then
+**Back up now** runs the first backup.
 
-```bash
-/opt/resticgui/resticgui
+The image includes restic and runs on linux/amd64, linux/arm64 and
+linux/arm/v7. The documentation has the same quick start
+[with Docker](https://docs.resticgui.com/install/docker),
+[on Linux](https://docs.resticgui.com/install/linux) as a systemd service, and
+[on Kubernetes](https://docs.resticgui.com/install/kubernetes), each ending
+with [a first backup](https://docs.resticgui.com/guide/first-backup).
+
+Without a password, anyone who reaches ResticGUI can read your backups. The
+examples listen on 127.0.0.1 only; set a
+[login](https://docs.resticgui.com/reference/security) before you open it to a
+network.
+
+## Screenshots
+
+A repository with two backup plans, in the dark theme:
+
+![A repository with two plans](images/ui-overview-dark.png)
+
+A backup plan, with its folders, options and schedule:
+
+![A backup plan](images/ui-plans.png)
+
+Every run, with the plan it belongs to:
+
+![The runs of a repository](images/ui-runs-light.png)
+
+Browsing a snapshot, and what changed since the snapshot before:
+
+![Browsing a snapshot](images/ui-snapshot-browser.png)
+
+![The changes between two snapshots](images/ui-compare.png)
+
+The retention preview:
+
+![The retention preview](images/ui-retention.png)
+
+The screenshots come from a demo server with made-up data. To take them again,
+run make screenshots (it needs Docker).
+
+## Configuration
+
+Repositories, plans, schedules, notifications and hooks are set in the web
+interface. The configuration file holds what the server needs to start: where
+it listens, where its database is, the login, and which folders may be backed
+up. See the [configuration reference](https://docs.resticgui.com/reference/configuration).
+
+Upgrading from ResticGUI 0.1 imports its repositories, folders, schedules and
+retention policies: see [upgrading](https://docs.resticgui.com/reference/upgrading).
+
+## Roadmap
+
+- **Maintenance tools**: unlock, repair, a partial data check and a password
+  change, from the interface.
+- **Copy to a second repository** with restic copy, for 3-2-1 backups.
+- **Configuration from environment variables** for container deployments.
+
+Suggestions are welcome in the [issues](https://github.com/mathieuHa/resticgui/issues).
+
+## Development
+
+ResticGUI is a Go server with a Svelte web interface, which the binary embeds.
+You need Go, Node.js and restic.
+
+```sh
+make build       # the web interface, the server and restic, in dist/
+make run         # run the server on http://localhost:3001/ui/
+make rundevweb   # the web interface with live reload on http://localhost:3000/ui/
+make testgo      # Go tests
+make testweb     # web interface checks and unit tests
+make e2e         # browser tests against the built binary and real restic
+make help        # every target
 ```
 
-### Run with docker
-
-Pull the latest stable image from dockerhub registry or gitlab registry:
-- [gitlab](https://gitlab.com/resticgui/resticgui/container_registry)
-- [dockerhub](https://hub.docker.com/r/resticgui/resticgui)
-
-Example:
-
-```bash
-docker pull resticgui/resticgui:v0.1.2
-```
-> You can bind mount the directories you want to backup in the container
-```bash
-docker run -d resticgui/resticgui:v0.1.2 -v /home/myuser:/backup
-```  
-
-## Configure
-
-Configuration is made in the `config.yaml` file.  
-The `config.yaml` must be place in the same directory as the resticgui binary.  
-
-### Variables
-
-- `logs.debug` (bool, default `false`): enable the debug logs (overrides `logs.level`)
-- `logs.level` (int, default `1`): zerolog levels, 0 debug, 1 info, 2 warn, 3 error
-- `server.ip` (default `127.0.0.1`) and `server.port` (default `3001`): where the web server listens
-- `store.path` (default `resticgui.sqlite`): the SQLite database, created on the first start
-- `store.key_file` (default `resticgui.key`): the key that encrypts repository passwords and credentials, created if missing; `$RESTICGUI_SECRET_KEY` takes precedence. Keep a copy: without it the stored passwords cannot be read.
-- `store.legacy_path` (default `resticgui.db`): a ResticGUI v0.1 database, imported once when `store.path` does not exist yet. The import can also be run by hand with `resticgui migrate-legacy -from resticgui.db -to resticgui.sqlite`.
-- `restic.bin` (default `restic`): the restic binary
-- `jobs.workers` (default `2`): how many restic commands may run at once
-- `jobs.schedule` (default `true`): run the scheduled backups, forget/prune and checks
-- `paths.roots` (default empty, meaning everything): directories that may be backed up, restored into and browsed
-- `auth.username` and `auth.password_hash`: the login. Make the hash with `resticgui hash-password` (it reads the password on stdin). With no hash the API needs no login, so only do that on a trusted network.
-
-### Example
-```yaml
-logs:
-  debug: false
-  level: 1
-
-server:
-  ip: "127.0.0.1"
-  port: 3001
-
-store:
-  path: resticgui.sqlite
-  key_file: resticgui.key
-
-paths:
-  roots: [/home/myuser]
-
-auth:
-  username: admin
-  password_hash: "$2a$10$..."
-```
-
-
-### Demo environment
-
-A public demo environment is available at [demo.resticgui.com](https://demo.resticgui.com)  
-It is reinitialized every hour and do not persist data between restarts. 
-
-## Glossary
-
-The Design of Restic component is detailed in [github.com/restic/restic/blob/master/doc/design.rst](https://github.com/restic/restic/blob/master/doc/design.rst)
-
-Extract from this documentation:
-
-> Repository: All data produced during a backup is sent to and stored in a repository in a structured form, for example in a file system hierarchy with several subdirectories. A repository implementation must be able to fulfill a number of operations, e.g. list the contents.
-
-> Snapshot: A Snapshot stands for the state of a file or directory that has been backed up at some point in time. The state here means the content and meta data like the name and modification time for the file or the directory and its contents.
+The API is described by its OpenAPI document at /api/v2/openapi.yaml on a
+running server.
 
 ## License
 
-ResticGUI is licensed under [GPL 3.0 License](https://www.gnu.org/licenses/gpl-3.0.txt). You can find the
-complete text in [``COPYING``](COPYING).
+ResticGUI is licensed under the [GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
+The complete text is in [COPYING](COPYING).
 
-## Dev tools
+## About
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/resticgui/resticgui)
-
-
-#### Launch Backend server
-
-```
-make run
-```
-> Listen on http://localhost:3001
-
-#### Start dev web server 
-
-```
-make rundevweb
-```
-> Listen on http://localhost:3000/ui, and sends `/api` to the backend on port 3001
-
-#### Tests
-
-```
-make testgo     # Go unit tests
-make testweb    # svelte-check, eslint and Vitest
-make e2e        # Playwright against the built binary; needs restic, or RESTIC_BIN=/path/to/restic
-make genapi     # after changing internal/server/openapi.yaml
-```
-
-#### Start container
-
-```
-make rundocker
-```
-> Listen on http://localhost:8000
-
-## Dependancies
-
-### Frontend
-
-#### Install node 24
-
-```
-curl -sL https://deb.nodesource.com/setup_24.x | sudo bash -
-sudo apt -y install nodejs
-```
-
-### Backend
-
-#### Install go
-
-__Linux__
-```bash
-sudo apt-get install golang-go
-# Ou 
-wget https://go.dev/dl/go1.27.2.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.27.2.linux-amd64.tar.gz
-```
-
-__Windows__
-```bash
-choco install go mingw make
-```
-#### Documentation
-
-The API is described by its OpenAPI document at http://localhost:3001/api/v2/openapi.yaml
-
-### Makefile help
-
-```
-all                            Run Build and launch Tests
-build                          Build go backend, Web and restic binary
-builddocker                    Build the docker image (needs auth for gitlab registry)
-buildgo                        Build the go backend in dist dir
-buildrestic                    Download restic binary in build dir
-buildweb                       Build the frontend in dist dir
-clean                          Clean build and temporary directory
-createdir                      Create the build and package dist dir if not present
-install                        Install the web dependancies and download restic binary
-installgo                      Install go on Windows using choco
-installweb                     Install the web dependancies in the build dir
-installwebdev                  Install the web dependancies for Development
-printvars                      Print vars for debug
-pushdocker                     Push the built docker image to gitlab registry
-rundev                         Build and run resticgui binary listening on localhost:8080
-run                            Run resticgui binary listening on localhost:8080
-rundevweb                      Run dev web listening on localhost:3000
-rundocker                      Run the docker container locally
-test                           Launch Tests for the go backend
-testgo                         Run the go Tests
-```
-
-### Library Doc
-
-#### GO Logging documentation
-
-https://github.com/rs/zerolog
-
-#### Configuration documentation
-
-https://github.com/spf13/viper
-
-# About
-
-[maxlerebourg](https://github.com/maxlerebourg) and [I](https://github.com/mathieuHa) have been using Restic since 2020 at [Primadviz](https://primadviz.com).
-We come from a web development and security engineer background and wanted to add a wrapper in the form a web UI that facilitate configuration and usage of Restic.
+[maxlerebourg](https://github.com/maxlerebourg) and
+[I](https://github.com/mathieuHa) have been using restic since 2020 at
+[Primadviz](https://primadviz.com). We come from web development and security
+engineering, and wanted a web interface that makes restic easy to set up and
+use.

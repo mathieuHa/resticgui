@@ -1,7 +1,7 @@
 name: Docs
 
-# Builds the documentation site at https://docs.resticgui.com, checks its links,
-# and follows each quick start to a first backup. main deploys the site to
+# Builds the documentation site at https://docs.resticgui.com, checks its links
+# and the README's, and follows each quick start to a first backup. main deploys the site to
 # GitHub Pages.
 on:
   push:
@@ -35,6 +35,11 @@ jobs:
       - run: npm ci
       # VitePress fails the build on a dead link
       - run: npm run build
+      # the README's files and links, and its Docker quick start, which the docker job runs
+      - name: README
+        run: |
+          python3 ../scripts/check_readme.py
+          python3 -m unittest discover -s ../scripts -p check_readme_test.py
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v5

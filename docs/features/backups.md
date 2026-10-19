@@ -14,6 +14,8 @@ under **Backup plans**. Deleting a plan keeps its snapshots; no retention
 policy removes them any more, so forget them by hand when you no longer
 need them.
 
+![A backup plan](../../images/ui-plans.png){.screenshot}
+
 ## Folders and exclusions
 
 Each plan has a list of folders and files to back up, and exclude
