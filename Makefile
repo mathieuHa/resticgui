@@ -120,10 +120,10 @@ smokedocker: builddocker ## Smoke-test the container image: UI, API and one back
 rundocker: ## Run the container image locally on http://localhost:8000/ui
 	docker run --rm -d --name resticgui -p "8000:3030" $(IMAGE):$(TAG)
 
-run: ## Run resticgui binary listening on localhost:8080
+run: ## Run resticgui binary listening on localhost:3001
 	cd ${DISTDIR}/ && ./resticgui-${GOARCH}${EXT}
 
-rundev: buildgo run ## Build and run resticgui binary listening on localhost:8080
+rundev: buildgo run ## Build and run resticgui binary listening on localhost:3001
 
 rundevweb: installwebdev ## Run dev web listening on localhost:3000
 	cd $(WEBDIR) && npm run dev
@@ -152,6 +152,12 @@ e2edocker: e2ebin ## Run the end-to-end tests in the Playwright container and co
 		-e PLAYWRIGHT_SCREENSHOTS=1 -e RESTICGUI_BIN=/src/build/resticgui-e2e -e RESTIC_BIN=/usr/local/bin/restic \
 		-v "$(CURDIR)":/src -v "$(shell command -v $(or $(RESTIC_BIN),restic))":/usr/local/bin/restic:ro \
 		-w /src/$(WEBDIR) $(PLAYWRIGHT_IMAGE) npx playwright test $(ARGS)
+
+screenshots: e2ebin ## Take the README and documentation screenshots (images/ui-*.png) from a demo server, in the Playwright container
+	docker run --rm --init --ipc=host -e HOME=/tmp \
+		-e RESTICGUI_BIN=/src/build/resticgui-e2e -e RESTIC_BIN=/usr/local/bin/restic \
+		-v "$(CURDIR)":/src -v "$(shell command -v $(or $(RESTIC_BIN),restic))":/usr/local/bin/restic:ro \
+		-w /src/$(WEBDIR) $(PLAYWRIGHT_IMAGE) node e2e/demo/screenshots.mjs
 
 genapi: ## Regenerate the frontend API types from internal/server/openapi.yaml
 	cd $(WEBDIR) && npm run gen:api
