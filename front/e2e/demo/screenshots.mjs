@@ -19,6 +19,7 @@ const base = `http://127.0.0.1:${port}`;
 const api = `${base}/api/v2`;
 const password = 'demo repository password';
 
+/** @param {string} name @param {number | string} bytes size of random data, or the content */
 function file(name, bytes) {
   mkdirSync(path.dirname(name), { recursive: true });
   writeFileSync(name, typeof bytes === 'number' ? randomBytes(bytes) : bytes);
@@ -58,13 +59,14 @@ logs: {level: 2}
 /** A repository made with restic on the command line, to connect. */
 function existing() {
   const env = { ...process.env, RESTIC_REPOSITORY: `${repos}/music`, RESTIC_PASSWORD: password };
-  const run = (...args) => execFileSync(restic, args, { env, stdio: 'ignore' });
+  const run = (/** @type {string[]} */ ...args) => execFileSync(restic, args, { env, stdio: 'ignore' });
   run('init');
   run('backup', '--host', 'nas', `${home}/Music`);
   file(`${home}/Music/live/track-4.flac`, 600_000);
   run('backup', '--host', 'nas', `${home}/Music`);
 }
 
+/** @param {string} method @param {string} url @param {object} [body] @returns {Promise<any>} */
 async function call(method, url, body) {
   const res = await fetch(api + url, {
     method,
@@ -75,6 +77,7 @@ async function call(method, url, body) {
   return res.status === 204 ? null : res.json();
 }
 
+/** @param {number} id @param {string} kind @param {number} [planId] */
 async function job(id, kind, planId) {
   const { id: jobId } = await call('POST', `/repositories/${id}/jobs`, { kind, plan_id: planId });
   for (;;) {
@@ -88,9 +91,9 @@ async function job(id, kind, planId) {
 const retention = { keep_daily: 7, keep_weekly: 4, keep_monthly: 12, prune: true };
 
 async function data() {
-  const repository = (name, extra = {}) =>
+  const repository = (/** @type {string} */ name, extra = {}) =>
     call('POST', '/repositories', { name, backend: 'local', location: `${repos}/${name.toLowerCase()}`, password, host: 'laptop', ...extra });
-  const plan = (id, p) => call('POST', `/repositories/${id}/plans`, p);
+  const plan = (/** @type {number} */ id, /** @type {object} */ p) => call('POST', `/repositories/${id}/plans`, p);
 
   const photos = await repository('Photos');
   await job(photos.id, 'init');
@@ -166,10 +169,12 @@ async function data() {
   return { photos: photos.id, documents: documents.id };
 }
 
+/** @param {{ photos: number, documents: number }} ids */
 async function shots({ photos, documents }) {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
   const page = await context.newPage();
+  /** @param {string} name @param {import('@playwright/test').Page | import('@playwright/test').Locator} target */
   const shot = async (name, target = page, full = true) => {
     await page.waitForLoadState('networkidle');
     await page
@@ -183,8 +188,8 @@ async function shots({ photos, documents }) {
     if (target !== page) await page.setViewportSize({ width: 1280, height: 800 });
     console.log(`${name}.png`);
   };
-  const theme = (scheme) => page.emulateMedia({ colorScheme: scheme });
-  const repo = (id, tab = '') => `${base}/ui/repositories/${id}${tab ? `?tab=${tab}` : ''}`;
+  const theme = (/** @type {'light' | 'dark'} */ scheme) => page.emulateMedia({ colorScheme: scheme });
+  const repo = (/** @type {number} */ id, tab = '') => `${base}/ui/repositories/${id}${tab ? `?tab=${tab}` : ''}`;
 
   await theme('light');
   await page.goto(`${base}/ui/`);
@@ -284,6 +289,7 @@ const server = spawn(bin, [], { cwd: state, stdio: 'inherit', env: { ...process.
 try {
   for (let i = 0; ; i++) {
     try {
+      // nosemgrep: typescript.react.security.react-insecure-request.react-insecure-request -- the demo server on 127.0.0.1
       if ((await fetch(`${api}/version`)).ok) break;
     } catch {
       if (i > 100) throw new Error('ResticGUI did not start');
