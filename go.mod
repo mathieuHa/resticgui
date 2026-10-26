@@ -4,9 +4,9 @@ go 1.27.2
 
 require (
 	github.com/gin-gonic/gin v1.12.0
-	github.com/nicholas-fedor/shoutrrr v0.21.2
+	github.com/nicholas-fedor/shoutrrr v0.22.1
 	github.com/pressly/goose/v3 v3.29.0
-	github.com/prometheus/client_golang v1.24.1
+	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.72.1
 	github.com/robfig/cron/v3 v3.0.1
@@ -15,7 +15,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/crypto v0.58.0
 	gopkg.in/yaml.v3 v3.0.1
-	modernc.org/sqlite v1.60.1
+	modernc.org/sqlite v1.61.0
 )
 
 require (
