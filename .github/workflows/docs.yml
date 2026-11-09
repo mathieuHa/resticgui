@@ -153,7 +153,7 @@ jobs:
           tags: resticgui:quickstart
           build-args: VERSION=quickstart
           cache-from: type=gha,scope=linux-amd64
-      - uses: helm/kind-action@v1.15.1
+      - uses: helm/kind-action@v1.15.2
         with:
           cluster_name: quickstart
       - name: Load the image into the cluster
