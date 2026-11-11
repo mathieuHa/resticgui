@@ -6,7 +6,7 @@
 # The base images are written out, not build arguments, so that Dependabot
 # can update them.
 
-FROM --platform=$BUILDPLATFORM docker.io/library/node:24-alpine AS web
+FROM --platform=$BUILDPLATFORM docker.io/library/node:26-alpine AS web
 WORKDIR /front
 COPY front/package.json front/package-lock.json ./
 RUN npm ci
